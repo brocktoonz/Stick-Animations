@@ -1,7 +1,7 @@
 // "MOMS BE LIKE: when you say you're bored" (8.6 s).
 // The kid whines, Mom's head snaps round, she offers a broom, the kid bolts.
 Skits.bored = (() => {
-  const { FLOOR, seg, lerp, easeInOut, easeOut, talk, blink, bubble, wash, speedLines, exclaim,
+  const { FLOOR, seg, lerp, easeInOut, easeOut, say, blink, bubble, wash, speedLines, exclaim,
           livingRoom, couch, phone, broom } = Stage;
 
   function shotWhine(ctx, t) {
@@ -14,7 +14,7 @@ Skits.bored = (() => {
       x: 250, y: FLOOR, s: 1.35,
       lean: -0.08 + sway, tilt: 0.22 + sway, bob: 10,
       lid: 0.6, lookX: 0.8, lookY: -0.4, brow: -0.6,
-      mouth: t > 0.4 && t < 2.3 ? 'o' : 'frown', open: talk(t, 0.4, 2.3, 7),
+      mouth: 'frown', ...say(t, 0.4, 2.3, "Moooom... I'm boooored", { intensity: 0.8 }),
       armL: [-74, -40], bendL: 0.1, armR: [74, -40], bendR: -0.1,     // arms dangling
     });
     Chars.mom(ctx, {
@@ -40,7 +40,9 @@ Skits.bored = (() => {
     Chars.mom(ctx, {
       x: 540, y: headY + 628 * push, s: push,
       lid: 0.45, brow: 0.8, pupil: 9, lookX: 0.2,
-      mouth: 'grin', open: talk(t, 3.6, 5.6, 9) * 0.6,
+      mouth: 'grin', open: 0.2,
+      ...say(t, 3.65, 4.45, "Oh, you're bored?", { smile: 0.8 }),
+      ...say(t, 4.6, 5.65, 'GREAT. CLEAN YOUR ROOM.', { smile: 0.5, intensity: 1.3 }),
       tilt: Math.sin(t * 2) * 0.03,
       armR: [150, lerp(-100, -520, easeOut(seg(t, 4.5, 4.8)))], bendR: -0.2, holdR: broom,
     });
@@ -60,11 +62,11 @@ Skits.bored = (() => {
       step: running ? Math.sin(t * 40) : 0,
       pupil: 5, brow: -1, sweat: true,
       lookX: running ? 0 : 0.9,
-      mouth: t > 6.5 && t < 7.3 ? 'yell' : 'wobbly', open: talk(t, 6.5, 7.3, 12) * 0.5,
+      mouth: 'wobbly', ...say(t, 5.95, 7.25, 'I JUST REMEMBERED I HAVE HOMEWORK!', { intensity: 1.3 }),
       armL: running ? [-120, -250] : [-70, -200], armR: running ? [140, -300] : [70, -200],
     });
     if (running) speedLines(ctx, x + 250, 1250, 600, -1, 9);
-    if (t > 6.4 && t < 7.4) bubble(ctx, 560, 520, 420, 160, [560, 780], 'I JUST REMEMBERED\nI HAVE HOMEWORK!', 64, 'Luckiest Guy', seg(t, 6.4, 6.6));
+    if (t > 5.9 && t < 7.4) bubble(ctx, 560, 520, 420, 160, [560, 780], 'I JUST REMEMBERED\nI HAVE HOMEWORK!', 64, 'Luckiest Guy', seg(t, 5.9, 6.1));
   }
 
   return {

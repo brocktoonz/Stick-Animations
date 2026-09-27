@@ -9,6 +9,7 @@
 //   tilt       head tilt (rad)                              face horizontal face offset
 //   lookX/Y    pupils -1..1   pupil  pupil radius   lid 0..1 (>=1 closed eyes)
 //   brow       >0 angry, <0 worried                         mouth/open  see mouth()
+//   viz        LipSync shape, used when mouth === 'talk' (see Stage.say)
 //   armL/armR  hand target [x,y] in the character's local space (default: at sides)
 //   bendL/R    elbow bend   pointR  finger direction or null   armRBehind  bool
 //   holdR(ctx, x, y)  draws a prop at the right hand (before the hand, so it grips it)
@@ -81,9 +82,39 @@ const Chars = (() => {
     outline(ctx, pts, { w: 7 * s, jit: 1 });
   }
 
-  // kinds: flat | smile | smirk | o | wobbly | yell | grin | frown
+  // Speaking mouth drawn from a LipSync shape (see lipsync.js), so it can
+  // morph continuously between shapes. `color` tints the lip line (Mom).
+  function talkMouth(ctx, x, y, v, s, color) {
+    const boost = 0.85 + 0.15 * Math.min(1.6, v.intensity ?? 1);
+    const w = (22 + 32 * v.width) * s * (1 - 0.4 * v.round) * boost;
+    const h = (5 + 70 * v.open) * s;
+    const lift = (v.smile ?? 0) * 12 * s;
+    if (h < 11 * s) {   // closed or pressed lips
+      stroke(ctx, [[x - w, y - lift], [x, y + 3 * s * (1 - v.round)], [x + w, y - lift]], { w: 7 * s, color });
+      return;
+    }
+    const top = -h * (0.1 + 0.25 * v.round);
+    const pts = [[x - w, y - lift], [x - w * 0.45, y + top], [x + w * 0.45, y + top], [x + w, y - lift],
+                 [x + w * (0.75 - 0.15 * v.round), y + h * 0.55], [x, y + h], [x - w * (0.75 - 0.15 * v.round), y + h * 0.55]];
+    fill(ctx, pts, INK, 0.8);
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+    for (const q of Brush.spline(pts, true, 5)) ctx.lineTo(q[0], q[1]);
+    ctx.clip();
+    const teethH = Math.min(h * (v.lip > 0.5 ? 0.6 : 0.32), 18 * s);
+    if (v.teeth > 0.5) { ctx.fillStyle = W; ctx.fillRect(x - w, y + top - 4 * s, w * 2, teethH + 4 * s - top * 0.2); }
+    ctx.fillStyle = '#9a9a9a';
+    if (v.tongue > 0.5) { ctx.beginPath(); ctx.ellipse(x, y + top + teethH + h * 0.2, w * 0.5, h * 0.22, 0, 0, 7); ctx.fill(); }
+    else if (v.open > 0.45) { ctx.beginPath(); ctx.ellipse(x + 4 * s, y + h * 0.95, w * 0.55, h * 0.28, 0, 0, 7); ctx.fill(); }
+    ctx.restore();
+    outline(ctx, pts, { w: 6 * s, jit: 0.8, color });
+    if (v.lip > 0.5) stroke(ctx, [[x - w * 0.8, y + teethH * 0.8], [x, y + teethH], [x + w * 0.8, y + teethH * 0.8]], { w: 7 * s, color });
+  }
+
+  // kinds: flat | smile | smirk | o | wobbly | yell | grin | frown | talk (uses p.viz)
   function mouth(ctx, x, y, p, size = 1, color = INK) {
     const k = p.mouth ?? 'flat', open = p.open ?? 0, s = size;
+    if (k === 'talk' && p.viz) return talkMouth(ctx, x, y, p.viz, s, color);
     if (k === 'flat') {
       stroke(ctx, [[x - 26 * s, y], [x, y + 2 * s], [x + 26 * s, y - 1 * s]], { w: 7 * s, color });
     } else if (k === 'smile') {
@@ -156,7 +187,7 @@ const Chars = (() => {
   function dadHead(ctx, p) {
     const fx = p.face ?? 0;
     if (p.eyesOnly) return eyes(ctx, fx, -30, p, 0.9);
-    const open = p.mouth === 'yell' ? (p.open ?? 0) : 0;
+    const open = p.mouth === 'yell' ? (p.open ?? 0) : p.mouth === 'talk' && p.viz ? p.viz.open * 0.7 : 0;
     const jaw = 170 + open * 55;              // head stretches when he yells
     const head = [];
     for (let i = 0; i < 20; i++) {
@@ -177,7 +208,7 @@ const Chars = (() => {
       fill(ctx, [[fx + side * 10, iy], [fx + side * 86, oy - 4], [fx + side * 92, oy + 14], [fx + side * 12, iy + 20]], INK, 1);
     }
     stroke(ctx, [[fx - 4, 10], [fx - 22, 44], [fx + 4, 52]], { w: 8 });   // nose
-    mouth(ctx, fx, 88, p, 1.2);
+    mouth(ctx, fx, p.mouth === 'talk' ? 100 : 88, p, 1.2);
     const m = [];                            // the moustache
     for (let i = 0; i <= 10; i++) {
       const x = -130 + (i / 10) * 260;
@@ -262,8 +293,9 @@ const Chars = (() => {
     if (p.armRBehind) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
 
     ctx.save();
-    ctx.translate(0, neckY - S.headUp + bob * 0.5);
-    ctx.rotate(p.tilt ?? 0);
+    const jaw = p.mouth === 'talk' && p.viz ? p.viz.open : 0;
+    ctx.translate(0, neckY - S.headUp + bob * 0.5 + jaw * 5);
+    ctx.rotate((p.tilt ?? 0) - jaw * 0.03);
     S.head(ctx, p);
     ctx.restore();
 

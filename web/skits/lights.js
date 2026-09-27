@@ -1,8 +1,8 @@
-// "DADS BE LIKE: when you leave one light on" (8.8 s).
+// "DADS BE LIKE: when you leave one light on" (9.3 s).
 // Dad strolls in, spots the lamp, waves the electric bill, then turns the
 // lights off on the kid doing homework.
 Skits.lights = (() => {
-  const { FLOOR, seg, lerp, mix, easeInOut, easeOut, talk, blink, bubble, burst, wash, shake, exclaim,
+  const { FLOOR, seg, lerp, mix, easeInOut, easeOut, say, blink, bubble, burst, wash, shake, exclaim,
           livingRoom, lightSwitch, ceilingLamp, bill, book } = Stage;
   const SWITCH = [150, 1060];
 
@@ -50,7 +50,8 @@ Skits.lights = (() => {
     Chars.dad(ctx, {
       x: 430, y: 1100 + 695 * s, s,
       brow: 1, pupil: 7, vein: t > 2.9, lookX: -0.2,
-      mouth: 'yell', open: talk(t, 2.8, 5.2, 13) || 0.3,
+      mouth: 'yell', open: 0.3,
+      ...say(t, 2.85, 5.2, 'DO I LOOK LIKE I OWN THE ELECTRIC COMPANY?!', { intensity: 1.7 }),
       tilt: Math.sin(t * 9) * 0.03,
       armR: [290 + wag, -760], bendR: -0.25, holdR: bill, armRBehind: true,
     });
@@ -59,15 +60,15 @@ Skits.lights = (() => {
   }
 
   function shotDark(ctx, t) {
-    const reach = easeInOut(seg(t, 6.7, 6.95));
-    const off = t > 7.0;
+    const reach = easeInOut(seg(t, 7.0, 7.25));
+    const off = t > 7.3;
     room(ctx, !off);
     const kidPose = reader(t, off
       ? { lookY: 0, lookX: 1, lid: blink(t, 0.9, 0.5) || 0.5, mouth: 'flat' }
-      : { lookY: t > 5.7 ? 0 : 0.8, lookX: t > 5.7 ? 1 : 0.2, mouth: t > 5.7 && t < 6.6 ? 'o' : 'flat', open: talk(t, 5.7, 6.6, 10) * 0.4 });
+      : { lookY: t > 5.7 ? 0 : 0.8, lookX: t > 5.7 ? 1 : 0.2, mouth: 'flat', ...say(t, 5.65, 6.9, "Dad, I'm literally doing homework.", { intensity: 0.8 }) });
     Chars.kid(ctx, kidPose);
     // Dad turns to the switch behind him (dir -1), so his local x is mirrored.
-    const dx = 330, ds = 0.95, turned = t > 6.6;
+    const dx = 330, ds = 0.95, turned = t > 6.95;
     const sw = [(SWITCH[0] - dx) / -ds, (SWITCH[1] - FLOOR) / ds];
     const dadPose = {
       x: dx, y: FLOOR, s: ds, dir: turned ? -1 : 1,
@@ -82,12 +83,12 @@ Skits.lights = (() => {
       Chars.kid(ctx, { ...kidPose, eyesOnly: true });
       Chars.dad(ctx, { ...dadPose, eyesOnly: true, lookX: -0.9, lid: 0.35 });
     }
-    if (t > 5.6 && t < 6.9) bubble(ctx, 700, 560, 360, 150, [790, 820], "Dad, I'm literally\ndoing homework.", 62, 'Patrick Hand', seg(t, 5.6, 5.8));
-    if (t > 7.6) bubble(ctx, 760, 620, 200, 110, [800, 850], '...cool.', 66, 'Patrick Hand', seg(t, 7.6, 7.8));
+    if (t > 5.6 && t < 7.1) bubble(ctx, 700, 560, 360, 150, [790, 820], "Dad, I'm literally\ndoing homework.", 62, 'Patrick Hand', seg(t, 5.6, 5.8));
+    if (t > 7.9) bubble(ctx, 760, 620, 200, 110, [800, 850], '...cool.', 66, 'Patrick Hand', seg(t, 7.9, 8.1));
   }
 
   return {
-    title: 'DADS BE LIKE:', subtitle: 'WHEN YOU LEAVE ONE LIGHT ON', duration: 8.8,
+    title: 'DADS BE LIKE:', subtitle: 'WHEN YOU LEAVE ONE LIGHT ON', duration: 9.3,
     draw(ctx, t) {
       if (t < 2.6) shotSpot(ctx, t);
       else if (t < 5.5) shotRant(ctx, t);

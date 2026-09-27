@@ -11,6 +11,9 @@ swells like ink, wobbles slightly, and re-jitters every 3 frames ("line boil")
 so the drawing looks hand-made. No images or video models are used.
 
 - `web/brush.js`: brush primitives (tapered strokes, blobs, outlines, boil).
+- `web/lipsync.js`: text-driven lip sync. Each dialogue line becomes a sequence
+  of mouth shapes (open, wide, round, lips pressed, teeth on lip, tongue up)
+  that blend smoothly while the line is spoken. Skits use `Stage.say(t, t0, t1, text)`.
 - `web/characters.js`: the recurring cast (Dad, Mom, Kid) on one shared rig,
   plus faces, hands, props hooks and a Dad close-up bust.
 - `web/stage.js`: timing helpers, title band, speech bubbles, effects (burst,

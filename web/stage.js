@@ -15,8 +15,13 @@ const Stage = (() => {
   const easeOut = k => 1 - (1 - k) ** 3;
   const easeOutBack = k => { const c = 2.2; return 1 + (c + 1) * (k - 1) ** 3 + c * (k - 1) ** 2; };
   const mix = (a, b, k) => a.map((v, i) => lerp(v, b[i], k));
-  // Mouth flapping while a line is spoken between t0 and t1.
-  const talk = (t, t0, t1, rate = 13) => (t > t0 && t < t1) ? 0.3 + 0.7 * Math.abs(Math.sin((t - t0) * rate)) : 0;
+  // Pose fields that make a character speak `text` between t0 and t1:
+  //   Chars.kid(ctx, { ...pose, ...say(t, 0.4, 2.3, "I'm bored") })
+  // Outside that window it returns {} and the pose's own mouth shows.
+  const say = (t, t0, t1, text, o) => {
+    const viz = LipSync.shape(text, t0, t1, t, o);
+    return viz ? { mouth: 'talk', viz } : {};
+  };
   // Blink (lid = 1) for ~0.12 s every `every` seconds, offset by `phase`.
   const blink = (t, every = 3.1, phase = 0) => ((t + phase) % every) < 0.12 ? 1 : 0;
 
@@ -265,7 +270,7 @@ const Stage = (() => {
   }
 
   return {
-    W, H, FPS, FLOOR, clamp, seg, lerp, mix, easeInOut, easeOut, easeOutBack, talk, blink,
+    W, H, FPS, FLOOR, clamp, seg, lerp, mix, easeInOut, easeOut, easeOutBack, say, blink,
     text, title, bottomFade, bubble, burst, wash, shake, speedLines, exclaim,
     floor, picture, lamp, livingRoom, phone, broom, bill, book, thermostat, couch, kitchen, lightSwitch, ceilingLamp, frame,
   };

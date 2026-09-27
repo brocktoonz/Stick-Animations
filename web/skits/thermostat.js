@@ -2,7 +2,7 @@
 // The kid sneaks the thermostat down, Dad explodes, the kid denies everything.
 Skits.thermostat = (() => {
   const { INK } = Brush;
-  const { W, FLOOR, seg, lerp, mix, easeInOut, easeOutBack, text, bubble, burst, wash, shake,
+  const { W, FLOOR, say, seg, lerp, mix, easeInOut, easeOutBack, text, bubble, burst, wash, shake,
           livingRoom, thermostat } = Stage;
 
   // ---------- shots ----------
@@ -60,8 +60,8 @@ Skits.thermostat = (() => {
       x: lerp(1600, 540, easeOutBack(k)), y: 1180, s: 1.35,
       tilt: lerp(0.5, 0, easeOutBack(k)) + (talking ? Math.sin(t * 9) * 0.03 : 0),
       brow: 1, pupil: 8, lookX: -0.4, lookY: 0.1,
-      mouth: 'yell',
-      open: talking ? 0.45 + 0.55 * Math.abs(Math.sin(t * 13)) : 0.7,
+      mouth: 'yell', open: 0.5,
+      ...say(t, 3.25, 5.1, 'WHO TOUCHED MY THERMOSTAT?!', { intensity: 1.7 }),
       vein: t > 3.4,
     });
     ctx.restore();
@@ -70,7 +70,7 @@ Skits.thermostat = (() => {
 
   function shotBusted(ctx, t) {
     const lower = easeInOut(seg(t, 6.2, 7.0));
-    const talking = t > 7.1 && t < 8.3;
+    const talking = t > 7.05 && t < 8.5;
     const r = Brush.random(5);
     const tremble = t < 6.2 ? 3 : 1;
     ctx.save();
@@ -84,8 +84,8 @@ Skits.thermostat = (() => {
       lookY: -0.1,
       pupil: 5,
       brow: -1,
-      mouth: talking ? (Math.sin(t * 16) > 0 ? 'o' : 'wobbly') : 'wobbly',
-      open: 0.3,
+      mouth: 'wobbly',
+      ...say(t, 7.05, 8.5, '...it was like that when I got here', { intensity: 0.8 }),
       sweat: true,
       armL: [-80, -215], bendL: 0.3,
       armR: mix([150, -470], [96, -140], lower), bendR: lerp(0.15, -0.2, lower),
