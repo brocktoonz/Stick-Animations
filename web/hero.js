@@ -440,5 +440,77 @@ const Hero = (() => {
   const N1 = eHair(sweptFringe), N2 = eHair(messyShort), N3 = eHair(shortQuiff);
   const N4 = eHair(crewCut), N5 = eHair(softFringe), N6 = eHair(tousledPart);
 
-  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6 };
+
+  // ================= round 5: in-between cuts, more volume and texture =================
+  // Like hairFrom, but the arc span is adjustable so hair can come further down
+  // the sides (span < 0.32), and edge points close the shape along the hairline.
+  const hairArc = (bump, edge, extra, r0 = 1.1, span = 0.32) => ctx => {
+    const pts = [];
+    for (let i = 0; i <= 24; i++) {
+      const a = Math.PI + span + (Math.PI - 2 * span) * i / 24;
+      const r = r0 + (bump ? bump(Math.cos(a)) : 0);
+      pts.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r]);
+    }
+    fill(ctx, [...pts, ...edge], INK, 1.2);
+    extra?.(ctx);
+  };
+  const strand = (ctx, pts, w = 12) => stroke(ctx, pts, { w, taper0: 0, taper1: 0.85, minW: 0.1 });
+  const shine = (ctx, pts) => stroke(ctx, pts, { w: 5, color: '#5a5a5a' });
+  const tex = (n, amp) => x => amp * Math.abs(Math.sin(x * n));   // choppy top edge
+
+  // M1: textured quiff: volume up and back, choppy top, one loose strand on the forehead
+  const texQuiff = hairArc(x => tuft(0.15, 0.2, 0.4)(x) + tex(9, 0.04)(x),
+    [[RX * 0.94, -RY * 0.36], [RX * 0.7, -RY * 0.62], [RX * 0.3, -RY * 0.74], [-RX * 0.1, -RY * 0.72], [-RX * 0.5, -RY * 0.62], [-RX * 0.94, -RY * 0.36]],
+    ctx => {
+      shine(ctx, [[-RX * 0.3, -RY * 0.86], [RX * 0.05, -RY * 1.16], [RX * 0.4, -RY * 1.24]]);
+      shine(ctx, [[RX * 0.1, -RY * 0.82], [RX * 0.4, -RY * 1.02]]);
+      strand(ctx, [[-RX * 0.05, -RY * 0.76], [-RX * 0.16, -RY * 0.6], [-RX * 0.12, -RY * 0.48]]);
+    });
+
+  // M2: messy mop: fuller, fringe in chunky uneven points swept to one side
+  const messyMop = hairArc(tex(11, 0.05),
+    [[RX * 0.98, -RY * 0.1], [RX * 0.86, -RY * 0.36], [RX * 0.72, -RY * 0.6], [RX * 0.54, -RY * 0.56], [RX * 0.4, -RY * 0.74],
+     [RX * 0.2, -RY * 0.62], [RX * 0.04, -RY * 0.76], [-RX * 0.2, -RY * 0.62], [-RX * 0.36, -RY * 0.76], [-RX * 0.6, -RY * 0.64],
+     [-RX * 0.78, -RY * 0.68], [-RX * 0.9, -RY * 0.4], [-RX * 0.98, -RY * 0.1]],
+    ctx => { shine(ctx, [[-RX * 0.5, -RY * 1.0], [0, -RY * 1.1], [RX * 0.5, -RY * 0.98]]); }, 1.12, 0.14);
+
+  // M3: short curtains: middle part, fringe opening to both sides
+  const shortCurtains = hairArc(x => 0.07 * Math.min(1, Math.abs(x) * 2.2) - 0.02,
+    [[RX * 0.98, -RY * 0.14], [RX * 0.9, -RY * 0.34], [RX * 0.72, -RY * 0.46], [RX * 0.46, -RY * 0.58], [RX * 0.2, -RY * 0.74],
+     [RX * 0.04, -RY * 0.9], [0, -RY * 0.98], [-RX * 0.04, -RY * 0.9], [-RX * 0.2, -RY * 0.74], [-RX * 0.46, -RY * 0.58],
+     [-RX * 0.72, -RY * 0.46], [-RX * 0.9, -RY * 0.34], [-RX * 0.98, -RY * 0.14]],
+    ctx => {
+      for (const s of [-1, 1]) {
+        shine(ctx, [[s * RX * 0.1, -RY * 1.02], [s * RX * 0.5, -RY * 0.84], [s * RX * 0.8, -RY * 0.5]]);
+      }
+    }, 1.12, 0.16);
+
+  // M4: side swoop: fringe swept up and over to the right, tip overhanging
+  const sideSwoop = hairArc(x => tuft(0.4, 0.2, 0.32)(x) + tex(8, 0.025)(x),
+    [[RX * 0.94, -RY * 0.4], [RX * 0.78, -RY * 0.62], [RX * 0.5, -RY * 0.7], [RX * 0.2, -RY * 0.74],
+     [-RX * 0.2, -RY * 0.68], [-RX * 0.6, -RY * 0.58], [-RX * 0.94, -RY * 0.36]],
+    ctx => {
+      shine(ctx, [[-RX * 0.5, -RY * 0.8], [0, -RY * 1.08], [RX * 0.6, -RY * 1.2]]);
+      shine(ctx, [[-RX * 0.2, -RY * 0.8], [RX * 0.3, -RY * 0.98], [RX * 0.7, -RY * 0.9]]);
+    });
+
+  // M5: wavy medium: covers the tops of the ears, waves flick out at the ends
+  const wavyMedium = hairArc(tex(7, 0.035),
+    [[RX * 1.02, RY * 0.12], [RX * 1.14, RY * 0.18], [RX * 1.04, RY * 0.02], [RX * 0.88, -RY * 0.22], [RX * 0.8, -RY * 0.46],
+     [RX * 0.6, -RY * 0.62], [RX * 0.3, -RY * 0.7], [RX * 0.1, -RY * 0.62], [-RX * 0.14, -RY * 0.72], [-RX * 0.46, -RY * 0.66],
+     [-RX * 0.76, -RY * 0.48], [-RX * 0.88, -RY * 0.22], [-RX * 1.04, RY * 0.02], [-RX * 1.14, RY * 0.18], [-RX * 1.02, RY * 0.12]],
+    ctx => {
+      for (const s of [-1, 1]) shine(ctx, [[s * RX * 0.2, -RY * 1.04], [s * RX * 0.6, -RY * 0.92], [s * RX * 0.88, -RY * 0.6]]);
+    }, 1.12, -0.1);
+
+  // M6: textured spikes: soft chunky spikes leaning one way
+  const softSpikes = hairArc(x => [-0.6, -0.3, 0, 0.3, 0.6].reduce((h, c, k) => h + tuft(c, 0.12 + 0.03 * (k % 2), 0.1)(x), 0),
+    [[RX * 0.94, -RY * 0.36], [RX * 0.66, -RY * 0.64], [RX * 0.5, -RY * 0.6], [RX * 0.3, -RY * 0.74], [0, -RY * 0.74],
+     [-RX * 0.2, -RY * 0.64], [-RX * 0.4, -RY * 0.74], [-RX * 0.7, -RY * 0.64], [-RX * 0.94, -RY * 0.36]],
+    ctx => { for (const x of [-0.45, -0.15, 0.15, 0.45]) shine(ctx, [[RX * x, -RY * 0.84], [RX * (x + 0.08), -RY * 1.1]]); }, 1.08);
+
+  const M1 = eHair(texQuiff), M2 = eHair(messyMop), M3 = eHair(shortCurtains);
+  const M4 = eHair(sideSwoop), M5 = eHair(wavyMedium), M6 = eHair(softSpikes);
+
+  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6 };
 })();
