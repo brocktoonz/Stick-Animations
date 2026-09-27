@@ -160,6 +160,21 @@ const Chars = (() => {
     stroke(ctx, [[x - 18 * s, y - 6 * s], [x - 28 * s, y - 18 * s], [x - 20 * s, y - 24 * s]], { w: 6 * s });
   }
 
+  // Short-sleeve hem: a line across the arm, a fraction `at` of the way from
+  // shoulder to hand. Follows the same curve as tube() so it sits on the arm.
+  function sleeveHem(ctx, a, b, bend, w, at) {
+    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+    const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
+    const e = [mx - dy / d * bend * d, my + dx / d * bend * d];
+    const c = [2 * e[0] - mx, 2 * e[1] - my];          // bezier control that passes through e
+    const t = at, u = 1 - t;
+    const p = [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]];
+    const tx = 2 * u * (c[0] - a[0]) + 2 * t * (b[0] - c[0]), ty = 2 * u * (c[1] - a[1]) + 2 * t * (b[1] - c[1]);
+    const tl = Math.hypot(tx, ty) || 1, nx = -ty / tl, ny = tx / tl, half = w * 0.4;   // ends land on the arm outline (caps add the rest)
+    stroke(ctx, [[p[0] - nx * half, p[1] - ny * half], [p[0] + nx * half, p[1] + ny * half]],
+      { w: 7, taper0: 0, taper1: 0, minW: 1, jit: 0.2, wob: 0 });
+  }
+
   // Outlined noodle limb: a thick ink tube with a white core. A thin white
   // halo keeps it readable over dark clothes (Mom's dress).
   function tube(ctx, a, b, bend, w = 24, fillCol = W, halo = true) {
@@ -292,13 +307,7 @@ const Chars = (() => {
       const sh = [side * S.shX, neckY + S.shY];
       const hnd = target ?? [side * S.restX, hipY + S.restY];
       tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W);
-      if (S.shortSleeve) {   // sleeve over the upper arm, in the shirt colour
-        const d = Math.hypot(hnd[0] - sh[0], hnd[1] - sh[1]) || 1, k = Math.min(48, d * 0.3) / d;
-        const end = [sh[0] + (hnd[0] - sh[0]) * k, sh[1] + (hnd[1] - sh[1]) * k];
-        const seed = 500 + side;
-        stroke(ctx, [sh, end], { w: S.armW + 24, taper0: 0, taper1: 0, minW: 1, seed, pressure: 0 });
-        stroke(ctx, [sh, end], { w: S.armW + 10, taper0: 0, taper1: 0, minW: 1, seed, pressure: 0, color: S.shortSleeve });
-      }
+      if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
       hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W);
     };

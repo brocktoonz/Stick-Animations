@@ -21,7 +21,7 @@ const Cameos = (() => {
       hipY: -150, neckY: -320, headUp: 118, legTop: 30, hipX: 26, footX: 28, stride: 36, lift: 26,
       legW: 24, shoeRx: 34, shX: 56, shY: 34, restX: 104, restY: 16, armW: 24, handS: 1,
       skin: o.skin ?? W, armFill: o.sleeve ?? o.skin ?? W,
-      shortSleeve: o.shortSleeve,
+      sleeveHem: o.sleeveHem,
       head: o.head,
       bottoms: (ctx, hipY) => fill(ctx, [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56],
         [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]], INK, 1.2),
@@ -106,10 +106,10 @@ const Cameos = (() => {
   // beard along the jaw with a jagged top edge. Cheeks stay clear.
   const chinStrap = ctx => {
     const outer = [], inner = [];
-    for (let i = 0; i <= 14; i++) {
-      const a = Math.PI * (0.14 + 0.72 * i / 14), down = Math.sin(a);
-      outer.push([Math.cos(a) * RX * 1.02, Math.sin(a) * RY * (1.02 + 0.08 * down ** 4)]);
-      const r = 0.9 + 0.05 * down ** 4 + (i % 2 ? -0.025 : 0.02);   // jagged top edge
+    for (let i = 0; i <= 12; i++) {
+      const a = Math.PI * (0.24 + 0.52 * i / 12), down = Math.sin(a);
+      outer.push([Math.cos(a) * RX * 1.0, Math.sin(a) * RY * (1.0 + 0.04 * down ** 6)]);
+      const r = 0.92 + 0.02 * down ** 6 + (i % 2 ? -0.02 : 0.015);   // jagged top edge
       inner.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r]);
     }
     const shape = [...outer, ...inner.reverse()];
@@ -148,12 +148,6 @@ const Cameos = (() => {
 
   // ---------- accessories / outfit details ----------
 
-  const chain = (ctx, n) => {
-    const c = [[-36, n + 4], [-26, n + 62], [0, n + 84], [26, n + 62], [36, n + 4]];
-    stroke(ctx, c, { w: 13, taper0: 0.05, taper1: 0.05 });
-    stroke(ctx, c, { w: 5, taper0: 0.05, taper1: 0.05, color: W, jit: 0.3 });
-  };
-  const vneck = (ctx, n, color = INK) => fill(ctx, [[-30, n - 2], [30, n - 2], [0, n + 40]], color, 0.5);
   const hood = (ctx, n, color = INK) => {
     stroke(ctx, [[-50, n + 2], [-30, n + 30], [0, n + 38], [30, n + 30], [50, n + 2]], { w: 9, color });
     stroke(ctx, [[-16, n + 32], [-18, n + 110]], { w: 7, color });
@@ -163,16 +157,27 @@ const Cameos = (() => {
 
   // ---------- the creators ----------
 
-  // Speed: twists under a straw hat, grey skin tone, jersey + chain.
+  // Speed: twists under a straw hat, Luffy's open sleeveless vest over a bare
+  // chest, buttons and a waist sash.
   const speed = build({
-    skin: GREY, shirt: W, shortSleeve: W,
+    skin: GREY, shirt: GREY,
     head: head({ skin: GREY, hair: twists(), hat: strawHat }),
-    detail: (ctx, n) => { vneck(ctx, n); stroke(ctx, [[-68, n + 120], [68, n + 120]], { w: 12 }); chain(ctx, n); },
+    detail: (ctx, n, h) => {
+      for (const side of [-1, 1]) {   // vest panels, open down the middle
+        const panel = [[side * 48, n], [side * 66, n + 64], [side * 68, h - 4], [side * 30, h - 4], [side * 22, n + 60], [side * 20, n + 4]];
+        fill(ctx, panel, W, 0.6);
+        outline(ctx, panel, { w: 8 });
+        for (let i = 0; i < 3; i++) blob(ctx, side * 34, n + 80 + i * 36, 7, 7, { fill: W, w: 4, n: 6 });
+      }
+      const sash = [[-70, h - 26], [70, h - 26], [72, h + 6], [-72, h + 6]];
+      fill(ctx, sash, '#dcdcdc', 0.8);
+      outline(ctx, sash, { w: 7 });
+    },
   });
 
   // Ludwig: light-grey blond swoop, short-sleeved pineapple shirt.
   const ludwig = build({
-    shirt: W, shortSleeve: W,
+    shirt: W, sleeveHem: 0.42,
     head: head({ hair: swoop() }),
     detail: (ctx, n) => {
       outline(ctx, [[-40, n - 2], [0, n + 44], [-18, n + 60]], { w: 7 });
