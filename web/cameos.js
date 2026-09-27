@@ -107,9 +107,9 @@ const Cameos = (() => {
   const chinStrap = ctx => {
     const outer = [], inner = [];
     for (let i = 0; i <= 12; i++) {
-      const a = Math.PI * (0.24 + 0.52 * i / 12), down = Math.sin(a);
+      const a = Math.PI * (0.32 + 0.36 * i / 12), down = Math.sin(a);   // chin area only
       outer.push([Math.cos(a) * RX * 1.0, Math.sin(a) * RY * 1.0]);
-      const r = 0.92 + 0.03 * down ** 6 + (i % 2 ? -0.02 : 0.015);   // jagged top edge, thinner at the chin
+      const r = 0.89 + (i % 2 ? -0.02 : 0.015);   // jagged top edge
       inner.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r]);
     }
     const shape = [...outer, ...inner.reverse()];
