@@ -134,20 +134,43 @@ const Hero = (() => {
       stroke(ctx, [[side * RX * 0.05, -RY * 1.0], [side * RX * 0.55, -RY * 0.9], [side * RX * 0.9, -RY * 0.4]], { w: 5, color: '#999' });
     }
   };
-  // E: backwards cap, fringe peeking through the strap opening
+  // E: backwards cap. From the front you see the curved lower edge, panel
+  // seams, the back opening over the forehead with hair poking through and the
+  // snap strap, plus the bill sticking out behind the head on one side.
+  const CAP = '#3a3a3a';
+  const capBill = ctx => {
+    const bill = [[-RX * 0.62, -RY * 1.08], [-RX * 1.18, -RY * 0.96], [-RX * 1.22, -RY * 0.82], [-RX * 0.8, -RY * 0.84]];
+    fill(ctx, bill, CAP, 0.6);
+    outline(ctx, bill, { w: 9 });
+  };
   const backCap = ctx => {
-    const dome = [[-RX * 1.03, -RY * 0.42]];
-    for (let i = 0; i <= 12; i++) {
-      const a = Math.PI * (1.08 + 0.84 * i / 12);
-      dome.push([Math.cos(a) * RX * 1.03, Math.sin(a) * RY * 1.2 - RY * 0.1]);
+    for (const side of [-1, 1]) {   // hair at the temples, below the cap
+      fill(ctx, [[side * RX * 0.99, -RY * 0.5], [side * RX * 0.99, -RY * 0.24], [side * RX * 0.9, -RY * 0.3], [side * RX * 0.86, -RY * 0.52]], INK, 0.5);
     }
-    dome.push([RX * 1.03, -RY * 0.42], [0, -RY * 0.56]);
-    fill(ctx, dome, INK, 1);
-    const hole = [[-RX * 0.3, -RY * 0.52], [-RX * 0.26, -RY * 0.8], [0, -RY * 0.9], [RX * 0.26, -RY * 0.8], [RX * 0.3, -RY * 0.52]];
-    fill(ctx, hole, '#5a5a5a', 0.6);
-    for (let i = 0; i < 4; i++) stroke(ctx, [[-RX * 0.2 + i * RX * 0.13, -RY * 0.82], [-RX * 0.24 + i * RX * 0.13, -RY * 0.55]], { w: 5, color: INK });
-    stroke(ctx, [[-RX * 0.34, -RY * 0.84], [RX * 0.34, -RY * 0.84]], { w: 9, color: '#888' });   // snap strap
-    stroke(ctx, [[0, -RY * 1.3], [0, -RY * 0.95]], { w: 5, color: '#666' });                      // seam
+    const EDGE = [[RX * 0.99, -RY * 0.5], [RX * 0.6, -RY * 0.66], [0, -RY * 0.74], [-RX * 0.6, -RY * 0.66], [-RX * 0.99, -RY * 0.5]];
+    const crown = [];
+    for (let i = 0; i <= 12; i++) {
+      const a = Math.PI * (1.12 + 0.76 * i / 12);
+      crown.push([Math.cos(a) * RX * 1.03, Math.sin(a) * RY * 1.1 - RY * 0.14]);
+    }
+    const cap = [...crown, ...EDGE];
+    fill(ctx, cap, CAP, 1);
+    outline(ctx, cap, { w: 10 });
+    // panel seams from the top button
+    for (const x of [-0.55, 0.55]) stroke(ctx, [[0, -RY * 1.22], [RX * x * 0.7, -RY * 1.04], [RX * x, -RY * 0.7]], { w: 5, color: '#777' });
+    blob(ctx, 0, -RY * 1.23, 10, 8, { fill: CAP, w: 5, n: 8 });
+    // back opening over the forehead: hair shows through, strap across the bottom
+    const hole = [[-RX * 0.32, -RY * 0.7], [-RX * 0.28, -RY * 0.9], [0, -RY * 1.0], [RX * 0.28, -RY * 0.9], [RX * 0.32, -RY * 0.7]];
+    fill(ctx, hole, INK, 0.6);
+    for (let i = 0; i < 4; i++) {   // little tufts poking out under the strap
+      const x = -RX * 0.2 + i * RX * 0.13;
+      stroke(ctx, [[x, -RY * 0.74], [x + 4, -RY * 0.63]], { w: 12, taper0: 0, taper1: 0.9 });
+    }
+    const strap = [[-RX * 0.34, -RY * 0.68], [RX * 0.34, -RY * 0.68], [RX * 0.34, -RY * 0.79], [-RX * 0.34, -RY * 0.79]];
+    fill(ctx, strap, '#bbb', 0.4);
+    outline(ctx, strap, { w: 6 });
+    for (const x of [-0.18, 0, 0.18]) blob(ctx, RX * x, -RY * 0.735, 5, 5, { fill: CAP, w: 0, n: 6 });
+    outline(ctx, hole, { w: 7 });
   };
   // F: big light curly hair
   const curls = ctx => {
@@ -250,7 +273,7 @@ const Hero = (() => {
   };
 
   const D = build({ shirt: INK, head: head({ hair: curtains, front: roundGlasses }), detail: (ctx, n) => stroke(ctx, [[-34, n + 2], [0, n + 24], [34, n + 2]], { w: 7, color: W }) });
-  const E = build({ shirt: W, sleeveHem: 0.42, head: head({ hair: backCap }), detail: crew });
+  const E = build({ shirt: W, sleeveHem: 0.42, head: head({ back: capBill, hair: backCap }), detail: crew });
   const F = build({ shirt: W, sleeveHem: 0.42, head: head({ hair: curls, front: freckles }), detail: stripes });
   const G = build({ shirt: '#d6d6d6', sleeve: '#d6d6d6', head: head({ hair: manBun, beard: stubble }), detail: buttonShirt });
   const H = build({ shirt: '#9a9a9a', sleeve: '#9a9a9a', head: head({ back: hoodBack, hair: hoodFront, front: eyeBags }), detail: hoodStrings });
