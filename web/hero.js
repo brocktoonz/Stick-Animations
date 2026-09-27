@@ -384,5 +384,61 @@ const Hero = (() => {
   const E1 = eHair(texturedCrop), E2 = eHair(curlyTop), E3 = eHair(flow);
   const E4 = eHair(fauxHawk), E5 = eHair(longFront, longBack), E6 = eHair(sidePartNeat);
 
-  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6 };
+
+  // ================= round 4: everyday haircuts on E's base =================
+  // Plain black ink, close to the head, no big silhouettes.
+
+  // Hair that hugs the skull: the outer edge follows the head outline scaled by
+  // r0 (a little volume), plus optional bumps (tufts, quiff) as a function of
+  // x across the head (-1..1). `edge` is the hairline, right temple to left.
+  const hairFrom = (bump, edge, extra, r0 = 1.07) => ctx => {
+    const pts = [];
+    for (let i = 0; i <= 20; i++) {
+      const a = Math.PI + 0.32 + (Math.PI - 0.64) * i / 20;
+      const r = r0 + (bump ? bump(Math.cos(a)) : 0);
+      pts.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r]);
+    }
+    fill(ctx, [...pts, ...edge], INK, 1.2);
+    extra?.(ctx);
+  };
+  const tuft = (x0, h, w = 0.07) => x => h * Math.exp(-(((x - x0) / w) ** 2));
+
+  // 1: side-swept fringe, tapering to a point at the left temple
+  const sweptFringe = hairFrom(null,
+    [[RX * 0.9, -RY * 0.4], [RX * 0.6, -RY * 0.72], [RX * 0.2, -RY * 0.76], [-RX * 0.3, -RY * 0.66], [-RX * 0.68, -RY * 0.5], [-RX * 0.92, -RY * 0.36]],
+    ctx => stroke(ctx, [[RX * 0.4, -RY * 1.0], [-RX * 0.1, -RY * 0.86], [-RX * 0.55, -RY * 0.64]], { w: 5, color: '#555' }));
+
+  // 2: messy short, a few loose points in the fringe and a couple of tufts on top
+  const messyShort = hairFrom(x => tuft(0.02, 0.18)(x) + tuft(0.22, 0.13)(x),
+    [[RX * 0.9, -RY * 0.4], [RX * 0.62, -RY * 0.7], [RX * 0.46, -RY * 0.56], [RX * 0.32, -RY * 0.74], [RX * 0.02, -RY * 0.72],
+     [-RX * 0.16, -RY * 0.56], [-RX * 0.26, -RY * 0.74], [-RX * 0.6, -RY * 0.66], [-RX * 0.74, -RY * 0.5], [-RX * 0.92, -RY * 0.4]]);
+
+  // 3: short quiff, pushed up a little at the front
+  const shortQuiff = hairFrom(tuft(0.2, 0.14, 0.3),
+    [[RX * 0.9, -RY * 0.4], [RX * 0.5, -RY * 0.68], [RX * 0.2, -RY * 0.76], [-RX * 0.2, -RY * 0.72], [-RX * 0.6, -RY * 0.64], [-RX * 0.9, -RY * 0.4]],
+    ctx => stroke(ctx, [[-RX * 0.2, -RY * 0.84], [RX * 0.2, -RY * 1.12]], { w: 5, color: '#555' }));
+
+  // 4: crew cut: short all over
+  const crewCut = hairFrom(null,
+    [[RX * 0.9, -RY * 0.4], [RX * 0.4, -RY * 0.7], [0, -RY * 0.72], [-RX * 0.4, -RY * 0.7], [-RX * 0.9, -RY * 0.4]], null, 1.04);
+
+  // 5: soft fringe covering a bit more forehead
+  const softFringe = hairFrom(null,
+    [[RX * 0.92, -RY * 0.38], [RX * 0.66, -RY * 0.58], [RX * 0.5, -RY * 0.52], [RX * 0.26, -RY * 0.64], [0, -RY * 0.58],
+     [-RX * 0.26, -RY * 0.64], [-RX * 0.5, -RY * 0.54], [-RX * 0.7, -RY * 0.6], [-RX * 0.92, -RY * 0.38]],
+    ctx => { for (const x of [-0.4, 0, 0.4]) stroke(ctx, [[RX * x * 0.6, -RY * 1.0], [RX * x, -RY * 0.72]], { w: 5, color: '#555' }); }, 1.1);
+
+  // 6: tousled side part
+  const tousledPart = hairFrom(x => tuft(0.1, 0.07, 0.3)(x),
+    [[RX * 0.9, -RY * 0.4], [RX * 0.5, -RY * 0.66], [RX * 0.1, -RY * 0.74], [-RX * 0.3, -RY * 0.72], [-RX * 0.4, -RY * 0.88],
+     [-RX * 0.5, -RY * 0.7], [-RX * 0.9, -RY * 0.4]],
+    ctx => {
+      stroke(ctx, [[-RX * 0.4, -RY * 0.92], [-RX * 0.36, -RY * 1.06]], { w: 5, color: '#666' });
+      stroke(ctx, [[-RX * 0.2, -RY * 0.98], [RX * 0.3, -RY * 1.04], [RX * 0.7, -RY * 0.82]], { w: 5, color: '#555' });
+    });
+
+  const N1 = eHair(sweptFringe), N2 = eHair(messyShort), N3 = eHair(shortQuiff);
+  const N4 = eHair(crewCut), N5 = eHair(softFringe), N6 = eHair(tousledPart);
+
+  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6 };
 })();

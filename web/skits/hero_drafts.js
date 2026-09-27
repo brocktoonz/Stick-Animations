@@ -3,12 +3,12 @@ Skits.hero_drafts = (() => {
   const { blink } = Stage;
   const grin = { mouth: 'talk', viz: { open: 0.5, width: 1, round: 0, teeth: 1, lip: 0, tongue: 0, smile: 1 } };
   const DRAFTS = [
-    ['E1', Hero.E1, { ...grin, lookX: 0.2 }, 'TEXTURED CROP'],
-    ['E2', Hero.E2, { ...grin, lookX: 0.2 }, 'CURLY TOP, FADED SIDES'],
-    ['E3', Hero.E3, { ...grin, lookX: 0.2 }, 'FLOW: SWEPT BACK, WAVY'],
-    ['E4', Hero.E4, { ...grin, lookX: 0.2 }, 'FAUX HAWK'],
-    ['E5', Hero.E5, { ...grin, lookX: 0.2 }, 'LONG AND SHAGGY'],
-    ['E6', Hero.E6, { ...grin, lookX: 0.2 }, 'NEAT SIDE PART'],
+    ['1', Hero.N1, { ...grin, lookX: 0.2 }, 'SIDE-SWEPT FRINGE'],
+    ['2', Hero.N2, { ...grin, lookX: 0.2 }, 'MESSY SHORT'],
+    ['3', Hero.N3, { ...grin, lookX: 0.2 }, 'SHORT QUIFF'],
+    ['4', Hero.N4, { ...grin, lookX: 0.2 }, 'CREW CUT'],
+    ['5', Hero.N5, { ...grin, lookX: 0.2 }, 'SOFT FRINGE'],
+    ['6', Hero.N6, { ...grin, lookX: 0.2 }, 'TOUSLED SIDE PART'],
   ];
   const shot = t => Math.min(DRAFTS.length - 1, Math.floor(t));
 
