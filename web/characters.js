@@ -15,6 +15,7 @@
 //   armLFront/armRFront  draw that arm in front of the head (hand on face etc.);
 //              by default arms go behind the head, which sits on the shoulders
 //   holdR(ctx, x, y)  draws a prop at the right hand (before the hand, so it grips it)
+//   happy      with lid >= 1, draw ^ ^ laughing eyes
 //   sweat      bool     eyesOnly  draw only the eyes (dark-room gags)
 const Chars = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
@@ -29,7 +30,8 @@ const Chars = (() => {
       const ex = fx + side * gap;
       const lid = p.lid ?? 0;
       if (lid >= 1) {   // closed: a curved line
-        stroke(ctx, [[ex - rx, y + 4 * size], [ex, y + 12 * size], [ex + rx, y + 4 * size]], { w: 7 * size });
+        const up = p.happy ? -1 : 1;   // happy: ^ arcs (laughing); otherwise gently closed
+        stroke(ctx, [[ex - rx, y + 4 * size], [ex, y + (4 + 8 * up) * size - (p.happy ? 8 * size : 0)], [ex + rx, y + 4 * size]], { w: 7 * size });
         continue;
       }
       blob(ctx, ex, y, rx, ry, { w: 6 * size, n: 12 });

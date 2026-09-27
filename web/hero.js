@@ -615,6 +615,23 @@ const Hero = (() => {
   const K3 = build({ shirt: '#a8a8a8', sleeve: '#a8a8a8', head: smugHeadWith({ band: false, hair: smugHairTop }), detail: hoodie });
   const J2 = build({ shirt: INK, head: smugHead, detail: tee });
 
+  // ================= MAIN CHARACTER =================
+  // K2's look (bean head, swept fringe, open overshirt) with a friendly, expressive
+  // face driven by the usual pose fields (lid, brow, lookX/Y, mouth, viz, sweat).
+  const mainHead = (ctx, p) => {
+    ctx.translate(0, -14);
+    const fx = p.face ?? 8;
+    if (p.eyesOnly) return Chars.eyes(ctx, fx, 4, p, 1.05);
+    fill(ctx, BEAN, W, 0.6); outline(ctx, BEAN, { w: 11 });
+    smugHairFlick(ctx);
+    Chars.eyes(ctx, fx, 4, p, 1.05);
+    Chars.brows(ctx, fx, -54, p, 1, 10);
+    Chars.mouth(ctx, fx + 4, 80, p, 1.05);
+    if (p.sweat) { Chars.sweat(ctx, -128, -20); Chars.sweat(ctx, 146, -50, 0.8); }
+  };
+  const mainBody = build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: mainHead, detail: overshirt });
+  const main = (ctx, p) => mainBody(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
+
   // J3 THE CHAOS GREMLIN: wide squat head, big sticking-out ears, one strand up, manic grin
   const gremlinHead = (ctx, p) => {
     ctx.translate(0, 8);
@@ -642,5 +659,5 @@ const Hero = (() => {
   };
   const J3 = build({ shirt: W, sleeveHem: 0.42, head: gremlinHead, detail: crew });
 
-  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6, J1, J2, J3, K1, K2, K3 };
+  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6, J1, J2, J3, K1, K2, K3, main };
 })();

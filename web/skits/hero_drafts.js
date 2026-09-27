@@ -2,15 +2,16 @@
 Skits.hero_drafts = (() => {
   const { blink } = Stage;
   const grin = { mouth: 'talk', viz: { open: 0.5, width: 1, round: 0, teeth: 1, lip: 0, tongue: 0, smile: 1 } };
+  const laugh = { mouth: 'talk', viz: { open: 0.62, width: 1, round: 0, teeth: 1, lip: 0, tongue: 0, smile: 1 }, lid: 1, happy: true, brow: -0.3 };
   const DRAFTS = [
-    ['1', Hero.K1, {}, 'SWEATBAND, BLACK TEE'],
-    ['2', Hero.K2, {}, 'SWEPT FRINGE, OPEN OVERSHIRT'],
-    ['3', Hero.K3, {}, 'PUSHED-UP TOP, HOODIE'],
+    ['1', Hero.main, { lookX: 0.2 }, 'DEFAULT: FRIENDLY'],
+    ['2', Hero.main, laugh, 'LAUGHING'],
+    ['3', Hero.main, { mouth: 'o', open: 0.6, pupil: 8, brow: -0.8, sweat: true }, 'CAUGHT OFF GUARD'],
   ];
   const shot = t => Math.min(DRAFTS.length - 1, Math.floor(t));
 
   return {
-    title: t => `SMUG JOKESTER ${DRAFTS[shot(t)][0]}`,
+    title: 'MAIN CHARACTER',
     subtitle: t => DRAFTS[shot(t)][3],
     duration: DRAFTS.length,
     draw(ctx, t) {
