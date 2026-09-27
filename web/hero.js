@@ -512,5 +512,111 @@ const Hero = (() => {
   const M1 = eHair(texQuiff), M2 = eHair(messyMop), M3 = eHair(shortCurtains);
   const M4 = eHair(sideSwoop), M5 = eHair(wavyMedium), M6 = eHair(softSpikes);
 
-  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6 };
+
+  // ================= round 6: from scratch, "funny" personality =================
+  // New head shapes (not the kid's circle), comedic faces, one signature item each.
+  const { eyes: kidEyes, mouth: drawMouth } = Chars;
+
+  // Head outline from a radius function r(angle) -> [rx, ry] scale.
+  const shapePts = (rx, ry, f, n = 22) => {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2, k = f(a);
+      pts.push([Math.cos(a) * rx * k[0], Math.sin(a) * ry * k[1]]);
+    }
+    return pts;
+  };
+  const eye = (ctx, x, y, rx, ry, px, py, pr, lid = 0) => {
+    const pts = Brush.ellipsePts(x, y, rx, ry, 12);
+    fill(ctx, pts, W, 0.4); outline(ctx, pts, { w: 7 });
+    fill(ctx, Brush.ellipsePts(x + px * (rx - pr - 4), y + py * (ry - pr - 4), pr, pr * 1.1, 8), INK, 0.3);
+    if (lid > 0) {   // flat upper lid
+      ctx.save(); ctx.beginPath(); ctx.ellipse(x, y, rx + 1, ry + 1, 0, 0, 7); ctx.clip();
+      ctx.fillStyle = W; ctx.fillRect(x - rx - 4, y - ry - 4, rx * 2 + 8, ry * 2 * lid + 4); ctx.restore();
+      stroke(ctx, [[x - rx, y - ry + ry * 2 * lid], [x + rx, y - ry + ry * 2 * lid - 3]], { w: 7, taper0: 0.1, taper1: 0.1 });
+    }
+  };
+  const brow = (ctx, x0, y0, x1, y1, w = 10) => stroke(ctx, [[x0, y0], [(x0 + x1) / 2, Math.min(y0, y1) - 6], [x1, y1]], { w, taper0: 0.3, taper1: 0.3 });
+
+  // J1 THE GOOFBALL: egg head (wider jaw), buck-tooth grin, smiley hoodie
+  const goofHead = (ctx, p) => {
+    ctx.translate(0, -26);
+    const pts = shapePts(128, 162, a => [1 + 0.09 * Math.sin(a), 1]);   // wider at the jaw
+    if (!p.eyesOnly) { fill(ctx, pts, W, 0.6); outline(ctx, pts, { w: 11 }); }
+    // three-strand tuft on top
+    stroke(ctx, [[-10, -160], [-24, -200], [-8, -226]], { w: 12, taper0: 0, taper1: 0.8 });
+    stroke(ctx, [[4, -162], [8, -206], [30, -222]], { w: 12, taper0: 0, taper1: 0.8 });
+    stroke(ctx, [[16, -160], [34, -188], [52, -190]], { w: 10, taper0: 0, taper1: 0.8 });
+    eye(ctx, -36, -34, 38, 44, p.lookX ?? 0.3, -0.1, 14);
+    eye(ctx, 46, -30, 32, 38, p.lookX ?? 0.3, 0.1, 12);
+    brow(ctx, -70, -94, -8, -98); brow(ctx, 20, -90, 76, -84);
+    // big open grin, two buck teeth hanging from the top lip
+    const m = [[-70, 40], [0, 50], [70, 40], [52, 90], [0, 116], [-52, 90]];
+    fill(ctx, m, INK, 1); outline(ctx, m, { w: 7 });
+    fill(ctx, [[18, 108], [-18, 108], [-24, 112], [24, 112]], '#9a9a9a', 0.4);   // tongue hint
+    for (const x of [-15, 15]) { const t = [[x - 14, 46], [x + 14, 46], [x + 13, 76], [x - 13, 76]]; fill(ctx, t, W, 0.3); outline(ctx, t, { w: 5 }); }
+  };
+  const smiley = (ctx, n) => {
+    const c = Brush.ellipsePts(0, n + 110, 34, 34, 12);
+    fill(ctx, c, W, 0.4); outline(ctx, c, { w: 6 });
+    blob(ctx, -11, n + 102, 4, 6, { fill: INK, w: 0, n: 6 }); blob(ctx, 11, n + 102, 4, 6, { fill: INK, w: 0, n: 6 });
+    stroke(ctx, [[-17, n + 116], [0, n + 128], [17, n + 116]], { w: 5 });
+  };
+  const J1 = build({ shirt: '#8f8f8f', sleeve: '#8f8f8f', head: goofHead,
+    detail: (ctx, n, h) => { hoodie(ctx, n, h); smiley(ctx, n); } });
+
+  // J2 THE SMUG JOKESTER: bean head (bulge top-left), one raised brow, lopsided smirk, sweatband
+  const smugHead = (ctx, p) => {
+    ctx.translate(0, -14);
+    const pts = shapePts(140, 150, a => [1 + 0.08 * Math.cos(a + 0.8), 1 + 0.06 * Math.sin(2 * a + 0.6)]);
+    if (!p.eyesOnly) { fill(ctx, pts, W, 0.6); outline(ctx, pts, { w: 11 }); }
+    // short messy black hair
+    fill(ctx, [[-140, -40], [-146, -100], [-100, -146], [-20, -168], [60, -160], [124, -120], [140, -60], [120, -90],
+               [96, -84], [80, -104], [50, -92], [20, -112], [-10, -96], [-40, -112], [-70, -96], [-110, -100]], INK, 1.2);
+    // sweatband across the forehead, clipped to the head so it wraps around it
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (const q of pts) ctx.lineTo(q[0], q[1]); ctx.closePath(); ctx.clip();
+    ctx.fillStyle = W; ctx.beginPath(); ctx.moveTo(-170, -112); ctx.quadraticCurveTo(0, -130, 170, -100);
+    ctx.lineTo(170, -58); ctx.quadraticCurveTo(0, -88, -170, -70); ctx.closePath(); ctx.fill();
+    for (const [y0, ym, y1] of [[-112, -130, -100], [-70, -88, -58]]) stroke(ctx, [[-170, y0], [0, (ym + (y0 + y1) / 2) / 2], [170, y1]], { w: 9 });
+    for (const [y0, ym, y1] of [[-98, -116, -86], [-84, -102, -72]]) stroke(ctx, [[-170, y0], [0, (ym + (y0 + y1) / 2) / 2], [170, y1]], { w: 6 });
+    ctx.restore();
+    outline(ctx, pts, { w: 11 });
+    eye(ctx, -34, 4, 32, 36, 0.4, 0.1, 13, 0.36);
+    eye(ctx, 50, 4, 32, 36, 0.4, 0.1, 13, 0.36);
+    brow(ctx, -66, -26, -6, -30);           // flat
+    brow(ctx, 22, -44, 82, -60, 11);        // raised
+    stroke(ctx, [[-30, 84], [20, 88], [64, 70], [74, 56]], { w: 8 });   // lopsided smirk
+    stroke(ctx, [[70, 60], [80, 70]], { w: 6 });                         // dimple
+  };
+  const J2 = build({ shirt: INK, head: smugHead, detail: (ctx, n) => stroke(ctx, [[-34, n + 2], [0, n + 24], [34, n + 2]], { w: 7, color: W }) });
+
+  // J3 THE CHAOS GREMLIN: wide squat head, big sticking-out ears, one strand up, manic grin
+  const gremlinHead = (ctx, p) => {
+    ctx.translate(0, 8);
+    for (const side of [-1, 1]) {   // big ears
+      const e = Brush.ellipsePts(side * 168, 0, 40, 54, 12, side * 0.3);
+      fill(ctx, e, W, 0.5); outline(ctx, e, { w: 10 });
+      stroke(ctx, [[side * 160, -22], [side * 176, 0], [side * 162, 22]], { w: 6 });
+    }
+    const pts = shapePts(170, 124, a => [1, Math.sin(a) > 0 ? 1.04 : 0.96]);
+    if (!p.eyesOnly) { fill(ctx, pts, W, 0.6); outline(ctx, pts, { w: 11 }); }
+    // buzzed cap with a single tall strand
+    fill(ctx, [[-150, -58], [-110, -104], [0, -124], [110, -104], [150, -58], [80, -82], [0, -90], [-80, -82]], '#6a6a6a', 0.8);
+    stroke(ctx, [[6, -118], [-6, -170], [20, -214], [48, -210]], { w: 14, taper0: 0, taper1: 0.85 });
+    eye(ctx, -52, -12, 42, 44, 0, 0, 8);
+    eye(ctx, 52, -12, 42, 44, 0, 0, 8);
+    brow(ctx, -92, -70, -20, -78, 11); brow(ctx, 20, -78, 92, -70, 11);
+    // wide manic grin with a full row of teeth
+    const m = [[-100, 40], [0, 54], [100, 40], [70, 86], [0, 100], [-70, 86]];
+    fill(ctx, m, INK, 1);
+    ctx.save(); ctx.beginPath(); ctx.moveTo(m[0][0], m[0][1]); for (const q of Brush.spline(m, true, 5)) ctx.lineTo(q[0], q[1]); ctx.clip();
+    ctx.fillStyle = W; ctx.fillRect(-110, 30, 220, 42);
+    for (let x = -80; x <= 80; x += 22) stroke(ctx, [[x, 44], [x, 70]], { w: 4, taper0: 0, taper1: 0 });
+    ctx.restore(); outline(ctx, m, { w: 7 });
+    for (const side of [-1, 1]) for (let i = 0; i < 3; i++) blob(ctx, side * (96 + i * 10), 30 + (i % 2) * 10, 3.5, 3.5, { fill: '#666', w: 0, n: 5 });
+  };
+  const J3 = build({ shirt: W, sleeveHem: 0.42, head: gremlinHead, detail: crew });
+
+  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6, J1, J2, J3 };
 })();
