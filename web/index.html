@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brush Skit</title>
+<style>
+  @font-face { font-family: "Luckiest Guy"; src: url(fonts/LuckiestGuy.ttf); }
+  @font-face { font-family: "Patrick Hand"; src: url(fonts/PatrickHand.ttf); }
+  html, body { margin: 0; height: 100%; background: #111; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { height: 100vh; max-width: 100vw; aspect-ratio: 9 / 16; object-fit: contain; background: #fff; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="brush.js"></script>
+<script src="characters.js"></script>
+<script src="skit.js"></script>
+<script>
+  // ?f=N shows a single frame; ?export=1 leaves playback to scripts/export.cjs.
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const params = new URLSearchParams(location.search);
+  window.renderFrame = f => Skit.render(ctx, f);
+  window.ready = Promise.all([
+    document.fonts.load('40px "Luckiest Guy"'),
+    document.fonts.load('40px "Patrick Hand"'),
+  ]);
+  window.ready.then(() => {
+    if (params.has('f')) return renderFrame(+params.get('f'));
+    if (params.has('export')) return;
+    let start = performance.now();
+    canvas.onclick = () => { start = performance.now(); };
+    (function loop(now) {
+      const f = Math.floor((now - start) / 1000 * Skit.FPS);
+      renderFrame(f % (Skit.frames + Skit.FPS));   // 1 s hold on the last frame
+      requestAnimationFrame(loop);
+    })(performance.now());
+  });
+</script>
+</body>
+</html>
