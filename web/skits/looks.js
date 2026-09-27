@@ -9,6 +9,7 @@
       title, subtitle: 'PICK A LOOK (OR MIX TRAITS)', duration: 3,
       draw(ctx, t) {
         ctx.fillStyle = '#fff'; ctx.fillRect(-60, -60, 1200, 2040);
+        Brush.setWeight(1.3);   // figures are drawn small here; keep the ink bold
         Stage.floor(ctx);
         looks.forEach(([key, draw, pose, note], i) => {
           const x = COLS[i];
@@ -24,11 +25,11 @@
   Skits.looks_speed = sheet('SPEED', [
     ['A', S.A, { viz: GRIN, lookX: 0.2 }, 'jersey + chain\nbig grin'],
     ['B', S.B, { viz: SCREAM, pupil: 6, brow: 0.6 }, 'hoodie + headset\nscreaming'],
-    ['C', S.C, { viz: GRIN, pupil: 9, brow: -0.3, armL: [-150, -600], bendL: 0.1, armR: [150, -600], bendR: -0.1 }, 'blue kit\ncelebrating'],
+    ['C', S.C, { viz: GRIN, pupil: 9, brow: -0.3, armL: [-150, -600], bendL: 0.1, armR: [150, -600], bendR: -0.1 }, 'black kit + chain\ncelebrating'],
   ]);
   Skits.looks_ludwig = sheet('LUDWIG', [
     ['A', L.A, { mouth: 'smirk', lid: 0.3, lookX: -0.3 }, 'blond + pineapple\nshirt, smirk'],
-    ['B', L.B, { viz: { ...GRIN, open: 0.25 }, lookX: 0.2 }, 'dark hair, glasses\nteal hoodie'],
+    ['B', L.B, { viz: { ...GRIN, open: 0.25 }, lookX: 0.2 }, 'dark hair, glasses\nstream hoodie'],
     ['C', L.C, { mouth: 'flat', lid: 0.35, brow: 0.3 }, 'bleached buzz\ntrack jacket'],
   ]);
   Skits.looks_beast = sheet('MRBEAST', [

@@ -66,7 +66,7 @@ const Cameos = (() => {
       outline(ctx, pts, { w: 8 });
       for (let i = 0; i < 26; i++) {   // stubble texture
         const x = (hh(i) - 0.5) * rx * 1.6, y = -ry * (0.65 + hh(i + 9) * 0.35);
-        blob(ctx, x, y, 2.5, 2.5, { fill: '#b9ad85', w: 0, n: 5 });
+        blob(ctx, x, y, 2.5, 2.5, { fill: '#9a9a9a', w: 0, n: 5 });
       }
     };
   }
@@ -94,7 +94,7 @@ const Cameos = (() => {
   function stubble(ctx, rx, ry) {
     for (let i = 0; i < 40; i++) {
       const a = Math.PI * (0.12 + 0.76 * hh(i + 3)), r = 0.72 + 0.22 * hh(i + 11);
-      blob(ctx, Math.cos(a) * rx * r, Math.sin(a) * ry * r, 2.6, 2.6, { fill: '#6d5a48', w: 0, n: 5 });
+      blob(ctx, Math.cos(a) * rx * r, Math.sin(a) * ry * r, 2.6, 2.6, { fill: INK, w: 0, n: 5 });
     }
   }
 
@@ -108,9 +108,9 @@ const Cameos = (() => {
 
   function headset(ctx, rx, ry) {
     stroke(ctx, [[-rx - 14, 0], [-rx * 0.7, -ry * 1.12], [rx * 0.7, -ry * 1.12], [rx + 14, 0]], { w: 22, taper0: 0, taper1: 0, minW: 1 });
-    for (const side of [-1, 1]) blob(ctx, side * (rx + 10), 10, 32, 50, { fill: '#2b2b2b', w: 8, n: 12 });
+    for (const side of [-1, 1]) blob(ctx, side * (rx + 10), 10, 32, 50, { fill: INK, w: 8, n: 12 });
     stroke(ctx, [[-rx - 10, 40], [-rx * 0.8, 110], [-rx * 0.35, 120]], { w: 9 });
-    blob(ctx, -rx * 0.33, 120, 16, 13, { fill: '#2b2b2b', w: 6, n: 8 });
+    blob(ctx, -rx * 0.33, 120, 16, 13, { fill: INK, w: 6, n: 8 });
   }
 
   // ---------- head builder ----------
@@ -155,7 +155,11 @@ const Cameos = (() => {
 
   // ---------- outfit details ----------
 
-  const chain = (ctx, n) => stroke(ctx, [[-44, n + 6], [-30, n + 90], [0, n + 118], [30, n + 90], [44, n + 6]], { w: 7, color: '#e0b43c' });
+  const chain = (ctx, n) => {
+    const c = [[-44, n + 6], [-30, n + 90], [0, n + 118], [30, n + 90], [44, n + 6]];
+    stroke(ctx, c, { w: 12, taper0: 0.05, taper1: 0.05 });
+    stroke(ctx, c, { w: 5, taper0: 0.05, taper1: 0.05, color: W, jit: 0.4 });
+  };
   const drawstrings = (ctx, n, color = W) => {
     stroke(ctx, [[-22, n + 20], [-26, n + 120]], { w: 6, color });
     stroke(ctx, [[22, n + 20], [26, n + 120]], { w: 6, color });
@@ -164,30 +168,30 @@ const Cameos = (() => {
 
   // ---------- the creators ----------
 
-  const SPEED_SKIN = '#74462b';
+  const SPEED_SKIN = '#8e8e8e';   // skin tones are greys, as in grayscale comics
   const speedHead = extra => head({ rx: 150, ry: 160, skin: SPEED_SKIN, hair: twists(), eyeS: 1.12, extra });
   const speed = {
     // A: red football jersey, gold chain, huge grin
     A: look({
-      skin: SPEED_SKIN, shirt: '#d2302a', pants: '#3b4a66', head: speedHead(),
+      skin: SPEED_SKIN, shirt: '#d9261c', pants: INK, head: speedHead(),
       detail: (ctx, n, h) => {
-        fill(ctx, [[-40, n - 2], [40, n - 2], [0, n + 50]], '#1f7a3a', 0.5);
-        stroke(ctx, [[-88, n + 150], [88, n + 150]], { w: 14, color: '#1f7a3a' });
+        fill(ctx, [[-40, n - 2], [40, n - 2], [0, n + 50]], INK, 0.5);
+        stroke(ctx, [[-88, n + 150], [88, n + 150]], { w: 14, color: INK });
         chain(ctx, n);
       },
     }),
     // B: grey hoodie + stream headset, screaming
     B: look({
-      skin: SPEED_SKIN, shirt: '#7b8190', sleeve: '#7b8190', pants: INK, head: speedHead(headset),
+      skin: SPEED_SKIN, shirt: '#d9d9d9', sleeve: '#d9d9d9', pants: INK, head: speedHead(headset),
       detail: (ctx, n) => { hood(ctx, n); drawstrings(ctx, n); stroke(ctx, [[-60, n + 200], [60, n + 200]], { w: 7 }); },
     }),
-    // C: blue patterned kit, chain, celebration energy
+    // C: black patterned kit, chain, celebration energy
     C: look({
-      skin: SPEED_SKIN, shirt: '#2f5fae', pants: '#1c1c1c', head: speedHead(),
+      skin: SPEED_SKIN, shirt: INK, pants: '#9a9a9a', head: speedHead(),
       detail: (ctx, n, h) => {
         for (let i = 0; i < 9; i++) {
           const x = -70 + hh(i) * 140, y = n + 40 + hh(i + 5) * (h - n - 80);
-          stroke(ctx, [[x, y], [x + 20, y - 12], [x + 34, y + 4]], { w: 7, color: '#dbe7ff' });
+          stroke(ctx, [[x, y], [x + 20, y - 12], [x + 34, y + 4]], { w: 7, color: W });
         }
         fill(ctx, [[-40, n - 2], [40, n - 2], [0, n + 40]], W, 0.5);
         chain(ctx, n);
@@ -195,63 +199,63 @@ const Cameos = (() => {
     }),
   };
 
-  const LUD_SKIN = '#f7e3d3';
+  const LUD_SKIN = W;
   const ludwig = {
     // A: blond swept hair, loud pink pineapple shirt, smirk
     A: look({
-      skin: LUD_SKIN, shirt: '#ec8cc3', pants: '#5a7fae',
-      head: head({ rx: 140, ry: 166, skin: LUD_SKIN, hair: sweep('#ecd27c') }),
+      skin: LUD_SKIN, shirt: W, pants: '#9a9a9a',
+      head: head({ rx: 140, ry: 166, skin: LUD_SKIN, hair: sweep(W) }),
       detail: (ctx, n, h) => {
         outline(ctx, [[-50, n - 2], [0, n + 60], [-20, n + 80]], { w: 7 });
         outline(ctx, [[50, n - 2], [0, n + 60], [20, n + 80]], { w: 7 });
         for (let i = 0; i < 7; i++) {
           const x = -64 + (i % 3) * 64 + (Math.floor(i / 3) % 2) * 30, y = n + 100 + Math.floor(i / 3) * 90;
-          blob(ctx, x, y, 13, 18, { fill: '#f2d04a', w: 4, n: 8 });
-          stroke(ctx, [[x - 8, y - 18], [x, y - 34], [x + 8, y - 18]], { w: 5, color: '#3c8d4a' });
+          blob(ctx, x, y, 13, 18, { fill: '#d9d9d9', w: 5, n: 8 });
+          stroke(ctx, [[x - 8, y - 18], [x, y - 34], [x + 8, y - 18]], { w: 5 });
         }
       },
     }),
-    // B: dark swept hair, streaming glasses, teal hoodie
+    // B: dark swept hair, streaming glasses, hoodie
     B: look({
-      skin: LUD_SKIN, shirt: '#63c7c2', sleeve: '#63c7c2', pants: INK,
-      head: head({ rx: 140, ry: 166, skin: LUD_SKIN, hair: sweep('#4a3325', 1.3), extra: (ctx, rx, ry, fx) => glasses(ctx, fx) }),
-      detail: (ctx, n) => { hood(ctx, n); drawstrings(ctx, n, '#f4f4f4'); },
+      skin: LUD_SKIN, shirt: '#d9d9d9', sleeve: '#d9d9d9', pants: INK,
+      head: head({ rx: 140, ry: 166, skin: LUD_SKIN, hair: sweep('#5f5f5f', 1.3), extra: (ctx, rx, ry, fx) => glasses(ctx, fx) }),
+      detail: (ctx, n) => { hood(ctx, n); drawstrings(ctx, n, W); },
     }),
     // C: bleached buzz, stubble, black track jacket
     C: look({
-      skin: LUD_SKIN, shirt: '#1d1d1f', sleeve: '#1d1d1f', pants: '#5a7fae',
-      head: head({ rx: 140, ry: 166, skin: LUD_SKIN, hair: buzz('#f3eed9'), stubble: true }),
+      skin: LUD_SKIN, shirt: INK, sleeve: '#222', pants: '#9a9a9a',
+      head: head({ rx: 140, ry: 166, skin: LUD_SKIN, hair: buzz(W), stubble: true }),
       detail: (ctx, n, h) => {
-        stroke(ctx, [[0, n + 10], [0, h - 16]], { w: 5, color: '#9a9a9a' });
-        for (const side of [-1, 1]) stroke(ctx, [[side * 62, n + 4], [side * 92, n + 48]], { w: 8, color: '#e3261b' });
+        stroke(ctx, [[0, n + 10], [0, h - 16]], { w: 5, color: W });
+        for (const side of [-1, 1]) stroke(ctx, [[side * 62, n + 4], [side * 92, n + 48]], { w: 8, color: W });
         fill(ctx, [[-30, n - 2], [30, n - 2], [26, n + 26], [-26, n + 26]], W, 0.5);
       },
     }),
   };
 
-  const BEAST_SKIN = '#f6dccb', BEARD = '#8b4c2c', BEAST_HAIR = '#6e4127';
+  const BEAST_SKIN = W, BEARD = '#9a9a9a', BEAST_HAIR = '#5f5f5f';
   const beastHead = () => head({ rx: 150, ry: 158, skin: BEAST_SKIN, hair: sweep(BEAST_HAIR, 1.32), beard: beard(BEARD), stache: moustache(BEARD, 72) });
   const cash = (ctx, x, y) => {
     for (let i = -2; i <= 2; i++) {
       ctx.save(); ctx.translate(x, y - 30); ctx.rotate(i * 0.22);
       const b = [[-26, -110], [26, -110], [26, 0], [-26, 0]];
-      fill(ctx, b, '#8fcf8a', 0.5); outline(ctx, b, { w: 5 });
-      Stage.text(ctx, '$', 0, -60, 34, 'Luckiest Guy', '#2f6b2c');
+      fill(ctx, b, '#d9d9d9', 0.5); outline(ctx, b, { w: 5 });
+      Stage.text(ctx, '$', 0, -60, 34, 'Luckiest Guy', INK);
       ctx.restore();
     }
   };
   const bigCheck = (ctx, x, y) => {
     x -= 150;   // held in front of the body, centred on the hand
     const c = [[x - 20, y - 150], [x + 330, y - 160], [x + 336, y + 20], [x - 14, y + 30]];
-    fill(ctx, c, '#fdfdf7', 0.5); outline(ctx, c, { w: 8 });
-    Stage.text(ctx, '$1,000,000', x + 160, y - 70, 50, 'Luckiest Guy', '#2f6b2c');
+    fill(ctx, c, W, 0.5); outline(ctx, c, { w: 8 });
+    Stage.text(ctx, '$1,000,000', x + 160, y - 70, 50, 'Luckiest Guy', INK);
     stroke(ctx, [[x + 20, y - 10], [x + 300, y - 16]], { w: 4 });
   };
   const beast = {
     // A: black hoodie, fanning cash, huge grin
     A: look({
-      skin: BEAST_SKIN, shirt: INK, sleeve: '#222', pants: '#5a7fae', head: beastHead(),
-      detail: (ctx, n) => { stroke(ctx, [[-64, n + 4], [0, n + 50], [64, n + 4]], { w: 8, color: '#555' }); drawstrings(ctx, n); },
+      skin: BEAST_SKIN, shirt: INK, sleeve: '#222', pants: '#9a9a9a', head: beastHead(),
+      detail: (ctx, n) => { stroke(ctx, [[-64, n + 4], [0, n + 50], [64, n + 4]], { w: 8, color: '#666' }); drawstrings(ctx, n); },
     }),
     // B: black suit, white shirt
     B: look({
@@ -263,7 +267,7 @@ const Cameos = (() => {
     }),
     // C: plain white tee, giant cheque
     C: look({
-      skin: BEAST_SKIN, shirt: W, pants: '#2a2a2a', head: beastHead(),
+      skin: BEAST_SKIN, shirt: W, pants: INK, head: beastHead(),
       detail: (ctx, n) => stroke(ctx, [[-40, n + 2], [0, n + 34], [40, n + 2]], { w: 7 }),
     }),
   };

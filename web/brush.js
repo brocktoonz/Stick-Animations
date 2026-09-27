@@ -8,6 +8,7 @@ const Brush = (() => {
   const INK = '#141414';
   let boilSeed = 1;
   let counter = 0;
+  let weight = 1;   // line-weight multiplier (see setWeight)
 
   function mulberry(a) {
     return () => {
@@ -22,6 +23,7 @@ const Brush = (() => {
   function frame(f, boilEvery = 3) {
     boilSeed = Math.floor(f / boilEvery) + 1;
     counter = 0;
+    weight = 1;
   }
 
   // Strokes drawn in the same order each frame get the same randomness until
@@ -61,7 +63,7 @@ const Brush = (() => {
   //   taper0/taper1: fraction of the length spent tapering in / out
   //   minW: width at the very tips, as a fraction of w
   function stroke(ctx, pts, o = {}) {
-    const w = o.w ?? 10, jit = o.jit ?? 1.2, wob = o.wob ?? 0.8;
+    const w = (o.w ?? 10) * weight, jit = o.jit ?? 1.2, wob = o.wob ?? 0.8;
     const t0 = o.taper0 ?? 0.18, t1 = o.taper1 ?? 0.24, minW = o.minW ?? 0.15;
     const press = o.pressure ?? 0.18;
     const r = rng(o.seed);
@@ -143,5 +145,9 @@ const Brush = (() => {
   // A fresh random source tied to the current boil tick (for shakes, bursts).
   function random(seed = 0) { return mulberry(seed * 131 + boilSeed * 7919); }
 
-  return { INK, frame, stroke, fill, outline, blob, ellipsePts, spline, random };
+  // Thicken (k > 1) or thin all lines drawn after this call, until the next
+  // frame. Characters drawn small keep a bold ink look with setWeight(1.3).
+  function setWeight(k) { weight = k; }
+
+  return { INK, frame, setWeight, stroke, fill, outline, blob, ellipsePts, spline, random };
 })();
