@@ -279,5 +279,110 @@ const Hero = (() => {
   const H = build({ shirt: '#9a9a9a', sleeve: '#9a9a9a', head: head({ back: hoodBack, hair: hoodFront, front: eyeBags }), detail: hoodStrings });
   const I = build({ shirt: INK, sleeve: W, head: head({ hair: buzzCut, front: bandAid }), detail: varsity });
 
-  return { A, B, C, D, E, F, G, H, I };
+
+  // ================= round 3: hairstyles on E's base (white tee, grin) =================
+
+  // 1: textured crop, uneven chunky fringe falling forward and to the right
+  const texturedCrop = ctx => {
+    const pts = [[-RX * 1.0, -RY * 0.25], [-RX * 1.02, -RY * 0.7], [-RX * 0.72, -RY * 1.1], [-RX * 0.2, -RY * 1.26],
+                 [RX * 0.4, -RY * 1.2], [RX * 0.86, -RY * 0.96], [RX * 1.03, -RY * 0.55], [RX * 1.0, -RY * 0.25],
+                 [RX * 0.9, -RY * 0.46]];
+    const teeth = [[0.66, 0.58, 0.1], [0.38, 0.66, 0.14], [0.08, 0.56, 0.08], [-0.2, 0.64, 0.16], [-0.48, 0.6, 0.1], [-0.72, 0.66, 0.12]];
+    for (const [x, tip, lean] of teeth) pts.push([RX * (x + lean), -RY * tip], [RX * (x - 0.1), -RY * 0.82]);
+    pts.push([-RX * 0.92, -RY * 0.44]);
+    fill(ctx, pts, INK, 1.2);
+    for (const x of [-0.5, -0.1, 0.3]) stroke(ctx, [[RX * x, -RY * 1.1], [RX * (x + 0.25), -RY * 0.86]], { w: 5, color: '#555' });
+  };
+
+  // 2: tight curls on top, faded sides
+  const curlyTop = ctx => {
+    const fade = [[-RX * 1.0, -RY * 0.3], [-RX * 1.0, -RY * 0.78], [-RX * 0.7, -RY * 0.9], [RX * 0.7, -RY * 0.9],
+                  [RX * 1.0, -RY * 0.78], [RX * 1.0, -RY * 0.3], [RX * 0.84, -RY * 0.56], [-RX * 0.84, -RY * 0.56]];
+    fill(ctx, fade, '#9a9a9a', 0.6);
+    for (let i = 0; i < 24; i++) {
+      const x = -RX * 0.75 + (i % 6) * RX * 0.3 + (Math.floor(i / 6) % 2) * RX * 0.15;
+      const y = -RY * (0.72 + Math.floor(i / 6) * 0.17);
+      if (Math.abs(x) > RX * (0.9 - Math.floor(i / 6) * 0.14)) continue;
+      blob(ctx, x, y, 30, 27, { fill: INK, w: 0, n: 10 });
+      stroke(ctx, [[x - 10, y + 4], [x, y - 8], [x + 10, y]], { w: 4, color: '#666' });
+    }
+  };
+
+  // 3: flow: wavy, swept back, flicking out over the ears
+  const flow = ctx => {
+    const top = [];
+    for (let i = 0; i <= 16; i++) {   // wavy outer edge
+      const a = Math.PI * (1.02 + 0.96 * i / 16);
+      const r = 1.1 + 0.07 * Math.sin(i * 1.9);
+      top.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r * 1.08 - RY * 0.05]);
+    }
+    const pts = [[-RX * 0.94, RY * 0.14], [-RX * 1.26, RY * 0.06], [-RX * 1.12, -RY * 0.04], ...top,
+                 [RX * 1.12, -RY * 0.04], [RX * 1.26, RY * 0.06], [RX * 0.94, RY * 0.14], [RX * 0.9, -RY * 0.28],
+                 [RX * 0.7, -RY * 0.56], [RX * 0.36, -RY * 0.66], [RX * 0.12, -RY * 0.58], [-RX * 0.16, -RY * 0.7],
+                 [-RX * 0.5, -RY * 0.66], [-RX * 0.8, -RY * 0.5], [-RX * 0.92, -RY * 0.2]];
+    fill(ctx, pts, '#4a4a4a', 1.2);
+    outline(ctx, pts, { w: 10 });
+    for (const side of [-1, 1]) {   // strands following the sweep back and out
+      stroke(ctx, [[side * RX * 0.1, -RY * 0.8], [side * RX * 0.55, -RY * 1.02], [side * RX * 0.96, -RY * 0.5], [side * RX * 1.12, RY * 0.02]], { w: 5, color: '#9a9a9a' });
+      stroke(ctx, [[side * RX * 0.4, -RY * 0.7], [side * RX * 0.8, -RY * 0.7], [side * RX * 1.0, -RY * 0.2]], { w: 4, color: '#9a9a9a' });
+    }
+  };
+
+  // 4: faux hawk: a ridge of spikes over buzzed sides (buzz follows the skull)
+  const fauxHawk = ctx => {
+    const buzz = [];
+    for (let i = 0; i <= 14; i++) {
+      const a = Math.PI * (1.18 + 0.64 * i / 14);
+      buzz.push([Math.cos(a) * RX * 0.97, Math.sin(a) * RY * 0.97]);
+    }
+    buzz.push([RX * 0.76, -RY * 0.58], [0, -RY * 0.66], [-RX * 0.76, -RY * 0.58]);
+    fill(ctx, buzz, '#b5b5b5', 0.4);
+    for (let i = 0; i < 40; i++) {
+      const x = (hh(i) * 2 - 1) * RX * 0.9, y = -RY * (0.6 + hh(i + 20) * 0.4);
+      if ((x / RX) ** 2 + (y / RY) ** 2 > 0.9) continue;
+      blob(ctx, x, y, 2.5, 2.5, { fill: '#555', w: 0, n: 5 });
+    }
+    const ridge = [[-RX * 0.3, -RY * 0.64], [-RX * 0.36, -RY * 0.95], [-RX * 0.26, -RY * 1.32], [-RX * 0.12, -RY * 1.08],
+                   [-RX * 0.02, -RY * 1.5], [RX * 0.1, -RY * 1.12], [RX * 0.24, -RY * 1.4], [RX * 0.3, -RY * 1.04],
+                   [RX * 0.36, -RY * 0.9], [RX * 0.3, -RY * 0.64], [0, -RY * 0.72]];
+    fill(ctx, ridge, INK, 1);
+  };
+
+  // 5: long and shaggy, middle part, down to the shoulders with ragged ends
+  const longBack = ctx => {
+    const pts = [];
+    for (let i = 0; i <= 12; i++) {
+      const a = Math.PI * (1.0 + i / 12);
+      pts.push([Math.cos(a) * RX * 1.16, Math.sin(a) * RY * 1.18 - RY * 0.02]);
+    }
+    pts.push([RX * 1.2, RY * 0.5]);
+    for (let i = 0; i <= 8; i++) pts.push([RX * (1.12 - i * 0.28), RY * (i % 2 ? 1.0 : 1.18)]);   // ragged ends
+    pts.push([-RX * 1.2, RY * 0.5]);
+    fill(ctx, pts, INK, 1.4);
+  };
+  const longFront = ctx => {
+    for (const side of [-1, 1]) {
+      fill(ctx, [[0, -RY * 1.12], [side * RX * 0.6, -RY * 1.1], [side * RX * 1.06, -RY * 0.52], [side * RX * 1.1, RY * 0.5],
+                 [side * RX * 0.9, RY * 0.64], [side * RX * 0.82, RY * 0.1], [side * RX * 0.62, -RY * 0.44], [side * RX * 0.1, -RY * 0.72],
+                 [side * RX * 0.02, -RY * 0.9]], INK, 1.2);
+      stroke(ctx, [[side * RX * 0.3, -RY * 1.0], [side * RX * 0.8, -RY * 0.6], [side * RX * 0.98, RY * 0.2]], { w: 5, color: '#555' });
+    }
+  };
+
+  // 6: neat side part, slick with a shine
+  const sidePartNeat = ctx => {
+    const pts = [[-RX * 1.0, -RY * 0.3], [-RX * 1.02, -RY * 0.72], [-RX * 0.62, -RY * 1.1], [RX * 0.1, -RY * 1.22],
+                 [RX * 0.7, -RY * 1.08], [RX * 1.03, -RY * 0.68], [RX * 1.0, -RY * 0.3], [RX * 0.86, -RY * 0.52],
+                 [RX * 0.4, -RY * 0.66], [-RX * 0.2, -RY * 0.7], [-RX * 0.4, -RY * 0.68], [-RX * 0.46, -RY * 0.9],
+                 [-RX * 0.52, -RY * 0.66], [-RX * 0.86, -RY * 0.52]];
+    fill(ctx, pts, INK, 1.2);
+    stroke(ctx, [[-RX * 0.46, -RY * 0.92], [-RX * 0.5, -RY * 1.06]], { w: 5, color: '#777' });                     // part line
+    stroke(ctx, [[-RX * 0.2, -RY * 1.02], [RX * 0.3, -RY * 1.1], [RX * 0.72, -RY * 0.9]], { w: 9, color: '#6a6a6a' }); // shine
+  };
+
+  const eHair = (hair, back) => build({ shirt: W, sleeveHem: 0.42, head: head({ hair, back }), detail: crew });
+  const E1 = eHair(texturedCrop), E2 = eHair(curlyTop), E3 = eHair(flow);
+  const E4 = eHair(fauxHawk), E5 = eHair(longFront, longBack), E6 = eHair(sidePartNeat);
+
+  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6 };
 })();
