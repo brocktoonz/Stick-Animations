@@ -33,11 +33,12 @@ const Cameos = (() => {
   }
 
   // ---------- head ----------
-  // o: skin hair beard browW front(ctx, fx) hat
+  // o: skin back hair beard browW front(ctx, fx) hat
   function head(o) {
     return (ctx, p) => {
       const fx = p.face ?? 12;
       if (p.eyesOnly) return eyes(ctx, fx, -6, p);
+      o.back?.(ctx);   // behind the head: hoods, long hair
       blob(ctx, 0, 0, RX, RY, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
       o.beard?.(ctx);
       o.hair?.(ctx);
