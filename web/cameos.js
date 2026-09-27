@@ -108,8 +108,8 @@ const Cameos = (() => {
     const outer = [], inner = [];
     for (let i = 0; i <= 12; i++) {
       const a = Math.PI * (0.24 + 0.52 * i / 12), down = Math.sin(a);
-      outer.push([Math.cos(a) * RX * 1.0, Math.sin(a) * RY * (1.0 + 0.04 * down ** 6)]);
-      const r = 0.92 + 0.02 * down ** 6 + (i % 2 ? -0.02 : 0.015);   // jagged top edge
+      outer.push([Math.cos(a) * RX * 1.0, Math.sin(a) * RY * 1.0]);
+      const r = 0.92 + 0.03 * down ** 6 + (i % 2 ? -0.02 : 0.015);   // jagged top edge, thinner at the chin
       inner.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r]);
     }
     const shape = [...outer, ...inner.reverse()];
@@ -121,7 +121,7 @@ const Cameos = (() => {
                [fx + 54, 52], [fx + 26, 46], [fx, 50], [fx - 26, 46], [fx - 54, 52]];
     fill(ctx, m, FACIAL_HAIR, 1);
     outline(ctx, m, { w: 6 });
-    const patch = [[fx - 13, 106], [fx + 13, 106], [fx + 5, 120], [fx, 126], [fx - 5, 120]];
+    const patch = [[fx - 11, 106], [fx + 11, 106], [fx + 4, 113], [fx, 117], [fx - 4, 113]];
     fill(ctx, patch, FACIAL_HAIR, 0.5);
     outline(ctx, patch, { w: 5 });
   };

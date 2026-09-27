@@ -175,6 +175,8 @@ const Chars = (() => {
       { w: 7, taper0: 0, taper1: 0, minW: 1, jit: 0.2, wob: 0 });
   }
 
+  const isDark = c => { const v = parseInt(c.slice(1, 3), 16); return c.length === 7 && v < 0x70; };
+
   // Outlined noodle limb: a thick ink tube with a white core. A thin white
   // halo keeps it readable over dark clothes (Mom's dress).
   function tube(ctx, a, b, bend, w = 24, fillCol = W, halo = true) {
@@ -278,6 +280,7 @@ const Chars = (() => {
     ctx.rotate(p.lean ?? 0);
     const bob = p.bob ?? 0, hipY = S.hipY + bob, neckY = S.neckY + bob;
     const step = p.step ?? 0;
+    const darkTorso = isDark(S.torsoFill ?? W);
     if (p.eyesOnly) {   // just the eyes, e.g. glowing in a dark room
       ctx.translate(0, neckY - S.headUp + bob * 0.5);
       ctx.rotate(p.tilt ?? 0);
@@ -306,7 +309,9 @@ const Chars = (() => {
     const arm = (side, target, bend, point, hold) => {
       const sh = [side * S.shX, neckY + S.shY];
       const hnd = target ?? [side * S.restX, hipY + S.restY];
-      tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W);
+      // The white halo only matters over dark clothes; on light shirts it would
+      // erase the shirt's outline next to the arm.
+      tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, darkTorso);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
       hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W);
