@@ -7,8 +7,8 @@
 const Cameos = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { figure, eyes, brows, mouth, sweat } = Chars;
-  const W = '#fff', GREY = '#a3a3a3', RED = '#d9261c';
-  const BLOND = '#f2da86', BEARD = '#8e8e8e';
+  const W = '#fff', GREY = '#a3a3a3';
+  const BLOND = '#d9d9d9';   // blond reads as a light grey in the ink style
   const RX = 146, RY = 136;   // head radii (the kid's is 138 x 128)
 
   // Fixed (non-boiling) pseudo-random numbers for tufts and patterns.
@@ -112,25 +112,42 @@ const Cameos = (() => {
     for (const x of [-0.35, 0.1, 0.55]) stroke(ctx, [[RX * x, -RY * 0.72], [RX * (x + 0.05), -RY * 0.98]], { w: 6 });
   };
 
-  // MrBeast: short sides, textured quiff (solid ink, like Dad's hair).
-  const quiff = ctx => fill(ctx, [[-RX * 1.0, -RY * 0.38], [-RX * 0.98, -RY * 0.7], [-RX * 0.66, -RY * 1.0],
-    [-RX * 0.2, -RY * 1.2], [RX * 0.05, -RY * 1.4], [RX * 0.22, -RY * 1.2], [RX * 0.48, -RY * 1.34],
-    [RX * 0.62, -RY * 1.12], [RX * 0.94, -RY * 0.82], [RX * 1.0, -RY * 0.38], [RX * 0.88, -RY * 0.55],
-    [RX * 0.4, -RY * 0.64], [-RX * 0.3, -RY * 0.64], [-RX * 0.88, -RY * 0.5]], INK, 1.5);
-
-  // MrBeast: full short beard framing the mouth, plus moustache.
-  const beard = ctx => {
-    const outer = [[-RX * 0.97, RY * 0.12], [-RX * 0.88, RY * 0.55], [-RX * 0.5, RY * 0.96], [0, RY * 1.12],
-                   [RX * 0.5, RY * 0.96], [RX * 0.88, RY * 0.55], [RX * 0.97, RY * 0.12]];
-    const inner = [[RX * 0.82, RY * 0.22], [RX * 0.62, RY * 0.56], [RX * 0.32, RY * 0.84], [-RX * 0.32, RY * 0.84],
-                   [-RX * 0.62, RY * 0.56], [-RX * 0.82, RY * 0.22]];
-    fill(ctx, [...outer, ...inner], BEARD, 1.2);
-    stroke(ctx, outer, { w: 9, taper0: 0.15, taper1: 0.15 });
+  // MrBeast: short sides, quiff swept up and to the right (grey + ink edge).
+  const sweptUp = (color = '#5c5c5c') => ctx => {
+    const pts = [[-RX * 1.0, -RY * 0.3], [-RX * 0.98, -RY * 0.72], [-RX * 0.7, -RY * 1.02], [-RX * 0.3, -RY * 1.16],
+                 [-RX * 0.05, -RY * 1.3], [RX * 0.12, -RY * 1.16], [RX * 0.36, -RY * 1.4], [RX * 0.52, -RY * 1.18],
+                 [RX * 0.8, -RY * 1.28], [RX * 0.88, -RY * 1.02], [RX * 1.0, -RY * 0.7], [RX * 1.0, -RY * 0.3],
+                 [RX * 0.9, -RY * 0.5], [RX * 0.55, -RY * 0.62], [RX * 0.1, -RY * 0.7], [-RX * 0.35, -RY * 0.66],
+                 [-RX * 0.75, -RY * 0.58], [-RX * 0.92, -RY * 0.45]];
+    fill(ctx, pts, color, 1.2);
+    outline(ctx, pts, { w: 10 });
+    for (const [x0, x1, y1] of [[-0.45, -0.05, 1.18], [-0.05, 0.34, 1.28], [0.35, 0.74, 1.18]]) {
+      stroke(ctx, [[RX * x0, -RY * 0.72], [RX * (x0 + x1) / 2, -RY * (y1 - 0.2)], [RX * x1, -RY * y1]], { w: 5 });
+    }
   };
-  const moustache = (ctx, fx) => {
-    const m = [[fx - 60, 50], [fx - 30, 30], [fx, 34], [fx + 30, 30], [fx + 62, 50], [fx + 32, 46], [fx, 42], [fx - 30, 46]];
-    fill(ctx, m, BEARD, 1);
-    outline(ctx, m, { w: 6 });
+
+  // Beard covering the whole lower face; the mouth is drawn on top of it.
+  // style: 'full' (light grey fill), 'stubble' (ink flecks), 'bold' (mid grey, heavy edge)
+  const BEARD_TOP = [[-RX * 0.99, RY * 0.02], [-RX * 0.86, RY * 0.36], [-RX * 0.52, RY * 0.42], [-RX * 0.24, RY * 0.33],
+                     [0, RY * 0.36], [RX * 0.24, RY * 0.33], [RX * 0.52, RY * 0.42], [RX * 0.86, RY * 0.36], [RX * 0.99, RY * 0.02]];
+  const BEARD_JAW = [[RX * 0.92, RY * 0.5], [RX * 0.55, RY * 0.92], [0, RY * 1.08], [-RX * 0.55, RY * 0.92], [-RX * 0.92, RY * 0.5]];
+  const beard = (style = 'full') => ctx => {
+    const region = [...BEARD_TOP, ...BEARD_JAW];
+    if (style === 'stubble') {
+      for (let i = 0; i < 120; i++) {
+        const x = (hh(i) * 2 - 1) * RX * 0.92, y = RY * (0.4 + hh(i + 50) * 0.65);
+        if ((x / RX) ** 2 + (y / (RY * 1.04)) ** 2 > 0.9) continue;
+        stroke(ctx, [[x, y], [x + 2, y + 9]], { w: 5, taper0: 0.3, taper1: 0.3, jit: 0.4 });
+      }
+      return;
+    }
+    fill(ctx, region, style === 'bold' ? '#9a9a9a' : '#cfcfcf', 1.2);
+    stroke(ctx, [BEARD_TOP[0], ...BEARD_JAW.slice().reverse(), BEARD_TOP[8]].reverse(), { w: style === 'bold' ? 13 : 11, taper0: 0.05, taper1: 0.05 });
+    stroke(ctx, BEARD_TOP, { w: style === 'bold' ? 8 : 5, taper0: 0.1, taper1: 0.1 });
+    for (let i = 0; i < 9; i++) {   // a few hair flicks for texture
+      const x = (hh(i + 5) * 2 - 1) * RX * 0.7, y = RY * (0.55 + hh(i + 17) * 0.35);
+      stroke(ctx, [[x, y], [x + 4, y + 16]], { w: 4, color: '#7a7a7a' });
+    }
   };
 
   // ---------- accessories / outfit details ----------
@@ -167,8 +184,8 @@ const Cameos = (() => {
 
   const speedHead = (hair, front) => head({ skin: GREY, hair, front });
   const speed = {
-    // A: red football jersey, chain, big grin
-    A: build({ skin: GREY, shirt: RED, head: speedHead(twists()),
+    // A: football jersey, chain, big grin
+    A: build({ skin: GREY, shirt: W, head: speedHead(twists()),
       detail: (ctx, n, h) => { vneck(ctx, n); stroke(ctx, [[-68, n + 120], [68, n + 120]], { w: 12 }); chain(ctx, n); } }),
     // B: hoodie + stream headset (made for screaming)
     B: build({ skin: GREY, shirt: W, sleeve: W, head: speedHead(twists(11, 48), headset),
@@ -201,7 +218,7 @@ const Cameos = (() => {
       } }),
   };
 
-  const beastHead = () => head({ hair: quiff, beard, front: moustache });
+  const beastHead = style => head({ hair: sweptUp(), beard: beard(style) });
   const cash = (ctx, x, y) => {
     for (let i = -2; i <= 2; i++) {
       ctx.save(); ctx.translate(x, y - 20); ctx.rotate(i * 0.22);
@@ -219,16 +236,16 @@ const Cameos = (() => {
     stroke(ctx, [[x + 16, y - 4], [x + 240, y - 10]], { w: 5 });
   };
   const beast = {
-    // A: black hoodie, fanning cash
-    A: build({ shirt: INK, sleeve: '#222', head: beastHead(), detail: (ctx, n, h) => { hood(ctx, n, W); pocket(ctx, h, W); } }),
-    // B: black suit, white shirt, tie
-    B: build({ shirt: INK, sleeve: '#222', head: beastHead(),
+    // A: light full beard, white tee
+    A: build({ head: beastHead('full'), detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 26], [32, n + 2]], { w: 7 }) }),
+    // B: stubble beard, black hoodie
+    B: build({ shirt: INK, sleeve: '#222', head: beastHead('stubble'), detail: (ctx, n, h) => { hood(ctx, n, W); pocket(ctx, h, W); } }),
+    // C: bold beard, black suit, white shirt, tie
+    C: build({ shirt: INK, sleeve: '#222', head: beastHead('bold'),
       detail: (ctx, n) => {
         fill(ctx, [[-30, n - 2], [30, n - 2], [8, n + 120], [-8, n + 120]], W, 0.5);
         fill(ctx, [[-8, n + 8], [8, n + 8], [12, n + 90], [0, n + 108], [-12, n + 90]], INK, 0.5);
       } }),
-    // C: white tee, giant cheque
-    C: build({ head: beastHead(), detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 26], [32, n + 2]], { w: 7 }) }),
   };
 
   return { speed, ludwig, beast, props: { cash, bigCheck } };

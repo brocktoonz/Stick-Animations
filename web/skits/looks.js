@@ -22,7 +22,7 @@
   const grin = { mouth: 'talk', viz: { open: 0.5, width: 1, round: 0, teeth: 1, lip: 0, tongue: 0, smile: 1 } };
   const scream = { mouth: 'yell', open: 0.55, pupil: 6, brow: 0.7 };
   Skits.looks_speed = sheet('SPEED', [
-    [S.A, { ...grin, lookX: 0.3 }, 'RED JERSEY + CHAIN'],
+    [S.A, { ...grin, lookX: 0.3 }, 'JERSEY + CHAIN'],
     [S.B, scream, 'HOODIE + HEADSET'],
     [S.C, { ...grin, pupil: 8, armL: [-190, -330], bendL: -0.25, armR: [190, -330], bendR: 0.25, armRBehind: true }, 'BLACK TEE + CHAIN, TALL TWISTS'],
   ]);
@@ -32,8 +32,8 @@
     [L.C, { mouth: 'flat', lid: 0.35, brow: 0.3 }, 'BLOND CROP + TRACK JACKET'],
   ]);
   Skits.looks_beast = sheet('MRBEAST', [
-    [B.A, { ...grin, armR: [110, -190], bendR: -0.2, holdR: Cameos.props.cash }, 'BLACK HOODIE + CASH'],
-    [B.B, { ...grin, lookX: 0.3 }, 'BLACK SUIT + TIE'],
-    [B.C, { ...grin, armR: [20, -110], bendR: -0.3, armL: [-100, -110], bendL: 0.3, holdR: Cameos.props.bigCheck }, 'WHITE TEE + BIG CHEQUE'],
+    [B.A, { ...grin, lookX: 0.2 }, 'FULL BEARD + WHITE TEE'],
+    [B.B, { ...grin, lookX: 0.2 }, 'STUBBLE + BLACK HOODIE'],
+    [B.C, { ...grin, lookX: 0.2 }, 'BOLD BEARD + SUIT'],
   ]);
 })();
