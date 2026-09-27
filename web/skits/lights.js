@@ -53,7 +53,7 @@ Skits.lights = (() => {
       mouth: 'yell', open: 0.3,
       ...say(t, 2.85, 5.2, 'DO I LOOK LIKE I OWN THE ELECTRIC COMPANY?!', { intensity: 1.7 }),
       tilt: Math.sin(t * 9) * 0.03,
-      armR: [290 + wag, -760], bendR: -0.25, holdR: bill, armRBehind: true,
+      armR: [290 + wag, -760], bendR: -0.25, holdR: bill,
     });
     ctx.restore();
     bubble(ctx, 540, 530, 460, 175, [400, 790], 'DO I LOOK LIKE I OWN\nTHE ELECTRIC COMPANY?!', 58, 'Luckiest Guy', seg(t, 2.85, 3.05));

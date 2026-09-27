@@ -42,7 +42,6 @@ Skits.thermostat = (() => {
       armL: sneakL, bendL: 0.3,
       armR: mix(sneakR, tl, reach), bendR: lerp(-0.3, -0.22, reach),
       pointR: reach > 0.5 ? -0.25 : null,
-      armRBehind: reach > 0.3,
     });
     ctx.restore();
   }

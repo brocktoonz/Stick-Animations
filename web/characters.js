@@ -11,7 +11,9 @@
 //   brow       >0 angry, <0 worried                         mouth/open  see mouth()
 //   viz        LipSync shape, used when mouth === 'talk' (see Stage.say)
 //   armL/armR  hand target [x,y] in the character's local space (default: at sides)
-//   bendL/R    elbow bend   pointR  finger direction or null   armRBehind  bool
+//   bendL/R    elbow bend   pointR  finger direction or null
+//   armLFront/armRFront  draw that arm in front of the head (hand on face etc.);
+//              by default arms go behind the head, which sits on the shoulders
 //   holdR(ctx, x, y)  draws a prop at the right hand (before the hand, so it grips it)
 //   sweat      bool     eyesOnly  draw only the eyes (dark-room gags)
 const Chars = (() => {
@@ -290,11 +292,18 @@ const Chars = (() => {
       const sh = [side * S.shX, neckY + S.shY];
       const hnd = target ?? [side * S.restX, hipY + S.restY];
       tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W);
+      if (S.shortSleeve) {   // sleeve over the upper arm, in the shirt colour
+        const d = Math.hypot(hnd[0] - sh[0], hnd[1] - sh[1]) || 1, k = Math.min(48, d * 0.3) / d;
+        const end = [sh[0] + (hnd[0] - sh[0]) * k, sh[1] + (hnd[1] - sh[1]) * k];
+        const seed = 500 + side;
+        stroke(ctx, [sh, end], { w: S.armW + 24, taper0: 0, taper1: 0, minW: 1, seed, pressure: 0 });
+        stroke(ctx, [sh, end], { w: S.armW + 10, taper0: 0, taper1: 0, minW: 1, seed, pressure: 0, color: S.shortSleeve });
+      }
       hold?.(ctx, hnd[0], hnd[1]);
       hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W);
     };
-    arm(-1, p.armL, p.bendL, null, p.holdL);
-    if (p.armRBehind) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
+    if (!p.armLFront) arm(-1, p.armL, p.bendL, null, p.holdL);
+    if (!p.armRFront) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
 
     ctx.save();
     const jaw = p.mouth === 'talk' && p.viz ? p.viz.open : 0;
@@ -303,7 +312,8 @@ const Chars = (() => {
     S.head(ctx, p);
     ctx.restore();
 
-    if (!p.armRBehind) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
+    if (p.armLFront) arm(-1, p.armL, p.bendL, null, p.holdL);
+    if (p.armRFront) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
     ctx.restore();
   }
 

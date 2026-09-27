@@ -20,7 +20,7 @@ Skits.cast = (() => {
       Chars.kid(ctx, {
         x: 922, y: FLOOR, s: 1.12, bob: breathe(2),
         mouth: 'smile', lookX: -0.4, lid: blink(t, 3.7, 2.1),
-        armR: [95 + wave * 0.6, -600], bendR: 0.2, armRBehind: true,       // waving
+        armR: [95 + wave * 0.6, -600], bendR: 0.2,   // waving
       });
       for (const [x, name] of [[228, 'DAD'], [605, 'MOM'], [922, 'KID']]) {
         text(ctx, name, x, FLOOR + 110, 70, 'Luckiest Guy', '#e3261b', 14);
