@@ -565,23 +565,37 @@ const Hero = (() => {
   const J1 = build({ shirt: '#8f8f8f', sleeve: '#8f8f8f', head: goofHead,
     detail: (ctx, n, h) => { hoodie(ctx, n, h); smiley(ctx, n); } });
 
-  // J2 THE SMUG JOKESTER: bean head (bulge top-left), one raised brow, lopsided smirk, sweatband
-  const smugHead = (ctx, p) => {
-    ctx.translate(0, -14);
-    const pts = shapePts(140, 150, a => [1 + 0.08 * Math.cos(a + 0.8), 1 + 0.06 * Math.sin(2 * a + 0.6)]);
-    if (!p.eyesOnly) { fill(ctx, pts, W, 0.6); outline(ctx, pts, { w: 11 }); }
-    // short messy black hair
-    fill(ctx, [[-140, -40], [-146, -100], [-100, -146], [-20, -168], [60, -160], [124, -120], [140, -60], [120, -90],
-               [96, -84], [80, -104], [50, -92], [20, -112], [-10, -96], [-40, -112], [-70, -96], [-110, -100]], INK, 1.2);
-    // sweatband across the forehead, clipped to the head so it wraps around it
+  // J2 THE SMUG JOKESTER: bean head (bulge top-left), one raised brow, lopsided smirk
+  const BEAN = shapePts(140, 150, a => [1 + 0.08 * Math.cos(a + 0.8), 1 + 0.06 * Math.sin(2 * a + 0.6)]);
+  const smugHairShort = ctx => fill(ctx, [[-140, -40], [-146, -100], [-100, -146], [-20, -168], [60, -160], [124, -120], [140, -60], [120, -90],
+    [96, -84], [80, -104], [50, -92], [20, -112], [-10, -96], [-40, -112], [-70, -96], [-110, -100]], INK, 1.2);
+  // fuller, fringe swept to one side and ending above the brows
+  const smugHairFlick = ctx => {
+    fill(ctx, [[-142, -30], [-150, -100], [-110, -152], [-20, -176], [70, -166], [130, -120], [146, -50], [128, -80],
+               [104, -104], [60, -114], [10, -110], [-40, -100], [-80, -88], [-100, -66], [-114, -86], [-130, -70]], INK, 1.2);
+    stroke(ctx, [[60, -150], [-10, -134], [-80, -104]], { w: 5, color: '#555' });
+  };
+  // short sides, textured top pushed up
+  const smugHairTop = ctx => {
+    fill(ctx, [[-140, -46], [-144, -104], [-96, -150], [-30, -178], [30, -190], [96, -168], [136, -118], [142, -52],
+               [124, -86], [80, -110], [30, -120], [-20, -112], [-70, -104], [-110, -92]], INK, 1.2);
+    for (const x of [-60, -10, 40]) stroke(ctx, [[x, -122], [x + 24, -168]], { w: 5, color: '#555' });
+  };
+  const sweatband = ctx => {   // clipped to the head so it wraps around it
     ctx.save();
-    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (const q of pts) ctx.lineTo(q[0], q[1]); ctx.closePath(); ctx.clip();
+    ctx.beginPath(); ctx.moveTo(BEAN[0][0], BEAN[0][1]); for (const q of BEAN) ctx.lineTo(q[0], q[1]); ctx.closePath(); ctx.clip();
     ctx.fillStyle = W; ctx.beginPath(); ctx.moveTo(-170, -112); ctx.quadraticCurveTo(0, -130, 170, -100);
     ctx.lineTo(170, -58); ctx.quadraticCurveTo(0, -88, -170, -70); ctx.closePath(); ctx.fill();
     for (const [y0, ym, y1] of [[-112, -130, -100], [-70, -88, -58]]) stroke(ctx, [[-170, y0], [0, (ym + (y0 + y1) / 2) / 2], [170, y1]], { w: 9 });
     for (const [y0, ym, y1] of [[-98, -116, -86], [-84, -102, -72]]) stroke(ctx, [[-170, y0], [0, (ym + (y0 + y1) / 2) / 2], [170, y1]], { w: 6 });
     ctx.restore();
-    outline(ctx, pts, { w: 11 });
+    outline(ctx, BEAN, { w: 11 });
+  };
+  const smugHeadWith = (o = {}) => (ctx, p) => {
+    ctx.translate(0, -14);
+    if (!p.eyesOnly) { fill(ctx, BEAN, W, 0.6); outline(ctx, BEAN, { w: 11 }); }
+    (o.hair ?? smugHairShort)(ctx);
+    if (o.band !== false) sweatband(ctx);
     eye(ctx, -34, 4, 32, 36, 0.4, 0.1, 13, 0.36);
     eye(ctx, 50, 4, 32, 36, 0.4, 0.1, 13, 0.36);
     brow(ctx, -66, -26, -6, -30);           // flat
@@ -589,7 +603,17 @@ const Hero = (() => {
     stroke(ctx, [[-30, 84], [20, 88], [64, 70], [74, 56]], { w: 8 });   // lopsided smirk
     stroke(ctx, [[70, 60], [80, 70]], { w: 6 });                         // dimple
   };
-  const J2 = build({ shirt: INK, head: smugHead, detail: (ctx, n) => stroke(ctx, [[-34, n + 2], [0, n + 24], [34, n + 2]], { w: 7, color: W }) });
+  const smugHead = smugHeadWith();
+  const overshirt = (ctx, n, h) => {
+    fill(ctx, [[-24, n], [24, n], [28, h - 4], [-28, h - 4]], W, 0.4);   // white tee in the gap
+    crew(ctx, n);
+    for (const side of [-1, 1]) stroke(ctx, [[side * 24, n], [side * 28, h - 4]], { w: 8 });
+  };
+  const tee = (ctx, n) => stroke(ctx, [[-34, n + 2], [0, n + 24], [34, n + 2]], { w: 7, color: W });
+  const K1 = build({ shirt: INK, head: smugHeadWith(), detail: tee });
+  const K2 = build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: smugHeadWith({ band: false, hair: smugHairFlick }), detail: overshirt });
+  const K3 = build({ shirt: '#a8a8a8', sleeve: '#a8a8a8', head: smugHeadWith({ band: false, hair: smugHairTop }), detail: hoodie });
+  const J2 = build({ shirt: INK, head: smugHead, detail: tee });
 
   // J3 THE CHAOS GREMLIN: wide squat head, big sticking-out ears, one strand up, manic grin
   const gremlinHead = (ctx, p) => {
@@ -618,5 +642,5 @@ const Hero = (() => {
   };
   const J3 = build({ shirt: W, sleeveHem: 0.42, head: gremlinHead, detail: crew });
 
-  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6, J1, J2, J3 };
+  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6, J1, J2, J3, K1, K2, K3 };
 })();
