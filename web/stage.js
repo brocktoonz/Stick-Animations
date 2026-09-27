@@ -266,7 +266,8 @@ const Stage = (() => {
     skit.draw(ctx, f / FPS);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     bottomFade(ctx);
-    title(ctx, skit.title, skit.subtitle);
+    const t = f / FPS, at = v => typeof v === 'function' ? v(t) : v;   // titles may change over time
+    title(ctx, at(skit.title), at(skit.subtitle));
   }
 
   return {
