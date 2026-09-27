@@ -3,26 +3,40 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Brush Skit</title>
+<title>Brush Skits</title>
 <style>
   @font-face { font-family: "Luckiest Guy"; src: url(fonts/LuckiestGuy.ttf); }
   @font-face { font-family: "Patrick Hand"; src: url(fonts/PatrickHand.ttf); }
-  html, body { margin: 0; height: 100%; background: #111; }
-  body { display: flex; align-items: center; justify-content: center; }
-  canvas { height: 100vh; max-width: 100vw; aspect-ratio: 9 / 16; object-fit: contain; background: #fff; }
+  html, body { margin: 0; height: 100%; background: #111; font-family: sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  canvas { height: calc(100vh - 48px); max-width: 100vw; aspect-ratio: 9 / 16; object-fit: contain; background: #fff; }
+  nav { height: 48px; display: flex; gap: 8px; align-items: center; }
+  nav a { color: #ddd; text-decoration: none; padding: 6px 10px; border-radius: 6px; background: #222; font-size: 14px; }
+  nav a.on { background: #e3261b; color: #fff; }
 </style>
 </head>
 <body>
+<nav id="nav"></nav>
 <canvas id="c" width="1080" height="1920"></canvas>
 <script src="brush.js"></script>
 <script src="characters.js"></script>
-<script src="skit.js"></script>
+<script src="stage.js"></script>
+<script src="skits/cast.js"></script>
+<script src="skits/thermostat.js"></script>
+<script src="skits/bored.js"></script>
+<script src="skits/lights.js"></script>
 <script>
-  // ?f=N shows a single frame; ?export=1 leaves playback to scripts/export.cjs.
+  // ?skit=name picks a skit; ?f=N shows a single frame;
+  // ?export=1 leaves playback to scripts/export.cjs.
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
   const params = new URLSearchParams(location.search);
-  window.renderFrame = f => Skit.render(ctx, f);
+  const name = params.get('skit') || 'thermostat';
+  const skit = Skits[name];
+  window.skitFrames = Math.round(skit.duration * Stage.FPS);
+  window.renderFrame = f => Stage.frame(ctx, f, skit);
+  document.getElementById('nav').innerHTML = Object.keys(Skits)
+    .map(k => `<a href="?skit=${k}" class="${k === name ? 'on' : ''}">${k}</a>`).join('');
   window.ready = Promise.all([
     document.fonts.load('40px "Luckiest Guy"'),
     document.fonts.load('40px "Patrick Hand"'),
@@ -33,8 +47,8 @@
     let start = performance.now();
     canvas.onclick = () => { start = performance.now(); };
     (function loop(now) {
-      const f = Math.floor((now - start) / 1000 * Skit.FPS);
-      renderFrame(f % (Skit.frames + Skit.FPS));   // 1 s hold on the last frame
+      const f = Math.floor((now - start) / 1000 * Stage.FPS);
+      renderFrame(f % (skitFrames + Stage.FPS));   // 1 s hold on the last frame
       requestAnimationFrame(loop);
     })(performance.now());
   });

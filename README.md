@@ -11,17 +11,25 @@ swells like ink, wobbles slightly, and re-jitters every 3 frames ("line boil")
 so the drawing looks hand-made. No images or video models are used.
 
 - `web/brush.js`: brush primitives (tapered strokes, blobs, outlines, boil).
-- `web/characters.js`: posable characters (kid, dad) plus faces, hands, sweat.
-- `web/skit.js`: the test skit "DADS BE LIKE: when you touch the thermostat".
-- `web/index.html`: open in a browser to watch it loop (`?f=120` shows one frame).
-- `scripts/export.cjs`: renders every frame in headless Chromium into an MP4.
+- `web/characters.js`: the recurring cast (Dad, Mom, Kid) on one shared rig,
+  plus faces, hands, props hooks and a Dad close-up bust.
+- `web/stage.js`: timing helpers, title band, speech bubbles, effects (burst,
+  shake, speed lines, "!") and sets (living room, kitchen, couch, lamps, props).
+- `web/skits/*.js`: one file per skit. Current ones: `cast` (character sheet),
+  `thermostat`, `bored`, `lights`.
+- `web/index.html`: open in a browser to watch (`?skit=bored`, `&f=120` for one frame).
+- `scripts/export.cjs`: renders a skit in headless Chromium into an MP4.
 
 ```bash
 npm i playwright   # or NODE_PATH=$(npm root -g) if it is installed globally
-FFMPEG=$(python3 -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())") \
-  node scripts/export.cjs out/skit.mp4
-node scripts/export.cjs out/stills 0 90 180    # PNG stills of chosen frames
+export FFMPEG=$(python3 -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())")
+node scripts/export.cjs bored out/bored.mp4
+node scripts/export.cjs bored out/bored.mp4 --audio voice.m4a   # with a sound track
+node scripts/export.cjs bored out/stills 0 90 180               # PNG stills
 ```
+
+A new skit is a file in `web/skits/` that sets `Skits.<name> = { title,
+subtitle, duration, draw(ctx, t) }`, plus a `<script>` tag in `index.html`.
 
 Fonts in `web/fonts/` (Luckiest Guy, Patrick Hand) are from Google Fonts under
 the SIL Open Font License.
