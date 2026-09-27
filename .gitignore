@@ -5,3 +5,7 @@ out/
 *.mp3
 *.m4a
 __pycache__/
+
+# Reference uploads are always tracked, even media files.
+!references/
+!references/**

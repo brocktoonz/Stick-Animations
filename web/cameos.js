@@ -213,5 +213,6 @@ const Cameos = (() => {
     Stage.text(ctx, '$1,000,000', x + 127, y - 50, 42, 'Luckiest Guy', INK);
     stroke(ctx, [[x + 16, y - 4], [x + 240, y - 10]], { w: 5 });
   };
-  return { speed, ludwig, beast, props: { cash, bigCheck } };
+  // parts: the shared build/head builders, for other adult characters (hero.js)
+  return { speed, ludwig, beast, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
