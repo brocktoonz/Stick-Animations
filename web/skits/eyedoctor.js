@@ -39,7 +39,7 @@ Skits.eyedoctor = (() => {
     stroke(ctx, [[X - 150, 1030], [X + 150, 1030]], { w: 6, color: '#999' }); // seam
   }
 
-  // The machine from behind: head unit with vents, knob and cable, on a table.
+  // The machine from behind: head unit with vents and a knob, on a table.
   function machineBack(ctx) {
     panel(ctx, box(-40, 1560, 1120, 1960), '#d6d6d6', 12);                  // table
     panel(ctx, box(190, MTOP, 890, 1560), '#ececec', 12);                   // head unit
@@ -47,7 +47,6 @@ Skits.eyedoctor = (() => {
     for (let i = 0; i < 7; i++) stroke(ctx, [[300, 1290 + i * 34], [520, 1290 + i * 34]], { w: 7, color: '#8a8a8a' });   // vents
     blob(ctx, 720, 1320, 44, 44, { fill: '#bdbdbd', w: 8, n: 12 });          // knob
     blob(ctx, 720, 1440, 22, 22, { fill: '#7fd17f', w: 6, n: 8 });           // power light
-    stroke(ctx, [[860, 1480], [980, 1520], [1040, 1640], [1000, 1780]], { w: 14, taper0: 0, taper1: 0, minW: 1 });   // cable
   }
 
   // ---------- the view through the eyepiece ----------
@@ -197,7 +196,7 @@ Skits.eyedoctor = (() => {
   }
 
   return {
-    title: 'That one machine\nat the eye doctor', subtitle: '', duration: 5.67,
+    title: 'That one machine\nat the eye doctor:', subtitle: '', duration: 5.67,
     draw(ctx, t) {
       if (t < 1.5) shotSetup(ctx, t);          // "Alright, go ahead and put your chin up there for me, please."
       else if (t < 2.8) shotBalloon(ctx, t);   // "You're gonna feel a small puff of air in a minute."
