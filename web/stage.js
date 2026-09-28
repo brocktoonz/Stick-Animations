@@ -59,21 +59,23 @@ const Stage = (() => {
   //   YouTube Shorts: top 288, bottom 672, left 48, right 192
   //   Instagram Reels: top 420, bottom 420
   const SAFE = { top: 420, bottom: H - 672, left: 120, right: W - 240 };
-  const SAFE_W = SAFE.right - SAFE.left, SAFE_CX = (SAFE.left + SAFE.right) / 2;
+  const SAFE_W = SAFE.right - SAFE.left;
 
   // The caption, placed at the top of the safe zone with a white outline so it
   // reads over the artwork. Multi-line captions ("a\nb") are sized by the
   // longest line; an optional subtitle sits underneath.
-  function title(ctx, main, sub) {
+  // Centred on the frame. A skit can set `bottom` (the y the last line should
+  // sit just above, e.g. a prop) to raise it from the default spot.
+  function title(ctx, main, sub, bottom) {
     if (!main) return;
     const lines = main.split('\n');
     const size = Math.min(...lines.map(l => fitSize(ctx, l, 110, SAFE_W)));
-    let y = SAFE.top + size * 0.55;
-    text(ctx, main, SAFE_CX, y, size, 'Luckiest Guy', '#e3261b', size * 0.22);
+    let y = bottom != null ? bottom - size * 0.55 - (lines.length - 1) * size * 1.05 : SAFE.top + size * 0.55;
+    text(ctx, main, W / 2, y, size, 'Luckiest Guy', '#e3261b', size * 0.22);
     if (sub) {
       y += lines.length * size * 1.05 + 10;
       const ss = fitSize(ctx, sub, 50, SAFE_W);
-      text(ctx, sub, SAFE_CX, y, ss, 'Luckiest Guy', INK, ss * 0.28);
+      text(ctx, sub, W / 2, y, ss, 'Luckiest Guy', INK, ss * 0.28);
     }
   }
 
@@ -306,7 +308,7 @@ const Stage = (() => {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     bottomFade(ctx);
     const t = f / FPS, at = v => typeof v === 'function' ? v(t) : v;   // titles may change over time
-    title(ctx, at(skit.title), at(skit.subtitle));
+    title(ctx, at(skit.title), at(skit.subtitle), skit.titleBottom);
     if (globalThis.SHOW_SAFE) safeOverlay(ctx);
   }
 

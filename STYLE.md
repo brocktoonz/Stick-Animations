@@ -63,5 +63,8 @@ disagree, the rule wins.
 
 - Exactly the words of the original, including punctuation (e.g. the colon in
   "That one machine at the eye doctor:").
-- Always inside `Stage.SAFE`, clear of TikTok, YouTube Shorts and Instagram
-  Reels UI. Check stills with `--safe`.
+- Centred on the frame. By default the caption starts at the top of
+  `Stage.SAFE` (the strictest of the TikTok, YouTube Shorts and Instagram
+  Reels guides). That is conservative: a skit can raise it with
+  `titleBottom` so the last line sits just above a key prop, as the eye
+  doctor does with the eye chart. Check stills with `--safe`.

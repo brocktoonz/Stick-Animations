@@ -9,7 +9,7 @@ Skits.eyedoctor = (() => {
   const { seg, lerp, easeInOut, easeOut, easeOutBack, blink, shake, burst } = Stage;
   const W = '#fff', RED = '#d9261c';
   const HEAD = 438;                    // feet-to-head-centre of the main character (unscaled)
-  const X = 540, S = 2.0, EYE_Y = 1036;
+  const X = 540, S = 2.0, EYE_Y = 1102;   // eyes end half behind the machine's top edge
   const Y = EYE_Y + (HEAD + 6) * S;   // his feet, so the eyes land at EYE_Y
   const MTOP = 1150;                   // top edge of the machine's back
 
@@ -124,7 +124,7 @@ Skits.eyedoctor = (() => {
     room(ctx);
     chairBack(ctx);
     const lean = easeInOut(seg(t, 0.15, 0.75));   // lowers his head down to the eyepiece
-    Hero.main(ctx, { x: X, y: Y + lerp(-85, 0, lean), s: S, lookY: lerp(-0.1, 0.25, lean), lid: blink(t, 1.7, 0.6), mouth: 'flat' });
+    Hero.main(ctx, { x: X, y: Y + lerp(-160, 0, lean), s: S, lookY: lerp(-0.1, 0.1, lean), lid: blink(t, 1.7, 0.6), mouth: 'flat' });
     machineBack(ctx);
     ctx.restore();
     whiteout(ctx, seg(t, 1.2, 1.5));
@@ -200,6 +200,7 @@ Skits.eyedoctor = (() => {
 
   return {
     title: 'That one machine\nat the eye doctor:', subtitle: '', duration: 5.67,
+    titleBottom: 385,   // last line just above the eye chart (its top is ~397 at the end of the push-in)
     draw(ctx, t) {
       if (t < 1.5) shotSetup(ctx, t);          // "Alright, go ahead and put your chin up there for me, please."
       else if (t < 3.4) shotBalloon(ctx, t);   // "You're gonna feel a small puff of air in a minute."
