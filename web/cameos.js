@@ -603,9 +603,9 @@ const Cameos = (() => {
   const SEAMLESS_FRONT = outlineHair(...SWEPT_WAVE, W, { seamless: true });
   const NICK_BACK_OPTS = {
     none: null,
-    shoulder: hairSilhouette({ len: 1.45, wide: 1.24 }),
-    long: hairSilhouette({ len: 1.75, wide: 1.28, flick: 0.2 }),
-    flared: hairSilhouette({ len: 1.6, wide: 1.4, flick: 0.26, waves: 5 }),
+    shorter: hairSilhouette({ len: 0.98, wide: 1.26, flick: 0.08, waves: 4 }),
+    same: hairSilhouette({ len: 1.12, wide: 1.28, flick: 0.1, waves: 5 }),
+    sameFlared: hairSilhouette({ len: 1.12, wide: 1.36, flick: 0.18, waves: 5 }),
   };
   const nickBack = Object.fromEntries(Object.entries(NICK_BACK_OPTS).map(([k, b]) => [k, build({
     shirt: INK, sleeve: '#222', behind: b || undefined,
