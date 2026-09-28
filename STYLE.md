@@ -53,6 +53,9 @@ disagree, the rule wins.
 
 ## Cast
 
+- Faces come from the shared emotion set (`web/emotions.js`, `...Emotions.angry`).
+  Don't hand-tune a face in a skit when an emotion covers it; add or adjust the
+  emotion instead and re-render `characters/` so the references stay true.
 - Main character: `Hero.main`, the spiky-haired guy with mid-grey hair and a
   grey hoodie (`Cameos.spikyShades.brown`). The previous design is kept as
   `Hero.mainOld`.

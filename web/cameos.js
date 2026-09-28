@@ -40,12 +40,15 @@ const Cameos = (() => {
       const fx = p.face ?? 12;
       if (p.eyesOnly) return eyes(ctx, fx, -6, p);
       o.back?.(ctx);   // behind the head: hoods, long hair
-      blob(ctx, 0, 0, RX, RY, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
-      o.beard?.(ctx);
+      // a yell drops the jaw: the head stretches down and the mouth rides up
+      // a little, so even a wide-open mouth stays inside the chin
+      const open = p.mouth === 'yell' ? (p.open ?? 0) : 0, jaw = 46 * open;
+      blob(ctx, 0, jaw * 0.5, RX - jaw * 0.1, RY + jaw * 0.5, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
+      if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx); ctx.restore(); }
       o.hair?.(ctx);
       eyes(ctx, fx, -6, p, 1, !!o.lashes);
       brows(ctx, fx, -62, p, 1, o.browW ?? 9);
-      mouth(ctx, fx + 4, 62, p);
+      mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, open ? 0.85 : 1);
       o.front?.(ctx, fx);
       o.hat?.(ctx);
       if (p.sweat) { sweat(ctx, -126, -30); sweat(ctx, 150, -60, 0.8); }
