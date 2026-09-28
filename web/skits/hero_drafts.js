@@ -3,15 +3,19 @@ Skits.hero_drafts = (() => {
   const { blink } = Stage;
   const grin = { mouth: 'talk', viz: { open: 0.5, width: 1, round: 0, teeth: 1, lip: 0, tongue: 0, smile: 1 } };
   const laugh = { mouth: 'talk', viz: { open: 0.62, width: 1, round: 0, teeth: 1, lip: 0, tongue: 0, smile: 1 }, lid: 1, happy: true, brow: -0.3 };
+  const H = Hero.mainHair, pose = { lookX: 0.2 };
   const DRAFTS = [
-    ['1', Hero.main, { lookX: 0.2 }, 'DEFAULT: FRIENDLY'],
-    ['2', Hero.main, laugh, 'LAUGHING'],
-    ['3', Hero.main, { mouth: 'o', open: 0.6, pupil: 8, brow: -0.8, sweat: true }, 'CAUGHT OFF GUARD'],
+    ['1', H.current, pose, 'CURRENT: SWEPT FRINGE'],
+    ['2', H.longSweep, pose, 'LONGER SIDE SWEEP'],
+    ['3', H.curtains, pose, 'SHORT CURTAINS'],
+    ['4', H.slickedBack, pose, 'SWEPT BACK'],
+    ['5', H.messyFringe, pose, 'MESSY FRINGE'],
+    ['6', H.frontFlick, pose, 'FRINGE FLICKED UP'],
   ];
   const shot = t => Math.min(DRAFTS.length - 1, Math.floor(t));
 
   return {
-    title: 'MAIN CHARACTER',
+    title: t => `HAIRCUT ${DRAFTS[shot(t)][0]}`,
     subtitle: t => DRAFTS[shot(t)][3],
     duration: DRAFTS.length,
     draw(ctx, t) {

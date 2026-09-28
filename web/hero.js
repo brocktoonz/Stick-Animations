@@ -618,17 +618,45 @@ const Hero = (() => {
   // ================= MAIN CHARACTER =================
   // K2's look (bean head, swept fringe, open overshirt) with a friendly, expressive
   // face driven by the usual pose fields (lid, brow, lookX/Y, mouth, viz, sweat).
-  const mainHead = (ctx, p) => {
+  const mainHeadWith = (hair = smugHairFlick) => (ctx, p) => {
     ctx.translate(0, -14);
     const fx = p.face ?? 8;
     if (p.eyesOnly) return Chars.eyes(ctx, fx, 4, p, 1.05);
     fill(ctx, BEAN, W, 0.6); outline(ctx, BEAN, { w: 11 });
-    smugHairFlick(ctx);
+    hair(ctx);
     Chars.eyes(ctx, fx, 4, p, 1.05);
     Chars.brows(ctx, fx, -54, p, 1, 10);
     Chars.mouth(ctx, fx + 4, 80, p, 1.05);
     if (p.sweat) { Chars.sweat(ctx, -128, -20); Chars.sweat(ctx, 146, -50, 0.8); }
   };
+  const mainHead = mainHeadWith();
+  // Alternative haircuts for the main character, same solid-ink style.
+  const OUT = [[-142, -30], [-150, -100], [-110, -152], [-20, -176], [70, -166], [130, -120], [146, -50]];
+  const inkHair = (outer, edge, extra) => ctx => { fill(ctx, [...outer, ...edge], INK, 1.2); extra?.(ctx); };
+  const MAIN_HAIR = {
+    current: smugHairFlick,
+    longSweep: inkHair(OUT,   // deeper side sweep covering more forehead
+      [[128, -76], [100, -94], [50, -98], [0, -94], [-50, -86], [-92, -76], [-114, -58], [-124, -76], [-136, -56]],
+      ctx => stroke(ctx, [[80, -150], [0, -126], [-90, -90]], { w: 5, color: '#555' })),
+    curtains: inkHair(OUT,     // short middle part opening to both sides
+      [[130, -66], [112, -90], [72, -104], [32, -118], [8, -140], [-16, -120], [-56, -104], [-96, -92], [-120, -72], [-134, -56]],
+      ctx => { for (const s of [-1, 1]) stroke(ctx, [[s * 16, -160], [s * 70, -140], [s * 120, -96]], { w: 5, color: '#555' }); }),
+    slickedBack: inkHair([[-142, -40], [-150, -110], [-100, -172], [-10, -198], [80, -186], [138, -130], [152, -60]],
+      [[146, -30], [138, -76], [112, -104], [70, -124], [20, -130], [-40, -124], [-94, -106], [-128, -80]],   // forehead clear, volume up and back
+      ctx => { for (const x of [-70, -20, 30, 80]) stroke(ctx, [[x, -130], [x * 0.7 + 10, -170], [x * 0.4 + 20, -190]], { w: 5, color: '#555' }); }),
+    messyFringe: inkHair(OUT,  // same shape as current, choppy fringe
+      [[128, -80], [110, -98], [96, -84], [80, -110], [56, -96], [36, -118], [10, -100], [-14, -116], [-40, -96], [-62, -110],
+       [-84, -88], [-104, -98], [-118, -72], [-132, -78]],
+      ctx => stroke(ctx, [[60, -154], [-10, -140], [-70, -116]], { w: 5, color: '#555' })),
+    frontFlick: inkHair([[-142, -30], [-150, -100], [-110, -156], [-50, -186], [-10, -206], [30, -196], [80, -172], [130, -120], [146, -50]],
+      [[128, -84], [90, -112], [40, -124], [-20, -128], [-60, -114], [-100, -96], [-126, -74]],   // fringe lifted into a small wave
+      ctx => { stroke(ctx, [[-60, -130], [-30, -180], [10, -198]], { w: 5, color: '#555' }); stroke(ctx, [[0, -130], [30, -170], [60, -180]], { w: 5, color: '#555' }); }),
+  };
+  const mainWith = hair => {
+    const body = build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: mainHeadWith(hair), detail: overshirt });
+    return (ctx, p) => body(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
+  };
+  const mainHair = Object.fromEntries(Object.entries(MAIN_HAIR).map(([k, h]) => [k, mainWith(h)]));
   const mainBody = build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: mainHead, detail: overshirt });
   const main = (ctx, p) => mainBody(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
 
@@ -659,5 +687,5 @@ const Hero = (() => {
   };
   const J3 = build({ shirt: W, sleeveHem: 0.42, head: gremlinHead, detail: crew });
 
-  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6, J1, J2, J3, K1, K2, K3, main };
+  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6, J1, J2, J3, K1, K2, K3, main, mainHair };
 })();
