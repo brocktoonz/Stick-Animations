@@ -441,6 +441,68 @@ const Cameos = (() => {
     },
   };
 
+  // ---- Outline-style hair (per the user's cartoon hair reference sheets) ----
+  // One continuous silhouette with a white fill and a strong outline; waves and
+  // curls live in the outline itself; only a few inner flow strokes.
+  // Points are in head units (x RX, y RY). outer runs left-bottom -> over the
+  // top -> right-bottom; inner (the face opening) runs right-bottom -> left-bottom.
+  const hu = pts => pts.map(([x, y]) => [x * RX, y * RY]);
+  // Points from a to b with an alternating sideways offset (waves/curls).
+  const wavyEdge = (a, b, n, amp) => {
+    const out = [], dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
+    for (let i = 0; i <= n; i++) {
+      const t = i / n, o = (i % 2 ? amp : -amp) * (i === 0 || i === n ? 0 : 1);
+      out.push([a[0] + dx * t - dy / d * o, a[1] + dy * t + dx / d * o]);
+    }
+    return out;
+  };
+  const outlineHair = (outer, inner, lines = [], fillCol = W) => ctx => {
+    const poly = hu([...outer, ...inner]);
+    fill(ctx, poly, fillCol, 1);
+    outline(ctx, poly, { w: 11 });
+    for (const l of lines) stroke(ctx, hu(l), { w: 7, taper0: 0.15, taper1: 0.35 });
+  };
+
+  const NICK_OUTLINE = {
+    // 1: wavy, shoulder length, fringe swept to one side
+    wavySide: outlineHair(
+      [[-1.08, 1.2], [-1.24, 1.12], ...wavyEdge([-1.2, 0.95], [-1.16, -0.3], 5, 0.07),
+       [-1.02, -0.78], [-0.62, -1.1], [0, -1.22], [0.62, -1.12], [1.02, -0.8],
+       ...wavyEdge([1.16, -0.3], [1.2, 0.95], 5, 0.07), [1.26, 1.12], [1.08, 1.2]],
+      [[0.94, 1.02], ...wavyEdge([0.98, 0.7], [0.92, 0.0], 3, 0.04), [0.84, -0.36], [0.58, -0.56],
+       [0.3, -0.6], [0.02, -0.58], [-0.3, -0.52], [-0.58, -0.4], [-0.8, -0.2],
+       ...wavyEdge([-0.92, 0.0], [-0.98, 0.7], 3, 0.04), [-0.94, 1.02]],
+      [[[0.3, -1.02], [-0.1, -0.86], [-0.48, -0.56]], [[0.44, -0.98], [0.9, -0.66], [1.02, -0.2]], [[-0.3, -0.96], [-0.86, -0.6], [-1.04, 0.1]]]),
+
+    // 2: middle part, straight fall with the ends flicking out
+    middlePart: outlineHair(
+      [[-1.02, 1.08], [-1.3, 1.02], ...wavyEdge([-1.18, 0.86], [-1.14, -0.2], 3, 0.03), [-1.1, -0.66], [-0.66, -1.08], [0, -1.2],
+       [0.66, -1.08], [1.1, -0.66], ...wavyEdge([1.14, -0.2], [1.18, 0.86], 3, 0.03), [1.3, 1.02], [1.02, 1.08]],
+      [[0.92, 0.96], [0.94, 0.2], [0.86, -0.34], [0.58, -0.64], [0.2, -0.82], [0, -0.96],
+       [-0.2, -0.82], [-0.58, -0.64], [-0.86, -0.34], [-0.94, 0.2], [-0.92, 0.96]],
+      [[[0.04, -1.06], [0.54, -0.9], [1.0, -0.2]], [[-0.04, -1.06], [-0.54, -0.9], [-1.0, -0.2]]]),
+
+    // 3: loose curls to the shoulders, curly fringe
+    looseCurls: outlineHair(
+      [...wavyEdge([-1.06, 1.14], [-1.26, -0.1], 7, 0.1), ...wavyEdge([-1.2, -0.3], [-0.5, -1.2], 5, 0.09),
+       ...wavyEdge([-0.3, -1.26], [0.3, -1.26], 3, 0.08), ...wavyEdge([0.5, -1.2], [1.2, -0.3], 5, 0.09),
+       ...wavyEdge([1.26, -0.1], [1.06, 1.14], 7, 0.1)],
+      [...wavyEdge([0.92, 1.0], [0.9, 0.0], 4, 0.06), [0.8, -0.34], [0.62, -0.5], [0.44, -0.62], [0.26, -0.5],
+       [0.08, -0.64], [-0.1, -0.5], [-0.28, -0.64], [-0.46, -0.5], [-0.64, -0.6], [-0.8, -0.34],
+       ...wavyEdge([-0.9, 0.0], [-0.92, 1.0], 4, 0.06)],
+      [[[-0.62, -0.9], [-0.44, -1.0], [-0.3, -0.9], [-0.36, -0.8]], [[0.3, -0.98], [0.48, -1.04], [0.6, -0.92], [0.52, -0.84]],
+       [[-1.06, 0.3], [-1.12, 0.46], [-1.02, 0.56]], [[1.06, 0.3], [1.12, 0.46], [1.02, 0.56]]]),
+
+    // 4: swept back with a wave, forehead mostly clear, wavy to the shoulders
+    sweptWave: outlineHair(
+      [[-1.04, 1.1], [-1.22, 1.02], ...wavyEdge([-1.16, 0.8], [-1.12, -0.36], 4, 0.07), [-0.96, -0.86],
+       [-0.5, -1.2], [0.1, -1.34], [0.66, -1.22], [1.04, -0.88],
+       ...wavyEdge([1.12, -0.36], [1.16, 0.8], 4, 0.07), [1.22, 1.02], [1.04, 1.1]],
+      [[0.9, 0.96], ...wavyEdge([0.94, 0.5], [0.9, -0.1], 2, 0.04), [0.8, -0.46], [0.5, -0.72], [0.16, -0.78],
+       [-0.08, -0.7], [-0.22, -0.8], [-0.52, -0.72], [-0.8, -0.46], ...wavyEdge([-0.9, -0.1], [-0.94, 0.5], 2, 0.04), [-0.9, 0.96]],
+      [[[-0.2, -0.82], [0.0, -1.12], [0.4, -1.22]], [[0.2, -0.8], [0.6, -1.0], [0.96, -0.66]], [[-0.6, -0.86], [-0.9, -0.66], [-1.02, -0.3]]]),
+  };
+
   const nickHair = {
     // 1 current: long mop past the jaw
     long: nickMop,
@@ -512,6 +574,7 @@ const Cameos = (() => {
   const nickWith = (hair, back) => build({ shirt: INK, sleeve: '#222', head: head({ back, hair, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
   const nickFlow = Object.fromEntries(Object.entries(NICK_FLOW).map(([k, v]) => [k, nickWith(v.front, v.back)]));
+  const nickOutline = Object.fromEntries(Object.entries(NICK_OUTLINE).map(([k, h]) => [k, nickWith(h)]));
   const nickAlts = Object.fromEntries(Object.entries(nickHair).map(([k, h]) => [k, nickWith(h, NICK_BACK[k])]));
 
   const nick = build({ shirt: INK, sleeve: '#222', head: head({ hair: nickMop, front: roundGlasses }),
@@ -557,5 +620,5 @@ const Cameos = (() => {
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
   // parts: the shared build/head builders, for other adult characters (hero.js)
-  return { speed, ludwig, beast, nick, slime, nickAlts, nickFlow, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick, slime, nickAlts, nickFlow, nickOutline, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
