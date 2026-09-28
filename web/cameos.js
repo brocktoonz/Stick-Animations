@@ -656,8 +656,9 @@ const Cameos = (() => {
       stroke(ctx, [[x, y], [x + 1 + (hh(i + 90) - 0.5) * 4, y + 6 + hh(i + 3) * 4]], { w: 3.5, color: hh(i + 11) > 0.5 ? '#333' : '#666', jit: 0.3 });
     }
   };
-  const slimeStache = (ctx, fx) => {
-    const m = [[fx - 58, 50], [fx - 26, 36], [fx, 40], [fx + 26, 36], [fx + 60, 50], [fx + 28, 52], [fx, 48], [fx - 28, 52]];
+  const slimeStache = (ctx, fx, rage) => {
+    const up = rage ? 16 : 0;   // rides up over the huge open mouth
+    const m = [[fx - 58, 50], [fx - 26, 36], [fx, 40], [fx + 26, 36], [fx + 60, 50], [fx + 28, 52], [fx, 48], [fx - 28, 52]].map(([x, y]) => [x, y - up]);
     fill(ctx, m, '#6a6a6a', 1);
   };
   const slime = build({ shirt: INK, sleeve: '#222', head: head({ back: ears, hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
