@@ -332,6 +332,115 @@ const Cameos = (() => {
                [-RX * 0.08, -RY * 0.62], [RX * 0.06, -RY * 0.74]], FLOW, 0.5);
     stroke(ctx, [[RX * 0.02, -RY * 0.74], [-RX * 0.12, -RY * 0.6], [-RX * 0.2, -RY * 0.48]], { w: 7, taper0: 0.1, taper1: 0.8 });
   };
+  // ---- Lock-based shoulder-length hair (from the anime reference) ----
+  // The hair is built from individual tapered locks, like the reference:
+  // darker locks hang behind the head, lighter front locks fall over the ears
+  // to the shoulders with a wave and an outward flick at the tips.
+  const LOCK = '#4a4a4a', LOCK_BACK = '#363636', LOCK_LINE = '#8a8a8a';
+  // Tapered ribbon along a spline centreline (head units), width w at the root.
+  function lock(ctx, pts, w, color) {
+    const c = Brush.spline(pts.map(([x, y]) => [x * RX, y * RY]), false, 6);
+    const L = [], R = [];
+    for (let i = 0; i < c.length; i++) {
+      const a = c[Math.max(0, i - 1)], b = c[Math.min(c.length - 1, i + 1)];
+      let dx = b[0] - a[0], dy = b[1] - a[1]; const d = Math.hypot(dx, dy) || 1; dx /= d; dy /= d;
+      const t = i / (c.length - 1), hw = w * 0.5 * Math.min(1, (1 - t) * 1.6) ** 0.8;
+      L.push([c[i][0] - dy * hw, c[i][1] + dx * hw]); R.push([c[i][0] + dy * hw, c[i][1] - dx * hw]);
+    }
+    const poly = [...L, ...R.reverse()];
+    fill(ctx, poly, color, 0.6);
+    outline(ctx, poly, { w: 8, jit: 0.8 });
+  }
+  // A wavy lock from (x0,y0) to (x1,y1): sideways wave `amp`, tip flicks by `flick`.
+  const wave = (x0, y0, x1, y1, amp, flick, n = 5) => {
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      pts.push([x0 + (x1 - x0) * t + Math.sin(t * Math.PI * 1.5) * amp, y0 + (y1 - y0) * t]);
+    }
+    const [lx, ly] = pts[n];
+    pts[n] = [lx + flick * 0.5, ly];
+    pts.push([lx + flick, ly - 0.04]);
+    return pts;
+  };
+  // Crown cap over the top of the head. hairline: points from the right temple
+  // to the left temple (head units). lift = extra volume on top.
+  const crown = (ctx, hairline, lift, color = LOCK) => {
+    const pts = [];
+    for (let i = 0; i <= 20; i++) {
+      const a = Math.PI * (0.96 + 1.08 * i / 20);
+      const top = Math.max(0, -Math.sin(a)) ** 2 * lift;
+      pts.push([Math.cos(a) * RX * 1.12, Math.sin(a) * RY * (1.12 + top)]);
+    }
+    const poly = [...pts, ...hairline.map(([x, y]) => [x * RX, y * RY])];
+    fill(ctx, poly, color, 1);
+    outline(ctx, poly, { w: 10 });
+  };
+  const sweepLines = (ctx, lines) => {
+    for (const l of lines) stroke(ctx, l.map(([x, y]) => [x * RX, y * RY]), { w: 5, color: LOCK_LINE });
+  };
+
+  // Back locks (behind the head): darker locks peeking out past the side locks.
+  const backLocks = (len = 1.28, spread = 1.3) => ctx => {
+    for (const sd of [-1, 1]) {
+      for (const [x0, x1, l, fl] of [[0.45, 1.12, len, 0.12], [0.55, spread, len - 0.08, 0.18]]) {
+        lock(ctx, wave(sd * x0, -0.66, sd * x1, l, sd * 0.06, sd * fl), 74, LOCK_BACK);
+      }
+    }
+  };
+  // A side lock hanging over the ear: root under the crown at the temple,
+  // hanging just outside the eyes, flicking out at the shoulder.
+  const sideLock = (ctx, sd, { x0 = 0.9, x1 = 1.04, len = 1.18, amp = 0.07, flick = 0.2, w = 64, y0 = -0.5 } = {}) =>
+    // root pulled up and in so it starts under the crown
+    lock(ctx, [[sd * x0 * 0.55, -0.82], [sd * x0 * 0.8, -0.72], ...wave(sd * x0 * 0.92, y0, sd * x1, len, sd * amp, sd * flick)], w, LOCK);
+
+  const NICK_FLOW = {
+    // A: middle part, curtains framing the face, waves flicking out at the shoulders
+    middlePart: {
+      back: backLocks(),
+      front: ctx => {
+        for (const sd of [-1, 1]) {
+          sideLock(ctx, sd, { x0: 1.0, x1: 1.12, len: 1.16, flick: 0.22 });
+          sideLock(ctx, sd, { x0: 0.8, x1: 0.94, len: 0.9, w: 50, flick: 0.14, y0: -0.6 });
+        }
+        crown(ctx, [[1.0, -0.3], [0.8, -0.5], [0.5, -0.62], [0.16, -0.76], [0, -0.92], [-0.16, -0.76], [-0.5, -0.62], [-0.8, -0.5], [-1.0, -0.3]], 0.1);
+        sweepLines(ctx, [[[0.06, -0.98], [0.5, -0.96], [0.86, -0.62]], [[-0.06, -0.98], [-0.5, -0.96], [-0.86, -0.62]]]);
+      },
+    },
+    // B: swept back off the forehead with volume, side locks over the ears
+    sweptBack: {
+      back: backLocks(1.3, 1.34),
+      front: ctx => {
+        for (const sd of [-1, 1]) sideLock(ctx, sd, { x0: 0.96, x1: 1.1, len: 1.2, flick: 0.26, w: 70 });
+        crown(ctx, [[1.0, -0.3], [0.72, -0.58], [0.3, -0.76], [-0.3, -0.76], [-0.72, -0.58], [-1.0, -0.3]], 0.22);
+        sweepLines(ctx, [[[-0.42, -0.8], [-0.32, -1.1], [0.02, -1.3]], [[0, -0.8], [0.1, -1.12], [0.42, -1.24]], [[0.4, -0.78], [0.56, -1.02], [0.8, -0.98]]]);
+      },
+    },
+    // C: side part, a heavy wave falling toward one eye, locks over both ears
+    sidePart: {
+      back: backLocks(),
+      front: ctx => {
+        sideLock(ctx, -1, { x0: 0.96, x1: 1.12, len: 1.22, flick: 0.24, w: 70 });
+        sideLock(ctx, 1, { x0: 0.96, x1: 1.08, len: 1.12, flick: 0.2 });
+        crown(ctx, [[1.0, -0.3], [0.74, -0.56], [0.44, -0.72], [0.32, -0.9], [0.14, -0.72], [-0.3, -0.56], [-0.62, -0.46], [-0.84, -0.4], [-1.0, -0.3]], 0.12);
+        lock(ctx, [[0.3, -0.9], [-0.05, -0.8], [-0.4, -0.64], [-0.62, -0.52]], 50, LOCK);   // the fringe wave
+        sweepLines(ctx, [[[0.34, -0.98], [0.7, -0.9], [0.92, -0.58]], [[0.2, -0.96], [-0.3, -1.0], [-0.78, -0.66]]]);
+      },
+    },
+    // D: messier and wavier: more separated locks with bigger waves
+    messy: {
+      back: backLocks(1.32, 1.36),
+      front: ctx => {
+        for (const sd of [-1, 1]) {
+          sideLock(ctx, sd, { x0: 1.0, x1: 1.14, len: 1.24, amp: 0.12, flick: 0.28, w: 58 });
+          sideLock(ctx, sd, { x0: 0.84, x1: 0.94, len: 0.96, amp: 0.1, flick: 0.18, w: 44, y0: -0.6 });
+        }
+        crown(ctx, [[1.0, -0.3], [0.76, -0.54], [0.44, -0.66], [0, -0.74], [-0.44, -0.66], [-0.76, -0.54], [-1.0, -0.3]], 0.16);
+        sweepLines(ctx, [[[-0.5, -0.82], [-0.2, -1.14], [0.3, -1.2]], [[0.14, -0.8], [0.42, -1.04], [0.8, -0.92]]]);
+      },
+    },
+  };
+
   const nickHair = {
     // 1 current: long mop past the jaw
     long: nickMop,
@@ -402,6 +511,7 @@ const Cameos = (() => {
                       fluffy: backHair(0.72, true), sidePart: backHair(0.8), flow: flowBack };
   const nickWith = (hair, back) => build({ shirt: INK, sleeve: '#222', head: head({ back, hair, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
+  const nickFlow = Object.fromEntries(Object.entries(NICK_FLOW).map(([k, v]) => [k, nickWith(v.front, v.back)]));
   const nickAlts = Object.fromEntries(Object.entries(nickHair).map(([k, h]) => [k, nickWith(h, NICK_BACK[k])]));
 
   const nick = build({ shirt: INK, sleeve: '#222', head: head({ hair: nickMop, front: roundGlasses }),
@@ -447,5 +557,5 @@ const Cameos = (() => {
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
   // parts: the shared build/head builders, for other adult characters (hero.js)
-  return { speed, ludwig, beast, nick, slime, nickAlts, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick, slime, nickAlts, nickFlow, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
