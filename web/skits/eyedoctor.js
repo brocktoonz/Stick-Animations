@@ -1,11 +1,16 @@
-// "EYE DOCTORS BE LIKE: the air puff test" (10 s), starring the main character.
-// He sits at the tonometer, waits forever for the puff, starts to ask when it's
-// coming, gets puffed mid-sentence, then hears "now the other eye".
+// "That one machine at the eye doctor" (10 s), starring the main character.
+// Camera sits behind the machine (it faces him, back to us). He stares at the
+// balloon picture; the doctor pops up in the view with a boxing glove and
+// punches the camera (the "air puff", exaggerated); he flies backwards out of
+// the chair and disappears into the distance with a twinkle.
 Skits.eyedoctor = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
-  const { seg, lerp, easeInOut, easeOut, say, blink, bubble, burst, shake, text } = Stage;
-  const W = '#fff';
-  const HEAD = 452;   // feet-to-head-centre distance of the main character (unscaled)
+  const { seg, lerp, easeInOut, easeOut, easeOutBack, blink, shake, burst } = Stage;
+  const W = '#fff', RED = '#d9261c';
+  const HEAD = 452;                    // feet-to-head-centre of the main character (unscaled)
+  const X = 540, S = 2.0, EYE_Y = 1090;
+  const Y = EYE_Y + 448 * S;           // his feet, so the eyes land at EYE_Y
+  const MTOP = 1150;                   // top edge of the machine's back
 
   // A box with extra points along each edge so the brush spline keeps it straight.
   function box(x0, y0, x1, y1) {
@@ -16,123 +21,184 @@ Skits.eyedoctor = (() => {
     }
     return pts;
   }
-  const panel = (ctx, pts, color) => { fill(ctx, pts, color, 0.4); outline(ctx, pts, { w: 10, jit: 0.8 }); };
+  const panel = (ctx, pts, color, w = 10) => { fill(ctx, pts, color, 0.4); outline(ctx, pts, { w, jit: 0.8 }); };
 
-  // Tonometer seen from the patient's side: base box, column, lens housing and
-  // a nozzle pointing right at the eye (tip at tx, ty).
-  function tonometer(ctx, tx, ty, s) {
-    ctx.save(); ctx.translate(tx, ty); ctx.scale(s, s);
-    panel(ctx, box(-630, 260, -150, 420), '#e6e6e6');
-    panel(ctx, box(-470, 80, -360, 262), '#cfcfcf');
-    panel(ctx, box(-580, -130, -180, 80), '#e6e6e6');
-    stroke(ctx, [[-560, 40], [-200, 40]], { w: 6, color: '#999' });   // panel seam
-    const lens = Brush.ellipsePts(-190, -20, 70, 90, 14);
-    fill(ctx, lens, '#3a3a3a', 0.5); outline(ctx, lens, { w: 10 });
-    const noz = [[-150, -44], [-30, -14], [0, -8], [0, 8], [-30, 14], [-150, 4]];
-    fill(ctx, noz, '#9a9a9a', 0.5); outline(ctx, noz, { w: 8 });
-    blob(ctx, -470, -60, 18, 18, { fill: '#7fd17f', w: 6, n: 8 });   // the little green light
-    ctx.restore();
-  }
-
-  // Close-up version: a huge lens ring and nozzle entering from the left.
-  function nozzleCloseUp(ctx, tx, ty) {
-    const ring = Brush.ellipsePts(tx - 420, ty, 300, 360, 18);
-    fill(ctx, ring, '#3a3a3a', 1); outline(ctx, ring, { w: 14 });
-    fill(ctx, Brush.ellipsePts(tx - 420, ty, 180, 220, 16), '#555', 1);
-    const noz = [[tx - 300, ty - 70], [tx - 60, ty - 24], [tx, ty - 14], [tx, ty + 14], [tx - 60, ty + 24], [tx - 300, ty + 70]];
-    fill(ctx, noz, '#9a9a9a', 0.6); outline(ctx, noz, { w: 12 });
-  }
-
-  function puffCloud(ctx, x, y, k) {
-    if (k <= 0) return;
-    const r = 40 + 160 * k;
-    for (let i = 0; i < 7; i++) {
-      const a = (i / 7) * Math.PI * 2;
-      blob(ctx, x + Math.cos(a) * r * 0.6, y + Math.sin(a) * r * 0.45, r * 0.45, r * 0.4, { fill: W, w: 8, n: 12 });
-    }
-    blob(ctx, x, y, r * 0.55, r * 0.5, { fill: W, w: 0, n: 12 });
-  }
-
-  const eyeOf = (x, y, s) => [x - 36 * s, y - 448 * s];   // his left eye (screen left)
-
-  // 1: medium shot, chin in the machine, doctor talking off-screen
-  function shotSetup(ctx, t) {
-    Stage.livingRoom(ctx, { floor: false, picture: false, lamp: false });
-    const x = 650, y = 2080, s = 1.9;
-    const [ex, ey] = eyeOf(x, y, s);
-    tonometer(ctx, ex - 150, ey, 1.2);
-    Hero.main(ctx, { x, y, s, lookX: -0.8, lid: blink(t, 2.2, 0.5), mouth: 'flat',
-      ...say(t, 2.0, 2.7, 'Okay.', { intensity: 0.7 }) });
-    bubble(ctx, 700, 560, 380, 150, [1100, 700], 'Chin here, and look\nat the little light.', 60, 'Patrick Hand', seg(t, 0.3, 0.5) * (t < 2.0 ? 1 : 0));
-    if (t >= 2.0) bubble(ctx, 780, 560, 160, 100, [700, 820], 'Okay.', 60, 'Patrick Hand', seg(t, 2.0, 2.2));
-  }
-
-  // 2: slow push-in on his face as the nozzle creeps closer; he starts to ask
-  function shotWait(ctx, t) {
-    const k = easeInOut(seg(t, 3.0, 5.7));
-    const s = lerp(2.6, 3.3, k), x = lerp(560, 640, k), y = 1150 + HEAD * s;
-    ctx.save();
-    shake(ctx, 3 + 5 * k, 4);
-    Stage.livingRoom(ctx, { floor: false, picture: false, lamp: false });
-    const [ex, ey] = eyeOf(x, y, s);
-    nozzleCloseUp(ctx, ex - lerp(260, 120, k), ey);
-    Hero.main(ctx, { x, y, s, lookX: -1, pupil: lerp(12, 6, k), brow: -0.8, sweat: t > 3.8,
-      mouth: 'wobbly', ...say(t, 4.7, 5.7, 'When is it gonna—', { intensity: 0.6, smile: -0.8 }) });
-    ctx.restore();
-    if (t < 4.6) text(ctx, '. . .', 540, 470, 110, 'Luckiest Guy', INK);
-    else bubble(ctx, 640, 520, 330, 130, [700, 760], 'When is it gonna—', 64, 'Patrick Hand', seg(t, 4.6, 4.8));
-  }
-
-  // 3: PFFT
-  function shotPuff(ctx, t) {
-    const k = seg(t, 5.7, 6.5);
-    const s = 3.3, x = 640, y = 1150 + HEAD * s;
-    ctx.save();
-    shake(ctx, 30 * (1 - k), 11);
+  // ---------- set ----------
+  function room(ctx) {
     ctx.fillStyle = W; ctx.fillRect(-60, -60, 1200, 2040);
-    Stage.wash(ctx, 540, 1150, '#dfe9ff');
-    burst(ctx, 420, 1150, 40, 380, 880);
-    const [ex, ey] = eyeOf(x, y, s);
-    nozzleCloseUp(ctx, ex - 120, ey);
-    Hero.main(ctx, { x, y, s, tilt: -0.12, lean: -0.05, lid: 1, brow: -1,
-      mouth: 'yell', open: 0.8 });
-    puffCloud(ctx, ex - 40, ey, easeOut(Math.min(1, k * 2.5)));
-    ctx.restore();
-    ctx.save(); ctx.translate(540, 520); ctx.rotate(-0.08);
-    const pop = Stage.easeOutBack(Math.min(1, k * 4));
-    ctx.scale(pop, pop);
-    text(ctx, 'PFFT!', 0, 0, 190, 'Luckiest Guy', '#e3261b', 26);
+    panel(ctx, box(760, 420, 1000, 780), W, 8);   // eye chart on the wall
+    [['E', 90, 490], ['F P', 54, 580], ['T O Z', 38, 650], ['L P E D', 26, 710], ['P E C F D', 18, 752]]
+      .forEach(([s, size, y]) => Stage.text(ctx, s, 880, y, size, 'Luckiest Guy', INK));
+  }
+
+  // Exam chair seen from the front: backrest with a headrest pad, above the machine.
+  function chairBack(ctx) {
+    panel(ctx, box(X - 190, 860, X + 190, 1200), '#6a6a6a', 12);             // backrest
+    panel(ctx, box(X - 120, 760, X + 120, 860), '#8a8a8a', 10);              // headrest
+    stroke(ctx, [[X - 150, 1030], [X + 150, 1030]], { w: 6, color: '#999' }); // seam
+  }
+
+  // The machine from behind: head unit with vents, knob and cable, on a table.
+  function machineBack(ctx) {
+    panel(ctx, box(-40, 1560, 1120, 1960), '#d6d6d6', 12);                  // table
+    panel(ctx, box(190, MTOP, 890, 1560), '#ececec', 12);                   // head unit
+    panel(ctx, box(250, MTOP - 60, 830, MTOP + 20), '#dcdcdc', 10);         // top hood
+    for (let i = 0; i < 7; i++) stroke(ctx, [[300, 1290 + i * 34], [520, 1290 + i * 34]], { w: 7, color: '#8a8a8a' });   // vents
+    blob(ctx, 720, 1320, 44, 44, { fill: '#bdbdbd', w: 8, n: 12 });          // knob
+    blob(ctx, 720, 1440, 22, 22, { fill: '#7fd17f', w: 6, n: 8 });           // power light
+    stroke(ctx, [[860, 1480], [980, 1520], [1040, 1640], [1000, 1780]], { w: 14, taper0: 0, taper1: 0, minW: 1 });   // cable
+  }
+
+  // ---------- the view through the eyepiece ----------
+  const POV = [540, 1150], POVR = 470;
+  function balloonScene(ctx, k) {
+    const [cx, cy] = POV;
+    const g = ctx.createLinearGradient(0, cy - POVR, 0, cy + POVR);
+    g.addColorStop(0, '#f4f4f4'); g.addColorStop(0.55, '#e2e2e2'); g.addColorStop(0.56, '#cfcfcf'); g.addColorStop(1, '#bdbdbd');
+    ctx.fillStyle = g; ctx.fillRect(cx - POVR, cy - POVR, POVR * 2, POVR * 2);
+    const hy = cy + 0.12 * POVR;                                             // horizon
+    stroke(ctx, [[cx - POVR, hy], [cx + POVR, hy]], { w: 6 });
+    fill(ctx, [[cx - 14, hy], [cx + 14, hy], [cx + 300, cy + POVR], [cx - 300, cy + POVR]], '#8a8a8a', 0.3);   // the road
+    stroke(ctx, [[cx, hy + 20], [cx, cy + POVR]], { w: 8, color: W, taper0: 0.9, taper1: 0 });
+    for (const s of [-1, 1]) stroke(ctx, [[cx + s * 14, hy], [cx + s * 300, cy + POVR]], { w: 7 });
+    // the hot air balloon at the end of the road, bobbing a little
+    const bx = cx, by = hy - 150 + Math.sin(k * 6) * 6;
+    const env = Brush.ellipsePts(bx, by, 78, 92, 14);
+    fill(ctx, env, RED, 0.4); outline(ctx, env, { w: 7 });
+    for (const x of [-40, 0, 40]) stroke(ctx, [[bx + x * 0.3, by - 88], [bx + x, by], [bx + x * 0.3, by + 86]], { w: 5 });
+    stroke(ctx, [[bx - 30, by + 82], [bx - 16, by + 128]], { w: 4 });
+    stroke(ctx, [[bx + 30, by + 82], [bx + 16, by + 128]], { w: 4 });
+    panel(ctx, box(bx - 20, by + 126, bx + 20, by + 156), '#b58a5a', 5);
+  }
+
+  function glove(ctx, x, y, s, rot = 0) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
+    panel(ctx, box(-60, 90, 60, 170), W, 8);                                     // cuff
+    const g = [[-110, -40], [-80, -130], [20, -150], [110, -90], [120, 20], [80, 100], [-70, 100], [-120, 40]];
+    fill(ctx, g, RED, 1); outline(ctx, g, { w: 11 });
+    const thumb = Brush.ellipsePts(-110, 10, 44, 60, 12, -0.4);
+    fill(ctx, thumb, RED, 0.6); outline(ctx, thumb, { w: 9 });
+    stroke(ctx, [[-40, -110], [40, -120], [90, -70]], { w: 7, color: '#ff8a80' });   // shine
     ctx.restore();
   }
 
-  // 4: recoiled, hand over the eye; the doctor is cheerful
-  function shotAfter(ctx, t) {
-    Stage.livingRoom(ctx, { floor: false, picture: false, lamp: false });
-    const x = 690, y = 2080, s = 1.9;
-    const [ex, ey] = eyeOf(640, y, s);
-    tonometer(ctx, ex - 260, ey, 1.2);   // he has recoiled away from the nozzle
-    Hero.main(ctx, { x, y, s, lean: -0.06, tilt: -0.08, brow: -0.9, lookX: 0.3, mouth: 'wobbly', sweat: true,
-      armL: [-40, -462], bendL: -0.55, armLFront: true, lid: 0 });   // elbow bows outward
-    bubble(ctx, 600, 560, 400, 150, [1100, 720], 'Perfect! Now the\nother eye.', 66, 'Patrick Hand', seg(t, 6.8, 7.0));
+  // The doctor popping up inside the view: bald, head mirror, big grin, glove up.
+  function doctor(ctx, x, y, s, windup) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    panel(ctx, [[-170, 120], [170, 120], [210, 420], [-210, 420]], W);           // white coat shoulders
+    outline(ctx, [[-60, 120], [0, 230], [-40, 280]], { w: 8 });
+    outline(ctx, [[60, 120], [0, 230], [40, 280]], { w: 8 });
+    const head = Brush.ellipsePts(0, 0, 150, 140, 18);
+    fill(ctx, head, W, 0.5); outline(ctx, head, { w: 11 });
+    for (const sd of [-1, 1]) fill(ctx, [[sd * 150, -10], [sd * 158, -70], [sd * 120, -60], [sd * 128, 20]], INK, 0.6);   // side hair
+    stroke(ctx, [[-140, -80], [0, -120], [140, -80]], { w: 10 });                // head-mirror band
+    blob(ctx, 0, -110, 38, 38, { fill: '#e6e6e6', w: 8, n: 12 });
+    Chars.eyes(ctx, 0, -10, { lid: 0.2, pupil: 9 }, 0.85);
+    Chars.brows(ctx, 0, -64, { brow: 0.8 }, 0.9, 10);
+    Chars.mouth(ctx, 0, 70, { mouth: 'grin', open: 0.4 }, 0.9);
+    ctx.restore();
+    glove(ctx, x + s * lerp(200, 150, windup), y + s * lerp(-60, 40, windup), s * 0.9, lerp(-0.5, -0.9, windup));
   }
 
-  // 5: slow push on his face: the dread of eye number two
-  function shotDread(ctx, t) {
-    const k = easeInOut(seg(t, 8.4, 10));
-    const s = lerp(2.7, 3.1, k), x = 540, y = 1180 + HEAD * s;
-    Stage.livingRoom(ctx, { floor: false, picture: false, lamp: false });
-    Hero.main(ctx, { x, y, s, pupil: 5, brow: -1, sweat: true, mouth: 'o', open: 0.3, lookX: 0 });
-    if (t > 8.8) bubble(ctx, 540, 560, 170, 100, [540, 760], '...no.', 70, 'Patrick Hand', seg(t, 8.8, 9.0));
+  function povFrame(ctx, draw) {
+    ctx.fillStyle = '#111'; ctx.fillRect(-60, -60, 1200, 2040);
+    const [cx, cy] = POV;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, POVR, 0, Math.PI * 2); ctx.clip();
+    draw();
+    ctx.restore();
+    outline(ctx, Brush.ellipsePts(cx, cy, POVR, POVR, 28), { w: 18, color: '#333' });
+  }
+
+  // ---------- shots ----------
+
+  // 1: behind the machine. He leans in, eyes peeking over the top.
+  function shotSetup(ctx, t) {
+    const push = lerp(1, 1.06, easeInOut(seg(t, 0, 2.6)));
+    ctx.save();
+    ctx.translate(540, 1150); ctx.scale(push, push); ctx.translate(-540, -1150);
+    room(ctx);
+    chairBack(ctx);
+    const lean = easeOut(seg(t, 0.3, 1.1));
+    Hero.main(ctx, { x: X, y: Y + lerp(60, 0, lean), s: S, lookY: 0.2, lid: blink(t, 1.7, 0.6), mouth: 'flat' });
+    machineBack(ctx);
+    ctx.restore();
+  }
+
+  // 2: his view: the balloon drifts in and out of focus.
+  function shotBalloon(ctx, t) {
+    const k = seg(t, 2.6, 5.4);
+    povFrame(ctx, () => {
+      ctx.filter = `blur(${Math.abs(Math.sin(k * Math.PI * 1.5)) * 10}px)`;
+      balloonScene(ctx, k);
+      ctx.filter = 'none';
+    });
+  }
+
+  // 3: the doctor pops up in the view, winds up, and punches the camera.
+  function shotPunch(ctx, t) {
+    const pop = easeOutBack(seg(t, 5.4, 5.75));
+    const wind = easeInOut(seg(t, 5.9, 6.2));
+    const hit = seg(t, 6.2, 6.45);
+    ctx.save();
+    if (hit > 0) shake(ctx, 40 * (1 - hit * 0.5), 13);
+    povFrame(ctx, () => {
+      balloonScene(ctx, 1);
+      if (hit === 0) doctor(ctx, 720, lerp(1800, 1340, pop), 0.9, wind);   // off to the side, balloon still visible
+    });
+    if (hit > 0) {   // the glove rushes the lens and fills the frame
+      const s = lerp(1.2, 9, easeOut(Math.min(1, hit * 1.6)));
+      glove(ctx, 540, 1100, s, lerp(-0.5, -0.1, hit));
+      if (hit > 0.55) {
+        ctx.fillStyle = `rgba(255,255,255,${(1 - hit) * 1.6})`; ctx.fillRect(-60, -60, 1200, 2040);
+        burst(ctx, 540, 1100, 36, 250, 900);
+      }
+    }
+    ctx.restore();
+  }
+
+  // 4: launched backwards out of the chair, shrinking into the distance, spinning.
+  function shotLaunch(ctx, t) {
+    const k = seg(t, 6.45, 8.0), e = easeOut(k);
+    ctx.save();
+    shake(ctx, 18 * (1 - k), 17);
+    room(ctx);
+    chairBack(ctx);
+    const s = lerp(S, 0.12, e), x = lerp(X, 300, e), y = lerp(Y, 600 + HEAD * 0.12, e);
+    if (k < 0.97) {
+      Stage.speedLines(ctx, x + 60 * s, y - HEAD * s + 200 * s, 500 * s, -1, 7);
+      const cy = y - 300 * s;   // spin around the middle of his body
+      ctx.save(); ctx.translate(x, cy); ctx.rotate(-k * 9); ctx.translate(-x, -cy);
+      Hero.main(ctx, { x, y, s, pupil: 6, brow: -1, mouth: 'yell', open: 0.9,
+        armL: [-150, -560], bendL: 0.2, armR: [150, -560], bendR: -0.2, step: Math.sin(t * 50), sweat: true });
+      ctx.restore();
+    }
+    machineBack(ctx);
+    ctx.restore();
+  }
+
+  // 5: gone. A twinkle where he vanished; the empty machine stays.
+  function shotGone(ctx, t) {
+    room(ctx);
+    chairBack(ctx);
+    machineBack(ctx);
+    const tw = seg(t, 8.2, 8.9);
+    if (tw > 0 && tw < 1) {
+      const r = 60 * Math.sin(tw * Math.PI);
+      ctx.save(); ctx.translate(300, 600); ctx.rotate(tw * 2);
+      fill(ctx, [[0, -r], [r * 0.2, -r * 0.2], [r, 0], [r * 0.2, r * 0.2], [0, r], [-r * 0.2, r * 0.2], [-r, 0], [-r * 0.2, -r * 0.2]], INK, 0.3);
+      ctx.restore();
+    }
   }
 
   return {
-    title: 'EYE DOCTORS BE LIKE:', subtitle: 'THE AIR PUFF TEST', duration: 10,
+    title: 'That one machine\nat the eye doctor', subtitle: '', duration: 10,
     draw(ctx, t) {
-      if (t < 3.0) shotSetup(ctx, t);
-      else if (t < 5.7) shotWait(ctx, t);
-      else if (t < 6.5) shotPuff(ctx, t);
-      else if (t < 8.4) shotAfter(ctx, t);
-      else shotDread(ctx, t);
+      if (t < 2.6) shotSetup(ctx, t);
+      else if (t < 5.4) shotBalloon(ctx, t);
+      else if (t < 6.45) shotPunch(ctx, t);
+      else if (t < 8.0) shotLaunch(ctx, t);
+      else shotGone(ctx, t);
     },
   };
 })();

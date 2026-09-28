@@ -48,6 +48,12 @@ const Stage = (() => {
   function title(ctx, main, sub) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, W, 330);
+    const lines = main.split('\n');
+    if (lines.length > 1) {   // two-line caption: sized by the longer line, no subtitle
+      const size = Math.min(...lines.map(l => fitSize(ctx, l, 110, W - 80)));
+      text(ctx, main, W / 2, 330 / 2 - size * 0.52, size, 'Luckiest Guy', '#e3261b');
+      return;
+    }
     text(ctx, main, W / 2, 150, fitSize(ctx, main, 124, W - 80), 'Luckiest Guy', '#e3261b');
     if (sub) text(ctx, sub, W / 2, 262, fitSize(ctx, sub, 52, W - 80), 'Luckiest Guy', INK);
   }
