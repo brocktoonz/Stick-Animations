@@ -244,6 +244,85 @@ const Cameos = (() => {
     }
     stroke(ctx, [[fx - 6, -14], [fx + 6, -14]], { w: 8 });
   };
+  // ---- Nick hair alternatives (from the reference photos) ----
+  // Curl texture: small "c" strokes scattered inside a region test.
+  const curlMarks = (ctx, n, inside, seed = 0) => {
+    // neat little curl arcs on a jittered grid, all turning the same way
+    const step = 46;
+    let k = 0;
+    for (let gy = -RY * 1.3; gy < RY * 0.8; gy += step) {
+      for (let gx = -RX * 1.2; gx < RX * 1.2; gx += step) {
+        k++;
+        const x = gx + (hh(k + seed) - 0.5) * 22, y = gy + (hh(k + seed + 50) - 0.5) * 22;
+        if (!inside(x, y) || hh(k + seed + 90) > n / 100) continue;
+        const r = 11, a = -2.4 + (hh(k + seed + 7) - 0.5) * 0.6;
+        stroke(ctx, [[x + Math.cos(a) * r, y + Math.sin(a) * r], [x + Math.cos(a + 1.2) * r, y + Math.sin(a + 1.2) * r],
+                     [x + Math.cos(a + 2.4) * r, y + Math.sin(a + 2.4) * r]], { w: 5, color: '#9a9a9a', jit: 0.2, wob: 0 });
+      }
+    }
+  };
+  // Lumpy (curly) outer edge from angle a0 to a1 (radians, head space), radius r0.
+  const curlyArc = (a0, a1, r0, n = 26, amp = 0.07) => {
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const a = a0 + (a1 - a0) * i / n, r = r0 + amp * Math.abs(Math.sin(i * 1.7));
+      pts.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r]);
+    }
+    return pts;
+  };
+  const inHead = (k = 1.2) => (x, y) => (x / RX) ** 2 + (y / RY) ** 2 < k * k;
+  const nickHair = {
+    // 1 current: long mop past the jaw
+    long: nickMop,
+    // 2 swept back: tall curly volume on top, forehead clear, ears half covered (photo 1)
+    sweptBack: ctx => {
+      const pts = [...curlyArc(Math.PI * 0.94, Math.PI * 2.06, 1.2, 26, 0.09),
+        [RX * 0.98, RY * 0.14], [RX * 0.86, -RY * 0.26], [RX * 0.5, -RY * 0.68], [0, -RY * 0.76], [-RX * 0.5, -RY * 0.68],
+        [-RX * 0.86, -RY * 0.26], [-RX * 0.98, RY * 0.14]];
+      const up = pts.map(([x, y]) => [x, y < -RY * 0.6 ? y - RY * 0.14 * (1 - Math.abs(x) / RX) : y]);   // extra height on top
+      fill(ctx, up, NICK_HAIR, 1.2); outline(ctx, up, { w: 10 });
+      curlMarks(ctx, 60, (x, y) => y < -RY * 0.9 && inHead(1.12)(x, y), 3);
+    },
+    // 3 curly fringe: curls tumbling over the forehead, covering the ears to the jaw (photo 3)
+    curlyFringe: ctx => {
+      const pts = [...curlyArc(Math.PI * 0.86, Math.PI * 2.14, 1.17, 28, 0.08),
+        [RX * 1.02, RY * 0.5], [RX * 0.9, RY * 0.4], [RX * 0.86, -RY * 0.1]];
+      for (let i = 0; i <= 8; i++) {   // scalloped fringe edge, right to left
+        const x = RX * (0.78 - i * 0.195);
+        pts.push([x, -RY * (i % 2 ? 0.5 : 0.36)]);
+      }
+      pts.push([-RX * 0.86, -RY * 0.1], [-RX * 0.9, RY * 0.4], [-RX * 1.02, RY * 0.5]);
+      fill(ctx, pts, NICK_HAIR, 1.2); outline(ctx, pts, { w: 10 });
+      curlMarks(ctx, 60, (x, y) => ((y < -RY * 0.66 && y > -RY * 1.1) || (Math.abs(x) > RX * 0.95 && y < RY * 0.3)) && inHead(1.1)(x, y), 11);
+    },
+    // 4 big fluffy curls: clusters of round curls all over, ear length
+    fluffy: ctx => {
+      const blobs = [];
+      for (let i = 0; i < 17; i++) {
+        const a = Math.PI * (0.9 + 1.2 * i / 16);
+        blobs.push([Math.cos(a) * RX * 1.05, Math.sin(a) * RY * 1.08, 44 + hh(i) * 14]);
+      }
+      for (let i = 0; i < 7; i++) blobs.push([RX * (-0.7 + i * 0.233), -RY * (0.66 + (i % 2) * 0.12), 36 + hh(i + 5) * 8]);
+      for (const [x, y, r] of blobs) blob(ctx, x, y, r, r * 0.92, { fill: NICK_HAIR, w: 9, n: 12 });
+      for (const [x, y, r] of blobs) blob(ctx, x, y, r * 0.8, r * 0.72, { fill: NICK_HAIR, w: 0, n: 10 });   // merge seams
+      curlMarks(ctx, 60, (x, y) => y < -RY * 0.8 && inHead(1.12)(x, y), 21);
+    },
+    // 5 side part: waves swept to one side, ends flicking out at the jaw
+    sidePart: ctx => {
+      const pts = [...curlyArc(Math.PI * 0.84, Math.PI * 2.16, 1.14, 24, 0.05),
+        [RX * 1.1, RY * 0.56], [RX * 0.96, RY * 0.5], [RX * 0.88, RY * 0.1], [RX * 0.76, -RY * 0.4],
+        [RX * 0.4, -RY * 0.58], [0, -RY * 0.52], [-RX * 0.3, -RY * 0.4], [-RX * 0.5, -RY * 0.56], [-RX * 0.54, -RY * 0.86],
+        [-RX * 0.66, -RY * 0.6], [-RX * 0.86, -RY * 0.26], [-RX * 0.9, RY * 0.3], [-RX * 1.1, RY * 0.56]];
+      fill(ctx, pts, NICK_HAIR, 1.2); outline(ctx, pts, { w: 10 });
+      for (const [x0, y0, x1, y1] of [[-0.5, -1.02, 0.5, -0.66], [-0.3, -0.9, 0.3, -0.56], [0.8, -0.8, 1.0, 0.4], [-0.9, -0.7, -1.0, 0.4]]) {
+        stroke(ctx, [[RX * x0, RY * y0], [RX * (x0 + x1) / 2, RY * (y0 + y1) / 2 - 10], [RX * x1, RY * y1]], { w: 5, color: '#9a9a9a' });
+      }
+    },
+  };
+  const nickWith = hair => build({ shirt: INK, sleeve: '#222', head: head({ hair, front: roundGlasses }),
+    detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
+  const nickAlts = Object.fromEntries(Object.entries(nickHair).map(([k, h]) => [k, nickWith(h)]));
+
   const nick = build({ shirt: INK, sleeve: '#222', head: head({ hair: nickMop, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
@@ -287,5 +366,5 @@ const Cameos = (() => {
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
   // parts: the shared build/head builders, for other adult characters (hero.js)
-  return { speed, ludwig, beast, nick, slime, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick, slime, nickAlts, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
