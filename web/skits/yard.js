@@ -14,7 +14,7 @@ Skits.yard = (() => {
       const i = shot(t);
       if (i < 2) {
         const [, draw, pose] = SHOTS[i];
-        Stage.livingRoom(ctx, { floor: false, picture: false });
+        Stage.livingRoom(ctx, { floor: false, picture: false, lamp: false });
         draw(ctx, { x: 520, y: 2160, s: 2.5, lid: blink(t, 1.3, 0.4), ...pose });
         return;
       }

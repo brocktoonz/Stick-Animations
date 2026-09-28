@@ -7,7 +7,7 @@ Skits.nick_hair = (() => {
   return {
     title: '', subtitle: '',   // labels are added in the comparison sheet duration: LOOKS.length,
     draw(ctx, t) {
-      Stage.livingRoom(ctx, { floor: false, picture: false });
+      Stage.livingRoom(ctx, { floor: false, picture: false, lamp: false });
       LOOKS[pick(t)][1](ctx, { x: 520, y: 2160, s: 2.5, mouth: 'smile', lookX: 0.35, lid: 0.15 });
     },
   };
