@@ -214,6 +214,88 @@ const Cameos = (() => {
     Stage.text(ctx, '$1,000,000', x + 127, y - 50, 42, 'Luckiest Guy', INK);
     stroke(ctx, [[x + 16, y - 4], [x + 240, y - 10]], { w: 5 });
   };
+  // ---------- The Yard: Nick and Slime ----------
+
+  // Nick: big wavy mop (grey = brown in the ink style) over the ears, round glasses.
+  const NICK_HAIR = '#5a5a5a';
+  const nickMop = ctx => {
+    const pts = [];
+    for (let i = 0; i <= 22; i++) {   // lumpy outer edge = waves
+      const a = Math.PI * (0.92 + 1.16 * i / 22);
+      const r = 1.13 + 0.07 * Math.sin(i * 2.3);
+      pts.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r * 1.02 - RY * 0.04]);
+    }
+    // inner edge: hair falls to the jaw at the sides, fringe swept apart above the brows
+    pts.push([RX * 1.02, RY * 0.36], [RX * 0.86, RY * 0.1], [RX * 0.84, -RY * 0.3], [RX * 0.62, -RY * 0.52],
+             [RX * 0.36, -RY * 0.6], [RX * 0.16, -RY * 0.52], [0, -RY * 0.64], [-RX * 0.2, -RY * 0.54],
+             [-RX * 0.46, -RY * 0.62], [-RX * 0.72, -RY * 0.48], [-RX * 0.86, -RY * 0.24], [-RX * 0.86, RY * 0.1], [-RX * 1.02, RY * 0.36]);
+    fill(ctx, pts, NICK_HAIR, 1.2);
+    outline(ctx, pts, { w: 10 });
+    for (const [x0, y0, x1, y1] of [[-0.7, -0.9, -0.3, -0.62], [-0.2, -1.05, 0.15, -0.66], [0.35, -0.98, 0.6, -0.6],
+                                    [-0.98, -0.4, -0.94, 0.2], [0.98, -0.4, 0.94, 0.2]]) {
+      stroke(ctx, [[RX * x0, RY * y0], [RX * (x0 + x1) / 2 + 10, RY * (y0 + y1) / 2], [RX * x1, RY * y1]], { w: 5, color: '#9a9a9a' });
+    }
+  };
+  const roundGlasses = (ctx, fx) => {
+    for (const side of [-1, 1]) {
+      const g = Brush.ellipsePts(fx + side * 42, -6, 44, 46, 14);
+      fill(ctx, g, 'rgba(255,255,255,0)', 0);
+      outline(ctx, g, { w: 9 });
+    }
+    stroke(ctx, [[fx - 6, -14], [fx + 6, -14]], { w: 8 });
+  };
+  const nick = build({ shirt: INK, sleeve: '#222', head: head({ hair: nickMop, front: roundGlasses }),
+    detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
+
+  // Slime: shaved head (light stubble), ears, short full beard + moustache, big grin.
+  const ears = ctx => {
+    for (const side of [-1, 1]) {
+      const e = Brush.ellipsePts(side * RX * 1.0, 6, 26, 36, 10);
+      fill(ctx, e, W, 0.4); outline(ctx, e, { w: 8 });
+      stroke(ctx, [[side * RX * 1.0, -12], [side * RX * 1.06, 6], [side * RX * 1.0, 22]], { w: 5 });
+    }
+  };
+  const shaved = ctx => {
+    const cap = [[-RX * 0.98, -RY * 0.3]];
+    for (let i = 0; i <= 12; i++) {
+      const a = Math.PI * (1.12 + 0.76 * i / 12);
+      cap.push([Math.cos(a) * RX * 0.985, Math.sin(a) * RY * 0.985]);
+    }
+    cap.push([RX * 0.98, -RY * 0.3], [RX * 0.7, -RY * 0.6], [0, -RY * 0.7], [-RX * 0.7, -RY * 0.6]);
+    fill(ctx, cap, '#e2e2e2', 0.4);
+    for (let i = 0; i < 70; i++) {   // buzz texture
+      const x = (hh(i) * 2 - 1) * RX * 0.85, y = -RY * (0.66 + hh(i + 31) * 0.3);
+      if ((x / RX) ** 2 + (y / RY) ** 2 > 0.9) continue;
+      blob(ctx, x, y, 2.2, 2.2, { fill: '#8a8a8a', w: 0, n: 5 });
+    }
+    stroke(ctx, [[-RX * 0.3, -RY * 0.86], [RX * 0.1, -RY * 0.92]], { w: 8, color: W });   // scalp shine
+  };
+  const shortBeard = ctx => {
+    // outer: jaw line from ear to ear; inner (right to left): cheek line that
+    // dips from the sideburns down around the mouth, so the cheeks stay clear
+    const outer = [];
+    for (let i = 0; i <= 14; i++) {
+      const a = Math.PI * (0.02 + 0.96 * i / 14);
+      outer.push([Math.cos(a) * RX * 1.0, Math.sin(a) * RY * 1.04]);
+    }
+    const inner = [[RX * 0.9, -RY * 0.02], [RX * 0.78, RY * 0.3], [RX * 0.5, RY * 0.4], [0, RY * 0.36],
+                   [-RX * 0.5, RY * 0.4], [-RX * 0.78, RY * 0.3], [-RX * 0.9, -RY * 0.02]];
+    const shape = [...outer.reverse(), ...inner];
+    fill(ctx, shape, '#9a9a9a', 1);
+    for (let i = 0; i < 90; i++) {   // stubbly texture
+      const a = Math.PI * (0.08 + 0.84 * hh(i + 7)), r = 0.66 + 0.32 * hh(i + 50);
+      const x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r;
+      if (y < RY * 0.42 && Math.abs(x) < RX * 0.8) continue;
+      stroke(ctx, [[x, y], [x + 1, y + 7]], { w: 4, color: '#555', jit: 0.3 });
+    }
+  };
+  const slimeStache = (ctx, fx) => {
+    const m = [[fx - 58, 50], [fx - 26, 36], [fx, 40], [fx + 26, 36], [fx + 60, 50], [fx + 28, 52], [fx, 48], [fx - 28, 52]];
+    fill(ctx, m, '#6a6a6a', 1);
+  };
+  const slime = build({ shirt: INK, sleeve: '#222', head: head({ back: ears, hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
+    detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
+
   // parts: the shared build/head builders, for other adult characters (hero.js)
-  return { speed, ludwig, beast, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick, slime, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
