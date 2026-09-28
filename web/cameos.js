@@ -722,6 +722,41 @@ const Cameos = (() => {
   const spikyShades = Object.fromEntries(Object.entries(SHADES).map(([k, [fillC, lineC]]) => [k,
     build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: outlineHair(...SPIKES, fillC, { lineColor: lineC }) }), detail: hoodieFront })]));
 
+  // Signature accent colour: hair stays a natural colour, the one unnatural
+  // colour lives on the clothes. Everything else stays black/white/grey, and
+  // red is left to the captions.
+  const HAIR = { brown: ['#6b4a30', '#b89472'], darkBrown: ['#3b2a1e', '#8c6d55'],
+                 dirtyBlond: ['#c7a468', '#6b4a30'], black: [INK, '#7a7a7a'] };
+  const spikyHair = k => outlineHair(...SPIKES, HAIR[k][0], { lineColor: HAIR[k][1] });
+  // hoodie lines with the hood edge, drawstrings and pocket picked out in a colour
+  const hoodieTrim = (col, { hood = true, strings = true, pocket = false } = {}) => (ctx, n, h) => {
+    const hoodPts = [[-50, n + 2], [-30, n + 30], [0, n + 38], [30, n + 30], [50, n + 2]];
+    if (hood) { stroke(ctx, hoodPts, { w: 22 }); stroke(ctx, hoodPts, { w: 12, color: col }); }
+    else stroke(ctx, hoodPts, { w: 9 });
+    for (const sd of [-1, 1]) {
+      const pts = [[sd * 16, n + 32], [sd * 18, n + 110]];
+      if (strings) {
+        stroke(ctx, pts, { w: 13 }); stroke(ctx, pts, { w: 7, color: col });
+        blob(ctx, sd * 18, n + 116, 7, 9, { fill: col, w: 4, n: 8 });
+      } else stroke(ctx, pts, { w: 7 });
+    }
+    const pk = [[-44, h - 60], [-30, h - 90], [30, h - 90], [44, h - 60]];
+    if (pocket) { stroke(ctx, pk, { w: 15 }); stroke(ctx, pk, { w: 8, color: col }); }
+    else stroke(ctx, pk, { w: 7 });
+  };
+  const ACCENT = { teal: '#16a79c', purple: '#7a4fd0', yellow: '#f2c418', green: '#5cc23a', pink: '#e8439a' };
+  const spikyAccents = {
+    // whole garment in the accent
+    tealHoodie: build({ shirt: ACCENT.teal, sleeve: ACCENT.teal, head: head({ back: ears, hair: spikyHair('brown') }), detail: hoodieFront }),
+    purpleHoodie: build({ shirt: ACCENT.purple, sleeve: ACCENT.purple, head: head({ back: ears, hair: spikyHair('black') }), detail: hoodieFront }),
+    yellowHoodie: build({ shirt: ACCENT.yellow, sleeve: ACCENT.yellow, head: head({ back: ears, hair: spikyHair('darkBrown') }), detail: hoodieFront }),
+    // grey or black hoodie, accent only on the trim
+    greenTrim: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: spikyHair('darkBrown') }), detail: hoodieTrim(ACCENT.green) }),
+    pinkTrim: build({ shirt: '#2a2a2a', sleeve: '#2a2a2a', head: head({ back: ears, hair: spikyHair('dirtyBlond') }), detail: hoodieTrim(ACCENT.pink, { pocket: true }) }),
+    // grayscale hoodie, natural hair colour only, for comparison
+    plain: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: spikyHair('brown') }), detail: hoodieFront }),
+  };
+
   const originals = {
     curly: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ears, hair: curlyTop }), detail: stripes }),
     bun: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', head: head({ back: bunBack, hair: bunFront, lashes: true }), detail: cardigan }),
@@ -899,5 +934,5 @@ const Cameos = (() => {
     beard: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', sleeveHem: 0.42, head: head({ hair: shaggy, beard: fullBeard }), detail: collarTee }),
   };
 
-  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, men, spikyShades, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();

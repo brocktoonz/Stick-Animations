@@ -177,7 +177,11 @@ const Chars = (() => {
       { w: 7, taper0: 0, taper1: 0, minW: 1, jit: 0.2, wob: 0 });
   }
 
-  const isDark = c => { const v = parseInt(c.slice(1, 3), 16); return c.length === 7 && v < 0x70; };
+  const isDark = c => {   // by luminance, so coloured clothes work too (greys unchanged)
+    if (c.length !== 7) return false;
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0x70;
+  };
 
   // Outlined noodle limb: a thick ink tube with a white core. A thin white
   // halo keeps it readable over dark clothes (Mom's dress).
