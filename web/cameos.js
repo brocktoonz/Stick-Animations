@@ -319,9 +319,28 @@ const Cameos = (() => {
       }
     },
   };
-  const nickWith = hair => build({ shirt: INK, sleeve: '#222', head: head({ hair, front: roundGlasses }),
+  // Hair seen behind the head: fills the gap between the side locks and the
+  // neck so the hair reads as one mass. len = how far down it hangs (x RY).
+  const backHair = (len, curly = false) => ctx => {
+    const pts = [];
+    for (let i = 0; i <= 24; i++) {
+      const a = Math.PI * (0.02 + 0.96 * i / 24) + Math.PI;   // top half, left to right
+      const r = 1.16 + (curly ? 0.06 * Math.abs(Math.sin(i * 1.7)) : 0);
+      pts.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r]);
+    }
+    const n = curly ? 9 : 5;   // bottom edge, right to left, gently uneven
+    for (let i = 0; i <= n; i++) {
+      const x = RX * (1.16 - 2.32 * i / n);
+      pts.push([x, RY * (len - 0.08 * (curly ? (i % 2) : Math.abs(Math.sin(i))))]);
+    }
+    fill(ctx, pts, '#474747', 1.2);
+    outline(ctx, pts, { w: 10 });
+  };
+  const NICK_BACK = { long: backHair(0.95), sweptBack: backHair(0.45, true), curlyFringe: backHair(0.7, true),
+                      fluffy: backHair(0.72, true), sidePart: backHair(0.8) };
+  const nickWith = (hair, back) => build({ shirt: INK, sleeve: '#222', head: head({ back, hair, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
-  const nickAlts = Object.fromEntries(Object.entries(nickHair).map(([k, h]) => [k, nickWith(h)]));
+  const nickAlts = Object.fromEntries(Object.entries(nickHair).map(([k, h]) => [k, nickWith(h, NICK_BACK[k])]));
 
   const nick = build({ shirt: INK, sleeve: '#222', head: head({ hair: nickMop, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
