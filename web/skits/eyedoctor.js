@@ -112,15 +112,15 @@ Skits.eyedoctor = (() => {
 
   // ---------- shots ----------
 
-  // 1: behind the machine. He leans in, eyes peeking over the top.
+  // 1: behind the machine. He lowers his head down to the eyepiece, eyes peeking over the top.
   function shotSetup(ctx, t) {
     const push = lerp(1, 1.06, easeInOut(seg(t, 0, 1.5)));
     ctx.save();
     ctx.translate(540, 1150); ctx.scale(push, push); ctx.translate(-540, -1150);
     room(ctx);
     chairBack(ctx);
-    const lean = easeOut(seg(t, 0.1, 0.6));
-    Hero.main(ctx, { x: X, y: Y + lerp(60, 0, lean), s: S, lookY: 0.2, lid: blink(t, 1.7, 0.6), mouth: 'flat' });
+    const lean = easeInOut(seg(t, 0.15, 0.75));   // lowers his head down to the eyepiece
+    Hero.main(ctx, { x: X, y: Y + lerp(-85, 0, lean), s: S, lookY: lerp(-0.1, 0.25, lean), lid: blink(t, 1.7, 0.6), mouth: 'flat' });
     machineBack(ctx);
     ctx.restore();
     whiteout(ctx, seg(t, 1.2, 1.5));
