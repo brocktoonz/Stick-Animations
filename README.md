@@ -31,6 +31,13 @@ node scripts/export.cjs bored out/bored.mp4 --audio voice.m4a   # with a sound t
 node scripts/export.cjs bored out/stills 0 90 180               # PNG stills
 ```
 
+Captions are placed inside a caption safe zone (x 120-840, y 420-1248 on the
+1080x1920 frame): the strictest of the TikTok, YouTube Shorts and Instagram
+Reels UI guides, so no platform's buttons or text cover them. `Stage.SAFE`
+holds the numbers; `index.html?safe=1` or `export.cjs ... --safe` shades the
+no-go areas for checking. Keep speech bubbles and key action out of the shaded
+areas too.
+
 A new skit is a file in `web/skits/` that sets `Skits.<name> = { title,
 subtitle, duration, draw(ctx, t) }`, plus a `<script>` tag in `index.html`.
 

@@ -45,17 +45,35 @@ const Stage = (() => {
   }
 
   // The "XS BE LIKE:" header band.
+  // Caption safe zone for 9:16 video: the strictest of TikTok, YouTube Shorts
+  // and Instagram Reels, so captions are never under a platform's UI.
+  //   TikTok (guide at 540x960, doubled): top 252, bottom 640, left 120, right 240
+  //   YouTube Shorts: top 288, bottom 672, left 48, right 192
+  //   Instagram Reels: top 420, bottom 420
+  const SAFE = { top: 420, bottom: H - 672, left: 120, right: W - 240 };
+  const SAFE_W = SAFE.right - SAFE.left, SAFE_CX = (SAFE.left + SAFE.right) / 2;
+
+  // The caption, placed at the top of the safe zone with a white outline so it
+  // reads over the artwork. Multi-line captions ("a\nb") are sized by the
+  // longest line; an optional subtitle sits underneath.
   function title(ctx, main, sub) {
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, W, 330);
+    if (!main) return;
     const lines = main.split('\n');
-    if (lines.length > 1) {   // two-line caption: sized by the longer line, no subtitle
-      const size = Math.min(...lines.map(l => fitSize(ctx, l, 110, W - 80)));
-      text(ctx, main, W / 2, 330 / 2 - size * 0.52, size, 'Luckiest Guy', '#e3261b');
-      return;
+    const size = Math.min(...lines.map(l => fitSize(ctx, l, 110, SAFE_W)));
+    let y = SAFE.top + size * 0.55;
+    text(ctx, main, SAFE_CX, y, size, 'Luckiest Guy', '#e3261b', size * 0.22);
+    if (sub) {
+      y += lines.length * size * 1.05 + 10;
+      const ss = fitSize(ctx, sub, 50, SAFE_W);
+      text(ctx, sub, SAFE_CX, y, ss, 'Luckiest Guy', INK, ss * 0.28);
     }
-    text(ctx, main, W / 2, 150, fitSize(ctx, main, 124, W - 80), 'Luckiest Guy', '#e3261b');
-    if (sub) text(ctx, sub, W / 2, 262, fitSize(ctx, sub, 52, W - 80), 'Luckiest Guy', INK);
+  }
+
+  // Debug overlay (index.html?safe=1): shade everything outside the safe zone.
+  function safeOverlay(ctx) {
+    ctx.fillStyle = 'rgba(227, 38, 27, 0.25)';
+    ctx.fillRect(0, 0, W, SAFE.top); ctx.fillRect(0, SAFE.bottom, W, H - SAFE.bottom);
+    ctx.fillRect(0, SAFE.top, SAFE.left, SAFE.bottom - SAFE.top); ctx.fillRect(SAFE.right, SAFE.top, W - SAFE.right, SAFE.bottom - SAFE.top);
   }
 
   function bottomFade(ctx) {
@@ -281,10 +299,11 @@ const Stage = (() => {
     bottomFade(ctx);
     const t = f / FPS, at = v => typeof v === 'function' ? v(t) : v;   // titles may change over time
     title(ctx, at(skit.title), at(skit.subtitle));
+    if (globalThis.SHOW_SAFE) safeOverlay(ctx);
   }
 
   return {
-    W, H, FPS, FLOOR, clamp, seg, lerp, mix, easeInOut, easeOut, easeOutBack, say, blink,
+    W, H, FPS, FLOOR, SAFE, clamp, seg, lerp, mix, easeInOut, easeOut, easeOutBack, say, blink,
     text, title, bottomFade, bubble, burst, wash, shake, speedLines, exclaim,
     floor, picture, lamp, livingRoom, phone, broom, bill, book, thermostat, couch, kitchen, lightSwitch, ceilingLamp, frame,
   };

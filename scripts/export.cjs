@@ -3,6 +3,7 @@
 //
 //   node scripts/export.cjs <skit> out/skit.mp4 [--audio voice.m4a]   # video
 //   node scripts/export.cjs <skit> out/stills 0 45 90                  # PNG stills
+//   node scripts/export.cjs <skit> out/stills 0 45 --safe               # stills with safe zones shaded
 //
 // Skit names are the files in web/skits/ (thermostat, bored, lights, cast).
 // With --audio, the track is muxed in and the video runs as long as the skit.
@@ -17,6 +18,8 @@ const path = require('path');
   const args = process.argv.slice(2);
   const ai = args.indexOf('--audio');
   const audio = ai >= 0 ? args.splice(ai, 2)[1] : null;
+  const si = args.indexOf('--safe');   // shade caption no-go areas (for checking stills)
+  const safe = si >= 0 && !!args.splice(si, 1);
   const [skit, out, ...frameArgs] = args;
   if (!skit || !out) { console.error('usage: export.cjs <skit> <out.mp4 | out-dir> [frames...] [--audio file]'); process.exit(1); }
   const exe = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined;
@@ -26,6 +29,7 @@ const path = require('path');
   const url = 'file://' + path.resolve(__dirname, '../web/index.html') + `?export=1&skit=${encodeURIComponent(skit)}`;
   await page.goto(url);
   await page.evaluate(() => window.ready);
+  if (safe) await page.evaluate(() => { window.SHOW_SAFE = true; });
   const total = await page.evaluate(() => window.skitFrames);
   const grab = f => page.evaluate(f => { renderFrame(f); return document.getElementById('c').toDataURL('image/png'); }, f)
     .then(u => Buffer.from(u.split(',')[1], 'base64'));

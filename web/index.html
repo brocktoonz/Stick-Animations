@@ -39,6 +39,7 @@
   const params = new URLSearchParams(location.search);
   const name = params.get('skit') || 'thermostat';
   const skit = Skits[name];
+  window.SHOW_SAFE = params.has('safe');   // ?safe=1 shades the caption no-go areas
   window.skitFrames = Math.round(skit.duration * Stage.FPS);
   window.renderFrame = f => Stage.frame(ctx, f, skit);
   document.getElementById('nav').innerHTML = Object.keys(Skits)
