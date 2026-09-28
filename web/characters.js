@@ -29,11 +29,19 @@ const Chars = (() => {
     for (const side of [-1, 1]) {
       const ex = fx + side * gap;
       const lid = p.lid ?? 0;
-      if (p.squint) {   // rage: a narrow slanted slit, low at the inner corner, no pupil
-        const o = ex - side * rx, i = ex + side * rx * 0.9;
-        const slit = [[o, y - 22 * size], [ex, y - 6 * size], [i, y + 16 * size], [ex, y + 10 * size], [o, y - 6 * size]];
-        fill(ctx, slit, W, 0.4);
-        outline(ctx, slit, { w: 6 * size });
+      if (p.squint) {
+        // rage (anime style): a big white eye with its top cut off by a thick
+        // brow line that slopes down toward the nose; round bottom, no pupil
+        const erx = rx * 1.3, ery = ry * 1.1;
+        const oy = y - ery * 0.5, iy = y + ery * 0.2;          // top edge: outer corner high, inner low
+        const ox = ex + side * erx * 1.25, ix = ex - side * erx * 0.95;   // side -1 is the left eye, so its inner corner is +x
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(ox, oy); ctx.lineTo(ix, iy); ctx.lineTo(ix, y + ery * 2); ctx.lineTo(ox, y + ery * 2); ctx.closePath();
+        ctx.clip();
+        blob(ctx, ex, y, erx, ery, { fill: W, w: 6 * size, n: 12 });
+        ctx.restore();
+        stroke(ctx, [[ox, oy], [ex, (oy + iy) / 2 - 2 * size], [ix, iy]], { w: 13 * size, taper0: 0.5, taper1: 0.2 });
         continue;
       }
       if (lid >= 1) {   // closed: a curved line

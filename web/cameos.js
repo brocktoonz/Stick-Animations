@@ -47,8 +47,10 @@ const Cameos = (() => {
       blob(ctx, 0, jaw * 0.5, RX - jaw * 0.1, RY + jaw * 0.5, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
       if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx); ctx.restore(); }
       o.hair?.(ctx);
-      eyes(ctx, fx, -6, p, 1, !!o.lashes);
-      brows(ctx, fx, -62, p, 1, o.browW ?? 9);
+      eyes(ctx, fx, p.squint ? -22 : -6, p, 1, !!o.lashes);   // rage eyes sit higher, clear of the teeth
+      if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
+        for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
+      } else brows(ctx, fx, -62, p, 1, o.browW ?? 9);
       if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
       else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, open ? 0.85 : 1);
       o.front?.(ctx, fx, rage);
