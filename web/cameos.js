@@ -42,14 +42,16 @@ const Cameos = (() => {
       o.back?.(ctx);   // behind the head: hoods, long hair
       // a yell drops the jaw: the head stretches down and the mouth rides up
       // a little, so even a wide-open mouth stays inside the chin
-      const open = p.mouth === 'yell' ? (p.open ?? 0) : 0, jaw = 46 * open;
+      const rage = p.mouth === 'rage';
+      const open = p.mouth === 'yell' || rage ? (p.open ?? 0) : 0, jaw = (rage ? 60 : 46) * open;
       blob(ctx, 0, jaw * 0.5, RX - jaw * 0.1, RY + jaw * 0.5, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
       if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx); ctx.restore(); }
       o.hair?.(ctx);
       eyes(ctx, fx, -6, p, 1, !!o.lashes);
       brows(ctx, fx, -62, p, 1, o.browW ?? 9);
-      mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, open ? 0.85 : 1);
-      o.front?.(ctx, fx);
+      if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
+      else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, open ? 0.85 : 1);
+      o.front?.(ctx, fx, rage);
       o.hat?.(ctx);
       if (p.sweat) { sweat(ctx, -126, -30); sweat(ctx, 150, -60, 0.8); }
     };
@@ -121,11 +123,13 @@ const Cameos = (() => {
     fill(ctx, shape, FACIAL_HAIR, 1);
     outline(ctx, shape, { w: 7 });
   };
-  const goateeFront = (ctx, fx) => {
+  const goateeFront = (ctx, fx, rage) => {
+    if (rage) ctx.translate(0, -12);   // moustache rides up over the huge open mouth
     const m = [[fx - 74, 64], [fx - 62, 40], [fx - 30, 28], [fx, 34], [fx + 30, 28], [fx + 62, 40], [fx + 74, 64],
                [fx + 54, 52], [fx + 26, 46], [fx, 50], [fx - 26, 46], [fx - 54, 52]];
     fill(ctx, m, FACIAL_HAIR, 1);
     outline(ctx, m, { w: 6 });
+    if (rage) return ctx.translate(0, 12);   // soul patch is hidden behind the open mouth
     const patch = [[fx - 11, 106], [fx + 11, 106], [fx + 4, 113], [fx, 117], [fx - 4, 113]];
     fill(ctx, patch, FACIAL_HAIR, 0.5);
     outline(ctx, patch, { w: 5 });

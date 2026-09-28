@@ -29,6 +29,13 @@ const Chars = (() => {
     for (const side of [-1, 1]) {
       const ex = fx + side * gap;
       const lid = p.lid ?? 0;
+      if (p.squint) {   // rage: a narrow slanted slit, low at the inner corner, no pupil
+        const o = ex - side * rx, i = ex + side * rx * 0.9;
+        const slit = [[o, y - 22 * size], [ex, y - 6 * size], [i, y + 16 * size], [ex, y + 10 * size], [o, y - 6 * size]];
+        fill(ctx, slit, W, 0.4);
+        outline(ctx, slit, { w: 6 * size });
+        continue;
+      }
       if (lid >= 1) {   // closed: a curved line
         const up = p.happy ? -1 : 1;   // happy: ^ arcs (laughing); otherwise gently closed
         stroke(ctx, [[ex - rx, y + 4 * size], [ex, y + (4 + 8 * up) * size - (p.happy ? 8 * size : 0)], [ex + rx, y + 4 * size]], { w: 7 * size });
@@ -115,7 +122,7 @@ const Chars = (() => {
     if (v.lip > 0.5) stroke(ctx, [[x - w * 0.8, y + teethH * 0.8], [x, y + teethH], [x + w * 0.8, y + teethH * 0.8]], { w: 7 * s, color });
   }
 
-  // kinds: flat | smile | smirk | o | wobbly | yell | grin | frown | talk (uses p.viz)
+  // kinds: flat | smile | smirk | o | wobbly | yell | rage | grin | frown | talk (uses p.viz)
   function mouth(ctx, x, y, p, size = 1, color = INK) {
     const k = p.mouth ?? 'flat', open = p.open ?? 0, s = size;
     if (k === 'talk' && p.viz) return talkMouth(ctx, x, y, p.viz, s, color);
@@ -136,6 +143,27 @@ const Chars = (() => {
       blob(ctx, x, y + r * 0.3, r * 0.8, r, { fill: INK, w: 5 * s, n: 10 });
     } else if (k === 'yell') {
       openMouth(ctx, x, y, (60 + 30 * open) * s, (40 + 105 * open) * s, s);
+    } else if (k === 'rage') {
+      // furious anime yell: huge mouth, jagged shark teeth top and bottom
+      const w2 = (78 + 22 * open) * s, h = (70 + 70 * open) * s;
+      const pts = [[x - w2, y], [x, y - 8 * s], [x + w2, y], [x + w2 * 0.86, y + h * 0.55],
+                   [x + w2 * 0.45, y + h * 0.95], [x, y + h], [x - w2 * 0.45, y + h * 0.95], [x - w2 * 0.86, y + h * 0.55]];
+      fill(ctx, pts, '#d4d4d4', 1);
+      ctx.save();
+      ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+      for (const q of Brush.spline(pts, true, 6)) ctx.lineTo(q[0], q[1]);
+      ctx.clip();
+      const n = 6, tw = (w2 * 2) / n;
+      for (let i = 0; i < n; i++) {   // top teeth point down, bottom teeth point up (offset half a tooth)
+        const tx = x - w2 + i * tw;
+        const top = [[tx, y - 12 * s], [tx + tw, y - 12 * s], [tx + tw / 2, y + h * 0.32]];
+        fill(ctx, top, W, 0.3); outline(ctx, top, { w: 4 * s, closed: true });
+        const bx = tx + tw / 2;
+        const bot = [[bx - tw / 2, y + h + 10 * s], [bx + tw / 2, y + h + 10 * s], [bx, y + h * 0.62]];
+        fill(ctx, bot, W, 0.3); outline(ctx, bot, { w: 4 * s, closed: true });
+      }
+      ctx.restore();
+      outline(ctx, pts, { w: 8 * s });
     } else if (k === 'grin') {
       // wide sinister smile: upturned corners, teeth showing
       const w2 = 62 * s, h = (26 + 30 * open) * s;

@@ -35,7 +35,7 @@ const Emotions = (() => {
     excited:   { pupil: 15, mouth: 'yell', open: 0.35, brow: -0.6, ...both([178, -372], 'down') },   // fists pumped
     sad:       { mouth: 'frown', brow: -1, lid: 0.35, lookY: 0.6, tilt: 0.07 },
     angry:     { mouth: 'frown', brow: 1, pupil: 9, lid: 0.15, ...both([124, -170], 'out') },   // fists at hips
-    yelling:   { mouth: 'yell', open: 0.9, brow: 1, pupil: 7, ...both([196, -176], 'down') },   // fists flung out low
+    yelling:   { mouth: 'rage', open: 1, squint: true, brow: 1.3, ...both([124, -196], 'out') },   // furious: slit eyes, shark teeth, fists clenched
     scared:    { mouth: 'wobbly', brow: -1, pupil: 6, sweat: true, lean: -0.05, ...both([46, -328], 'out', true) },   // fists pulled in under the chin, elbows out
     shocked:   { mouth: 'o', open: 1, brow: -0.7, pupil: 5, ...both([112, -392], 'down', true) },   // hands on cheeks
     nervous:   { mouth: 'wobbly', brow: -0.6, lookX: -0.8, sweat: true },
