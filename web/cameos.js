@@ -23,6 +23,7 @@ const Cameos = (() => {
       skin: o.skin ?? W, armFill: o.sleeve ?? o.skin ?? W,
       sleeveHem: o.sleeveHem,
       head: o.head,
+      behind: o.behind,
       bottoms: (ctx, hipY) => fill(ctx, [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56],
         [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]], INK, 1.2),
       torso: (n, h) => [[-48, n], [48, n], [66, n + 64], [68, h - 4], [-68, h - 4], [-66, n + 64]],
@@ -574,6 +575,39 @@ const Cameos = (() => {
   const nickWith = (hair, back) => build({ shirt: INK, sleeve: '#222', head: head({ back, hair, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
   const nickFlow = Object.fromEntries(Object.entries(NICK_FLOW).map(([k, v]) => [k, nickWith(v.front, v.back)]));
+  // Back hair for the outline style: a layer behind the head that shows past
+  // the side curtains. len = how far the sides hang, wide = how far they fan
+  // out; the middle stays tucked behind the chin so the collar is visible.
+  // Hair hanging behind the body: drawn before the torso, so it shows beside
+  // the neck and past the shoulders. len = bottom (x RY), wide = half width.
+  const backOutline = ({ len = 1.6, wide = 1.3, tone = W, flick = 0.12 } = {}) => ctx => {
+    const top = [];
+    for (let i = 0; i <= 16; i++) {
+      const a = Math.PI * (0.9 + 1.2 * i / 16);
+      top.push([Math.cos(a) * 1.18, Math.sin(a) * 1.2]);
+    }
+    // bottom edge, right to left: wavy lock ends, the outer ones flicking out
+    const bottom = [];
+    const n = 8;
+    for (let i = 0; i <= n; i++) {
+      const t = i / n, x = wide - 2 * wide * t, edge = Math.abs(t - 0.5) * 2;
+      bottom.push([x + Math.sign(x) * edge ** 3 * flick, len - (i % 2) * 0.16 - edge ** 3 * flick * 0.5]);
+    }
+    const side = sd => [[sd * 1.28, 0.4], [sd * 1.24, len * 0.62], [sd * (wide + 0.04), len * 0.84]];
+    const poly = [[-1.24, 0.1], ...top.slice(1, -1), [1.24, 0.1], ...side(1), ...bottom, ...side(-1).reverse()];
+    fill(ctx, hu(poly), tone, 1);
+    outline(ctx, hu(poly), { w: 11 });
+    for (const sd of [-1, 1]) stroke(ctx, hu([[sd * 1.14, 0.5], [sd * (wide - 0.06), len * 0.78], [sd * (wide - 0.1), len - 0.14]]), { w: 6, taper0: 0.2, taper1: 0.3 });
+  };
+  const NICK_BACK_OPTS = {
+    none: null,
+    white: backOutline({ len: 1.5, wide: 1.14 }),
+    shaded: backOutline({ len: 1.55, wide: 1.16, tone: '#d6d6d6', flick: 0.14 }),
+    longShaded: backOutline({ len: 1.8, wide: 1.2, tone: '#d6d6d6', flick: 0.2 }),
+  };
+  const nickBack = Object.fromEntries(Object.entries(NICK_BACK_OPTS).map(([k, b]) => [k, build({
+    shirt: INK, sleeve: '#222', behind: b || undefined, head: head({ hair: NICK_OUTLINE.sweptWave, front: roundGlasses }),
+    detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) })]));
   const nickOutline = Object.fromEntries(Object.entries(NICK_OUTLINE).map(([k, h]) => [k, nickWith(h)]));
   const nickAlts = Object.fromEntries(Object.entries(nickHair).map(([k, h]) => [k, nickWith(h, NICK_BACK[k])]));
 
@@ -620,5 +654,5 @@ const Cameos = (() => {
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
   // parts: the shared build/head builders, for other adult characters (hero.js)
-  return { speed, ludwig, beast, nick, slime, nickAlts, nickFlow, nickOutline, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick, slime, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();

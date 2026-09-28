@@ -290,6 +290,13 @@ const Chars = (() => {
       ctx.restore();
       return;
     }
+    if (S.behind) {   // things behind the whole body (long hair down the back), in head space
+      ctx.save();
+      ctx.translate(0, neckY - S.headUp + bob * 0.5);
+      ctx.rotate(p.tilt ?? 0);
+      S.behind(ctx, p);
+      ctx.restore();
+    }
 
     for (const side of [-1, 1]) {
       const ph = side * step;

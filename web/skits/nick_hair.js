@@ -1,9 +1,9 @@
 // Nick hair alternatives, one close-up per second.
 Skits.nick_hair = (() => {
   const A = Cameos.nickAlts;
-  const O = Cameos.nickOutline;
-  const LOOKS = [['1', O.wavySide, 'WAVY, SIDE FRINGE'], ['2', O.middlePart, 'MIDDLE PART, FLICKED ENDS'],
-                 ['3', O.looseCurls, 'LOOSE CURLS'], ['4', O.sweptWave, 'SWEPT-BACK WAVE']];
+  const B = Cameos.nickBack;
+  const LOOKS = [['A', B.none, 'NO BACK HAIR'], ['B', B.white, 'BACK HAIR, WHITE'],
+                 ['C', B.shaded, 'BACK HAIR, SHADED'], ['D', B.longShaded, 'LONGER, SHADED']];
   const pick = t => Math.min(LOOKS.length - 1, Math.floor(t));
   return {
     title: '', subtitle: '',   // labels are added in the comparison sheet duration: LOOKS.length,
