@@ -1,4 +1,5 @@
-// "That one machine at the eye doctor" (10 s), starring the main character.
+// "That one machine at the eye doctor" (5.67 s), starring the main character.
+// Timed to references/eye-doctor/clip.mov (beats noted per shot).
 // Camera sits behind the machine (it faces him, back to us). He stares at the
 // balloon picture; the doctor pops up in the view with a boxing glove and
 // punches the camera (the "air puff", exaggerated); he flies backwards out of
@@ -83,7 +84,7 @@ Skits.eyedoctor = (() => {
   }
 
   // The doctor popping up inside the view: bald, head mirror, big grin, glove up.
-  function doctor(ctx, x, y, s, windup) {
+  function doctor(ctx, x, y, s, windup, scream = 0) {
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
     panel(ctx, [[-170, 120], [170, 120], [210, 420], [-210, 420]], W);           // white coat shoulders
     outline(ctx, [[-60, 120], [0, 230], [-40, 280]], { w: 8 });
@@ -95,7 +96,7 @@ Skits.eyedoctor = (() => {
     blob(ctx, 0, -110, 38, 38, { fill: '#e6e6e6', w: 8, n: 12 });
     Chars.eyes(ctx, 0, -10, { lid: 0.2, pupil: 9 }, 0.85);
     Chars.brows(ctx, 0, -64, { brow: 0.8 }, 0.9, 10);
-    Chars.mouth(ctx, 0, 70, { mouth: 'grin', open: 0.4 }, 0.9);
+    Chars.mouth(ctx, 0, 60, scream > 0 ? { mouth: 'yell', open: scream } : { mouth: 'grin', open: 0.4 }, 0.9);
     ctx.restore();
     glove(ctx, x + s * lerp(200, 150, windup), y + s * lerp(-60, 40, windup), s * 0.9, lerp(-0.5, -0.9, windup));
   }
@@ -114,37 +115,41 @@ Skits.eyedoctor = (() => {
 
   // 1: behind the machine. He leans in, eyes peeking over the top.
   function shotSetup(ctx, t) {
-    const push = lerp(1, 1.06, easeInOut(seg(t, 0, 2.6)));
+    const push = lerp(1, 1.06, easeInOut(seg(t, 0, 1.5)));
     ctx.save();
     ctx.translate(540, 1150); ctx.scale(push, push); ctx.translate(-540, -1150);
     room(ctx);
     chairBack(ctx);
-    const lean = easeOut(seg(t, 0.3, 1.1));
+    const lean = easeOut(seg(t, 0.1, 0.6));
     Hero.main(ctx, { x: X, y: Y + lerp(60, 0, lean), s: S, lookY: 0.2, lid: blink(t, 1.7, 0.6), mouth: 'flat' });
     machineBack(ctx);
     ctx.restore();
+    whiteout(ctx, seg(t, 1.2, 1.5));
   }
+  const whiteout = (ctx, a) => { if (a > 0) { ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.fillRect(-60, -60, 1200, 2040); } };
 
   // 2: his view: the balloon drifts in and out of focus.
   function shotBalloon(ctx, t) {
-    const k = seg(t, 2.6, 5.4);
+    const k = seg(t, 1.5, 2.8);
     povFrame(ctx, () => {
-      ctx.filter = `blur(${Math.abs(Math.sin(k * Math.PI * 1.5)) * 10}px)`;
+      ctx.filter = `blur(${12 * (1 - seg(t, 1.8, 2.5))}px)`;
       balloonScene(ctx, k);
       ctx.filter = 'none';
     });
+    whiteout(ctx, 1 - seg(t, 1.5, 1.9));
   }
 
   // 3: the doctor pops up in the view, winds up, and punches the camera.
   function shotPunch(ctx, t) {
-    const pop = easeOutBack(seg(t, 5.4, 5.75));
-    const wind = easeInOut(seg(t, 5.9, 6.2));
-    const hit = seg(t, 6.2, 6.45);
+    const pop = easeOutBack(seg(t, 2.8, 3.05));
+    const wind = easeInOut(seg(t, 3.5, 3.72));
+    const hit = seg(t, 3.72, 3.9);
+    const scream = t > 3.02 ? 0.7 + 0.3 * Math.abs(Math.sin(t * 30)) : 0;
     ctx.save();
     if (hit > 0) shake(ctx, 40 * (1 - hit * 0.5), 13);
     povFrame(ctx, () => {
       balloonScene(ctx, 1);
-      if (hit === 0) doctor(ctx, 720, lerp(1800, 1340, pop), 0.9, wind);   // off to the side, balloon still visible
+      if (hit === 0) doctor(ctx, lerp(1250, 720, pop) + (scream ? Math.sin(t * 60) * 6 : 0), 1340, 0.9, wind, scream);   // slides in from the right, beside the balloon
     });
     if (hit > 0) {   // the glove rushes the lens and fills the frame
       const s = lerp(1.2, 9, easeOut(Math.min(1, hit * 1.6)));
@@ -159,7 +164,7 @@ Skits.eyedoctor = (() => {
 
   // 4: launched backwards out of the chair, shrinking into the distance, spinning.
   function shotLaunch(ctx, t) {
-    const k = seg(t, 6.45, 8.0), e = easeOut(k);
+    const k = seg(t, 3.9, 4.5), e = easeOut(k);
     ctx.save();
     shake(ctx, 18 * (1 - k), 17);
     room(ctx);
@@ -182,7 +187,7 @@ Skits.eyedoctor = (() => {
     room(ctx);
     chairBack(ctx);
     machineBack(ctx);
-    const tw = seg(t, 8.2, 8.9);
+    const tw = seg(t, 4.6, 5.2);
     if (tw > 0 && tw < 1) {
       const r = 60 * Math.sin(tw * Math.PI);
       ctx.save(); ctx.translate(300, 600); ctx.rotate(tw * 2);
@@ -192,13 +197,13 @@ Skits.eyedoctor = (() => {
   }
 
   return {
-    title: 'That one machine\nat the eye doctor', subtitle: '', duration: 10,
+    title: 'That one machine\nat the eye doctor', subtitle: '', duration: 5.67,
     draw(ctx, t) {
-      if (t < 2.6) shotSetup(ctx, t);
-      else if (t < 5.4) shotBalloon(ctx, t);
-      else if (t < 6.45) shotPunch(ctx, t);
-      else if (t < 8.0) shotLaunch(ctx, t);
-      else shotGone(ctx, t);
+      if (t < 1.5) shotSetup(ctx, t);          // "Alright, go ahead and put your chin up there for me, please."
+      else if (t < 2.8) shotBalloon(ctx, t);   // "You're gonna feel a small puff of air in a minute."
+      else if (t < 3.9) shotPunch(ctx, t);     // screaming guy slides in, swings, hit at 3.8
+      else if (t < 4.5) shotLaunch(ctx, t);    // falls back out of the chair
+      else shotGone(ctx, t);                   // "There it was. Okay, thank you."
     },
   };
 })();
