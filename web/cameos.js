@@ -460,12 +460,12 @@ const Cameos = (() => {
   // seamless: the outer edge is left un-inked (a silhouette drawn behind the
   // body supplies it); only the face opening and the curtain tips (the last
   // `tips` outer points on each end) are inked, so front and back read as one.
-  const outlineHair = (outer, inner, lines = [], fillCol = W, { seamless = false, tips = 2 } = {}) => ctx => {
+  const outlineHair = (outer, inner, lines = [], fillCol = W, { seamless = false, tips = 2, lineColor = INK } = {}) => ctx => {
     const poly = hu([...outer, ...inner]);
     fill(ctx, poly, fillCol, 1);
     if (!seamless) outline(ctx, poly, { w: 11 });
     else stroke(ctx, hu([...outer.slice(-tips), ...inner, ...outer.slice(0, tips)]), { w: 11, taper0: 0.08, taper1: 0.08 });
-    for (const l of lines) stroke(ctx, hu(l), { w: 7, taper0: 0.15, taper1: 0.35 });
+    for (const l of lines) stroke(ctx, hu(l), { w: 7, taper0: 0.15, taper1: 0.35, color: lineColor });
   };
 
   const SWEPT_WAVE = [
@@ -696,12 +696,13 @@ const Cameos = (() => {
     [[[0.16, -0.8], [0.1, -1.0], [0.04, -1.12]], [[-0.3, -0.64], [-0.5, -0.9], [-0.28, -1.12]], [[0.56, -0.7], [0.62, -0.92], [0.34, -1.1]]]);
 
   // 3. Messy spikes, hoodie
-  const spikes = outlineHair(
+  const SPIKES = [
     [[-0.98, -0.1], [-1.1, -0.55], [-1.0, -0.8], [-1.22, -0.96], [-0.82, -1.06], [-0.86, -1.32], [-0.46, -1.2], [-0.3, -1.5],
      [0, -1.26], [0.26, -1.52], [0.46, -1.22], [0.86, -1.36], [0.8, -1.06], [1.22, -0.96], [1.0, -0.8], [1.1, -0.55], [0.98, -0.1]],
     [[0.88, -0.2], [0.8, -0.5], [0.6, -0.44], [0.5, -0.66], [0.3, -0.5], [0.15, -0.7], [-0.05, -0.5], [-0.2, -0.7],
      [-0.4, -0.48], [-0.55, -0.66], [-0.75, -0.46], [-0.88, -0.2]],
-    [[[-0.3, -0.8], [-0.2, -1.1]], [[0.3, -0.8], [0.22, -1.1]]]);
+    [[[-0.3, -0.8], [-0.2, -1.1]], [[0.3, -0.8], [0.22, -1.1]]]];
+  const spikes = outlineHair(...SPIKES);
 
   // 4. Wavy shoulder length with bangs (same one-silhouette method as Nick)
   const BANGS = [
@@ -713,6 +714,13 @@ const Cameos = (() => {
      ...wavyEdge([-0.9, -0.1], [-0.94, 0.5], 2, 0.04), [-0.9, 0.96]],
     [[[-0.1, -1.1], [-0.6, -0.9], [-1.0, -0.4]], [[0.1, -1.1], [0.6, -0.9], [1.0, -0.4]]],
   ];
+
+  // The spiky guy in different hair shades (grayscale house style). Dark
+  // fills get light inner strokes so the texture still reads.
+  const SHADES = { blond: [W, INK], light: ['#d4d4d4', INK], brown: ['#8f8f8f', '#e0e0e0'],
+                   dark: ['#555555', '#bdbdbd'], black: [INK, '#8a8a8a'] };
+  const spikyShades = Object.fromEntries(Object.entries(SHADES).map(([k, [fillC, lineC]]) => [k,
+    build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: outlineHair(...SPIKES, fillC, { lineColor: lineC }) }), detail: hoodieFront })]));
 
   const originals = {
     curly: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ears, hair: curlyTop }), detail: stripes }),
@@ -891,5 +899,5 @@ const Cameos = (() => {
     beard: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', sleeveHem: 0.42, head: head({ hair: shaggy, beard: fullBeard }), detail: collarTee }),
   };
 
-  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, men, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, men, spikyShades, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
