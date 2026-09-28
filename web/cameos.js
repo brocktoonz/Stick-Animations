@@ -271,6 +271,69 @@ const Cameos = (() => {
     return pts;
   };
   const inHead = (k = 1.2) => (x, y) => (x / RX) ** 2 + (y / RY) ** 2 < k * k;
+  // ---- "Flow": shoulder-length wavy hair, swept back, tucked behind one ear
+  // (from the user's anime reference, simplified to the house style).
+  const FLOW = '#4e4e4e', FLOW_BACK = '#3c3c3c', FLOW_LINE = '#8f8f8f';
+  // Wavy lock tips along the bottom, right to left, flicking outward at the ends.
+  const lockTips = (x0, x1, y, n, flick) => {
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const t = i / n, x = x0 + (x1 - x0) * t, out = (Math.abs(t - 0.5) * 2) ** 2;   // outer tips flick more
+      const side = x > 0 ? 1 : -1;
+      pts.push([x + side * out * flick, y + (i % 2 ? -RY * 0.18 : 0) - out * RY * 0.12]);
+    }
+    return pts;
+  };
+  const flowBack = ctx => {
+    // crown, then a hanging section on each side down to the shoulders; the
+    // middle stops under the head (the neck and collar stay visible)
+    const pts = [];
+    for (let i = 0; i <= 20; i++) {
+      const a = Math.PI * (1.0 + i / 20);
+      pts.push([Math.cos(a) * RX * 1.16, Math.sin(a) * RY * 1.2 - RY * 0.04]);
+    }
+    const side = sd => {   // outer edge down, pointed locks, inner edge back up
+      const out = [[sd * RX * 1.2, RY * 0.4], [sd * RX * 1.26, RY * 0.9]];
+      const tips = [[1.34, 1.3], [1.22, 1.12], [1.12, 1.34], [0.98, 1.14], [0.86, 1.28], [0.74, 1.02]];
+      const locks = tips.map(([x, y]) => [sd * RX * x, RY * y]);
+      const inner = [[sd * RX * 0.66, RY * 0.72]];
+      return sd > 0 ? [...out, ...locks, ...inner] : [...inner, ...locks.reverse(), ...out.reverse()];
+    };
+    pts.push(...side(1), [0, RY * 0.6], ...side(-1));
+    fill(ctx, pts, FLOW_BACK, 1.2);
+    outline(ctx, pts, { w: 10 });
+    for (const sd of [-1, 1]) {   // a lock line on each side
+      stroke(ctx, [[sd * RX * 1.08, RY * 0.3], [sd * RX * 1.12, RY * 0.8], [sd * RX * 1.0, RY * 1.1]], { w: 5, color: FLOW_LINE });
+    }
+    const e = Brush.ellipsePts(RX * 0.98, 10, 22, 32, 10, 0.15);   // ear tucked behind, on his left
+    fill(ctx, e, W, 0.4); outline(ctx, e, { w: 8 });
+    stroke(ctx, [[RX * 0.96, -8], [RX * 1.06, -4], [RX * 1.06, 18], [RX * 0.98, 28]], { w: 5 });
+  };
+  const flowFront = ctx => {
+    // swept-back top with volume; left side falls over the temple to the jaw,
+    // right side is tucked behind the ear
+    const pts = [];
+    for (let i = 0; i <= 20; i++) {
+      const a = Math.PI * (0.96 + 1.1 * i / 20);
+      const r = 1.14 + 0.05 * Math.sin(i * 1.3) + (i > 4 && i < 14 ? 0.08 : 0);
+      pts.push([Math.cos(a) * RX * r, Math.sin(a) * RY * r]);
+    }
+    pts.push([RX * 1.0, -RY * 0.34], [RX * 0.8, -RY * 0.5], [RX * 0.46, -RY * 0.7], [RX * 0.1, -RY * 0.74],
+             [-RX * 0.3, -RY * 0.68], [-RX * 0.62, -RY * 0.5], [-RX * 0.84, -RY * 0.2], [-RX * 0.9, RY * 0.3],
+             [-RX * 1.02, RY * 0.62], [-RX * 1.16, RY * 0.4], [-RX * 1.16, RY * 0.1]);
+    fill(ctx, pts, FLOW, 1.2);
+    outline(ctx, pts, { w: 10 });
+    // parallel flow lines sweeping up and back from the hairline
+    for (const k of [0, 1, 2]) {
+      const x = -0.45 + k * 0.32;
+      stroke(ctx, [[RX * x, -RY * 0.8], [RX * (x + 0.12), -RY * 1.02], [RX * (x + 0.32), -RY * 1.1]], { w: 5, color: FLOW_LINE });
+    }
+    stroke(ctx, [[-RX * 0.72, -RY * 0.72], [-RX * 0.98, -RY * 0.2], [-RX * 1.04, RY * 0.4]], { w: 5, color: FLOW_LINE });
+    // one loose strand curling down over the forehead, stopping above the brow
+    fill(ctx, [[-RX * 0.02, -RY * 0.74], [-RX * 0.14, -RY * 0.6], [-RX * 0.2, -RY * 0.48], [-RX * 0.13, -RY * 0.52],
+               [-RX * 0.08, -RY * 0.62], [RX * 0.06, -RY * 0.74]], FLOW, 0.5);
+    stroke(ctx, [[RX * 0.02, -RY * 0.74], [-RX * 0.12, -RY * 0.6], [-RX * 0.2, -RY * 0.48]], { w: 7, taper0: 0.1, taper1: 0.8 });
+  };
   const nickHair = {
     // 1 current: long mop past the jaw
     long: nickMop,
@@ -308,6 +371,7 @@ const Cameos = (() => {
       curlMarks(ctx, 60, (x, y) => y < -RY * 0.8 && inHead(1.12)(x, y), 21);
     },
     // 5 side part: waves swept to one side, ends flicking out at the jaw
+    flow: flowFront,
     sidePart: ctx => {
       const pts = [...curlyArc(Math.PI * 0.84, Math.PI * 2.16, 1.14, 24, 0.05),
         [RX * 1.1, RY * 0.56], [RX * 0.96, RY * 0.5], [RX * 0.88, RY * 0.1], [RX * 0.76, -RY * 0.4],
@@ -337,7 +401,7 @@ const Cameos = (() => {
     outline(ctx, pts, { w: 10 });
   };
   const NICK_BACK = { long: backHair(0.95), sweptBack: backHair(0.45, true), curlyFringe: backHair(0.7, true),
-                      fluffy: backHair(0.72, true), sidePart: backHair(0.8) };
+                      fluffy: backHair(0.72, true), sidePart: backHair(0.8), flow: flowBack };
   const nickWith = (hair, back) => build({ shirt: INK, sleeve: '#222', head: head({ back, hair, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
   const nickAlts = Object.fromEntries(Object.entries(nickHair).map(([k, h]) => [k, nickWith(h, NICK_BACK[k])]));
