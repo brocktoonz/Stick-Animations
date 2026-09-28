@@ -722,5 +722,77 @@ const Cameos = (() => {
       head: head({ hair: outlineHair(...BANGS, W, { seamless: true }), lashes: true }), detail: (ctx, n) => collarTee(ctx, n, W) }),
   };
 
-  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  // ---------- More originals, each modelled on a cut from the reference sheets ----------
+  const zipJacket = (ctx, n, h) => {
+    stroke(ctx, [[0, n + 8], [2, h - 6]], { w: 6, color: W });
+    for (const sd of [-1, 1]) stroke(ctx, [[sd * 44, n], [sd * 16, n + 44]], { w: 7, color: W });
+  };
+  const polo = (ctx, n) => {
+    for (const sd of [-1, 1]) { const col = [[sd * 4, n + 2], [sd * 46, n - 2], [sd * 30, n + 46]]; fill(ctx, col, W, 0.3); outline(ctx, col, { w: 7 }); }
+    stroke(ctx, [[0, n + 10], [0, n + 70]], { w: 6 });
+    blob(ctx, 0, n + 50, 5, 5, { fill: INK, w: 0, n: 6 });
+  };
+  const pocketTee = (ctx, n) => { collarTee(ctx, n); stroke(ctx, [[20, n + 70], [20, n + 118], [58, n + 118], [58, n + 70]], { w: 6 }); };
+
+  // A. side swoop: fringe swept up and over, ending in a point past the head
+  const swoopCut = outlineHair(
+    [[-0.98, -0.1], [-1.06, -0.6], [-0.8, -1.02], [-0.3, -1.22], [0.3, -1.26], [0.84, -1.12], [1.3, -0.98], [1.04, -0.8], [1.02, -0.4], [0.98, -0.1]],
+    [[0.88, -0.2], [0.84, -0.5], [0.6, -0.7], [0.2, -0.74], [-0.2, -0.68], [-0.56, -0.54], [-0.8, -0.34], [-0.88, -0.1]],
+    [[[-0.56, -0.9], [0.1, -1.06], [0.9, -1.0]], [[-0.36, -0.72], [0.3, -0.88], [0.96, -0.84]]]);
+  // B. short spiky crew: small tufts on top, short sides
+  const crewSpikes = outlineHair(
+    [[-0.96, -0.3], [-1.0, -0.7], [-0.8, -0.96], [-0.62, -1.0], [-0.54, -1.2], [-0.38, -1.04], [-0.22, -1.28], [-0.06, -1.06],
+     [0.1, -1.3], [0.24, -1.06], [0.42, -1.24], [0.54, -1.02], [0.8, -0.96], [1.0, -0.7], [0.96, -0.3]],
+    [[0.86, -0.36], [0.6, -0.62], [0.3, -0.72], [0, -0.74], [-0.3, -0.72], [-0.6, -0.62], [-0.86, -0.36]]);
+  // C. pointed fringe falling to one side, a couple of spikes at the crown
+  const pointedFringe = outlineHair(
+    [[-0.98, -0.1], [-1.08, -0.6], [-0.86, -1.02], [-0.4, -1.2], [0.18, -1.24], [0.34, -1.4], [0.46, -1.2], [0.62, -1.3], [0.7, -1.1], [1.04, -0.72], [1.0, -0.2]],
+    [[0.9, -0.24], [0.78, -0.54], [0.54, -0.68], [0.3, -0.48], [0.1, -0.68], [-0.14, -0.44], [-0.36, -0.64], [-0.62, -0.38], [-0.8, -0.5], [-0.9, -0.2]],
+    [[[0.2, -1.06], [-0.2, -0.86], [-0.5, -0.6]]]);
+  // D. blunt bob with straight bangs, covering the ears
+  const bob = outlineHair(
+    [[-1.1, 0.62], [-1.14, 0.0], [-1.1, -0.6], [-0.8, -1.08], [0, -1.24], [0.8, -1.08], [1.1, -0.6], [1.14, 0.0], [1.1, 0.62]],
+    [[0.9, 0.62], [0.9, -0.2], [0.86, -0.38], [0.4, -0.4], [-0.4, -0.4], [-0.86, -0.38], [-0.9, -0.2], [-0.9, 0.62]],
+    [[[0, -1.12], [-0.5, -0.96], [-0.86, -0.56]], [[0.3, -1.1], [0.8, -0.86], [1.0, 0.1]]]);
+  // E. ponytail with a pointed fringe
+  const ponytail = ctx => {
+    const p = [[0.5, -0.96], [1.1, -0.9], [1.4, -0.4], [1.44, 0.3], [1.34, 0.86], [1.42, 1.1], [1.2, 0.96], [1.18, 0.3], [1.1, -0.3], [0.8, -0.7]];
+    fill(ctx, hu(p), W, 0.8); outline(ctx, hu(p), { w: 10 });
+    stroke(ctx, hu([[1.24, -0.4], [1.32, 0.3], [1.28, 0.8]]), { w: 6 });
+    const tie = hu([[0.92, -0.98], [1.12, -0.88], [1.06, -0.74], [0.86, -0.84]]);
+    fill(ctx, tie, INK, 0.3);
+  };
+  const ponyFront = outlineHair(
+    [[-0.98, -0.1], [-1.06, -0.6], [-0.82, -1.02], [-0.3, -1.2], [0.3, -1.2], [0.82, -1.02], [1.06, -0.6], [0.98, -0.1]],
+    [[0.88, -0.2], [0.8, -0.46], [0.6, -0.44], [0.46, -0.62], [0.2, -0.46], [0.02, -0.64], [-0.2, -0.46], [-0.4, -0.62], [-0.64, -0.42], [-0.8, -0.46], [-0.88, -0.2]],
+    [[[0.2, -1.06], [0.6, -0.94], [0.96, -0.6]]]);
+  // Rounded bumps (curls) along a to b, bulging to the left of the direction of travel.
+  const scallop = (a, b, n, amp) => {
+    const out = [], dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1, nx = dy / d, ny = -dx / d;
+    for (let i = 0; i < 2 * n; i++) {
+      const t = i / (2 * n), o = i % 2 ? amp : 0;
+      out.push([a[0] + dx * t + nx * o, a[1] + dy * t + ny * o]);
+    }
+    return out;
+  };
+  // F. big curly hair to the shoulders
+  const bigCurls = outlineHair(
+    [...scallop([-1.12, 0.92], [-1.3, -0.1], 4, 0.14), ...scallop([-1.3, -0.1], [-0.9, -1.1], 3, 0.14),
+     ...scallop([-0.9, -1.1], [0, -1.4], 3, 0.14), ...scallop([0, -1.4], [0.9, -1.1], 3, 0.14),
+     ...scallop([0.9, -1.1], [1.3, -0.1], 3, 0.14), ...scallop([1.3, -0.1], [1.12, 0.92], 4, 0.14), [1.12, 0.92]],
+    [...scallop([0.92, 0.9], [0.9, -0.2], 3, 0.1), [0.8, -0.44], ...scallop([0.66, -0.6], [-0.66, -0.6], 4, 0.1),
+     [-0.8, -0.44], ...scallop([-0.9, -0.2], [-0.92, 0.9], 3, 0.1), [-0.92, 0.9]],
+    [[[-0.56, -0.98], [-0.42, -1.06], [-0.3, -0.98]], [[0.3, -1.02], [0.44, -1.1], [0.56, -1.02]],
+     [[-1.08, 0.34], [-0.98, 0.42]], [[1.08, 0.34], [0.98, 0.42]]]);
+
+  const originals2 = {
+    swoop: build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: head({ back: ears, hair: swoopCut }), detail: zipJacket }),
+    crew: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ears, hair: crewSpikes }), detail: pocketTee }),
+    fringe: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', sleeveHem: 0.42, head: head({ back: ears, hair: pointedFringe }), detail: polo }),
+    bob: build({ shirt: INK, sleeve: '#222', head: head({ hair: bob, lashes: true }), detail: (ctx, n) => collarTee(ctx, n, W) }),
+    pony: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ctx => { ears(ctx); ponytail(ctx); }, hair: ponyFront, lashes: true }), detail: stripes }),
+    curls: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: bigCurls }), detail: hoodieFront }),
+  };
+
+  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
