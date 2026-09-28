@@ -2,8 +2,8 @@
 Skits.nick_hair = (() => {
   const A = Cameos.nickAlts;
   const B = Cameos.nickBack;
-  const LOOKS = [['A', B.none, 'NO BACK HAIR'], ['B', B.white, 'BACK HAIR, WHITE'],
-                 ['C', B.shaded, 'BACK HAIR, SHADED'], ['D', B.longShaded, 'LONGER, SHADED']];
+  const LOOKS = [['A', B.none, 'NO BACK HAIR'], ['B', B.shoulder, 'SHOULDER LENGTH'],
+                 ['C', B.long, 'LONGER'], ['D', B.flared, 'FLARED ENDS']];
   const pick = t => Math.min(LOOKS.length - 1, Math.floor(t));
   return {
     title: '', subtitle: '',   // labels are added in the comparison sheet duration: LOOKS.length,

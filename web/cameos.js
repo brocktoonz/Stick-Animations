@@ -457,13 +457,25 @@ const Cameos = (() => {
     }
     return out;
   };
-  const outlineHair = (outer, inner, lines = [], fillCol = W) => ctx => {
+  // seamless: the outer edge is left un-inked (a silhouette drawn behind the
+  // body supplies it); only the face opening and the curtain tips (the last
+  // `tips` outer points on each end) are inked, so front and back read as one.
+  const outlineHair = (outer, inner, lines = [], fillCol = W, { seamless = false, tips = 2 } = {}) => ctx => {
     const poly = hu([...outer, ...inner]);
     fill(ctx, poly, fillCol, 1);
-    outline(ctx, poly, { w: 11 });
+    if (!seamless) outline(ctx, poly, { w: 11 });
+    else stroke(ctx, hu([...outer.slice(-tips), ...inner, ...outer.slice(0, tips)]), { w: 11, taper0: 0.08, taper1: 0.08 });
     for (const l of lines) stroke(ctx, hu(l), { w: 7, taper0: 0.15, taper1: 0.35 });
   };
 
+  const SWEPT_WAVE = [
+    [[-1.04, 1.1], [-1.22, 1.02], ...wavyEdge([-1.16, 0.8], [-1.12, -0.36], 4, 0.07), [-0.96, -0.86],
+     [-0.5, -1.2], [0.1, -1.34], [0.66, -1.22], [1.04, -0.88],
+     ...wavyEdge([1.12, -0.36], [1.16, 0.8], 4, 0.07), [1.22, 1.02], [1.04, 1.1]],
+    [[0.9, 0.96], ...wavyEdge([0.94, 0.5], [0.9, -0.1], 2, 0.04), [0.8, -0.46], [0.5, -0.72], [0.16, -0.78],
+     [-0.08, -0.7], [-0.22, -0.8], [-0.52, -0.72], [-0.8, -0.46], ...wavyEdge([-0.9, -0.1], [-0.94, 0.5], 2, 0.04), [-0.9, 0.96]],
+    [[[-0.2, -0.82], [0.0, -1.12], [0.4, -1.22]], [[0.2, -0.8], [0.6, -1.0], [0.96, -0.66]], [[-0.6, -0.86], [-0.9, -0.66], [-1.02, -0.3]]],
+  ];
   const NICK_OUTLINE = {
     // 1: wavy, shoulder length, fringe swept to one side
     wavySide: outlineHair(
@@ -495,13 +507,7 @@ const Cameos = (() => {
        [[-1.06, 0.3], [-1.12, 0.46], [-1.02, 0.56]], [[1.06, 0.3], [1.12, 0.46], [1.02, 0.56]]]),
 
     // 4: swept back with a wave, forehead mostly clear, wavy to the shoulders
-    sweptWave: outlineHair(
-      [[-1.04, 1.1], [-1.22, 1.02], ...wavyEdge([-1.16, 0.8], [-1.12, -0.36], 4, 0.07), [-0.96, -0.86],
-       [-0.5, -1.2], [0.1, -1.34], [0.66, -1.22], [1.04, -0.88],
-       ...wavyEdge([1.12, -0.36], [1.16, 0.8], 4, 0.07), [1.22, 1.02], [1.04, 1.1]],
-      [[0.9, 0.96], ...wavyEdge([0.94, 0.5], [0.9, -0.1], 2, 0.04), [0.8, -0.46], [0.5, -0.72], [0.16, -0.78],
-       [-0.08, -0.7], [-0.22, -0.8], [-0.52, -0.72], [-0.8, -0.46], ...wavyEdge([-0.9, -0.1], [-0.94, 0.5], 2, 0.04), [-0.9, 0.96]],
-      [[[-0.2, -0.82], [0.0, -1.12], [0.4, -1.22]], [[0.2, -0.8], [0.6, -1.0], [0.96, -0.66]], [[-0.6, -0.86], [-0.9, -0.66], [-1.02, -0.3]]]),
+    sweptWave: outlineHair(...SWEPT_WAVE),
   };
 
   const nickHair = {
@@ -578,35 +584,32 @@ const Cameos = (() => {
   // Back hair for the outline style: a layer behind the head that shows past
   // the side curtains. len = how far the sides hang, wide = how far they fan
   // out; the middle stays tucked behind the chin so the collar is visible.
-  // Hair hanging behind the body: drawn before the torso, so it shows beside
-  // the neck and past the shoulders. len = bottom (x RY), wide = half width.
-  const backOutline = ({ len = 1.6, wide = 1.3, tone = W, flick = 0.12 } = {}) => ctx => {
-    const top = [];
-    for (let i = 0; i <= 16; i++) {
-      const a = Math.PI * (0.9 + 1.2 * i / 16);
-      top.push([Math.cos(a) * 1.18, Math.sin(a) * 1.2]);
-    }
-    // bottom edge, right to left: wavy lock ends, the outer ones flicking out
+  // Full hair silhouette, drawn behind the body: the same top as the front
+  // hair, sides continuing down past the shoulders, wavy lock ends. It is the
+  // only outer outline, so front and back hair read as one piece.
+  const hairSilhouette = ({ len = 1.5, wide = 1.24, flick = 0.14, waves = 6 } = {}) => ctx => {
     const bottom = [];
     const n = 8;
-    for (let i = 0; i <= n; i++) {
+    for (let i = 0; i <= n; i++) {   // right to left
       const t = i / n, x = wide - 2 * wide * t, edge = Math.abs(t - 0.5) * 2;
-      bottom.push([x + Math.sign(x) * edge ** 3 * flick, len - (i % 2) * 0.16 - edge ** 3 * flick * 0.5]);
+      bottom.push([x + Math.sign(x) * edge ** 3 * flick, len - (i % 2) * 0.14 - edge ** 3 * flick * 0.5]);
     }
-    const side = sd => [[sd * 1.28, 0.4], [sd * 1.24, len * 0.62], [sd * (wide + 0.04), len * 0.84]];
-    const poly = [[-1.24, 0.1], ...top.slice(1, -1), [1.24, 0.1], ...side(1), ...bottom, ...side(-1).reverse()];
-    fill(ctx, hu(poly), tone, 1);
+    const poly = [...wavyEdge([-wide - 0.02, len - 0.2], [-1.2, -0.36], waves, 0.05),
+      [-1.02, -0.9], [-0.52, -1.24], [0.1, -1.38], [0.68, -1.26], [1.08, -0.92],
+      ...wavyEdge([1.2, -0.36], [wide + 0.02, len - 0.2], waves, 0.05), ...bottom];
+    fill(ctx, hu(poly), W, 1);
     outline(ctx, hu(poly), { w: 11 });
-    for (const sd of [-1, 1]) stroke(ctx, hu([[sd * 1.14, 0.5], [sd * (wide - 0.06), len * 0.78], [sd * (wide - 0.1), len - 0.14]]), { w: 6, taper0: 0.2, taper1: 0.3 });
   };
+  const SEAMLESS_FRONT = outlineHair(...SWEPT_WAVE, W, { seamless: true });
   const NICK_BACK_OPTS = {
     none: null,
-    white: backOutline({ len: 1.5, wide: 1.14 }),
-    shaded: backOutline({ len: 1.55, wide: 1.16, tone: '#d6d6d6', flick: 0.14 }),
-    longShaded: backOutline({ len: 1.8, wide: 1.2, tone: '#d6d6d6', flick: 0.2 }),
+    shoulder: hairSilhouette({ len: 1.45, wide: 1.24 }),
+    long: hairSilhouette({ len: 1.75, wide: 1.28, flick: 0.2 }),
+    flared: hairSilhouette({ len: 1.6, wide: 1.4, flick: 0.26, waves: 5 }),
   };
   const nickBack = Object.fromEntries(Object.entries(NICK_BACK_OPTS).map(([k, b]) => [k, build({
-    shirt: INK, sleeve: '#222', behind: b || undefined, head: head({ hair: NICK_OUTLINE.sweptWave, front: roundGlasses }),
+    shirt: INK, sleeve: '#222', behind: b || undefined,
+    head: head({ hair: b ? SEAMLESS_FRONT : (ctx => NICK_OUTLINE.sweptWave(ctx)), front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) })]));
   const nickOutline = Object.fromEntries(Object.entries(NICK_OUTLINE).map(([k, h]) => [k, nickWith(h)]));
   const nickAlts = Object.fromEntries(Object.entries(nickHair).map(([k, h]) => [k, nickWith(h, NICK_BACK[k])]));
