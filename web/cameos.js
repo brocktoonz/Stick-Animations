@@ -794,5 +794,102 @@ const Cameos = (() => {
     curls: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: bigCurls }), detail: hoodieFront }),
   };
 
-  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  // ---------- Third batch: men only, from the men's cuts on the reference sheets ----------
+  const flannel = (ctx, n, h) => {
+    fill(ctx, [[-22, n], [22, n], [26, h - 4], [-26, h - 4]], W, 0.4);
+    for (const sd of [-1, 1]) {
+      stroke(ctx, [[sd * 22, n], [sd * 26, h - 4]], { w: 8 });
+      for (let i = 1; i <= 3; i++) stroke(ctx, [[sd * 26, n + i * 45], [sd * 66, n + i * 45]], { w: 5, color: '#777' });
+      stroke(ctx, [[sd * 46, n + 10], [sd * 48, h - 8]], { w: 5, color: '#777' });
+    }
+  };
+  const collarShirt = (ctx, n, h) => {
+    for (const sd of [-1, 1]) { const col = [[sd * 4, n + 2], [sd * 44, n - 2], [sd * 28, n + 44]]; fill(ctx, col, W, 0.3); outline(ctx, col, { w: 7 }); }
+    stroke(ctx, [[0, n + 20], [0, h - 8]], { w: 5 });
+    for (let i = 0; i < 3; i++) blob(ctx, 10, n + 60 + i * 40, 5, 5, { fill: W, w: 4, n: 6 });
+  };
+  const jacket = (ctx, n, h) => {
+    fill(ctx, [[-24, n], [24, n], [28, h - 4], [-28, h - 4]], W, 0.4);
+    for (const sd of [-1, 1]) {
+      stroke(ctx, [[sd * 24, n], [sd * 28, h - 4]], { w: 8 });
+      outline(ctx, [[sd * 30, n], [sd * 58, n + 50], [sd * 34, n + 70]], { w: 7 });
+    }
+  };
+  const chinStubble = ctx => {
+    for (let i = 0; i < 110; i++) {
+      const a = Math.PI * (0.18 + 0.64 * hh(i + 3)), r = 0.8 + 0.18 * hh(i + 60);
+      const x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r;
+      if (y < RY * 0.5) continue;
+      blob(ctx, x, y, 2.4, 2.4, { fill: '#555', w: 0, n: 5 });
+    }
+  };
+  const fullBeard = ctx => {
+    const outer = [];
+    for (let i = 0; i <= 12; i++) {
+      const a = Math.PI * (0.04 + 0.92 * i / 12);
+      outer.push([Math.cos(a) * 1.02, Math.sin(a) * 1.04]);
+    }
+    const bumps = [];
+    for (let i = 0; i < outer.length - 1; i++) bumps.push(...scallop(outer[i], outer[i + 1], 1, 0.06));
+    const inner = [[-0.98, 0.08], [-0.86, 0.34], [-0.62, 0.46], [-0.34, 0.36], [0, 0.32], [0.34, 0.36], [0.62, 0.46], [0.86, 0.34], [0.98, 0.08]];
+    const poly = hu([...bumps, outer[outer.length - 1], ...inner]);
+    fill(ctx, poly, '#d6d6d6', 1); outline(ctx, poly, { w: 10 });
+    for (const x of [-0.5, 0, 0.5]) stroke(ctx, hu([[x, 0.62], [x * 1.05, 0.84]]), { w: 5, color: '#888' });
+  };
+
+  // 1. short curly mop
+  const curlyMop = outlineHair(
+    [...scallop([-0.98, -0.2], [-0.92, -0.9], 2, 0.12), ...scallop([-0.92, -0.9], [0, -1.3], 3, 0.14),
+     ...scallop([0, -1.3], [0.92, -0.9], 3, 0.14), ...scallop([0.92, -0.9], [0.98, -0.2], 2, 0.12), [0.98, -0.2]],
+    [[0.88, -0.3], [0.78, -0.5], ...scallop([0.66, -0.6], [-0.66, -0.6], 4, 0.1), [-0.78, -0.5], [-0.88, -0.3]],
+    [[[-0.46, -1.0], [-0.32, -1.08], [-0.2, -1.0]], [[0.2, -1.02], [0.34, -1.1], [0.46, -1.02]]]);
+  // 2. tall quiff with sideburns
+  const quiff = outlineHair(
+    [[-0.96, 0.08], [-1.0, -0.2], [-1.04, -0.64], [-0.8, -1.02], [-0.3, -1.26], [0.3, -1.42], [0.9, -1.32], [1.2, -1.12],
+     [0.98, -0.92], [1.02, -0.5], [0.98, -0.2], [0.96, 0.08]],
+    [[0.86, 0.08], [0.86, -0.3], [0.7, -0.6], [0.3, -0.74], [-0.2, -0.72], [-0.6, -0.62], [-0.86, -0.3], [-0.86, 0.08]],
+    [[[-0.4, -0.92], [0.2, -1.2], [0.9, -1.16]], [[-0.1, -0.8], [0.4, -1.02], [0.96, -1.02]]]);
+  // 3. messy spikes (with chin stubble)
+  const messySpikes = outlineHair(
+    [[-0.98, -0.16], [-1.12, -0.6], [-0.96, -0.74], [-1.1, -1.0], [-0.72, -1.04], [-0.68, -1.3], [-0.36, -1.14], [-0.14, -1.42],
+     [0.06, -1.14], [0.36, -1.36], [0.46, -1.1], [0.84, -1.2], [0.82, -0.94], [1.14, -0.84], [1.0, -0.6], [0.98, -0.16]],
+    [[0.88, -0.24], [0.76, -0.52], [0.56, -0.46], [0.42, -0.68], [0.2, -0.5], [0.02, -0.7], [-0.18, -0.52], [-0.36, -0.7],
+     [-0.56, -0.5], [-0.72, -0.62], [-0.88, -0.24]],
+    [[[-0.44, -0.86], [-0.34, -1.12]], [[0.26, -0.86], [0.34, -1.12]]]);
+  // 4. beanie with tufts poking out at the sides
+  const beanie = ctx => {
+    for (const sd of [-1, 1]) {
+      const t = hu([[sd * 0.9, -0.5], [sd * 1.08, -0.3], [sd * 0.96, -0.3], [sd * 1.04, -0.1], [sd * 0.88, -0.2]]);
+      fill(ctx, t, W, 0.4); outline(ctx, t, { w: 8 });
+    }
+    const dome = [[-1.04, -0.5]];
+    for (let i = 0; i <= 12; i++) { const a = Math.PI * (1.08 + 0.84 * i / 12); dome.push([Math.cos(a) * 1.04, Math.sin(a) * 1.32 - 0.16]); }
+    dome.push([1.04, -0.5]);
+    fill(ctx, hu(dome), '#cfcfcf', 1); outline(ctx, hu(dome), { w: 11 });
+    const band = hu([[-1.06, -0.42], [-0.5, -0.56], [0.5, -0.56], [1.06, -0.42], [1.06, -0.7], [0.5, -0.84], [-0.5, -0.84], [-1.06, -0.7]]);
+    fill(ctx, band, '#a8a8a8', 0.6); outline(ctx, band, { w: 10 });
+    for (let i = -4; i <= 4; i++) stroke(ctx, hu([[i * 0.22, -0.8 + Math.abs(i) * 0.015], [i * 0.22, -0.58 + Math.abs(i) * 0.02]]), { w: 5, color: '#777' });
+  };
+  // 5. neat side part (with round glasses)
+  const neatPart = outlineHair(
+    [[-0.96, -0.2], [-1.02, -0.66], [-0.78, -1.04], [-0.2, -1.22], [0.4, -1.2], [0.86, -0.98], [1.02, -0.6], [0.96, -0.2]],
+    [[0.86, -0.3], [0.8, -0.56], [0.5, -0.7], [0.1, -0.72], [-0.3, -0.66], [-0.4, -0.88], [-0.5, -0.62], [-0.86, -0.3]],
+    [[[-0.42, -0.92], [-0.46, -1.12]], [[-0.26, -0.9], [0.3, -1.06], [0.84, -0.8]]]);
+  // 6. shaggy middle part to the jaw (with a full beard)
+  const shaggy = outlineHair(
+    [[-1.02, 0.4], [-1.14, 0.3], ...wavyEdge([-1.12, 0.2], [-1.1, -0.5], 3, 0.05), [-0.9, -0.96], [-0.4, -1.2], [0, -1.24],
+     [0.4, -1.2], [0.9, -0.96], ...wavyEdge([1.1, -0.5], [1.12, 0.2], 3, 0.05), [1.14, 0.3], [1.02, 0.4]],
+    [[0.9, 0.3], [0.9, -0.2], [0.8, -0.46], [0.5, -0.6], [0.16, -0.72], [0, -0.86], [-0.16, -0.72], [-0.5, -0.6], [-0.8, -0.46], [-0.9, -0.2], [-0.9, 0.3]],
+    [[[0.04, -1.1], [0.5, -0.96], [0.96, -0.4]], [[-0.04, -1.1], [-0.5, -0.96], [-0.96, -0.4]]]);
+
+  const men = {
+    curly: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ears, hair: curlyMop }), detail: pocketTee }),
+    quiff: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', head: head({ back: ears, hair: quiff }), detail: flannel }),
+    spikes: build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: head({ back: ears, hair: messySpikes, beard: chinStubble }), detail: hoodieFront }),
+    beanie: build({ shirt: INK, sleeve: '#222', head: head({ back: ears, hair: beanie }), detail: jacket }),
+    glasses: build({ shirt: W, head: head({ back: ears, hair: neatPart, front: roundGlasses }), detail: collarShirt }),
+    beard: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', sleeveHem: 0.42, head: head({ hair: shaggy, beard: fullBeard }), detail: collarTee }),
+  };
+
+  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, men, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
