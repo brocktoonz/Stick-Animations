@@ -83,20 +83,24 @@ Skits.eyedoctor = (() => {
   }
 
   // The doctor popping up inside the view: bald, head mirror, big grin, glove up.
+  // scream (0..1) comes from the audio: the mouth snaps open and holds while
+  // it is loud, and the head stretches down with the jaw and tips back.
   function doctor(ctx, x, y, s, windup, scream = 0) {
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    const jaw = 40 * scream;
     panel(ctx, [[-170, 120], [170, 120], [210, 420], [-210, 420]], W);           // white coat shoulders
     outline(ctx, [[-60, 120], [0, 230], [-40, 280]], { w: 8 });
     outline(ctx, [[60, 120], [0, 230], [40, 280]], { w: 8 });
-    const head = Brush.ellipsePts(0, 0, 150, 140, 18);
+    ctx.save(); ctx.rotate(-0.1 * scream);                                        // head tips back
+    const head = Brush.ellipsePts(0, jaw * 0.5, 150 - jaw * 0.2, 140 + jaw * 0.5, 18);
     fill(ctx, head, W, 0.5); outline(ctx, head, { w: 11 });
     for (const sd of [-1, 1]) fill(ctx, [[sd * 150, -10], [sd * 158, -70], [sd * 120, -60], [sd * 128, 20]], INK, 0.6);   // side hair
     stroke(ctx, [[-140, -80], [0, -120], [140, -80]], { w: 10 });                // head-mirror band
     blob(ctx, 0, -110, 38, 38, { fill: '#e6e6e6', w: 8, n: 12 });
     Chars.eyes(ctx, 0, -10, { lid: 0.2, pupil: 9 }, 0.85);
-    Chars.brows(ctx, 0, -64, { brow: 0.8 }, 0.9, 10);
-    Chars.mouth(ctx, 0, 60, scream > 0 ? { mouth: 'yell', open: scream } : { mouth: 'grin', open: 0.4 }, 0.9);
-    ctx.restore();
+    Chars.brows(ctx, 0, -64 - jaw * 0.3, { brow: 0.8 }, 0.9, 10);
+    Chars.mouth(ctx, 6, 56 + jaw * 0.4, scream > 0 ? { mouth: 'yell', open: scream * 0.8 } : { mouth: 'grin', open: 0.4 }, 0.9);
+    ctx.restore(); ctx.restore();
     glove(ctx, x + s * lerp(200, 150, windup), y + s * lerp(-60, 40, windup), s * 0.9, lerp(-0.5, -0.9, windup));
   }
 
@@ -143,12 +147,12 @@ Skits.eyedoctor = (() => {
     const pop = easeOutBack(seg(t, 3.4, 3.52));
     const wind = easeInOut(seg(t, 3.52, 3.7));
     const hit = seg(t, 3.7, 3.88);
-    const scream = t > 3.46 ? 0.7 + 0.3 * Math.abs(Math.sin(t * 30)) : 0;
+    const scream = t > 3.44 ? Stage.clamp(0.3 + 0.9 * Stage.loud('eyedoctor', t), 0, 1) : 0;   // follows the audio
     ctx.save();
     if (hit > 0) shake(ctx, 40 * (1 - hit * 0.5), 13);
     povFrame(ctx, () => {
       balloonScene(ctx, 1);
-      if (hit === 0) doctor(ctx, lerp(1250, 720, pop) + (scream ? Math.sin(t * 60) * 6 : 0), 1340, 0.9, wind, scream);   // slides in from the right, beside the balloon
+      if (hit === 0) doctor(ctx, lerp(1250, 720, pop), 1340, 0.9, wind, scream);   // slides in from the right, beside the balloon
     });
     if (hit > 0) {   // the glove rushes the lens and fills the frame
       const s = lerp(1.2, 9, easeOut(Math.min(1, hit * 1.6)));

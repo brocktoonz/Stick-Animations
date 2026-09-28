@@ -3,6 +3,8 @@
 Proof-of-concept toolchain for producing short, captioned stick-figure
 animations for social media (9:16, 1080x1920, 30 fps), driven by a voice track.
 
+See [STYLE.md](STYLE.md) for the house style rules every skit follows.
+
 ## Brush-ink renderer (web/)
 
 The main renderer. It draws a Nutshell-style skit frame by frame in an HTML

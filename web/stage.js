@@ -22,6 +22,14 @@ const Stage = (() => {
     const viz = LipSync.shape(text, t0, t1, t, o);
     return viz ? { mouth: 'talk', viz } : {};
   };
+  // Loudness of a baked audio envelope (scripts/envelope.py) at time t, 0..1.
+  // Drive wordless reactions (screams, gasps) from this, never from a sine wave.
+  const loud = (name, t) => {
+    const v = globalThis.Envelopes?.[name];
+    if (!v) return 0;
+    const f = clamp(t * FPS, 0, v.length - 1), i = Math.floor(f);
+    return lerp(v[i], v[Math.min(i + 1, v.length - 1)], f - i);
+  };
   // Blink (lid = 1) for ~0.12 s every `every` seconds, offset by `phase`.
   const blink = (t, every = 3.1, phase = 0) => ((t + phase) % every) < 0.12 ? 1 : 0;
 
@@ -303,7 +311,7 @@ const Stage = (() => {
   }
 
   return {
-    W, H, FPS, FLOOR, SAFE, clamp, seg, lerp, mix, easeInOut, easeOut, easeOutBack, say, blink,
+    W, H, FPS, FLOOR, SAFE, clamp, seg, lerp, mix, easeInOut, easeOut, easeOutBack, say, loud, blink,
     text, title, bottomFade, bubble, burst, wash, shake, speedLines, exclaim,
     floor, picture, lamp, livingRoom, phone, broom, bill, book, thermostat, couch, kitchen, lightSwitch, ceilingLamp, frame,
   };
