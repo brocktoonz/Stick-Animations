@@ -8,9 +8,9 @@ Skits.eyedoctor = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { seg, lerp, easeInOut, easeOut, easeOutBack, blink, shake, burst } = Stage;
   const W = '#fff', RED = '#d9261c';
-  const HEAD = 452;                    // feet-to-head-centre of the main character (unscaled)
-  const X = 540, S = 2.0, EYE_Y = 1090;
-  const Y = EYE_Y + 448 * S;           // his feet, so the eyes land at EYE_Y
+  const HEAD = 438;                    // feet-to-head-centre of the main character (unscaled)
+  const X = 540, S = 2.0, EYE_Y = 1036;
+  const Y = EYE_Y + (HEAD + 6) * S;   // his feet, so the eyes land at EYE_Y
   const MTOP = 1150;                   // top edge of the machine's back
 
   // A box with extra points along each edge so the brush spline keeps it straight.
@@ -170,7 +170,6 @@ Skits.eyedoctor = (() => {
     chairBack(ctx);
     const s = lerp(S, 0.12, e), x = lerp(X, 260, e), y = lerp(Y, 800 + HEAD * 0.12, e);
     if (k < 0.97) {
-      Stage.speedLines(ctx, x + 60 * s, y - HEAD * s + 200 * s, 500 * s, -1, 7);
       const cy = y - 300 * s;   // spin around the middle of his body
       ctx.save(); ctx.translate(x, cy); ctx.rotate(-k * 9); ctx.translate(-x, -cy);
       Hero.main(ctx, { x, y, s, pupil: 6, brow: -1, mouth: 'yell', open: 0.9,
