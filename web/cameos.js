@@ -43,7 +43,7 @@ const Cameos = (() => {
       blob(ctx, 0, 0, RX, RY, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
       o.beard?.(ctx);
       o.hair?.(ctx);
-      eyes(ctx, fx, -6, p);
+      eyes(ctx, fx, -6, p, 1, !!o.lashes);
       brows(ctx, fx, -62, p, 1, o.browW ?? 9);
       mouth(ctx, fx + 4, 62, p);
       o.front?.(ctx, fx);
@@ -657,5 +657,70 @@ const Cameos = (() => {
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
   // parts: the shared build/head builders, for other adult characters (hero.js)
-  return { speed, ludwig, beast, nick, slime, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  // ---------- Original characters (outline-style hair, per the hair reference sheets) ----------
+  const collarTee = (ctx, n, color = INK) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color });
+  const stripes = (ctx, n, h) => {
+    collarTee(ctx, n);
+    for (let y = n + 60; y < h - 10; y += 46) stroke(ctx, [[-66, y], [66, y + 2]], { w: 12 });
+  };
+  const hoodieFront = (ctx, n, h) => {
+    stroke(ctx, [[-50, n + 2], [-30, n + 30], [0, n + 38], [30, n + 30], [50, n + 2]], { w: 9 });
+    stroke(ctx, [[-16, n + 32], [-18, n + 110]], { w: 7 });
+    stroke(ctx, [[16, n + 32], [18, n + 110]], { w: 7 });
+    stroke(ctx, [[-44, h - 60], [-30, h - 90], [30, h - 90], [44, h - 60]], { w: 7 });
+  };
+  const cardigan = (ctx, n, h) => {
+    fill(ctx, [[-26, n], [26, n], [30, h - 4], [-30, h - 4]], W, 0.4);
+    for (const sd of [-1, 1]) {
+      stroke(ctx, [[sd * 26, n], [sd * 30, h - 4]], { w: 8 });
+      for (let i = 0; i < 3; i++) blob(ctx, sd * 40, n + 60 + i * 40, 5, 5, { fill: W, w: 4, n: 6 });
+    }
+  };
+
+  // 1. Curly top: soft curls on top, ears showing, striped tee
+  const curlyTop = outlineHair(
+    [...wavyEdge([-0.98, -0.2], [-0.84, -0.98], 3, 0.08), ...wavyEdge([-0.62, -1.16], [0.62, -1.16], 6, 0.1),
+     ...wavyEdge([0.84, -0.98], [0.98, -0.2], 3, 0.08)],
+    [[0.9, -0.3], [0.76, -0.5], ...wavyEdge([0.6, -0.56], [-0.6, -0.56], 6, 0.07), [-0.76, -0.5], [-0.9, -0.3]],
+    [[[-0.4, -0.94], [-0.28, -1.02], [-0.18, -0.92], [-0.26, -0.84]], [[0.2, -0.96], [0.34, -1.02], [0.44, -0.92], [0.36, -0.84]]]);
+
+  // 2. High bun with a side-swept fringe, lashes, cardigan
+  const bunBack = ctx => {
+    const b = Brush.ellipsePts(RX * 0.05, -RY * 1.3, 52, 46, 14);
+    fill(ctx, b, W, 0.5); outline(ctx, b, { w: 10 });
+    stroke(ctx, hu([[-0.14, -1.34], [0.02, -1.44], [0.2, -1.36]]), { w: 6 });
+  };
+  const bunFront = outlineHair(
+    [[-1.0, 0.1], [-1.08, -0.5], [-0.82, -1.0], [-0.3, -1.18], [0.3, -1.18], [0.82, -1.0], [1.08, -0.5], [1.0, 0.1]],
+    [[0.9, 0.0], [0.86, -0.4], [0.64, -0.62], [0.36, -0.6], [0.16, -0.74], [-0.14, -0.58], [-0.46, -0.46], [-0.74, -0.3], [-0.9, 0.0]],
+    [[[0.16, -0.8], [0.1, -1.0], [0.04, -1.12]], [[-0.3, -0.64], [-0.5, -0.9], [-0.28, -1.12]], [[0.56, -0.7], [0.62, -0.92], [0.34, -1.1]]]);
+
+  // 3. Messy spikes, hoodie
+  const spikes = outlineHair(
+    [[-0.98, -0.1], [-1.1, -0.55], [-1.0, -0.8], [-1.22, -0.96], [-0.82, -1.06], [-0.86, -1.32], [-0.46, -1.2], [-0.3, -1.5],
+     [0, -1.26], [0.26, -1.52], [0.46, -1.22], [0.86, -1.36], [0.8, -1.06], [1.22, -0.96], [1.0, -0.8], [1.1, -0.55], [0.98, -0.1]],
+    [[0.88, -0.2], [0.8, -0.5], [0.6, -0.44], [0.5, -0.66], [0.3, -0.5], [0.15, -0.7], [-0.05, -0.5], [-0.2, -0.7],
+     [-0.4, -0.48], [-0.55, -0.66], [-0.75, -0.46], [-0.88, -0.2]],
+    [[[-0.3, -0.8], [-0.2, -1.1]], [[0.3, -0.8], [0.22, -1.1]]]);
+
+  // 4. Wavy shoulder length with bangs (same one-silhouette method as Nick)
+  const BANGS = [
+    [[-1.04, 1.1], [-1.22, 1.02], ...wavyEdge([-1.16, 0.8], [-1.12, -0.36], 4, 0.07), [-0.96, -0.86],
+     [-0.5, -1.18], [0, -1.24], [0.5, -1.18], [0.96, -0.86],
+     ...wavyEdge([1.12, -0.36], [1.16, 0.8], 4, 0.07), [1.22, 1.02], [1.04, 1.1]],
+    [[0.9, 0.96], ...wavyEdge([0.94, 0.5], [0.9, -0.1], 2, 0.04), [0.82, -0.32], [0.7, -0.42], [0.5, -0.38], [0.3, -0.46],
+     [0.1, -0.38], [-0.1, -0.46], [-0.3, -0.38], [-0.5, -0.46], [-0.7, -0.4], [-0.82, -0.32],
+     ...wavyEdge([-0.9, -0.1], [-0.94, 0.5], 2, 0.04), [-0.9, 0.96]],
+    [[[-0.1, -1.1], [-0.6, -0.9], [-1.0, -0.4]], [[0.1, -1.1], [0.6, -0.9], [1.0, -0.4]]],
+  ];
+
+  const originals = {
+    curly: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ears, hair: curlyTop }), detail: stripes }),
+    bun: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', head: head({ back: bunBack, hair: bunFront, lashes: true }), detail: cardigan }),
+    spiky: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: spikes }), detail: hoodieFront }),
+    wavy: build({ shirt: INK, sleeve: '#222', behind: hairSilhouette({ len: 1.12, wide: 1.28, flick: 0.1, waves: 5 }),
+      head: head({ hair: outlineHair(...BANGS, W, { seamless: true }), lashes: true }), detail: (ctx, n) => collarTee(ctx, n, W) }),
+  };
+
+  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, nickAlts, nickFlow, nickOutline, nickBack, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
