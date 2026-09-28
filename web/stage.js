@@ -37,12 +37,19 @@ const Stage = (() => {
     });
   }
 
+  // Largest font size <= size at which str fits in maxW.
+  function fitSize(ctx, str, size, maxW) {
+    ctx.font = `${size}px "Luckiest Guy"`;
+    const w = ctx.measureText(str).width;
+    return w > maxW ? Math.floor(size * maxW / w) : size;
+  }
+
   // The "XS BE LIKE:" header band.
   function title(ctx, main, sub) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, W, 330);
-    text(ctx, main, W / 2, 150, 124, 'Luckiest Guy', '#e3261b');
-    if (sub) text(ctx, sub, W / 2, 262, 52, 'Luckiest Guy', INK);
+    text(ctx, main, W / 2, 150, fitSize(ctx, main, 124, W - 80), 'Luckiest Guy', '#e3261b');
+    if (sub) text(ctx, sub, W / 2, 262, fitSize(ctx, sub, 52, W - 80), 'Luckiest Guy', INK);
   }
 
   function bottomFade(ctx) {
