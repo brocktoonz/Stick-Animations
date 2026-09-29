@@ -27,6 +27,7 @@ const Emotions = (() => {
     return { ['arm' + k]: r.at, ['bend' + k]: r.bend, ...(front ? { ['arm' + k + 'Front']: true } : {}) };
   };
   const both = (hand, elbow, front) => ({ ...arm(-1, [-hand[0], hand[1]], elbow, front), ...arm(1, hand, elbow, front) });
+  globalThis.Arms = { arm, both };   // for one-off arm poses in skits, with the same fixed-length arms
 
   const E = {
     neutral:   { mouth: 'flat' },
