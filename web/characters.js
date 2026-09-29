@@ -172,32 +172,48 @@ const Chars = (() => {
 
   // Speaking mouth drawn from a LipSync shape (see lipsync.js), so it can
   // morph continuously between shapes. `color` tints the lip line (Mom).
+  // Speaking mouth: one of a few simple drawings chosen by LipSync.shape
+  // (v.kind), swapped rather than morphed. `color` tints the outline (Mom).
   function talkMouth(ctx, x, y, v, s, color) {
-    const boost = 0.85 + 0.15 * Math.min(1.6, v.intensity ?? 1);
-    const w = (22 + 32 * v.width) * s * (1 - 0.4 * v.round) * boost;
-    const h = (5 + 70 * v.open) * s;
-    const lift = (v.smile ?? 0) * 12 * s;
-    if (h < 11 * s) {   // closed or pressed lips
-      stroke(ctx, [[x - w, y - lift], [x, y + 3 * s * (1 - v.round)], [x + w, y - lift]], { w: 7 * s, color });
-      return;
+    if (!v.kind) v = { kind: v.open > 0.6 ? 'open' : v.open > 0.2 ? 'small' : 'closed', smile: v.smile };
+    const lift = (v.smile ?? 0) * 8 * s;
+    const tongue = (cx, cy, rx, ry) => { ctx.fillStyle = '#9a9a9a'; ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 7); ctx.fill(); };
+    const clipTo = pts => { ctx.save(); ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (const q of Brush.spline(pts, true, 5)) ctx.lineTo(q[0], q[1]); ctx.clip(); };
+    switch (v.kind) {
+      case 'closed':
+        stroke(ctx, [[x - 22 * s, y - lift], [x, y + 2 * s], [x + 22 * s, y - lift]], { w: 7 * s, color });
+        return;
+      case 'teeth': {
+        const w = 30 * s, h = 13 * s;
+        const pts = [[x - w, y - lift - h * 0.6], [x, y - h * 0.8], [x + w, y - lift - h * 0.6], [x + w * 1.05, y], [x + w, y + h * 0.7], [x, y + h * 0.9], [x - w, y + h * 0.7], [x - w * 1.05, y]];
+        fill(ctx, pts, W, 0.3);
+        stroke(ctx, [[x - w * 0.9, y], [x + w * 0.9, y + 1 * s]], { w: 4 * s, color });
+        for (const dx of [-0.35, 0.35]) stroke(ctx, [[x + dx * w, y - h * 0.6], [x + dx * w, y + h * 0.6]], { w: 3 * s, color });
+        outline(ctx, pts, { w: 6 * s, jit: 0.5, color });
+        return;
+      }
+      case 'small': {
+        const pts = Brush.ellipsePts(x, y + 6 * s, 13 * s, 16 * s, 10);
+        fill(ctx, pts, INK, 0.3);
+        clipTo(pts); tongue(x, y + 20 * s, 9 * s, 6 * s); ctx.restore();
+        outline(ctx, pts, { w: 5 * s, jit: 0.5, color });
+        return;
+      }
+      default: {   // open / wide: dark D shape, flat top, round bottom
+        const wide = v.kind === 'wide';
+        const w = (wide ? 40 : 28) * s, h = (wide ? 56 : 36) * s;
+        const pts = [[x - w, y - lift], [x - w * 0.4, y - 4 * s], [x + w * 0.4, y - 4 * s], [x + w, y - lift],
+                     [x + w * 0.8, y + h * 0.6], [x, y + h], [x - w * 0.8, y + h * 0.6]];
+        fill(ctx, pts, INK, 0.5);
+        clipTo(pts);
+        if (wide) { ctx.fillStyle = W; ctx.fillRect(x - w, y - 8 * s, w * 2, 16 * s); }
+        tongue(x + 4 * s, y + h * 0.95, w * 0.55, h * 0.3);
+        ctx.restore();
+        outline(ctx, pts, { w: 6 * s, jit: 0.6, color });
+      }
     }
-    const top = -h * (0.1 + 0.25 * v.round);
-    const pts = [[x - w, y - lift], [x - w * 0.45, y + top], [x + w * 0.45, y + top], [x + w, y - lift],
-                 [x + w * (0.75 - 0.15 * v.round), y + h * 0.55], [x, y + h], [x - w * (0.75 - 0.15 * v.round), y + h * 0.55]];
-    fill(ctx, pts, INK, 0.8);
-    ctx.save();
-    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
-    for (const q of Brush.spline(pts, true, 5)) ctx.lineTo(q[0], q[1]);
-    ctx.clip();
-    const teethH = Math.min(h * (v.lip > 0.5 ? 0.6 : 0.32), 18 * s);
-    if (v.teeth > 0.5) { ctx.fillStyle = W; ctx.fillRect(x - w, y + top - 4 * s, w * 2, teethH + 4 * s - top * 0.2); }
-    ctx.fillStyle = '#9a9a9a';
-    if (v.tongue > 0.5) { ctx.beginPath(); ctx.ellipse(x, y + top + teethH + h * 0.2, w * 0.5, h * 0.22, 0, 0, 7); ctx.fill(); }
-    else if (v.open > 0.45) { ctx.beginPath(); ctx.ellipse(x + 4 * s, y + h * 0.95, w * 0.55, h * 0.28, 0, 0, 7); ctx.fill(); }
-    ctx.restore();
-    outline(ctx, pts, { w: 6 * s, jit: 0.8, color });
-    if (v.lip > 0.5) stroke(ctx, [[x - w * 0.8, y + teethH * 0.8], [x, y + teethH], [x + w * 0.8, y + teethH * 0.8]], { w: 7 * s, color });
   }
+
 
   // kinds: flat | smile | smirk | o | wobbly | yell | rage | tiny | grinwide | bigsmile | gape | grimace | grin | frown | talk (uses p.viz)
   function mouth(ctx, x, y, p, size = 1, color = INK) {

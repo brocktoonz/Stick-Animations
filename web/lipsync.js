@@ -1,7 +1,6 @@
-// Text-driven lip sync. A line of dialogue becomes a sequence of mouth shapes
-// ("visemes") spread across the time it is spoken. Shapes are numbers, not
-// drawings, so the mouth blends smoothly from one to the next instead of
-// snapping between a few fixed pictures.
+// Text-driven lip sync. LipSync.shape (the default) is swap-style: a few
+// simple mouth drawings that snap per syllable, on threes. LipSync.morph is
+// the older continuous viseme blend, kept for reference.
 //
 // Shape fields (all 0..1): open (jaw), width, round (lips pushed forward),
 // teeth (top teeth showing), lip (teeth on lower lip: f/v), tongue (tongue up: l/th).
@@ -86,5 +85,64 @@ const LipSync = (() => {
     return out;
   }
 
-  return { shape, plan, VISEMES: V };
+  // ---------- swap lip sync (the default) ----------
+  // Cartoon-style talking, as in stick-figure channels: a handful of simple
+  // mouth drawings that SNAP from one to the next (no morphing), one per
+  // syllable, changing at most every 3 frames (animating "on threes").
+  //   closed: a short line     teeth: clenched, white with a centre line
+  //   small:  a little dark O  open:  dark D shape with a tongue
+  //   wide:   big yell, top teeth + tongue (loud lines only)
+  const OPEN = { closed: 0, teeth: 0.2, small: 0.3, open: 0.6, wide: 1 };
+  function syllables(text, loud) {
+    const out = [];
+    const words = text.toLowerCase().split(/(\s+|[,.!?;:…-]+)/);
+    for (const w of words) {
+      if (!w) continue;
+      if (/^[,.!?;:…-]+$/.test(w)) { out.push({ kind: 'closed', w: 1.4 }); continue; }
+      if (/^\s+$/.test(w)) { out.push({ kind: 'gap', w: 0.15 }); continue; }
+      const letters = w.replace(/[^a-z0-9']/g, '').replace(/(^|[^aeiou])y(?=[aeiou])/g, '$1j');   // y before a vowel is a consonant
+      // onset consonants + vowel group = one syllable
+      const re = /([^aeiouy]*)([aeiouy]+|$)/g;
+      let m, any = false;
+      while ((m = re.exec(letters)) && m[0]) {
+        const [, onset, nuc] = m;
+        if (!nuc) { if (!any) out.push({ kind: 'teeth', w: 0.8 }); break; }   // no vowel: "hm", "mm"
+        any = true;
+        let kind = /^(o|u|oo|ou|ow)/.test(nuc) || /w$/.test(onset) ? 'small'
+                 : /^(e|y|ee|ea|ie)/.test(nuc) ? 'teeth' : 'open';
+        if (loud && kind === 'open') kind = 'wide';
+        const lips = /[mbp]$/.test(onset) ? 'closed' : /[fv]$/.test(onset) ? 'teeth' : null;
+        out.push({ kind, lips, w: 1 + 0.25 * (nuc.length - 1) });
+      }
+    }
+    return out;
+  }
+  const swapCache = new Map();
+  const STEP = 3 / 30;   // hold each drawing at least 3 frames
+  function swap(text, t0, t1, t, o = {}) {
+    if (t < t0 || t > t1) return null;
+    const loud = (o.intensity ?? 1) > 1.3;
+    const key = text + (loud ? '!' : '');
+    let syl = swapCache.get(key);
+    if (!syl) { syl = syllables(text, loud); swapCache.set(key, syl); }
+    const tq = t0 + Math.floor((t - t0) / STEP) * STEP;          // on threes
+    let kind = 'closed';
+    if (t1 - tq > STEP) {                                          // close on the last beat
+      const total = syl.reduce((a, s) => a + s.w, 0) || 1;
+      const u = ((tq - t0) / (t1 - t0)) * total;
+      let acc = 0, i = 0;
+      while (i < syl.length - 1 && acc + syl[i].w <= u) { acc += syl[i].w; i++; }
+      const sy = syl[i], slotT = (sy.w / total) * (t1 - t0);
+      if (sy.kind === 'gap') kind = syl[i - 1]?.kind === 'closed' ? 'closed' : (syl[i - 1]?.kind ?? 'closed');
+      else if (sy.lips && (u - acc) / sy.w * slotT < STEP && slotT >= STEP * 2) kind = sy.lips;   // m/b/p, f/v lead-in
+      else kind = sy.kind;
+      // the same drawing twice in a row reads as a freeze: alternate it
+      const prev = syl[i - 1];
+      if (prev && prev.kind === kind && (u - acc) / sy.w < 0.5 && kind !== 'closed')
+        kind = kind === 'open' || kind === 'wide' ? 'small' : 'open';
+    }
+    return { kind, open: OPEN[kind], intensity: o.intensity ?? 1, smile: o.smile ?? 0 };
+  }
+
+  return { shape: swap, morph: shape, plan, VISEMES: V };
 })();
