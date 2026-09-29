@@ -34,7 +34,8 @@ Skits.extinct = (() => {
     [22.2, 23.2, SLIME, 'thats why he sent\nthe meteor'],
   ];
   // a caption holds through gaps under 0.15 s so it doesn't blink off between lines
-  const line = t => LINES.find(([a, b], i) => t >= a && (t < b || (LINES[i + 1] && t < LINES[i + 1][0] && LINES[i + 1][0] - b < 0.15)));
+  const cutIn = (a, b) => shots.some(([s0]) => s0 > a && s0 <= b);   // a shot cut inside (a, b]
+  const line = t => LINES.find(([a, b], i) => t >= a && (t < b || (LINES[i + 1] && t < LINES[i + 1][0] && LINES[i + 1][0] - b < 0.15 && !cutIn(b, t))));
   // lip sync for whoever is talking in [a, b]
   const talk = (t, a, b, text, o) => say(t, a, b, text.replace(/\n/g, ' ').replace(/\*/g, 'u'), o);
   const talkLine = (t, i, o) => talk(t, LINES[i][0], LINES[i][1], LINES[i][3], o);
@@ -199,10 +200,12 @@ Skits.extinct = (() => {
     return (hh(b + seed * 17) > 0.5 ? 1 : -1) * (0.8 + 0.2 * hh(b + 3));   // always a clear bend
   }
   function acting(p, t, seed) {
-    const base = { bob: Math.sin(t * 2.3 + seed) * 3, weight: stance(t, seed) };
-    if (p.mouth !== 'talk') return base;
-    const beat = Math.floor(t * 1.8 + seed);
-    return { ...base, lean: 0.05 + 0.03 * (hh(beat) - 0.5), tilt: (p.tilt ?? 0) + 0.09 * (hh(beat + 9) - 0.5) };
+    // lean and head tilt are always on (held per beat, changing only on a
+    // beat), so nothing pops when a line starts or ends
+    const beat = Math.floor(t * 1.8 + seed), talking = p.mouth === 'talk';
+    return { bob: Math.sin(t * 2.3 + seed) * 3, weight: stance(t, seed),
+             lean: 0.04 + (talking ? 0.03 * (hh(beat) - 0.5) : 0),
+             tilt: (p.tilt ?? 0) + (talking ? 0.09 * (hh(beat + 9) - 0.5) : 0) };
   }
   // Eyelines: Nick is always screen-left facing right (dir 1), Ludwig always
   // screen-right facing left (dir -1). Never flipped.
@@ -261,7 +264,7 @@ Skits.extinct = (() => {
     if (who === 'nick') sx = Math.max(400, g.half * sc + 40);
     else sx = Math.min(640, 1050 - g.half * sc) - g.offset * sc;
     // eyeline: pupils toward the other character (across the frame), never at camera
-    pose = { ...pose, lookX: Math.max(who === 'nick' ? 0.95 : 0.7, pose.lookX ?? 0), lookY: Math.max(-0.2, Math.min(0.2, pose.lookY ?? 0)) };
+    pose = { ...pose, lookX: Math.max(who === 'nick' ? 0.95 : 0.8, pose.lookX ?? 0), lookY: Math.max(-0.2, Math.min(0.2, pose.lookY ?? 0)), ...((pose.pupil ?? 13) > 11 ? { pupil: 10 } : {}) };
     const wx = who === 'nick' ? NX : LX, wy = FLOOR - g.head * (pose.s ?? S);
     ctx.save(); cam(ctx, wx - (sx - 540) / z, wy, z, sy);
     stage(ctx);
@@ -299,8 +302,8 @@ Skits.extinct = (() => {
       // back row: mammoth (left) and T-rex (right), clear of each other; front row: raptor, dodo
       const pops = [[1.8, 225, 0.8, FLOOR - 70, (x, y) => A.mammoth(ctx, { x, y, s: 0.8, t, eyes: 'happy' })],
                     [2.05, 850, 1.0, FLOOR - 80, (x, y) => A.trex(ctx, { x, y, s: 1.0, t, dir: -1, open: 0.6 * seg(t, 2.3, 2.5) })],
-                    [2.3, 385, 0.85, FLOOR + 120, (x, y) => A.dodo(ctx, { x, y, s: 0.85, t })],
-                    [2.55, 620, 0.85, FLOOR + 130, (x, y) => A.raptor(ctx, { x, y, s: 0.85, t, walk: true })]];
+                    [2.3, 330, 0.85, FLOOR + 120, (x, y) => A.dodo(ctx, { x, y, s: 0.85, t })],
+                    [2.55, 720, 0.85, FLOOR + 130, (x, y) => A.raptor(ctx, { x, y, s: 0.85, t, walk: true })]];
       for (const [t0, x, sc, y, draw] of pops) {
         const k = seg(t, t0, t0 + 0.28);
         if (k > 0) shadow(ctx, x, 110 * sc * Math.min(1, k * 2), y + 6);
@@ -320,9 +323,10 @@ Skits.extinct = (() => {
     [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...talkLine(t, 4) })],
     // "give me the other option" (points at him) / "why you don't want that?":
     // fastest stretch, and Ludwig points at Nick, so both in one two-shot
-    [7.0, 8.5, (ctx, t) => twoShot(ctx, t,
-      t < 7.72 ? { ...E.confused, mouth: 'flat' } : { ...E.confused, ...Ar.both([172, -236], 'down'), browLiftL: 0, browLiftR: -10, ...talkLine(t, 6) },
-      t < 7.72 ? { ...E.neutral, pointR: -0.25, ...Ar.arm(1, [160, -330], 'down'), ...Ar.arm(-1, [-112, -176], 'out'), ...talkLine(t, 5) } : { ...E.unimpressed, ...Ar.both([112, -176], 'out') })],
+    [7.0, 7.72, (ctx, t) => twoShot(ctx, t, { ...E.confused, mouth: 'flat' },
+      { ...E.neutral, pointR: -0.25, ...Ar.arm(1, [160, -330], 'down'), ...Ar.arm(-1, [-112, -176], 'out'), ...talkLine(t, 5) })],
+    // "why you don't want that?"
+    [7.72, 8.5, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...Ar.both([172, -236], 'down'), browLiftL: 0, browLiftR: -10, ...talkLine(t, 6) })],
     // "whatever the other option is I'll ... take it": one shot, snapping in on "take it"
     [8.5, 9.45, (ctx, t) => mediumLud(ctx, t, { ...E.smirk, ...Ar.both([90, -200], 'out'), ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it") })],
     // snap in on "take it"
@@ -367,18 +371,19 @@ Skits.extinct = (() => {
       ctx.save(); ctx.translate(0, dy);
       stage(ctx);
       A.wingPig(ctx, { x: 960, y: FLOOR - 700, s: 0.65, t, dir: -1 });
-      shadow(ctx, 950, 55, FLOOR + 44);
-      A.fishLegs(ctx, { x: 950, y: FLOOR + 40, s: 0.8, t, walk: true, dir: -1 });
+      shadow(ctx, 900, 55, FLOOR + 6);
+      A.fishLegs(ctx, { x: 900, y: FLOOR, s: 0.8, t, walk: true, dir: -1 });
       // the dodo stands right at his foot; wind-up, contact at 17.12, then a
       // visible arc off the left edge
       const wind = seg(t, 16.98, 17.08), kick = seg(t, 17.08, 17.14), fly = seg(t, 17.14, 17.5);
       const step = t < 17.08 ? 0.6 * wind : lerp(0.6, -1.5, kick) * (1 - 0.6 * fly);
-      const yell = talkLine(t, 14, { intensity: 1.7 });
-      lud(ctx, { t, x: 640, ...(t < 17.0 ? { ...E.excited, ...talkLine(t, 13, { intensity: 1.4 }) }
-                                          : { ...E.yelling, ...Ar.both([124, -196], 'out'), ...(yell.mouth ? yell : { mouth: 'talk', viz: { kind: 'rest' } }), stretch: 0.5 }),
+      // the yell: big open mouth held for the whole line, following the audio's loudness; jaw drops, head stretches and tips
+      const yellOpen = clamp(0.55 + 0.6 * loud('extinct', t), 0.55, 1);
+      lud(ctx, { t, x: 640, ...(t < 17.0 ? { ...E.excited, pupil: 10, lookX: 0.9, ...talkLine(t, 13, { intensity: 1.4 }) }
+                                          : { ...E.yelling, ...Ar.both([124, -196], 'out'), mouth: 'yell', open: yellOpen, mouthScale: 1.25, stretch: 0.7, tilt: -0.1 }),
                  step, lean: -0.1 * kick * (1 - fly) + 0.05 * wind, ...(t > 16.98 ? { weight: 0 } : {}) });
-      const dodoX = 470;
-      if (fly === 0) { shadow(ctx, dodoX, 70, FLOOR + 10); A.dodo(ctx, { x: dodoX, y: FLOOR + 6, s: 1, t, eyes: kick > 0.5 ? 'blank' : 'normal' }); }
+      const dodoX = 410;
+      if (fly === 0) { shadow(ctx, dodoX, 70, FLOOR + 6); A.dodo(ctx, { x: dodoX, y: FLOOR, s: 1, t, eyes: kick > 0.5 ? 'blank' : 'normal' }); }
       else if (fly < 1) A.dodo(ctx, { x: lerp(dodoX, -250, fly), y: FLOOR - 900 * 4 * fly * (1 - fly * 0.7), s: 1, t, rot: -fly * 8, eyes: 'blank' });
       ctx.restore();
       heads.push(headTop + dy);
@@ -399,13 +404,16 @@ Skits.extinct = (() => {
       ctx.save(); cam(ctx, NX - (sx - 540) / z, FLOOR - GEO.nick.head * S, z, sy);
       stage(ctx);
       const k = seg(t, 19.7, 19.95);
-      if (k > 0) { shadow(ctx, 1060, 190 * k, FLOOR + 30); A.raptor(ctx, { x: 1080, y: FLOOR + 30, s: 2.7 * easeOutBack(k), t, dir: -1, open: t > 19.9 ? 0.8 : 0 }); }   // big, so its head looms above Nick's fists
+      // raptor rears up behind Nick's shoulder: head placed at screen x ~870,
+      // body running off the right edge on purpose
+      const rs = 2.4, headWx = NX - (sx - 540) / z + (870 - 540) / z;
+      if (k > 0) A.raptor(ctx, { x: headWx + 150 * rs, y: FLOOR + 20, s: rs * easeOutBack(k), t, dir: -1, open: t > 19.9 ? 0.8 : 0 });
       nick(ctx, { t, ...E.excited, ...Ar.both([175, -236], 'down'), ...talkLine(t, 18) });   // in front: the raptor rears up behind him; fists kept in, clear of its jaws
       ctx.restore();
       heads.push(sy - hairTop);
     }],
     // "God didn't love velociraptors"
-    [20.7, 21.55, (ctx, t) => { const fy = slimeFloor(); stage(ctx, fy); slime(ctx, { t, y: fy, ...E.unimpressed, lookX: 0, ...Ar.both([110, -176], 'out'), ...talkLine(t, 19) }); heads.push(fy - 574 * 2); }],
+    [20.7, 21.55, (ctx, t) => { const fy = slimeFloor(); stage(ctx, fy); slime(ctx, { t, y: fy, ...E.unimpressed, lookX: -0.8, ...Ar.both([110, -176], 'out'), ...talkLine(t, 19) }); heads.push(fy - 574 * 2); }],
     // raptors frolicking... "thats why he sent the meteor"
     [21.55, 23.02, (ctx, t) => {
       const hit = 22.95;
@@ -444,9 +452,9 @@ Skits.extinct = (() => {
       // through Slime's arms), Slime in front and lower, chest-up
       const k = loud('extinct', t), back = 1400;
       ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040);
-      lud(ctx, { t, x: 790, y: back, s: 1.2, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12 });
-      nick(ctx, { t, x: 295, y: back, s: 1.2, ...E.laughing, open: 0.3 + 0.4 * k });
-      Cameos.slime(ctx, { t, x: 540, y: 1400 + 438 * 2.1, s: 2.1, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
+      lud(ctx, { t, x: 790, y: back, s: 1.2, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(1, [30, -320], 'down', true), ...Ar.arm(-1, [-112, -176], 'out') });
+      nick(ctx, { t, x: 295, y: back, s: 1.2, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(1, [170, -150], 'down'), ...Ar.arm(-1, [-72, -176], 'out') });
+      Cameos.slime(ctx, { t, x: 540, y: 1331 + 438 * 1.7, s: 1.7, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
     }],
   ];
 

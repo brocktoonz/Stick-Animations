@@ -117,7 +117,14 @@ const Animals = (() => {
   const mammoth = (ctx, p) => place(ctx, p, () => {
     const t = p.t ?? 0, ph = p.walk ? t * 8 : 0;
     const col = '#6e6e6e', dark = '#4a4a4a';
-    for (const [x, o] of [[-90, Math.PI], [70, 0]]) leg(ctx, [x, -110], 110, ph + o, 46, dark, 'hoof');
+    // four straight pillar legs under the body (far pair darker), toenails at the base
+    const pillar = (x, c, o) => {
+      const sw = Math.sin(ph + o) * 14, pts = [[x, -150], [x + sw * 0.5, -70], [x + sw, -4]];
+      stroke(ctx, pts, { w: 60, taper0: 0, taper1: 0, minW: 1, seed: 500 + x });
+      stroke(ctx, pts, { w: 44, taper0: 0, taper1: 0, minW: 1, seed: 500 + x, color: c });
+      for (const d of [-12, 0, 12]) blob(ctx, x + sw + d, -8, 5, 4, { fill: W, w: 3, n: 6 });
+    };
+    pillar(-100, dark, Math.PI); pillar(80, dark, 0); pillar(-60, col, 0); pillar(120, col, Math.PI);
     const body = [];
     for (let i = 0; i < 22; i++) {
       const a = (i / 22) * Math.PI * 2, r = i % 2 ? 1 : 1.06;
@@ -125,7 +132,6 @@ const Animals = (() => {
     }
     shape(ctx, body, col);
     for (let i = 0; i < 8; i++) stroke(ctx, [[-120 + i * 32, -150], [-128 + i * 32, -96]], { w: 5, color: dark });
-    for (const [x, o] of [[-50, 0], [110, Math.PI]]) leg(ctx, [x, -110], 110, ph + o, 46, col, 'hoof');
     // head + trunk
     shape(ctx, Brush.ellipsePts(160, -250, 80, 90, 14), col);
     const sw = Math.sin(t * 4) * 16;

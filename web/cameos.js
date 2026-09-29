@@ -695,12 +695,13 @@ const Cameos = (() => {
     const inner = [[RX * 0.9, -RY * 0.02], [RX * 0.78, RY * 0.3], [RX * 0.5, RY * 0.4], [0, RY * 0.36],
                    [-RX * 0.5, RY * 0.4], [-RX * 0.78, RY * 0.3], [-RX * 0.9, -RY * 0.02]];
     const shape = [...outer.reverse(), ...inner];
-    // stubble, not a beard: a faint shadow with dense short dots over it
-    fill(ctx, shape, '#ececec', 0.6);
+    // stubble, not a beard: dots straight on the skin (no tinted patch),
+    // kept inside the head outline so the jaw line stays intact
     ctx.save();
     ctx.beginPath(); ctx.moveTo(shape[0][0], shape[0][1]);
     for (const q of Brush.spline(shape, true, 4)) ctx.lineTo(q[0], q[1]);
     ctx.clip();
+    ctx.beginPath(); ctx.ellipse(0, 0, RX - 9, RY - 9, 0, 0, 7); ctx.clip();
     // dense and dark at the jaw, thinning out toward the cheeks, so there's no hard top edge
     for (let gy = -RY * 0.1; gy < RY * 1.1; gy += 10) for (let gx = -RX; gx < RX; gx += 11) {
       const k = Math.round(gx * 7 + gy * 13);
@@ -714,8 +715,7 @@ const Cameos = (() => {
   const slimeStache = (ctx, fx, rage) => {
     const up = rage ? 16 : 0;   // rides up over the huge open mouth
     const m = [[fx - 58, 50], [fx - 26, 36], [fx, 40], [fx + 26, 36], [fx + 60, 50], [fx + 28, 52], [fx, 48], [fx - 28, 52]].map(([x, y]) => [x, y - up]);
-    // moustache stubble: same faint shadow + dots as the jaw
-    fill(ctx, m, '#e4e4e4', 0.4);
+    // moustache stubble: dots only, like the jaw
     ctx.save();
     ctx.beginPath(); ctx.moveTo(m[0][0], m[0][1]);
     for (const q of Brush.spline(m, true, 3)) ctx.lineTo(q[0], q[1]);
