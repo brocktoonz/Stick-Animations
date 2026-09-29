@@ -328,17 +328,30 @@ Skits.extinct = (() => {
     [7.72, 8.5, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...Ar.both([172, -236], 'down'), browLiftL: 0, browLiftR: -10, ...talkLine(t, 6) })],
     // "whatever the other option is I'll ... take it": one shot, snapping in on "take it"
     [8.5, 9.45, (ctx, t) => mediumLud(ctx, t, { ...E.smirk, ...Ar.both([90, -200], 'out'), ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it") })],
-    // snap in on "take it"
-    [9.45, 9.85, (ctx, t) => closeLud(ctx, t, { ...E.smirk, ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it") }, 1.8)],
-    // Slime loses it
-    // Slime cracks up, popping up behind Ludwig (no cut away to him)
-    [9.85, 10.75, (ctx, t) => {
-      const k = loud('extinct', t), pop = easeOutBack(seg(t, 9.85, 10.02));
-      const sS = S * 0.82, sx = LX - 330, sy0 = FLOOR - 90;
-      mediumLud(ctx, t, { ...E.smirk, lid: 1, lowLid: 0, brow: 0.45 }, 1.3, () => {
-        Cameos.slime(ctx, { t, x: sx, y: sy0 + (1 - pop) * 700, s: sS, dir: 1, ...E.laughing,
-          open: 0.3 + 0.5 * k, tilt: -0.12 - 0.08 * k, bob: -10 * k, weight: stance(t, 7) });
-      });
+    // "take it", then Slime cracks up: one continuous close-up on Ludwig,
+    // centred. Slime leans in from off the left edge at an angle (torso up
+    // only), laughing behind Ludwig's shoulder.
+    [9.45, 10.75, (ctx, t) => {
+      const z = 1.35, sc = S * z, g = GEO.lud;
+      const headSx = 590, headSy = Math.max(1200, capBottom() + HEAD_GAP + g.hair * sc);
+      const bodySx = headSx - g.offset * sc;                       // body line that puts the head at centre
+      const cwx = LX - (bodySx - 540) / z, cwy = FLOOR - g.head * S;
+      const toWorld = (x, y) => [cwx + (x - 540) / z, cwy + (y - headSy) / z];
+      ctx.save(); cam(ctx, cwx, cwy, z, headSy);
+      stage(ctx);
+      if (t >= 9.85) {
+        const k = loud('extinct', t), slide = easeOutBack(seg(t, 9.85, 10.02)), lean = 0.42, ss = S * 0.8;   // smaller: further back
+        // Slime's head centre on screen: slides in from off the left edge,
+        // face just clear of Ludwig's head
+        const hx = lerp(-360, 210, slide), hy = headSy - 30;
+        const [wx, wy] = toWorld(hx, hy), R = 438 * ss;
+        Cameos.slime(ctx, { t, x: wx - Math.sin(lean) * R, y: wy + Math.cos(lean) * R, s: ss, dir: 1, lean,
+          ...E.laughing, open: 0.3 + 0.5 * k, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
+      }
+      lud(ctx, { t, ...E.smirk, lid: t >= 9.9 ? 1 : 0.42, lowLid: t >= 9.9 ? 0 : 0.3, brow: t >= 9.9 ? 0.45 : 0.2,
+                 ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it"), lean: 0.02 });
+      ctx.restore();
+      heads.push(headSy - g.hair * sc);
     }],
     // "you don't wanna engage with the hypothetical"
     [10.75, 12.0, (ctx, t) => mediumNick(ctx, t, { ...E.unimpressed, lookX: 0.5, ...Ar.arm(1, [170, -250], 'down'), ...talkLine(t, 9) })],
