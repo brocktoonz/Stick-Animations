@@ -518,10 +518,11 @@ const Chars = (() => {
     for (const side of [-1, 1]) {
       const ph = side * step;
       const free = wt && Math.sign(wt) !== side ? Math.abs(wt) : 0;
-      // free leg: knee pushed forward and in, foot stepped out and resting on its toe
-      const fx = side * S.footX + ph * S.stride + side * 22 * free, lift = Math.max(0, ph) * S.lift + 14 * free;
+      // free leg: foot stepped out to its own side and resting on its toe, knee
+      // bent forward. It never crosses the standing leg.
+      const fx = side * Math.max(S.footX, 24) + ph * S.stride + side * 30 * free, lift = Math.max(0, ph) * S.lift + 14 * free;
       const hip = [side * S.hipX + wt * 14, hipY + S.legTop], foot = [fx, -12 - lift];
-      const leg = [hip, [(hip[0] + fx) / 2 + 8 + 46 * free - side * 10 * free, (hip[1] + foot[1]) / 2 - 6 * free], foot];
+      const leg = [hip, [(hip[0] + fx) / 2 + 8 + 30 * free + side * 6 * free, (hip[1] + foot[1]) / 2 - 6 * free], foot];
       if (S.legColor) {   // coloured trousers: ink edge, colour inside
         stroke(ctx, leg, { w: S.legW + 10, taper0: 0, taper1: 0, minW: 1, seed: 70 + side, pressure: 0.03 });
         stroke(ctx, leg, { w: S.legW, taper0: 0, taper1: 0, minW: 1, seed: 70 + side, pressure: 0, color: S.legColor });

@@ -696,15 +696,18 @@ const Cameos = (() => {
                    [-RX * 0.5, RY * 0.4], [-RX * 0.78, RY * 0.3], [-RX * 0.9, -RY * 0.02]];
     const shape = [...outer.reverse(), ...inner];
     // stubble, not a beard: a faint shadow with dense short dots over it
-    fill(ctx, shape, '#e4e4e4', 0.6);
+    fill(ctx, shape, '#ececec', 0.6);
     ctx.save();
     ctx.beginPath(); ctx.moveTo(shape[0][0], shape[0][1]);
     for (const q of Brush.spline(shape, true, 4)) ctx.lineTo(q[0], q[1]);
     ctx.clip();
+    // dense and dark at the jaw, thinning out toward the cheeks, so there's no hard top edge
     for (let gy = -RY * 0.1; gy < RY * 1.1; gy += 10) for (let gx = -RX; gx < RX; gx += 11) {
       const k = Math.round(gx * 7 + gy * 13);
       const x = gx + (hh(k) - 0.5) * 9 + ((gy / 10) % 2) * 5, y = gy + (hh(k + 5) - 0.5) * 7;
-      blob(ctx, x, y, 1.7, 1.7, { fill: hh(k + 9) > 0.35 ? '#4a4a4a' : '#7a7a7a', w: 0, n: 5 });
+      const depth = Math.min(1, Math.max(0, (Math.hypot(x / RX, y / RY) - 0.62) / 0.34));   // 0 at the inner edge, 1 at the jaw
+      if (hh(k + 13) > 0.25 + 0.75 * depth) continue;
+      blob(ctx, x, y, 1.5 + 0.5 * depth, 1.5 + 0.5 * depth, { fill: depth > 0.5 || hh(k + 9) > 0.5 ? '#4a4a4a' : '#7a7a7a', w: 0, n: 5 });
     }
     ctx.restore();
   };

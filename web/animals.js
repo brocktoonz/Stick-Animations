@@ -173,8 +173,10 @@ const Animals = (() => {
     }
     const wing = (dx) => {   // feathered wing, flapping about its root
       ctx.save(); ctx.translate(-10 + dx, -140); ctx.rotate(0.7 + flap * 0.45);
-      shape(ctx, Brush.ellipsePts(-60, 0, 66, 26, 12), W, 6);
-      for (const x of [-100, -72, -44]) stroke(ctx, [[x, -10], [x + 10, 16]], { w: 4, color: '#999' });
+      // a bird wing: rounded leading edge, three scalloped feather tips
+      const wing = [[0, -8], [-40, -26], [-92, -30], [-128, -14], [-116, 2], [-126, 14], [-100, 16], [-104, 30], [-74, 26], [-72, 38], [-40, 24], [0, 12]];
+      shape(ctx, wing, W, 7);
+      for (const [x, y] of [[-96, 6], [-70, 16], [-44, 14]]) stroke(ctx, [[x + 18, y - 14], [x, y]], { w: 4 });
       ctx.restore();
     };
     wing(30);
