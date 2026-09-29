@@ -24,7 +24,20 @@ const Chars = (() => {
 
   // ---------- face parts ----------
 
+  // Sobbing: a stream of tears running from the eye down the cheek.
+  // side: which eye, so the stream runs outward along the cheek, clear of the mouth
+  function tearStream(ctx, x, y, s, side = 1) {
+    const o = side * s;
+    const pts = [[x - 8 * o, y], [x + 8 * o, y], [x + 30 * o, y + 60 * s], [x + 44 * o, y + 120 * s],
+                 [x + 20 * o, y + 124 * s], [x + 10 * o, y + 62 * s]];
+    fill(ctx, pts, '#dcdcdc', 0.5); outline(ctx, pts, { w: 4 * s });
+    stroke(ctx, [[x + 4 * o, y + 16 * s], [x + 22 * o, y + 90 * s]], { w: 3.5 * s, color: W });
+  }
+  // Extra eye looks (see web/emotions.js): eyeScale, sparkle, flatLid, lowLid,
+  // tears (welling), streams (sobbing), spiral (dizzy), pinch (> <), stress
+  // (lines under the eyes), blank (stunned), squint (rage).
   function eyes(ctx, fx, y, p, size = 1, lashes = false) {
+    size *= p.eyeScale ?? 1;
     const rx = 30 * size, ry = 40 * size, gap = 40 * size;
     for (const side of [-1, 1]) {
       const ex = fx + side * gap;
@@ -32,6 +45,21 @@ const Chars = (() => {
       if (p.blank) {   // stunned: small, perfectly round, thick rim, no pupil
         const r = rx * 0.72;
         blob(ctx, ex, y, r, r, { fill: W, w: 10 * size, n: 12, jit: 0.6 });
+        continue;
+      }
+      if (p.spiral) {   // dizzy: an empty eye with a spiral in it
+        blob(ctx, ex, y, rx, ry, { fill: W, w: 6 * size, n: 12 });
+        const pts = [];
+        for (let i = 0; i <= 40; i++) {
+          const t = i / 40, a = side * t * Math.PI * 5.2;
+          pts.push([ex + Math.cos(a) * rx * 0.82 * t, y + Math.sin(a) * ry * 0.82 * t]);
+        }
+        stroke(ctx, pts, { w: 5 * size, taper0: 0.2, taper1: 0.2 });
+        continue;
+      }
+      if (p.pinch) {   // hurt: squeezed shut into > <
+        stroke(ctx, [[ex + side * rx, y - ry * 0.45], [ex - side * rx * 0.7, y + 2 * size], [ex + side * rx, y + ry * 0.45]],
+          { w: 8 * size, taper0: 0.3, taper1: 0.3 });
         continue;
       }
       if (p.squint) {
@@ -50,22 +78,53 @@ const Chars = (() => {
         continue;
       }
       if (lid >= 1) {   // closed: a curved line
-        const up = p.happy ? -1 : 1;   // happy: ^ arcs (laughing); otherwise gently closed
-        stroke(ctx, [[ex - rx, y + 4 * size], [ex, y + (4 + 8 * up) * size - (p.happy ? 8 * size : 0)], [ex + rx, y + 4 * size]], { w: 7 * size });
+        const up = p.happy || p.streams ? -1 : 1;   // happy/sobbing: ^ arcs squeezed shut; otherwise gently closed
+        stroke(ctx, [[ex - rx, y + 4 * size], [ex, y + (4 + 8 * up) * size - (up < 0 ? 8 * size : 0)], [ex + rx, y + 4 * size]], { w: (p.streams ? 9 : 7) * size });
+        if (p.streams) tearStream(ctx, ex + side * rx * 0.55, y + 16 * size, size, side);
         continue;
+      }
+      const lowY = p.lowLid ? y + ry - p.lowLid * ry * 1.2 : null;
+      if (lowY != null) {   // smug: everything below the raised lower lid is hidden
+        ctx.save(); ctx.beginPath();
+        ctx.moveTo(ex - rx - 10, y - ry - 10); ctx.lineTo(ex + rx + 10, y - ry - 10); ctx.lineTo(ex + rx + 10, lowY + 4 * size);
+        ctx.quadraticCurveTo(ex, lowY - 16 * size, ex - rx - 10, lowY + 4 * size); ctx.closePath(); ctx.clip();
       }
       blob(ctx, ex, y, rx, ry, { w: 6 * size, n: 12 });
       const pr = (p.pupil ?? 13) * size;
       const px = ex + (p.lookX ?? 0) * (rx - pr - 4), py = y + (p.lookY ?? 0) * (ry - pr - 6);
       fill(ctx, Brush.ellipsePts(px, py, pr, pr * 1.1, 8), INK, 0.4);
+      if (p.sparkle) {   // excited: a white star in each pupil
+        const r = pr * 0.85, q = r * 0.28;
+        fill(ctx, [[px, py - r], [px + q, py - q], [px + r, py], [px + q, py + q], [px, py + r], [px - q, py + q], [px - r, py], [px - q, py - q]], W, 0.2);
+        blob(ctx, px + r * 0.7, py - r * 0.75, r * 0.2, r * 0.2, { fill: W, w: 0, n: 6 });
+      }
+      const clipEye = () => { ctx.save(); ctx.beginPath(); ctx.ellipse(ex, y, rx + 1, ry + 1, 0, 0, 7); ctx.clip(); };
+      if (p.tears) {   // sad: tears welling along the bottom of the eye
+        const ty = y + ry * 0.3, wave = [];
+        for (let i = 0; i <= 6; i++) wave.push([ex - rx + i * rx / 3, ty + (i % 2 ? -5 : 4) * size]);
+        clipEye();
+        fill(ctx, [...wave, [ex + rx + 4, y + ry + 4], [ex - rx - 4, y + ry + 4]], '#d9d9d9', 0.3);
+        ctx.restore();
+        stroke(ctx, wave, { w: 4 * size, taper0: 0.2, taper1: 0.2 });
+        const dx = ex + side * rx * 0.75, dy = y + ry * 0.95;   // a drop at the outer corner
+        const drop = [[dx, dy - 10 * size], [dx + 8 * size, dy + 6 * size], [dx, dy + 12 * size], [dx - 8 * size, dy + 6 * size]];
+        fill(ctx, drop, '#d9d9d9', 0.3); outline(ctx, drop, { w: 4 * size });
+      }
       if (lid > 0.02) {
         const ly = y - ry + lid * ry * 1.2;
-        ctx.save();
-        ctx.beginPath(); ctx.ellipse(ex, y, rx + 1, ry + 1, 0, 0, 7); ctx.clip();
+        clipEye();
         ctx.fillStyle = W; ctx.fillRect(ex - rx - 4, y - ry - 4, rx * 2 + 8, ly - (y - ry) + 4);
         ctx.restore();
-        stroke(ctx, [[ex - rx, ly + 2], [ex, ly - 1], [ex + rx, ly + 2]], { w: 6 * size, taper0: 0.1, taper1: 0.1 });
+        if (p.flatLid) stroke(ctx, [[ex - rx - 3, ly], [ex + rx + 3, ly]], { w: 8 * size, taper0: 0.05, taper1: 0.05 });   // dead-eyed
+        else stroke(ctx, [[ex - rx, ly + 2], [ex, ly - 1], [ex + rx, ly + 2]], { w: 6 * size, taper0: 0.1, taper1: 0.1 });
       }
+      if (lowY != null) {   // the cheek line the grin pushes up
+        ctx.restore();
+        stroke(ctx, [[ex - rx - 2, lowY + 4 * size], [ex, lowY - 6 * size], [ex + rx + 2, lowY + 4 * size]], { w: 6 * size, taper0: 0.1, taper1: 0.1 });
+      }
+      if (p.stress) for (const dx of [-12, 0, 12])   // shock: lines under the eyes
+        stroke(ctx, [[ex + dx * size, y + ry + 8 * size], [ex + dx * size * 1.1, y + ry + 24 * size]], { w: 4 * size, taper0: 0.3, taper1: 0.3 });
+      if (p.streams) tearStream(ctx, ex + side * rx * 0.5, y + ry * 0.8, size, side);
       if (lashes) {
         for (let i = 0; i < 3; i++) {
           const a = -Math.PI / 2 + side * (0.5 + i * 0.32);
@@ -140,7 +199,7 @@ const Chars = (() => {
     if (v.lip > 0.5) stroke(ctx, [[x - w * 0.8, y + teethH * 0.8], [x, y + teethH], [x + w * 0.8, y + teethH * 0.8]], { w: 7 * s, color });
   }
 
-  // kinds: flat | smile | smirk | o | wobbly | yell | rage | tiny | grin | frown | talk (uses p.viz)
+  // kinds: flat | smile | smirk | o | wobbly | yell | rage | tiny | grinwide | bigsmile | gape | grimace | grin | frown | talk (uses p.viz)
   function mouth(ctx, x, y, p, size = 1, color = INK) {
     const k = p.mouth ?? 'flat', open = p.open ?? 0, s = size;
     if (k === 'talk' && p.viz) return talkMouth(ctx, x, y, p.viz, s, color);
@@ -161,6 +220,26 @@ const Chars = (() => {
       blob(ctx, x, y + r * 0.3, r * 0.8, r, { fill: INK, w: 5 * s, n: 10 });
     } else if (k === 'yell') {
       openMouth(ctx, x, y, (60 + 30 * open) * s, (40 + 105 * open) * s, s);
+    } else if (k === 'grinwide') {   // smug closed grin, teeth together
+      const w2 = 58 * s;
+      const pts = [[x - w2, y - 10 * s], [x, y + 2 * s], [x + w2, y - 10 * s], [x + w2 * 0.6, y + 22 * s], [x, y + 30 * s], [x - w2 * 0.6, y + 22 * s]];
+      fill(ctx, pts, W, 0.4); outline(ctx, pts, { w: 6 * s });
+      stroke(ctx, [[x - w2 * 0.8, y + 2 * s], [x, y + 12 * s], [x + w2 * 0.8, y + 2 * s]], { w: 4 * s });
+    } else if (k === 'bigsmile') {   // wide innocent smile
+      stroke(ctx, [[x - 58 * s, y - 14 * s], [x - 30 * s, y + 12 * s], [x, y + 20 * s], [x + 30 * s, y + 12 * s], [x + 58 * s, y - 14 * s]], { w: 7 * s, color });
+    } else if (k === 'gape') {   // shock / horror: big round open mouth
+      const w2 = (22 + 14 * open) * s, h = (26 + 44 * open) * s;
+      const pts = Brush.ellipsePts(x, y + h * 0.45, w2, h * 0.55, 14);
+      fill(ctx, pts, INK, 0.6);
+      ctx.save(); ctx.beginPath(); ctx.ellipse(x, y + h * 0.45, w2, h * 0.55, 0, 0, 7); ctx.clip();
+      ctx.fillStyle = '#9a9a9a'; ctx.beginPath(); ctx.ellipse(x, y + h * 0.95, w2 * 0.7, h * 0.3, 0, 0, 7); ctx.fill();
+      ctx.restore();
+      outline(ctx, pts, { w: 6 * s });
+    } else if (k === 'grimace') {   // hurt / sobbing: wavy open mouth
+      const w2 = (40 + 14 * open) * s, h = (12 + 46 * open) * s;
+      const pts = [[x - w2, y], [x - w2 * 0.5, y - 7 * s], [x, y + 1 * s], [x + w2 * 0.5, y - 7 * s], [x + w2, y],
+                   [x + w2 * 0.7, y + h], [x + w2 * 0.25, y + h * 0.82], [x - w2 * 0.25, y + h * 1.05], [x - w2 * 0.7, y + h * 0.85]];
+      fill(ctx, pts, INK, 0.6); outline(ctx, pts, { w: 6 * s });
     } else if (k === 'tiny') {   // small blank pout (stunned)
       stroke(ctx, [[x - 13 * s, y + 3 * s], [x, y], [x + 13 * s, y + 3 * s]], { w: 7 * s, color });
     } else if (k === 'rage') {

@@ -47,6 +47,13 @@ const Cameos = (() => {
       blob(ctx, 0, jaw * 0.5, RX - jaw * 0.1, RY + jaw * 0.5, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
       if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx); ctx.restore(); }
       o.hair?.(ctx);
+      if (p.gloom) {   // dread: shading lines down the forehead
+        ctx.save();
+        ctx.beginPath(); ctx.ellipse(0, 0, RX - 6, RY - 6, 0, 0, 7); ctx.clip();
+        for (let x = -104; x <= 104; x += 15)
+          stroke(ctx, [[fx + x, -RY * 0.62], [fx + x + 2, -36 + Math.abs(x) * 0.1]], { w: 3.5, taper0: 0.1, taper1: 0.8, seed: 300 + x });
+        ctx.restore();
+      }
       eyes(ctx, fx, p.squint ? -22 : -6, p, 1, !!o.lashes);   // rage eyes sit higher, clear of the teeth
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
