@@ -56,7 +56,7 @@ const Animals2 = (() => {
     const pr = kind === 'angry' ? 0.36 : 0.47;   // angry: smaller pupil under a heavy brow
     fill(ctx, Brush.ellipsePts(x + lx, y + ly, r * pr, r * pr * 1.1, 16), INK, 0.2);
     fill(ctx, Brush.ellipsePts(x + lx + r * pr * 0.37, y + ly - r * pr * 0.43, r * 0.15, r * 0.15, 10), W, 0.1);
-    if (kind === 'angry') stroke(ctx, [[x - r * 1.2, y - r * 1.2], [x + r * 1.1, y - r * 0.45]], { w: lw * 0.9, taper0: 0.5, taper1: 0.1 });
+    if (kind === 'angry') stroke(ctx, [[x - r * 1.2, y - r * 1.2], [x + r * 1.1, y - r * 0.45]], { w: lw * 0.9, taper0: 0.02, taper1: 0.3, minW: 0.5 });   // blunt at the back
   }
   // tiny ":3" style mouth
   const mouth = (ctx, x, y, s, lw) => stroke(ctx, [[x - s, y - s * 0.3], [x - s * 0.5, y + s * 0.3], [x, y], [x + s * 0.5, y + s * 0.3], [x + s, y - s * 0.3]], { w: lw * 0.6, taper0: 0.2, taper1: 0.2, jit: 0.2, wob: 0.2 });
@@ -85,7 +85,8 @@ const Animals2 = (() => {
   const snarl = (ctx, up, lo, lw, n, size) => {
     fill(ctx, [...up, ...lo], INK, 0.3);
     fangs(ctx, ...up[0], ...up[1], n, size, lw, 1);
-    fangs(ctx, ...lo[1], ...lo[0], n - 1, size * 0.8, lw, -1);
+    const [[bx0, by0], [bx1, by1]] = [lo[1], lo[0]], k = 0.22;   // lower row starts further forward, clear of the back upper fang
+    fangs(ctx, bx0 + (bx1 - bx0) * k, by0 + (by1 - by0) * k, bx1, by1, n - 1, size * 0.8, lw, -1);
   };
   // open mouth: a dark wedge, with a row of teeth if asked
   const jaw = (ctx, pts, teeth, open) => {
@@ -158,7 +159,10 @@ const Animals2 = (() => {
   const raptor = (ctx, p) => place(ctx, p, (lw, t) => {
     const ph = t * 12, wk = !!p.walk, open = p.open ?? 0;
     if (p.snarl) ctx.rotate(0.08);   // lean forward into the snarl
-    silhouette(ctx, leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 }), '#989898', lw, 20);   // far leg, set well back
+    // enlarged sickle claw: a hooked blade raised off the front of the visible foot
+    const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 14, y - 6], [x + 24, y - 36], [x + 48, y - 46], [x + 62, y - 28]], 22, 1)], col, lw * 0.8, seed);
+    const far = leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 });
+    silhouette(ctx, far, '#989898', lw, 20);   // far leg, set well back
     const near = leg(18, -118, 30, ph, wk, { off: 14, knee: 20, foot: 30 }), [fx, fy] = near[1].e;
     silhouette(ctx, [
       T([[-40, -155], [-150, -168], [-250, -160]], 44, 1),                // long straight tail
@@ -182,9 +186,9 @@ const Animals2 = (() => {
       fangs(ctx, 144, -210, 198, -205, 3, 12, lw);
     }
     // enlarged sickle claw: a hooked toe claw raised on the visible foot
-    silhouette(ctx, [T([[fx + 2, fy - 6], [fx + 12, fy - 28], [fx + 32, fy - 32], [fx + 44, fy - 14]], 18, 1)], '#eeeeee', lw * 0.8, 29);
+    claw([fx, fy], '#f4f4f4', 29);
     marks(ctx, -20, -185, 2, 26, lw);
-    eye(ctx, p.snarl ? 98 : 104, p.snarl ? -246 : -238, 17, p, lw);
+    eye(ctx, p.snarl ? 96 : 102, p.snarl ? -246 : -238, 22, p, lw);
   });
 
   const mammoth = (ctx, p) => place(ctx, p, (lw, t) => {
