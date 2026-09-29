@@ -38,7 +38,7 @@ const Emotions = (() => {
     yelling:   { mouth: 'rage', open: 1, squint: true, brow: 1.3, ...both([124, -196], 'out') },   // furious: anime rage eyes, shark teeth, fists clenched
     scared:    { mouth: 'wobbly', brow: -1, pupil: 6, sweat: true, lean: -0.05, ...both([46, -328], 'out', true) },   // fists pulled in under the chin, elbows out
     shocked:   { mouth: 'o', open: 1, brow: -0.7, pupil: 5, ...both([112, -392], 'down', true) },   // hands on cheeks
-    stunned:   { mouth: 'tiny', pupil: 4, brow: -0.1 },   // blank stare, arms limp
+    stunned:   { mouth: 'tiny', blank: true, brow: -0.1 },   // blank stare: small round empty eyes, arms limp
     nervous:   { mouth: 'wobbly', brow: -0.6, lookX: -0.8, sweat: true },
     confused:  { mouth: 'o', open: 0.25, browL: 0.6, browLiftL: 8, browR: -0.2, browLiftR: -16, lookX: -0.5, lookY: -0.6, tilt: 0.16,
                  ...arm(1, [132, -522], 'out', true, 150) },   // one brow up, one down, scratching the top of his head

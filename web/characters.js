@@ -29,6 +29,11 @@ const Chars = (() => {
     for (const side of [-1, 1]) {
       const ex = fx + side * gap;
       const lid = p.lid ?? 0;
+      if (p.blank) {   // stunned: small, perfectly round, thick rim, no pupil
+        const r = rx * 0.72;
+        blob(ctx, ex, y, r, r, { fill: W, w: 10 * size, n: 12, jit: 0.6 });
+        continue;
+      }
       if (p.squint) {
         // rage (anime style): a big white eye with its top cut off by a thick
         // brow line that slopes down toward the nose; round bottom, no pupil
