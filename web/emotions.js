@@ -32,7 +32,7 @@ const Emotions = (() => {
   const E = {
     neutral:   { mouth: 'flat' },
     happy:     { mouth: 'smile', brow: -0.2 },
-    laughing:  { lid: 1, happy: true, mouth: 'yell', open: 0.45, brow: -0.4, tilt: -0.1, ...both([72, -176], 'out') },   // hands on belly
+    laughing:  { lid: 1, happy: true, mouth: 'yell', open: 0.6, mouthScale: 1.15, stretch: -0.5, brow: -0.4, tilt: -0.1, ...both([72, -176], 'out') },   // hands on belly
     excited:   { pupil: 15, sparkle: true, mouth: 'yell', open: 0.5, mouthScale: 1.2, stretch: 0.5, brow: -0.6, ...both([178, -372], 'down') },   // sparkly eyes, fists pumped
     smirk:     { mouth: 'grinwide', lid: 0.42, lowLid: 0.3, brow: 0.2, lookX: 0.35 },   // eyes narrowed by the grin
     sad:       { mouth: 'wobbly', brow: -1, lid: 0.25, lookY: 0.3, tears: true, tilt: 0.07 },   // tears welling

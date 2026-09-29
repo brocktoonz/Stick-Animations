@@ -69,8 +69,14 @@ disagree, the rule wins.
 
 - Don't sit in one medium two-shot. Cut to close-ups for reactions and punch
   lines, push in on the joke, pull back for group shots.
-- Fill the frame: a backdrop reaches the top of the frame (sky, trees, props);
-  no empty white band above the captions.
+- **Dialogue shots use a flat light-grey backdrop (`#eeeeee`), not scenery.**
+  One thin ink ground line and a flat ink shadow under each character keep
+  them grounded; the white halo around dark bodies stays visible on the grey.
+  Full sets (sky, hills, props, grass) are only for cutaways, and every
+  cutaway in a video uses the same set kit so they match.
+- Frame the characters big: heads sit just under the captions, singles for
+  most lines (medium or close-up), two-shots only when both need to be seen.
+  Two-shots don't push in if it would clip a character at the edge.
 - Keep a margin at the frame edges, or crop a character on purpose well past
   the head. Never clip hair by a few pixels.
 - Nobody stands dead still: breathing, a lean toward whoever they're talking
@@ -87,8 +93,8 @@ disagree, the rule wins.
 - Title captions ("That one machine at the eye doctor:") are red. Dialogue
   subtitles for clips of real people use the original's speaker colours (for
   The Yard: Nick blue, Ludwig white, Slime green), with a heavy black
-  outline. Every caption in a video is the same size: long lines wrap, they
-  don't shrink.
+  outline. Every caption in a video is the same size (84 px for dialogue
+  subtitles; never below that): long lines wrap, they don't shrink.
 - Centred on the frame. By default the caption starts at the top of
   `Stage.SAFE` (the strictest of the TikTok, YouTube Shorts and Instagram
   Reels guides). That is conservative: a skit can raise it with

@@ -86,39 +86,35 @@ Skits.extinct = (() => {
     }
     fill(ctx, pts, W, 0.4); outline(ctx, pts, { w: 9 });
   }
-  function tree(ctx, x, y, r) {
-    stroke(ctx, [[x, 1010], [x + 10, y + r * 0.5], [x - 6, y]], { w: 58, taper0: 0, taper1: 0.4 });
-    stroke(ctx, [[x, 1010], [x + 10, y + r * 0.5], [x - 6, y]], { w: 40, taper0: 0, taper1: 0.4, color: '#9a9a9a' });
-    const pts = [];
-    for (let i = 0; i < 22; i++) {
-      const a = i / 22 * Math.PI * 2, bump = i % 2 ? 1 : 1.13;
-      pts.push([x + Math.cos(a) * r * bump, y + Math.sin(a) * r * 0.9 * bump]);
-    }
-    fill(ctx, pts, '#d2d2d2', 0.5); outline(ctx, pts, { w: 11 });
-    for (let i = 0; i < 5; i++) stroke(ctx, [[x - r * 0.5 + i * r * 0.25, y - r * 0.2 + (i % 2) * 40], [x - r * 0.42 + i * r * 0.25, y - r * 0.05 + (i % 2) * 40]], { w: 6, color: '#9a9a9a' });
+  // Dialogue shots: a flat light-grey backdrop (the white halo around dark
+  // bodies stays visible on it), one thin ink ground line, flat shadows.
+  const BACKDROP = '#eeeeee';
+  function stage(ctx, floor = FLOOR) {
+    ctx.fillStyle = BACKDROP; ctx.fillRect(-700, -900, 2500, 3600);
+    stroke(ctx, [[-700, floor], [540, floor + 3], [1800, floor - 4]], { w: 6, taper0: 0, taper1: 0 });
   }
-  // The Yard's string lights: a sagging cord with bulbs.
-  function lights(ctx, t) {
-    const cord = [];
-    for (let i = 0; i <= 24; i++) { const u = i / 24; cord.push([-300 + u * 1700, 780 + Math.sin(u * Math.PI) * 150]); }
-    stroke(ctx, cord, { w: 6, taper0: 0, taper1: 0 });
-    for (let i = 1; i < 24; i += 2) {
-      const [bx, by] = cord[i];
-      stroke(ctx, [[bx, by], [bx, by + 16]], { w: 5 });
-      blob(ctx, bx, by + 32, 12, 16, { fill: (i + Math.floor(t * 2)) % 7 ? W : '#e6e6e6', w: 6, n: 10 });
-    }
-  }
-  function yard(ctx, t = 0) {
+  // Cutaway for the new animals: the same kit as the prehistoric cutaway
+  // (sky, clouds, hills, grass) with made-up plants, so it reads as a world.
+  function newWorld(ctx, t) {
     sky(ctx);
-    tree(ctx, 60, 560, 250); tree(ctx, 1000, 520, 230);
-    lights(ctx, t);
-    for (let x = -600; x < 1700; x += 92) {   // wooden fence
-      const plank = [[x, 1000], [x + 40, 978], [x + 80, 1000], [x + 80, FLOOR], [x, FLOOR]];
-      fill(ctx, plank, '#e4e4e4', 0.4); outline(ctx, plank, { w: 10 });
+    const hills = [[-700, 1360], [-100, 1200], [420, 1300], [1000, 1170], [1800, 1320], [1800, 1700], [-700, 1700]];
+    fill(ctx, hills, '#e8e8e8', 0.4); outline(ctx, hills, { w: 9 });
+    for (const [x, h, r] of [[80, 520, 110], [990, 600, 130]]) {   // lollipop trees with spiral canopies
+      stroke(ctx, [[x, FLOOR], [x + 10, FLOOR - h * 0.5], [x, FLOOR - h]], { w: 40, taper0: 0, taper1: 0.3 });
+      stroke(ctx, [[x, FLOOR], [x + 10, FLOOR - h * 0.5], [x, FLOOR - h]], { w: 24, taper0: 0, taper1: 0.3, color: '#9a9a9a' });
+      blob(ctx, x, FLOOR - h - r * 0.7, r, r, { fill: '#d2d2d2', w: 11, n: 16 });
+      const sp = [];
+      for (let i = 0; i <= 30; i++) { const u = i / 30, a = u * Math.PI * 4.5; sp.push([x + Math.cos(a) * r * 0.75 * u, FLOOR - h - r * 0.7 + Math.sin(a) * r * 0.75 * u]); }
+      stroke(ctx, sp, { w: 6, taper0: 0.2, taper1: 0.2 });
     }
-    stroke(ctx, [[-600, 1110], [1700, 1104]], { w: 26, color: '#cfcfcf' });
-    stroke(ctx, [[-600, 1420], [1700, 1426]], { w: 26, color: '#cfcfcf' });
-    ground(ctx, '#d6d6d6');
+    for (const [x, k] of [[420, 1], [700, 0.8]]) {   // giant mushrooms
+      stroke(ctx, [[x, FLOOR], [x, FLOOR - 120 * k]], { w: 44 * k, taper0: 0, taper1: 0 });
+      stroke(ctx, [[x, FLOOR], [x, FLOOR - 120 * k]], { w: 30 * k, taper0: 0, taper1: 0, color: W });
+      const cap = [[x - 90 * k, FLOOR - 110 * k], [x - 60 * k, FLOOR - 190 * k], [x, FLOOR - 215 * k], [x + 60 * k, FLOOR - 190 * k], [x + 90 * k, FLOOR - 110 * k]];
+      fill(ctx, cap, '#bdbdbd', 0.4); outline(ctx, cap, { w: 10 });
+      for (const d of [-40, 10, 45]) blob(ctx, x + d * k, FLOOR - 160 * k + (d % 20), 12 * k, 10 * k, { fill: W, w: 5, n: 8 });
+    }
+    ground(ctx, '#d9d9d9');
   }
   function ground(ctx, col) {
     fill(ctx, [[-700, FLOOR], [1800, FLOOR - 6], [1800, 2700], [-700, 2700]], col, 0.4);
@@ -191,7 +187,7 @@ Skits.extinct = (() => {
   // Acting: nobody stands dead still. Idle breathing, a lean toward whoever
   // they're talking to, and a head tilt that shifts every half second or so
   // while they talk (held, not wobbling).
-  const NX = 320, LX = 800;
+  const NX = 335, LX = 805;
   function acting(p, t, seed) {
     if (p.mouth !== 'talk') return { bob: Math.sin(t * 2.3 + seed) * 3 };
     const beat = Math.floor(t * 1.8 + seed);
@@ -212,29 +208,36 @@ Skits.extinct = (() => {
   // head centres in world space, for close-ups
   const NICK_HEAD = FLOOR - 418 * S, LUD_HEAD = FLOOR - 470 * S;
 
-  // two-shot; z/fx/fy push the camera in
-  function twoShot(ctx, t, n, l, z = 1, fx = 540, fy = 1150) {
-    ctx.save(); cam(ctx, fx, fy, z);
-    yard(ctx, t); nick(ctx, { t, ...n }); lud(ctx, { t, ...l });
+  // Framings. Characters are big: heads sit just under the captions so the
+  // frame is filled, with margin at the edges. Singles show only the subject.
+  //   twoShot  both, head-to-feet, heads high in frame
+  //   medium   one character, waist-up-ish, head at y ~900
+  //   close    one character's face, head at y ~1180
+  // Two-shots never push in: Nick's wide hair needs the full frame width.
+  function twoShot(ctx, t, n, l, z = 1, fx = 540, fy = NICK_HEAD) {
+    ctx.save(); cam(ctx, fx, fy, z, 1000);
+    stage(ctx); nick(ctx, { t, ...n }); lud(ctx, { t, ...l });
     ctx.restore();
   }
-  // close-up on one of them (both drawn, so the other can sit at frame edge)
-  // head centred low enough that hair clears the caption
-  const closeNick = (ctx, t, n, l, z = 1.6) => twoShotAt(ctx, t, n, l, z, NX + 40, NICK_HEAD, 1300);
-  const closeLud = (ctx, t, n, l, z = 1.6) => twoShotAt(ctx, t, n, l, z, LX - 40, LUD_HEAD, 1300);
-  // twoShot with its own screen anchor
-  function twoShotAt(ctx, t, n, l, z, fx, fy, sy) {
-    ctx.save(); cam(ctx, fx, fy, z, sy);
-    yard(ctx, t); nick(ctx, { t, ...n }); lud(ctx, { t, ...l });
+  function single(ctx, t, who, pose, z, sy) {
+    const isNick = who === 'nick';
+    // Ludwig's swoop reaches further left than right: frame him a little left of centre
+    ctx.save(); cam(ctx, isNick ? NX : LX - 30, isNick ? NICK_HEAD : LUD_HEAD, z, sy);
+    stage(ctx);
+    (isNick ? nick : lud)(ctx, { t, ...pose });
     ctx.restore();
   }
+  const mediumNick = (ctx, t, pose, z = 1.35) => single(ctx, t, 'nick', pose, z, 1010);
+  const mediumLud = (ctx, t, pose, z = 1.35) => single(ctx, t, 'lud', pose, z, 1160);
+  const closeNick = (ctx, t, pose, z = 1.8) => single(ctx, t, 'nick', pose, z, 1250);
+  const closeLud = (ctx, t, pose, z = 1.8) => single(ctx, t, 'lud', pose, z, 1330);
 
   // ---------- shots ----------
   const shots = [
     // Nick poses the question: two-shot, slow push
     [0, 1.75, (ctx, t) => twoShot(ctx, t,
       { ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 0) },
-      { ...E.neutral }, lerp(1, 1.08, easeInOut(seg(t, 0, 1.75))))],
+      { ...E.neutral })],
     // ...every single extinct animal: they burst out of the ground
     [1.75, 3.35, (ctx, t) => {
       prehistoric(ctx, t);
@@ -249,42 +252,39 @@ Skits.extinct = (() => {
       }
     }],
     // "but there's no-"
-    [3.35, 4.0, (ctx, t) => twoShot(ctx, t, { ...E.happy, pointR: -1.2, ...Ar.arm(1, [130, -420], 'down'), ...talkLine(t, 2) }, { ...E.neutral })],
+    [3.35, 4.0, (ctx, t) => mediumNick(ctx, t, { ...E.happy, pointR: -1.2, ...Ar.arm(1, [170, -400], 'down', true), ...talkLine(t, 2) })],
     // "other option": cut in on Ludwig cutting him off
-    [4.0, 4.7, (ctx, t) => closeLud(ctx, t, { ...E.happy }, { ...E.unimpressed, lookX: 0.5, ...talkLine(t, 3) }, 1.7)],
+    [4.0, 4.7, (ctx, t) => closeLud(ctx, t, { ...E.unimpressed, lookX: 0.5, ...talkLine(t, 3) }, 1.75)],
     // Nick's reaction: stunned close-up, slow push
-    [4.7, 6.0, (ctx, t) => closeNick(ctx, t, { ...E.stunned }, { ...E.smirk }, lerp(1.55, 1.8, easeInOut(seg(t, 4.7, 6.0))))],
+    [4.7, 6.0, (ctx, t) => closeNick(ctx, t, { ...E.stunned }, lerp(1.6, 1.9, easeInOut(seg(t, 4.7, 6.0))))],
     // "what do you mean other option"
-    [6.0, 7.0, (ctx, t) => twoShot(ctx, t, { ...E.confused, ...talkLine(t, 4) }, { ...E.smirk })],
+    [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...talkLine(t, 4) })],
     // "give me the other option": Ludwig points
     [7.0, 7.7, (ctx, t) => twoShot(ctx, t, { ...E.confused, mouth: 'flat' },
-      { ...E.neutral, pointR: 0, ...Ar.arm(1, [230, -300], 'down'), ...talkLine(t, 5) }, 1.12, 600)],
+      { ...E.neutral, pointR: 0, ...Ar.arm(1, [230, -300], 'down'), ...talkLine(t, 5) })],
     // "why you don't want that?": medium on Nick's shrug
-    [7.7, 8.5, (ctx, t) => twoShotAt(ctx, t, { ...E.confused, ...Ar.both([172, -236], 'down'), browLiftL: 0, browLiftR: -10, ...talkLine(t, 6) },
-      { ...E.unimpressed }, 1.35, NX + 80, NICK_HEAD + 120, 1150)],
+    [7.7, 8.5, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...Ar.both([172, -236], 'down'), browLiftL: 0, browLiftR: -10, ...talkLine(t, 6) }, 1.25)],
     // "whatever the other option is I'll": medium on Ludwig
-    [8.5, 9.45, (ctx, t) => twoShotAt(ctx, t, { ...E.unimpressed, lookX: 0.6 },
-      { ...E.smirk, ...Ar.both([90, -200], 'out'), ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it") }, 1.35, LX - 80, LUD_HEAD + 140, 1150)],
+    [8.5, 9.45, (ctx, t) => mediumLud(ctx, t, { ...E.smirk, ...Ar.both([90, -200], 'out'), ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it") })],
     // "take it": snap close-up
-    [9.45, 9.85, (ctx, t) => closeLud(ctx, t, { ...E.unimpressed }, { ...E.smirk, ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it") }, 1.95)],
+    [9.45, 9.85, (ctx, t) => closeLud(ctx, t, { ...E.smirk, ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it") }, 2.0)],
     // Slime loses it
     [9.85, 10.75, (ctx, t) => {
       ctx.save(); shake(ctx, 6 * loud('extinct', t), Math.floor(t * 20));
-      yard(ctx, t);
+      stage(ctx, FLOOR + 300);
       const k = loud('extinct', t);
       slime(ctx, { t, ...E.laughing, open: 0.3 + 0.5 * k, tilt: -0.12 - 0.08 * k, bob: -10 * k });
       ctx.restore();
     }],
     // "you don't wanna engage with the hypothetical"
-    [10.75, 12.0, (ctx, t) => twoShot(ctx, t,
-      { ...E.unimpressed, lookX: 0.5, ...Ar.arm(1, [170, -250], 'down'), ...talkLine(t, 9) }, { ...E.smirk })],
+    [10.75, 12.0, (ctx, t) => mediumNick(ctx, t, { ...E.unimpressed, lookX: 0.5, ...Ar.arm(1, [170, -250], 'down'), ...talkLine(t, 9) })],
     // "What was the second one": close on Ludwig playing dumb
-    [12.0, 13.25, (ctx, t) => closeLud(ctx, t, { ...E.unimpressed }, { ...E.confused, ...talkLine(t, 10) }, 1.5)],
+    [12.0, 13.25, (ctx, t) => mediumLud(ctx, t, { ...E.confused, ...talkLine(t, 10) }, 1.45)],
     // "the second one was-"
-    [13.25, 14.0, (ctx, t) => closeNick(ctx, t, { ...E.excited, sparkle: false, ...talkLine(t, 11) }, { ...E.neutral }, 1.4)],
-    // "...or get an equal amount of new animals": new creatures pop into the yard
+    [13.25, 14.0, (ctx, t) => closeNick(ctx, t, { ...E.excited, sparkle: false, ...talkLine(t, 11) }, 1.6)],
+    // "...or get an equal amount of new animals": cutaway, new creatures pop in
     [14.0, 16.0, (ctx, t) => {
-      yard(ctx, t);
+      newWorld(ctx, t);
       const pops = [[14.1, 230, 1.5, () => A.fishLegs(ctx, { x: 230, y: FLOOR + 60, s: 1.5, t, walk: true })],
                     [14.55, 560, 1.6, () => A.longCat(ctx, { x: 560, y: FLOOR + 20, s: 1.6, t })],
                     [15.0, 860, 1.4, () => A.wingPig(ctx, { x: 860, y: FLOOR - 200, s: 1.4, t, dir: -1 })]];
@@ -299,7 +299,7 @@ Skits.extinct = (() => {
     }],
     // "Gimme the new ones" / "f*ck the old ones": punts the dodo
     [16.0, 17.5, (ctx, t) => {
-      yard(ctx, t);
+      stage(ctx);
       A.wingPig(ctx, { x: 250, y: FLOOR - 420, s: 0.8, t });
       shadow(ctx, 150, 55, FLOOR + 44);
       A.fishLegs(ctx, { x: 150, y: FLOOR + 40, s: 0.8, t, walk: true });
@@ -313,24 +313,24 @@ Skits.extinct = (() => {
       if (fly > 0.6) sparkle(ctx, 1000, 700, 40 * Math.sin(seg(t, 17.3, 17.5) * Math.PI), t * 6);
     }],
     // "Why?": the big reaction, close and pushing in
-    [17.5, 18.18, (ctx, t) => closeNick(ctx, t, { ...E.shocked, ...talkLine(t, 15), mouth: 'gape', open: 1 }, { ...E.neutral },
-      lerp(1.3, 1.5, easeOut(seg(t, 17.5, 18.18))))],
+    [17.5, 18.18, (ctx, t) => single(ctx, t, 'nick', { ...E.shocked, ...talkLine(t, 15), mouth: 'gape', open: 1 },
+      lerp(1.4, 1.65, easeOut(seg(t, 17.5, 18.18))), 1160)],
     // "they died for a reason": deadpan close-up
-    [18.18, 18.75, (ctx, t) => closeLud(ctx, t, { ...E.shocked, mouth: 'flat' }, { ...E.unimpressed, lookX: 0.8, ...talkLine(t, 16) }, 1.9)],
+    [18.18, 18.75, (ctx, t) => closeLud(ctx, t, { ...E.unimpressed, lookX: 0.8, ...talkLine(t, 16) }, 1.95)],
     // "you don't wanna see a f*ckin'..."
-    [18.75, 19.75, (ctx, t) => twoShotAt(ctx, t, { ...E.excited, ...talkLine(t, 17) }, { ...E.neutral }, 1.3, NX + 120, NICK_HEAD + 150, 1150)],
+    [18.75, 19.75, (ctx, t) => mediumNick(ctx, t, { ...E.excited, ...talkLine(t, 17) }, 1.3)],
     // "...Velociraptor": punch in as the raptor pops up behind him
     [19.75, 20.7, (ctx, t) => {
-      const z = lerp(1.3, 1.65, easeOut(seg(t, 19.75, 19.95)));
-      ctx.save(); cam(ctx, NX + 120, NICK_HEAD + 150, z);
-      yard(ctx, t);
+      const z = lerp(1.3, 1.6, easeOut(seg(t, 19.75, 19.95)));
+      ctx.save(); cam(ctx, NX + 150, NICK_HEAD, z, 1010);
+      stage(ctx);
       const k = seg(t, 19.7, 19.95);
       nick(ctx, { t, ...E.excited, ...talkLine(t, 18) });
       if (k > 0) { shadow(ctx, 890, 170 * k, FLOOR + 30); A.raptor(ctx, { x: 910, y: FLOOR + 30, s: 2.3 * easeOutBack(k), t, dir: -1, open: t > 19.9 ? 0.8 : 0 }); }
       ctx.restore();
     }],
     // "God didn't love velociraptors"
-    [20.7, 21.55, (ctx, t) => { yard(ctx, t); slime(ctx, { t, ...E.unimpressed, lookX: 0, ...talkLine(t, 19) }); }],
+    [20.7, 21.55, (ctx, t) => { stage(ctx, FLOOR + 300); slime(ctx, { t, ...E.unimpressed, lookX: 0, ...talkLine(t, 19) }); }],
     // raptors frolicking... "thats why he sent the meteor"
     [21.55, 23.2, (ctx, t) => {
       const hit = 22.95, boom = seg(t, hit, hit + 0.25);
@@ -364,12 +364,12 @@ Skits.extinct = (() => {
     // everyone cracking up (camera pulled back so nobody touches the edge)
     [24.25, 25.2, (ctx, t) => {
       const k = loud('extinct', t);
-      ctx.save(); cam(ctx, 540, 1200, 0.88, 1180);
-      yard(ctx, t);
-      nick(ctx, { t, x: 250, s: 1.25, ...E.laughing, open: 0.3 + 0.4 * k });
-      lud(ctx, { t, x: 840, s: 1.25, ...E.smirk });
-      shadow(ctx, 540, 90, FLOOR + 46);
-      Cameos.slime(ctx, { t, x: 540, y: FLOOR + 40, s: 1.3, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
+      ctx.save(); cam(ctx, 540, 1200, 0.88, 960);
+      stage(ctx);
+      nick(ctx, { t, x: 265, s: 1.35, ...E.laughing, open: 0.3 + 0.4 * k });
+      lud(ctx, { t, x: 820, s: 1.35, ...E.smirk });
+      shadow(ctx, 540, 100, FLOOR + 46);
+      Cameos.slime(ctx, { t, x: 540, y: FLOOR + 40, s: 1.45, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
       ctx.restore();
     }],
   ];
