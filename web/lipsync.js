@@ -89,10 +89,10 @@ const LipSync = (() => {
   // Cartoon-style talking, as in stick-figure channels: a handful of simple
   // mouth drawings that SNAP from one to the next (no morphing), one per
   // syllable, changing at most every 3 frames (animating "on threes").
-  //   closed: a short line     teeth: clenched, white with a centre line
-  //   small:  a little dark O  open:  dark D shape with a tongue
-  //   wide:   big yell, top teeth + tongue (loud lines only)
-  const OPEN = { closed: 0, teeth: 0.2, small: 0.3, open: 0.6, wide: 1 };
+  //   closed: a short line          teeth: clenched, dark wedge at one corner
+  //   small:  a little dark O       half:  half open, top teeth
+  //   open:   open, teeth + tongue  wide:  big yell (loud lines only)
+  const OPEN = { closed: 0, teeth: 0.2, small: 0.3, half: 0.4, open: 0.6, wide: 1 };
   function syllables(text, loud) {
     const out = [];
     const words = text.toLowerCase().split(/(\s+|[,.!?;:…-]+)/);
@@ -109,9 +109,9 @@ const LipSync = (() => {
         if (!nuc) { if (!any) out.push({ kind: 'teeth', w: 0.8 }); break; }   // no vowel: "hm", "mm"
         any = true;
         let kind = /^(o|u|oo|ou|ow)/.test(nuc) || /w$/.test(onset) ? 'small'
-                 : /^(e|y|ee|ea|ie)/.test(nuc) ? 'teeth' : 'open';
+                 : /^(e|y|ee|ea|ie)/.test(nuc) ? 'half' : 'open';
         if (loud && kind === 'open') kind = 'wide';
-        const lips = /[mbp]$/.test(onset) ? 'closed' : /[fv]$/.test(onset) ? 'teeth' : null;
+        const lips = /[mbp]$/.test(onset) ? 'closed' : /([fv]|s|z|ch|sh|t)$/.test(onset) ? 'teeth' : null;
         out.push({ kind, lips, w: 1 + 0.25 * (nuc.length - 1) });
       }
     }
@@ -139,9 +139,11 @@ const LipSync = (() => {
       // the same drawing twice in a row reads as a freeze: alternate it
       const prev = syl[i - 1];
       if (prev && prev.kind === kind && (u - acc) / sy.w < 0.5 && kind !== 'closed')
-        kind = kind === 'open' || kind === 'wide' ? 'small' : 'open';
+        kind = kind === 'open' || kind === 'wide' ? 'half' : 'open';
     }
-    return { kind, open: OPEN[kind], intensity: o.intensity ?? 1, smile: o.smile ?? 0 };
+    // a slightly different tilt each time the drawing changes, like redrawn frames
+    const beat = Math.floor((tq - t0) / STEP);
+    return { kind, open: OPEN[kind], intensity: o.intensity ?? 1, smile: o.smile ?? 0, side: o.side ?? 1, var: (beat * 7919 % 5) / 4 };
   }
 
   return { shape: swap, morph: shape, plan, VISEMES: V };

@@ -173,46 +173,60 @@ const Chars = (() => {
   // Speaking mouth drawn from a LipSync shape (see lipsync.js), so it can
   // morph continuously between shapes. `color` tints the lip line (Mom).
   // Speaking mouth: one of a few simple drawings chosen by LipSync.shape
-  // (v.kind), swapped rather than morphed. `color` tints the outline (Mom).
+  // (v.kind), swapped rather than morphed. Like hand-drawn cartoon mouths they
+  // are lopsided: tilted, one side bigger, sitting a little off-centre.
+  // `color` tints the outline (Mom).
   function talkMouth(ctx, x, y, v, s, color) {
     if (!v.kind) v = { kind: v.open > 0.6 ? 'open' : v.open > 0.2 ? 'small' : 'closed', smile: v.smile };
     const lift = (v.smile ?? 0) * 8 * s;
-    const tongue = (cx, cy, rx, ry) => { ctx.fillStyle = '#9a9a9a'; ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 7); ctx.fill(); };
+    const side = v.side ?? 1;                       // which side is the bigger, higher corner
+    ctx.save();
+    ctx.translate(x + side * 6 * s, y);
+    ctx.rotate(-side * (0.1 + 0.06 * (v.var ?? 0)));
+    ctx.scale(side, 1);                            // draw with the big side on +x
     const clipTo = pts => { ctx.save(); ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (const q of Brush.spline(pts, true, 5)) ctx.lineTo(q[0], q[1]); ctx.clip(); };
+    const tongue = (cx, cy, rx, ry) => { ctx.fillStyle = '#8e8e8e'; ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 7); ctx.fill(); };
+    // lopsided D: flat-ish top lip, round bottom; left side (-x) smaller
+    const dShape = (w, h) => [[-w * 0.8, -lift * 0.6], [-w * 0.35, -5 * s], [w * 0.45, -7 * s], [w, -3 * s - lift],
+                              [w * 0.85, h * 0.62], [w * 0.2, h], [-w * 0.45, h * 0.8], [-w * 0.8, h * 0.3]];
     switch (v.kind) {
       case 'closed':
-        stroke(ctx, [[x - 22 * s, y - lift], [x, y + 2 * s], [x + 22 * s, y - lift]], { w: 7 * s, color });
-        return;
-      case 'teeth': {
-        const w = 30 * s, h = 13 * s;
-        const pts = [[x - w, y - lift - h * 0.6], [x, y - h * 0.8], [x + w, y - lift - h * 0.6], [x + w * 1.05, y], [x + w, y + h * 0.7], [x, y + h * 0.9], [x - w, y + h * 0.7], [x - w * 1.05, y]];
+        stroke(ctx, [[-18 * s, 3 * s - lift * 0.5], [0, -2 * s], [20 * s, 4 * s - lift]], { w: 7 * s, color });
+        break;
+      case 'teeth': {   // clenched: white lens, dark wedge at the far corner, a line between the teeth
+        const w = 30 * s, h = 12 * s;
+        const pts = [[-w * 0.85, 0], [-w * 0.2, -h * 1.1], [w * 0.6, -h * 1.1], [w, -h * 0.2], [w * 0.7, h * 0.95], [-w * 0.3, h * 0.9]];
         fill(ctx, pts, W, 0.3);
-        stroke(ctx, [[x - w * 0.9, y], [x + w * 0.9, y + 1 * s]], { w: 4 * s, color });
-        for (const dx of [-0.35, 0.35]) stroke(ctx, [[x + dx * w, y - h * 0.6], [x + dx * w, y + h * 0.6]], { w: 3 * s, color });
-        outline(ctx, pts, { w: 6 * s, jit: 0.5, color });
-        return;
+        clipTo(pts);
+        fill(ctx, [[w * 0.55, -h * 1.4], [w * 1.2, -h * 1.4], [w * 1.2, h * 1.4], [w * 0.5, h * 1.4], [w * 0.62, 0]], INK, 0.2);
+        ctx.restore();
+        stroke(ctx, [[-w * 0.8, 1 * s], [w * 0.55, 0]], { w: 4 * s, color });
+        outline(ctx, pts, { w: 6 * s, jit: 0.4, color });
+        break;
       }
       case 'small': {
-        const pts = Brush.ellipsePts(x, y + 6 * s, 13 * s, 16 * s, 10);
+        const pts = Brush.ellipsePts(0, 6 * s, 12 * s, 16 * s, 10, 0.15);
         fill(ctx, pts, INK, 0.3);
-        clipTo(pts); tongue(x, y + 20 * s, 9 * s, 6 * s); ctx.restore();
-        outline(ctx, pts, { w: 5 * s, jit: 0.5, color });
-        return;
+        clipTo(pts); tongue(2 * s, 20 * s, 9 * s, 6 * s); ctx.restore();
+        outline(ctx, pts, { w: 5 * s, jit: 0.4, color });
+        break;
       }
-      default: {   // open / wide: dark D shape, flat top, round bottom
-        const wide = v.kind === 'wide';
-        const w = (wide ? 40 : 28) * s, h = (wide ? 56 : 36) * s;
-        const pts = [[x - w, y - lift], [x - w * 0.4, y - 4 * s], [x + w * 0.4, y - 4 * s], [x + w, y - lift],
-                     [x + w * 0.8, y + h * 0.6], [x, y + h], [x - w * 0.8, y + h * 0.6]];
-        fill(ctx, pts, INK, 0.5);
+      default: {   // half / open / wide: dark mouth, top teeth along the upper lip, grey tongue
+        const [w, h] = { half: [26, 20], open: [30, 34], wide: [40, 54] }[v.kind] ?? [30, 34];
+        const pts = dShape(w * s, h * s);
+        fill(ctx, pts, INK, 0.4);
         clipTo(pts);
-        if (wide) { ctx.fillStyle = W; ctx.fillRect(x - w, y - 8 * s, w * 2, 16 * s); }
-        tongue(x + 4 * s, y + h * 0.95, w * 0.55, h * 0.3);
+        const tb = v.kind === 'half' ? 2 : 8;   // teeth strip depth: half-open shows more of the dark mouth
+        const teeth = [[-w * s, -12 * s], [w * s * 1.1, -12 * s], [w * s * 1.1, tb * s - lift], [w * s * 0.2, (tb - 1) * s], [-w * s, (tb - 3) * s]];
+        fill(ctx, teeth, W, 0.2);
+        if (v.kind !== 'half') tongue(w * s * 0.15, h * s * 0.98, w * s * 0.6, h * s * 0.3);
         ctx.restore();
-        outline(ctx, pts, { w: 6 * s, jit: 0.6, color });
+        outline(ctx, pts, { w: 6 * s, jit: 0.5, color });
       }
     }
+    ctx.restore();
   }
+
 
 
   // kinds: flat | smile | smirk | o | wobbly | yell | rage | tiny | grinwide | bigsmile | gape | grimace | grin | frown | talk (uses p.viz)
@@ -355,7 +369,7 @@ const Chars = (() => {
   function dadHead(ctx, p) {
     const fx = p.face ?? 0;
     if (p.eyesOnly) return eyes(ctx, fx, -30, p, 0.9);
-    const open = p.mouth === 'yell' ? (p.open ?? 0) : p.mouth === 'talk' && p.viz ? p.viz.open * 0.7 : 0;
+    const open = p.mouth === 'yell' ? (p.open ?? 0) : p.mouth === 'talk' && p.viz ? (p.viz.open ?? 0) * 0.7 : 0;
     const jaw = 170 + open * 55;              // head stretches when he yells
     const head = [];
     for (let i = 0; i < 20; i++) {
@@ -476,7 +490,7 @@ const Chars = (() => {
     if (!p.armRFront) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
 
     ctx.save();
-    const jaw = p.mouth === 'talk' && p.viz ? p.viz.open : 0;
+    const jaw = p.mouth === 'talk' && p.viz ? p.viz.open ?? 0 : 0;
     ctx.translate(0, neckY - S.headUp + bob * 0.5 + jaw * 5);
     ctx.rotate((p.tilt ?? 0) - jaw * 0.03);
     S.head(ctx, p);
