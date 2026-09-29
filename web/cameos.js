@@ -50,7 +50,7 @@ const Cameos = (() => {
       eyes(ctx, fx, p.squint ? -22 : -6, p, 1, !!o.lashes);   // rage eyes sit higher, clear of the teeth
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
-      } else brows(ctx, fx, -62, p, 1, o.browW ?? 9);
+      } else brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
       if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
       else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, open ? 0.85 : 1);
       o.front?.(ctx, fx, rage);

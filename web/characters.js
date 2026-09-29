@@ -72,13 +72,18 @@ const Chars = (() => {
   }
 
   // brow > 0 angry (inner ends down), brow < 0 worried (inner ends up)
-  function brows(ctx, fx, y, p, size = 1, thick = 9) {
+  // browL/browR tilt one brow at a time; browLiftL/browLiftR raise (-) or
+  // lower (+) a whole brow. halo: a white edge so brows read over dark hair.
+  function brows(ctx, fx, y, p, size = 1, thick = 9, halo = false) {
     for (const side of [-1, 1]) {
-      const b = (side < 0 ? p.browL : p.browR) ?? p.brow ?? 0;   // browL/browR: one brow up, one down
-      const inner = [fx + side * 12 * size, y + 16 * b * size];
-      const outer = [fx + side * 66 * size, y - 8 * b * size - 4 * size];
+      const b = (side < 0 ? p.browL : p.browR) ?? p.brow ?? 0;
+      const by = y + ((side < 0 ? p.browLiftL : p.browLiftR) ?? 0) * size;
+      const inner = [fx + side * 12 * size, by + 16 * b * size];
+      const outer = [fx + side * 66 * size, by - 8 * b * size - 4 * size];
       const mid = [(inner[0] + outer[0]) / 2, (inner[1] + outer[1]) / 2 - 5 * size];
-      stroke(ctx, side < 0 ? [outer, mid, inner] : [inner, mid, outer], { w: thick * size, taper0: 0.3, taper1: 0.3 });
+      const pts = side < 0 ? [outer, mid, inner] : [inner, mid, outer];
+      if (halo) stroke(ctx, pts, { w: (thick + 9) * size, taper0: 0.3, taper1: 0.3, color: W, seed: 40 + side });
+      stroke(ctx, pts, { w: thick * size, taper0: 0.3, taper1: 0.3, seed: 40 + side });
     }
   }
 

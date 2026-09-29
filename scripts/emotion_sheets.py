@@ -34,7 +34,7 @@ def render(name, keys):
             im = Image.open(os.path.join(tmp, f'emotions_{name}_{f}.png')).convert('RGB').crop(CROP)
             im.save(os.path.join(out, f'{key}.png'), optimize=True)
             tiles.append(im)
-    cols, tw, th = 5, 360, 520
+    cols, tw, th = 4, 360, 520
     rows = -(-len(tiles) // cols)
     sheet = Image.new('RGB', (cols * tw, rows * th + 90), 'white')
     font = ImageFont.truetype(os.path.join(ROOT, 'web', 'fonts', 'LuckiestGuy.ttf'), 60)

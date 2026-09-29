@@ -40,7 +40,7 @@ const Emotions = (() => {
     shocked:   { mouth: 'o', open: 1, brow: -0.7, pupil: 5, ...both([112, -392], 'down', true) },   // hands on cheeks
     stunned:   { mouth: 'tiny', pupil: 4, brow: -0.1 },   // blank stare, arms limp
     nervous:   { mouth: 'wobbly', brow: -0.6, lookX: -0.8, sweat: true },
-    confused:  { mouth: 'o', open: 0.25, browL: 0.7, browR: -0.9, lookX: -0.5, lookY: -0.6, tilt: 0.16,
+    confused:  { mouth: 'o', open: 0.25, browL: 0.6, browLiftL: 8, browR: -0.2, browLiftR: -16, lookX: -0.5, lookY: -0.6, tilt: 0.16,
                  ...arm(1, [132, -522], 'out', true, 150) },   // one brow up, one down, scratching the top of his head
     thinking:  { mouth: 'flat', brow: 0.3, lookX: -0.6, lookY: -0.7,
                  ...arm(1, [26, -306], 'down', true), ...arm(-1, [-2, -210], 'down', true) },   // hand on chin, other arm across holding the elbow
