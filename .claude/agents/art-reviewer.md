@@ -39,6 +39,12 @@ Characters
 - Hair reads as hair (not a cap, leaf or helmet). Facial hair reads as hair (not a smear or mask).
 - Silhouettes stay distinct between characters.
 - Anatomy is correct: no backwards elbows, and no hands detached from arms.
+Animals
+- Each animal's signature feature is big and obvious at phone size (a mammoth's tusks sweep up and out past the trunk; a raptor has a visible sickle claw).
+- Predators that scare someone show menace: teeth on the jaw line, and a snarl (angry brow, fangs top and bottom) in the scare shot. A toothless smile reads as a friendly gecko; a snout with a line down the middle reads as a beak.
+- Head tufts read as hair or fur, not antennae.
+- Wings, ears and other attached parts are joined to the body, not floating outlines, and use the same fill treatment as the matching part on other animals.
+- All animals share one eye design (size, ring weight, pupil and highlight). Flag any animal whose eyes look like a different artist drew them.
 Acting
 - Full-body poses have a weight shift, lean, or bent knee. Flag any shot with parallel planted legs and hanging arms.
 - The expression is strong enough to read at phone size. Mouth size and shape match the emotion.

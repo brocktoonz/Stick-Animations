@@ -23,7 +23,7 @@ const Animals2 = (() => {
         const grow = pass ? 0 : lw, c = pass ? col : INK;
         if (p.e) {
           const [cx, cy, rx, ry, rot] = p.e;
-          fill(ctx, Brush.ellipsePts(cx, cy, rx + grow, ry + grow, 24, rot), c, 0.3);
+          fill(ctx, Brush.ellipsePts(cx, cy, rx + grow, ry + grow, 24, rot), c, pass ? 0.3 : 1.3);
         } else {
           let pts = p.pts, minW = p.taper ? 0.12 : 1;
           if (p.taper && grow) {   // ink round a pointed tip: run it past the tip and keep it wide enough to show
@@ -32,20 +32,23 @@ const Animals2 = (() => {
             minW = 0.04;
           }
           stroke(ctx, pts, { w: p.w + grow * 2, taper0: 0, taper1: p.taper, minW,
-            pressure: 0, jit: 0.3, wob: 0.3, seed: seed + i, color: c });
+            pressure: 0, jit: pass ? 0.3 : 1.2, wob: pass ? 0.3 : 1.1, seed: seed + i, color: c });
         }
       });
     }
   }
   // big round cartoon eye: white, ink ring, large pupil toward lookX, highlight
   function eye(ctx, x, y, r, p, lw) {
-    const kind = p.eyes ?? 'normal', ring = Math.min(lw * 0.8, r * 0.3);
+    const kind = p.eyes ?? (p.snarl ? 'angry' : 'normal'), ring = lw * 0.6;
+    r *= 1.12;
     if (kind === 'happy') { stroke(ctx, [[x - r, y + r * 0.3], [x, y - r * 0.7], [x + r, y + r * 0.3]], { w: lw * 0.7, taper0: 0.3, taper1: 0.3 }); return; }
     blob(ctx, x, y, r, r * 1.08, { fill: W, w: ring, n: 16, jit: 0.3, wob: 0.3 });
     if (kind === 'blank') return;
     const lx = (p.lookX ?? 0.3) * r * 0.3, ly = (p.lookY ?? 0) * r * 0.3;
-    fill(ctx, Brush.ellipsePts(x + lx, y + ly, r * 0.6, r * 0.66, 16), INK, 0.2);
-    fill(ctx, Brush.ellipsePts(x + lx + r * 0.22, y + ly - r * 0.26, r * 0.17, r * 0.17, 10), W, 0.1);
+    const pr = kind === 'angry' ? 0.36 : 0.47;   // angry: smaller pupil under a heavy brow
+    fill(ctx, Brush.ellipsePts(x + lx, y + ly, r * pr, r * pr * 1.1, 16), INK, 0.2);
+    fill(ctx, Brush.ellipsePts(x + lx + r * pr * 0.37, y + ly - r * pr * 0.43, r * 0.15, r * 0.15, 10), W, 0.1);
+    if (kind === 'angry') stroke(ctx, [[x - r * 1.2, y - r * 1.2], [x + r * 1.1, y - r * 0.45]], { w: lw * 1.2, taper0: 0.5, taper1: 0.1 });
   }
   // tiny ":3" style mouth
   const mouth = (ctx, x, y, s, lw) => stroke(ctx, [[x - s, y - s * 0.3], [x - s * 0.5, y + s * 0.3], [x, y], [x + s * 0.5, y + s * 0.3], [x + s, y - s * 0.3]], { w: lw * 0.6, taper0: 0.2, taper1: 0.2, jit: 0.2, wob: 0.2 });
@@ -58,6 +61,23 @@ const Animals2 = (() => {
     const pts = Brush.ellipsePts(cx, cy, rx, ry, 20, rot);
     fill(ctx, pts, col, 0.3);
     Brush.outline(ctx, pts, { w: lw * 0.7, jit: 0.3, wob: 0.3 });
+  };
+  // a row of small white fangs along a jaw line from (x0, y0) to (x1, y1),
+  // hanging down (dir 1) or pointing up (dir -1)
+  const fangs = (ctx, x0, y0, x1, y1, n, size, lw, dir = 1) => {
+    for (let i = 0; i < n; i++) {
+      const u = (i + 0.5) / n, x = x0 + (x1 - x0) * u, y = y0 + (y1 - y0) * u, h = size * (i % 2 ? 0.8 : 1);
+      const tri = [[x - h * 0.45, y], [x + h * 0.45, y], [x + h * 0.1, y + dir * h]];
+      Brush.outline(ctx, tri, { w: lw * 0.4, jit: 0.2, wob: 0.2 });
+      fill(ctx, tri, W, 0.1);
+    }
+  };
+  // snarl: a wide dark mouth with fangs top and bottom. up = [back, front]
+  // points of the upper jaw, lo = [front, back] of the lower jaw
+  const snarl = (ctx, up, lo, lw, n, size) => {
+    fill(ctx, [...up, ...lo], INK, 0.3);
+    fangs(ctx, ...up[0], ...up[1], n, size, lw, 1);
+    fangs(ctx, ...lo[1], ...lo[0], n - 1, size * 0.8, lw, -1);
   };
   // open mouth: a dark wedge, with a row of teeth if asked
   const jaw = (ctx, pts, teeth, open) => {
@@ -99,33 +119,55 @@ const Animals2 = (() => {
       T([[-60, -190], [-190, -190], [-300, -150]], 90, 1),               // tail
       E(0, -195, 125, 100, -0.25),                                        // body
       ...leg(35, -120, 62, ph, wk, { off: 14, knee: -16, foot: 44 }),
-      E(110, -318, 108, 76, -0.1),                                        // big head
-      T([[75, -262], [205, -264]], 58),                                   // boxy jaw
+      ...(p.snarl ? [
+        E(112, -326, 108, 74, -0.2),                                      // head tipped up
+        T([[80, -292], [218, -312]], 50),                                 // upper jaw raised
+        T([[92, -250], [206, -206]], 38),                                 // lower jaw dropped
+      ] : [
+        E(110, -318, 108, 76, -0.1),                                      // big head
+        T([[75, -262], [205, -264]], 58),                                 // boxy jaw
+      ]),
       T([[100, -200], [150, -190], [162, -172]], 22),                     // tiny arm
       T([[160, -174], [172, -160]], 12), T([[156, -176], [158, -158]], 12),   // two fingers
     ], '#8a8a8a', lw, 11);
-    if (open > 0.1) jaw(ctx, [[130, -278], [228, -284], [220, -250 + 22 * open], [140, -252 + 18 * open]], true, open);
-    else line(ctx, [[222, -262], [160, -264], [146, -276]], lw);          // closed smile along the jaw
+    if (p.snarl) {
+      snarl(ctx, [[120, -272], [236, -290]], [[214, -222], [118, -254]], lw, 5, 22);
+      for (const dx of [0, 16]) line(ctx, [[178 + dx, -358], [186 + dx, -346]], lw);   // snout wrinkles
+    } else if (open > 0.1) jaw(ctx, [[130, -278], [228, -284], [220, -250 + 22 * open], [140, -252 + 18 * open]], true, open);
+    else {   // closed: a straight jaw line with fangs poking over it
+      line(ctx, [[228, -262], [170, -264], [116, -258]], lw);           // snout tip to below the eye
+      fangs(ctx, 140, -263, 222, -262, 5, 16, lw);
+    }
     marks(ctx, -45, -275, 3, 36, lw);
     eye(ctx, 118, -338, 34, p, lw);
   });
 
   const raptor = (ctx, p) => place(ctx, p, (lw, t) => {
     const ph = t * 12, wk = !!p.walk, open = p.open ?? 0;
-    silhouette(ctx, leg(-15, -118, 28, ph + Math.PI, wk, { off: -26, knee: 22, foot: 26 }), '#989898', lw, 20);   // far leg
+    silhouette(ctx, leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 }), '#989898', lw, 20);   // far leg, set well back
+    const near = leg(18, -118, 30, ph, wk, { off: 14, knee: 20, foot: 30 }), [fx, fy] = near[1].e;
     silhouette(ctx, [
       T([[-40, -155], [-150, -168], [-250, -160]], 44, 1),                // long straight tail
       E(0, -150, 82, 42, -0.08),                                          // level body
-      ...leg(18, -118, 30, ph, wk, { off: 10, knee: 20, foot: 26 }),
+      ...near,
       T([[50, -160], [92, -214]], 32),                                    // neck
       E(108, -228, 44, 34, -0.1),                                         // head
-      T([[122, -226], [170, -218], [206, -206]], 32, 0.55),               // long snout, narrowing and dipping to the tip
+      ...(p.snarl ? [
+        T([[122, -232], [170, -232], [208, -226]], 28, 0.3),              // upper snout lifted
+        T([[124, -210], [196, -184]], 18, 0.3),                           // lower jaw dropped
+      ] : [T([[122, -228], [170, -222], [206, -212]], 34, 0.3)]),        // long snout with a blunt, rounded tip
       T([[62, -140], [88, -122], [98, -132]], 14),                        // little arm
     ], '#a8a8a8', lw, 21);
-    if (open > 0.1) jaw(ctx, [[128, -222], [200, -210], [192, -198 + 14 * open], [132, -206 + 12 * open]], true, open);
-    else line(ctx, [[206, -206], [168, -212], [140, -214], [128, -224]], lw);
+    if (p.snarl) snarl(ctx, [[122, -222], [206, -218]], [[192, -190], [124, -208]], lw, 4, 14);
+    else if (open > 0.1) jaw(ctx, [[128, -222], [200, -210], [192, -198 + 14 * open], [132, -206 + 12 * open]], true, open);
+    else {   // closed: jaw line low on the snout with little fangs
+      line(ctx, [[204, -204], [166, -208], [132, -212]], lw);
+      fangs(ctx, 144, -210, 198, -205, 3, 12, lw);
+    }
+    // sickle claw raised off the near foot
+    stroke(ctx, [[fx - 2, fy - 12], [fx + 4, fy - 30], [fx + 16, fy - 34], [fx + 22, fy - 24]], { w: 13, taper0: 0, taper1: 1, minW: 0.05 });   // sickle claw, raised off the foot
     marks(ctx, -20, -185, 2, 26, lw);
-    eye(ctx, 104, -238, 20, p, lw);
+    eye(ctx, 110, -232, 17, p, lw);
   });
 
   const mammoth = (ctx, p) => place(ctx, p, (lw, t) => {
@@ -141,14 +183,14 @@ const Animals2 = (() => {
       ...fur,                                                             // shaggy fringe under the belly
       ...leg(-125, -120, 58, ph, wk, { off: 10 }), ...leg(115, -120, 58, ph + Math.PI, wk, { off: -6 }),
       E(150, -262, 78, 82),                                               // head
-      T([[138, -330], [146, -378], [166, -366]], 20, 1), T([[122, -326], [112, -366]], 18, 1),   // hair tuft on the crown
-      T([[205, -238], [226, -180], [224, -132], [246 + sw, -100], [272 + sw, -110], [274 + sw, -134]], 36, 1),   // trunk tapering to a curl
+      T([[118, -322], [104, -354]], 34, 1), T([[140, -330], [138, -366]], 38, 1), T([[160, -326], [174, -354]], 32, 1),   // one shaggy crown
+      T([[205, -238], [228, -170], [238, -100], [252 + sw, -58], [280 + sw, -52], [288 + sw, -76]], 36, 1),   // trunk hanging below the tusk, curled at the tip
     ], '#6e6e6e', lw, 31);
     patch(ctx, 92, -252, 30, 46, 0.2, '#5c5c5c', lw * 0.7);             // ear flap over the head/shoulder edge
-    // tusk: its own small white shape
-    const tusk = [[182, -200], [232, -148], [288, -178]];
-    stroke(ctx, tusk, { w: 26 + lw * 2, taper0: 0, taper1: 0.8, minW: 0.45 });
-    stroke(ctx, tusk, { w: 26, taper0: 0, taper1: 0.8, color: W });
+    // big sweeping tusk: down, forward past the trunk, then up and out
+    const tusk = [[178, -208], [222, -140], [296, -128], [346, -196]];
+    stroke(ctx, tusk, { w: 36 + lw * 2, taper0: 0, taper1: 0.85, minW: 0.4 });
+    stroke(ctx, tusk, { w: 36, taper0: 0, taper1: 0.85, color: W });
     eye(ctx, 176, -286, 24, p, lw);
   });
 
@@ -178,17 +220,13 @@ const Animals2 = (() => {
       E(-20, -196, 52, 20, 0.08),                                         // low rounded back fin
       E(0, -150, 105, 58),                                                // body
     ], '#b0b0b0', lw, 51);
-    mouth(ctx, 78, -138, 18, lw);
+    mouth(ctx, 86, -126, 16, lw);
     eye(ctx, 55, -168, 20, p, lw);
   });
 
   const wingPig = (ctx, p) => place(ctx, p, (lw, t) => {
     const flap = Math.sin(t * 22), hover = Math.sin(t * 6) * 12;
     ctx.translate(0, -60 + hover);
-    // one wing from the shoulder, behind the body, fanned up and back with feather lobes
-    ctx.save(); ctx.translate(10, -130); ctx.rotate(0.9 + flap * 0.35);
-    silhouette(ctx, [E(-60, 0, 64, 26), E(-110, 14, 20, 16), E(-82, 22, 20, 16), E(-54, 22, 18, 15)], W, lw, 61);
-    ctx.restore();
     silhouette(ctx, [...leg(-30, -60, 26, 0, false, { off: -8 }), ...leg(58, -60, 26, 0, false, { off: 6 })], '#c4c4c4', lw, 70);   // far legs
     silhouette(ctx, [
       ...leg(-55, -60, 26, 0, false, { off: -6 }), ...leg(34, -60, 26, 0, false, { off: 8 }),
@@ -198,7 +236,11 @@ const Animals2 = (() => {
     ], '#d6d6d6', lw, 71);
     for (const y of [-112, -96]) blob(ctx, 106, y, 4, 5, { fill: INK, w: 0, n: 6 });
     line(ctx, [[-96, -108], [-118, -116], [-126, -134], [-112, -146], [-102, -134], [-112, -126]], lw);   // corkscrew tail off the rump
-    eye(ctx, 62, -126, 17, p, lw);
+    // one wing rooted on the shoulder, fanned up and back, filled like the dodo's wing
+    ctx.save(); ctx.translate(0, -122); ctx.rotate(1.15 + flap * 0.3);
+    silhouette(ctx, [E(-56, 0, 62, 26), E(-104, 16, 20, 15), E(-76, 23, 20, 15), E(-48, 22, 18, 14)], '#b4b4b4', lw * 0.5, 61);
+    ctx.restore();
+    eye(ctx, 64, -126, 20, p, lw);
   });
 
   const longCat = (ctx, p) => place(ctx, p, (lw, t) => {
@@ -208,11 +250,11 @@ const Animals2 = (() => {
       ...leg(-50, -60, 22, 0, false, { off: -8 }), ...leg(50, -60, 22, 0, false, { off: 6 }),
       E(0, -80, 80, 40),                                                  // body
       T([[50, -100], [60 + sway * 0.4, -260], [70 + sway, -380]], 42),    // the long neck
-      E(hx, hy, 52, 44),                                                  // head
+      E(hx, hy, 62, 50),                                                  // head
       T([[hx - 36, hy - 20], [hx - 30, hy - 66]], 34, 1), T([[hx + 36, hy - 20], [hx + 30, hy - 66]], 34, 1),   // ears
     ], '#7a7a7a', lw, 81);
-    for (const sd of [-1, 1]) eye(ctx, hx + sd * 21, hy - 6, 16, p, lw);
-    mouth(ctx, hx, hy + 22, 12, lw);
+    for (const sd of [-1, 1]) eye(ctx, hx + sd * 27, hy - 8, 20, p, lw);
+    mouth(ctx, hx + 4, hy + 28, 12, lw);
     marks(ctx, -30, -112, 3, 20, lw, '#5a5a5a');
   });
 
