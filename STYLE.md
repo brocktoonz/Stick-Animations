@@ -77,6 +77,26 @@ disagree, the rule wins.
 - Frame the characters big: heads sit just under the captions, singles for
   most lines (medium or close-up), two-shots only when both need to be seen.
   Two-shots don't push in if it would clip a character at the edge.
+- **Eyelines never flip.** In a two-person scene each character keeps one
+  side of the screen and one facing for the whole video (The Yard: Nick
+  screen-left facing right, Ludwig screen-right facing left). In singles,
+  place the character off-centre toward their own side, looking across the
+  frame toward the other.
+- Open with one establishing shot of the people together (with clear space
+  between them), then give each line a single on the speaker.
+- Don't cut on every line in a rapid back-and-forth: hold each shot at
+  least ~1 s, staying on the listener's reaction while the other speaks, or
+  use a two-shot for the fastest stretch.
+- Use a two-shot whenever one character touches, points at, or physically
+  reacts to the other.
+- Group shots are huddled and pushed in (heads filling the frame), not a
+  small row of full bodies at the bottom.
+- **Captions never overlap a head.** Framings compute the caption block for
+  the shot and keep every hair top below it (see `capBottom` in
+  `web/skits/extinct.js`); the skit throws at render time if a head reaches
+  into a visible caption.
+- Full-body poses always carry a weight shift (`weight`, one knee bent), an
+  offset stance or a step: never parallel planted legs.
 - Keep a margin at the frame edges, or crop a character on purpose well past
   the head. Never clip hair by a few pixels.
 - Nobody stands dead still: breathing, a lean toward whoever they're talking
@@ -85,6 +105,10 @@ disagree, the rule wins.
 - Animals and props use the characters' line weight (`web/animals.js` scales
   it automatically), and sets use outlines of at least ~9 px.
 - Repeated set details (grass, planks, bulbs) vary in spacing and size.
+- Clouds and other soft shapes are unions of round puffs outlined with the
+  brush, never polygons.
+- Anything drawn behind a head (back hair, hoods) squashes and stretches
+  with it, so no fill shows past the outline.
 
 ## Captions
 

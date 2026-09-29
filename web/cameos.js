@@ -15,6 +15,8 @@ const Cameos = (() => {
   // Fixed (non-boiling) pseudo-random numbers for tufts and patterns.
   const hh = i => { const x = Math.sin(i * 12.9898 + 4.1) * 43758.5453; return x - Math.floor(x); };
 
+  const stretchHead = (ctx, st) => { if (st) { ctx.translate(0, RY * 0.8); ctx.scale(1 - 0.09 * st, 1 + 0.13 * st); ctx.translate(0, -RY * 0.8); } };
+
   // ---------- body: the kid's build, a little taller ----------
   // o.body overrides rig proportions (taller, stockier...); o.headScale
   // [sx, sy] reshapes the head. Pose arm targets shift with the neck so the
@@ -34,6 +36,10 @@ const Cameos = (() => {
       torsoDetail: o.detail,
       ...o.body,
     };
+    if (S.behind) {   // back hair follows the head's squash/stretch, or its fill shows past the outline
+      const bh = S.behind;
+      S.behind = (ctx, p) => { ctx.save(); stretchHead(ctx, p.stretch ?? 0); bh(ctx, p); ctx.restore(); };
+    }
     if (o.headScale) {
       const [sx, sy] = o.headScale, h = S.head;
       S.head = (ctx, p) => { ctx.save(); ctx.scale(sx, sy); h(ctx, p); ctx.restore(); };
@@ -52,7 +58,7 @@ const Cameos = (() => {
       // p.stretch: + stretches the head tall (shock), - squashes it wide (anger)
       const st = p.stretch ?? 0;
       ctx.save();
-      if (st) { ctx.translate(0, RY * 0.8); ctx.scale(1 - 0.09 * st, 1 + 0.13 * st); ctx.translate(0, -RY * 0.8); }
+      stretchHead(ctx, st);
       o.back?.(ctx);   // behind the head: hoods, long hair
       // a yell drops the jaw: the head stretches down and the mouth rides up
       // a little, so even a wide-open mouth stays inside the chin
@@ -122,12 +128,13 @@ const Cameos = (() => {
                  [-RX * 0.2, -RY * 0.6], [-RX * 0.3, -RY * 0.86], [-RX * 0.44, -RY * 0.94], [-RX * 0.58, -RY * 0.7], [-RX * 0.72, -RY * 0.62], [-RX * 0.92, -RY * 0.3]];
     fill(ctx, pts, BLOND, 1.2);
     outline(ctx, pts, { w: 11 });
-    for (const [a, b, c, w] of [[[-0.38, -1.05], [0.15, -(height - 0.12)], [0.85, -(height - 0.28)], 7],
-                                [[-0.3, -0.92], [0.3, -1.1], [0.95, -0.9], 6],
-                                [[-0.62, -0.84], [-0.2, -(height - 0.3)], [0.4, -(height - 0.08)], 5],
-                                [[0.1, -0.82], [0.55, -0.98], [1.0, -1.1], 5],
-                                [[-0.86, -0.5], [-0.8, -0.8], [-0.6, -1.0], 5]])
-      stroke(ctx, [[RX * a[0], RY * a[1]], [RX * b[0], RY * b[1]], [RX * c[0], RY * c[1]]], { w, taper0: 0.3, taper1: 0.5 });
+    // strands all flow one way: from the crown (left) up and over to the tips (right)
+    const lo = [[-0.62, -0.86], [0.1, -1.04], [0.92, -1.0]];
+    const hi = [[-0.36, -(height - 0.22)], [0.22, -(height - 0.04)], [0.9, -(height - 0.3)]];
+    for (const k of [0.12, 0.38, 0.62, 0.86]) {
+      const pts = lo.map((a, i) => [RX * (a[0] + (hi[i][0] - a[0]) * k), RY * (a[1] + (hi[i][1] - a[1]) * k)]);
+      stroke(ctx, pts, { w: 5.5, taper0: 0.5, taper1: 0.8 });
+    }
   };
 
   // MrBeast: short sides, hair swept across with a fringe flick over the forehead.
@@ -696,14 +703,11 @@ const Cameos = (() => {
     const inner = [[RX * 0.9, -RY * 0.02], [RX * 0.78, RY * 0.3], [RX * 0.5, RY * 0.4], [0, RY * 0.36],
                    [-RX * 0.5, RY * 0.4], [-RX * 0.78, RY * 0.3], [-RX * 0.9, -RY * 0.02]];
     const shape = [...outer.reverse(), ...inner];
-    fill(ctx, shape, '#b8b8b8', 1);
-    // stubble: a sparse, even stipple in one tone (a busy two-tone texture
-    // was the noisiest thing in the frame)
-    for (let gy = -RY * 0.1; gy < RY * 1.0; gy += 17) for (let gx = -RX; gx < RX; gx += 19) {
-      const k = Math.round(gx * 7 + gy * 13);
-      const x = gx + (hh(k) - 0.5) * 8, y = gy + (hh(k + 5) - 0.5) * 8;
-      if ((x / RX) ** 2 + (y / RY) ** 2 > 0.9 || (y < RY * 0.42 && Math.abs(x) < RX * 0.8) || y < RY * 0.02 * Math.abs(x) / RX) continue;
-      blob(ctx, x, y, 2.6, 2.6, { fill: '#5a5a5a', w: 0, n: 5 });
+    fill(ctx, shape, '#c4c4c4', 1);
+    // stubble: flat grey, with a few short strokes along the jaw edge
+    for (let i = 0; i < 9; i++) {
+      const a = Math.PI * (0.14 + 0.72 * i / 8), c = Math.cos(a), sn = Math.sin(a);
+      stroke(ctx, [[c * RX * 0.95, sn * RY * 0.99], [c * RX * 0.84, sn * RY * 0.87]], { w: 4, taper0: 0.2, taper1: 0.6, color: '#6a6a6a' });
     }
   };
   const slimeStache = (ctx, fx, rage) => {
