@@ -122,7 +122,8 @@ const Brush = (() => {
     const start = Math.floor(rng()() * n);
     const ring = [];
     for (let i = 0; i <= n + 1; i++) ring.push(pts[(start + i) % n]);
-    stroke(ctx, ring, { taper0: 0.06, taper1: 0.08, ...o });
+    // closed shapes: no taper at the join (a tapered start/end left a visible pinch)
+    stroke(ctx, ring, { taper0: 0, taper1: 0, minW: 1, ...o });
   }
 
   function ellipsePts(cx, cy, rx, ry, n = 16, rot = 0) {

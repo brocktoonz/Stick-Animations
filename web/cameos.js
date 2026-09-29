@@ -40,9 +40,10 @@ const Cameos = (() => {
       const bh = S.behind;
       S.behind = (ctx, p) => { ctx.save(); stretchHead(ctx, p.stretch ?? 0); bh(ctx, p); ctx.restore(); };
     }
-    if (o.headScale) {
-      const [sx, sy] = o.headScale, h = S.head;
+    if (o.headScale) {   // reshape the head and anything behind it together, or the front hair covers the back hair's outline
+      const [sx, sy] = o.headScale, h = S.head, bh = S.behind;
       S.head = (ctx, p) => { ctx.save(); ctx.scale(sx, sy); h(ctx, p); ctx.restore(); };
+      if (bh) S.behind = (ctx, p) => { ctx.save(); ctx.scale(sx, sy); bh(ctx, p); ctx.restore(); };
     }
     const dy = S.neckY + 320;
     const shift = a => a && [a[0], a[1] + dy];
@@ -117,24 +118,14 @@ const Cameos = (() => {
 
   // Ludwig: blond (white + ink outline) side part with a swoop to the right.
   const swoop = (height = 1.6) => ctx => {
-    // outer edge broken up with a couple of flicks; the fringe edge falls in
-    // pointed locks, so it reads as hair rather than a cap
-    const pts = [[-RX * 1.0, -RY * 0.15], [-RX * 0.98, -RY * 0.62], [-RX * 1.06, -RY * 0.8], [-RX * 0.8, -RY * 0.92], [-RX * 0.44, -RY * 1.02],
-                 [-RX * 0.32, -RY * (height - 0.2)], [-RX * 0.12, -RY * (height - 0.02)], [RX * 0.2, -RY * height], [RX * 0.5, -RY * (height + 0.06)],
-                 [RX * 0.82, -RY * (height - 0.16)], [RX * 1.2, -RY * (height - 0.3)], [RX * 1.0, -RY * 1.04],
-                 [RX * 1.12, -RY * 0.84], [RX * 1.02, -RY * 0.22],
-                 [RX * 0.9, -RY * 0.52], [RX * 0.8, -RY * 0.38], [RX * 0.66, -RY * 0.64], [RX * 0.5, -RY * 0.7],
-                 [RX * 0.34, -RY * 0.52], [RX * 0.2, -RY * 0.74], [-RX * 0.05, -RY * 0.76],
-                 [-RX * 0.2, -RY * 0.6], [-RX * 0.3, -RY * 0.86], [-RX * 0.44, -RY * 0.94], [-RX * 0.58, -RY * 0.7], [-RX * 0.72, -RY * 0.62], [-RX * 0.92, -RY * 0.3]];
+    const pts = [[-RX * 1.0, -RY * 0.15], [-RX * 0.98, -RY * 0.62], [-RX * 0.72, -RY * 0.96], [-RX * 0.44, -RY * 1.02],
+                 [-RX * 0.32, -RY * (height - 0.2)], [RX * 0.2, -RY * height], [RX * 0.82, -RY * (height - 0.16)],
+                 [RX * 1.12, -RY * 0.84], [RX * 1.02, -RY * 0.22], [RX * 0.9, -RY * 0.52], [RX * 0.5, -RY * 0.7],
+                 [-RX * 0.05, -RY * 0.76], [-RX * 0.44, -RY * 0.94], [-RX * 0.72, -RY * 0.62], [-RX * 0.92, -RY * 0.3]];
     fill(ctx, pts, BLOND, 1.2);
     outline(ctx, pts, { w: 11 });
-    // strands start up at the crown and curve down into the pointed fringe
-    // tips, so the hair reads as falling locks rather than a knit cap
-    for (const [a, b, c] of [[[-0.36, -(height - 0.34)], [-0.5, -1.02], [-0.56, -0.82]],
-                             [[0.04, -(height - 0.16)], [-0.08, -1.1], [-0.18, -0.72]],
-                             [[0.44, -(height - 0.1)], [0.42, -1.1], [0.33, -0.64]],
-                             [[0.86, -(height - 0.32)], [0.9, -0.95], [0.8, -0.5]]])
-      stroke(ctx, [[RX * a[0], RY * a[1]], [RX * b[0], RY * b[1]], [RX * c[0], RY * c[1]]], { w: 5.5, taper0: 0.5, taper1: 0.85 });
+    stroke(ctx, [[-RX * 0.38, -RY * 1.05], [RX * 0.15, -RY * (height - 0.12)], [RX * 0.85, -RY * (height - 0.28)]], { w: 7 });
+    stroke(ctx, [[-RX * 0.3, -RY * 0.92], [RX * 0.3, -RY * 1.1], [RX * 0.95, -RY * 0.9]], { w: 6 });
   };
 
   // MrBeast: short sides, hair swept across with a fringe flick over the forehead.
@@ -523,7 +514,8 @@ const Cameos = (() => {
     const poly = hu([...outer, ...inner]);
     fill(ctx, poly, fillCol, 1);
     if (!seamless) outline(ctx, poly, { w: 11 });
-    else stroke(ctx, hu([...outer.slice(-tips), ...inner, ...outer.slice(0, tips)]), { w: 11, taper0: 0.08, taper1: 0.08 });
+    // full width to the ends (round caps) so it joins the back hair's outline without thinning
+    else stroke(ctx, hu([...outer.slice(-tips), ...inner, ...outer.slice(0, tips)]), { w: 11, taper0: 0, taper1: 0, minW: 1 });
     for (const l of lines) stroke(ctx, hu(l), { w: 7, taper0: 0.15, taper1: 0.35, color: lineColor });
   };
 
@@ -703,21 +695,33 @@ const Cameos = (() => {
     const inner = [[RX * 0.9, -RY * 0.02], [RX * 0.78, RY * 0.3], [RX * 0.5, RY * 0.4], [0, RY * 0.36],
                    [-RX * 0.5, RY * 0.4], [-RX * 0.78, RY * 0.3], [-RX * 0.9, -RY * 0.02]];
     const shape = [...outer.reverse(), ...inner];
-    fill(ctx, shape, '#c4c4c4', 1);
-    // stubble edge: short broken ticks all along the fill boundary (inner
-    // cheek line and jaw), so the grey reads as hair, not a smudge
-    const ring = Brush.spline([...shape], true, 4);
-    for (let i = 0; i < ring.length; i += 3) {
-      const [x, y] = ring[i], [x2, y2] = ring[(i + 2) % ring.length];
-      const d = Math.hypot(x2 - x, y2 - y) || 1, nx = -(y2 - y) / d, ny = (x2 - x) / d;
-      const len = 7 + 5 * hh(i), off = (hh(i + 3) - 0.5) * 4;
-      stroke(ctx, [[x + nx * off, y + ny * off], [x + nx * (off - len), y + ny * (off - len)]], { w: 3.2, taper0: 0.1, taper1: 0.7, color: '#5a5a5a' });
+    // stubble, not a beard: a faint shadow with dense short dots over it
+    fill(ctx, shape, '#e4e4e4', 0.6);
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(shape[0][0], shape[0][1]);
+    for (const q of Brush.spline(shape, true, 4)) ctx.lineTo(q[0], q[1]);
+    ctx.clip();
+    for (let gy = -RY * 0.1; gy < RY * 1.1; gy += 10) for (let gx = -RX; gx < RX; gx += 11) {
+      const k = Math.round(gx * 7 + gy * 13);
+      const x = gx + (hh(k) - 0.5) * 9 + ((gy / 10) % 2) * 5, y = gy + (hh(k + 5) - 0.5) * 7;
+      blob(ctx, x, y, 1.7, 1.7, { fill: hh(k + 9) > 0.35 ? '#4a4a4a' : '#7a7a7a', w: 0, n: 5 });
     }
+    ctx.restore();
   };
   const slimeStache = (ctx, fx, rage) => {
     const up = rage ? 16 : 0;   // rides up over the huge open mouth
     const m = [[fx - 58, 50], [fx - 26, 36], [fx, 40], [fx + 26, 36], [fx + 60, 50], [fx + 28, 52], [fx, 48], [fx - 28, 52]].map(([x, y]) => [x, y - up]);
-    fill(ctx, m, '#6a6a6a', 1);
+    // moustache stubble: same faint shadow + dots as the jaw
+    fill(ctx, m, '#e4e4e4', 0.4);
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(m[0][0], m[0][1]);
+    for (const q of Brush.spline(m, true, 3)) ctx.lineTo(q[0], q[1]);
+    ctx.clip();
+    for (let y = 30; y < 56; y += 7) for (let x = fx - 62; x < fx + 64; x += 8) {
+      const k = Math.round(x * 3 + y * 11);
+      blob(ctx, x + (hh(k) - 0.5) * 5, y - up + (hh(k + 2) - 0.5) * 4, 1.7, 1.7, { fill: '#4a4a4a', w: 0, n: 5 });
+    }
+    ctx.restore();
   };
   const slime = build({ shirt: INK, sleeve: '#222', head: head({ back: ears, hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
