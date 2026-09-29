@@ -12,18 +12,18 @@ const Emotions = (() => {
   // works out the bend. A hand out of reach is pulled back along the arm, so
   // arms never stretch. elbow: 'out' (away from the body) or 'down'.
   const SHOULDER = [56, -286], UPPER = 86;
-  function reach(side, hand, elbow = 'out') {
+  function reach(side, hand, elbow = 'out', upper = UPPER) {
     const sh = [side * SHOULDER[0], SHOULDER[1]];
     let dx = hand[0] - sh[0], dy = hand[1] - sh[1], d = Math.hypot(dx, dy);
-    const max = UPPER * 2 * 0.97;
+    const max = upper * 2 * 0.97;
     if (d > max) { dx *= max / d; dy *= max / d; d = max; }
-    const h = Math.sqrt(UPPER * UPPER - (d / 2) ** 2);   // elbow's distance off the shoulder-hand line
+    const h = Math.sqrt(upper * upper - (d / 2) ** 2);   // elbow's distance off the shoulder-hand line
     const nx = -dy / d, ny = dx / d;                      // tube() offsets the elbow along +bend * (nx, ny)
     const flip = elbow === 'down' ? ny < 0 : side * nx < 0;
     return { at: [sh[0] + dx, sh[1] + dy], bend: (flip ? -h : h) / d };
   }
-  const arm = (side, hand, elbow, front) => {
-    const r = reach(side, hand, elbow), k = side < 0 ? 'L' : 'R';
+  const arm = (side, hand, elbow, front, upper) => {
+    const r = reach(side, hand, elbow, upper), k = side < 0 ? 'L' : 'R';
     return { ['arm' + k]: r.at, ['bend' + k]: r.bend, ...(front ? { ['arm' + k + 'Front']: true } : {}) };
   };
   const both = (hand, elbow, front) => ({ ...arm(-1, [-hand[0], hand[1]], elbow, front), ...arm(1, hand, elbow, front) });
@@ -38,9 +38,10 @@ const Emotions = (() => {
     yelling:   { mouth: 'rage', open: 1, squint: true, brow: 1.3, ...both([124, -196], 'out') },   // furious: anime rage eyes, shark teeth, fists clenched
     scared:    { mouth: 'wobbly', brow: -1, pupil: 6, sweat: true, lean: -0.05, ...both([46, -328], 'out', true) },   // fists pulled in under the chin, elbows out
     shocked:   { mouth: 'o', open: 1, brow: -0.7, pupil: 5, ...both([112, -392], 'down', true) },   // hands on cheeks
+    stunned:   { mouth: 'tiny', pupil: 4, brow: -0.1 },   // blank stare, arms limp
     nervous:   { mouth: 'wobbly', brow: -0.6, lookX: -0.8, sweat: true },
-    confused:  { mouth: 'smirk', brow: -0.5, lookX: 0.5, lookY: -0.6, tilt: 0.14,
-                 ...both([172, -236], 'down') },   // shrug, hands out
+    confused:  { mouth: 'o', open: 0.25, browL: 0.7, browR: -0.9, lookX: -0.5, lookY: -0.6, tilt: 0.16,
+                 ...arm(1, [132, -522], 'out', true, 150) },   // one brow up, one down, scratching the top of his head
     thinking:  { mouth: 'flat', brow: 0.3, lookX: -0.6, lookY: -0.7,
                  ...arm(1, [26, -306], 'down', true), ...arm(-1, [-2, -210], 'down', true) },   // hand on chin, other arm across holding the elbow
     smirk:     { mouth: 'smirk', brow: 0.3, lid: 0.3, lookX: 0.4 },

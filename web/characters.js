@@ -73,8 +73,8 @@ const Chars = (() => {
 
   // brow > 0 angry (inner ends down), brow < 0 worried (inner ends up)
   function brows(ctx, fx, y, p, size = 1, thick = 9) {
-    const b = p.brow ?? 0;
     for (const side of [-1, 1]) {
+      const b = (side < 0 ? p.browL : p.browR) ?? p.brow ?? 0;   // browL/browR: one brow up, one down
       const inner = [fx + side * 12 * size, y + 16 * b * size];
       const outer = [fx + side * 66 * size, y - 8 * b * size - 4 * size];
       const mid = [(inner[0] + outer[0]) / 2, (inner[1] + outer[1]) / 2 - 5 * size];
@@ -130,7 +130,7 @@ const Chars = (() => {
     if (v.lip > 0.5) stroke(ctx, [[x - w * 0.8, y + teethH * 0.8], [x, y + teethH], [x + w * 0.8, y + teethH * 0.8]], { w: 7 * s, color });
   }
 
-  // kinds: flat | smile | smirk | o | wobbly | yell | rage | grin | frown | talk (uses p.viz)
+  // kinds: flat | smile | smirk | o | wobbly | yell | rage | tiny | grin | frown | talk (uses p.viz)
   function mouth(ctx, x, y, p, size = 1, color = INK) {
     const k = p.mouth ?? 'flat', open = p.open ?? 0, s = size;
     if (k === 'talk' && p.viz) return talkMouth(ctx, x, y, p.viz, s, color);
@@ -151,6 +151,8 @@ const Chars = (() => {
       blob(ctx, x, y + r * 0.3, r * 0.8, r, { fill: INK, w: 5 * s, n: 10 });
     } else if (k === 'yell') {
       openMouth(ctx, x, y, (60 + 30 * open) * s, (40 + 105 * open) * s, s);
+    } else if (k === 'tiny') {   // small blank pout (stunned)
+      stroke(ctx, [[x - 13 * s, y + 3 * s], [x, y], [x + 13 * s, y + 3 * s]], { w: 7 * s, color });
     } else if (k === 'rage') {
       // furious anime yell: huge mouth, jagged shark teeth top and bottom
       const w2 = (78 + 22 * open) * s, h = (70 + 70 * open) * s;
