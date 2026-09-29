@@ -51,7 +51,7 @@ disagree, the rule wins.
 ## Colour
 
 - Base is black, white and grey.
-- Red (`#e3261b` / `#d9261c`) belongs to captions and titles.
+- Red (`#e3261b` / `#d9261c`) belongs to title captions (dialogue subtitles use speaker colours, see Captions).
 - Unnatural colours are for clothing only. Cameos stay grayscale.
 
 ## Cast
@@ -65,10 +65,30 @@ disagree, the rule wins.
 - Cameos (`web/cameos.js`) are caricatures recognisable from hair silhouette
   plus one or two signature items. Nick's ears are always hidden by his hair.
 
+## Camera and staging
+
+- Don't sit in one medium two-shot. Cut to close-ups for reactions and punch
+  lines, push in on the joke, pull back for group shots.
+- Fill the frame: a backdrop reaches the top of the frame (sky, trees, props);
+  no empty white band above the captions.
+- Keep a margin at the frame edges, or crop a character on purpose well past
+  the head. Never clip hair by a few pixels.
+- Nobody stands dead still: breathing, a lean toward whoever they're talking
+  to, head tilts that change (and hold) through a line.
+- Shadows are flat ink shapes under feet. No soft fades or blurs anywhere.
+- Animals and props use the characters' line weight (`web/animals.js` scales
+  it automatically), and sets use outlines of at least ~9 px.
+- Repeated set details (grass, planks, bulbs) vary in spacing and size.
+
 ## Captions
 
 - Exactly the words of the original, including punctuation (e.g. the colon in
   "That one machine at the eye doctor:").
+- Title captions ("That one machine at the eye doctor:") are red. Dialogue
+  subtitles for clips of real people use the original's speaker colours (for
+  The Yard: Nick blue, Ludwig white, Slime green), with a heavy black
+  outline. Every caption in a video is the same size: long lines wrap, they
+  don't shrink.
 - Centred on the frame. By default the caption starts at the top of
   `Stage.SAFE` (the strictest of the TikTok, YouTube Shorts and Instagram
   Reels guides). That is conservative: a skit can raise it with

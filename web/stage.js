@@ -306,7 +306,7 @@ const Stage = (() => {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     skit.draw(ctx, f / FPS);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    bottomFade(ctx);
+    if (skit.fade) bottomFade(ctx);   // opt-in: a soft grey fade reads as a render glitch in the ink style
     const t = f / FPS, at = v => typeof v === 'function' ? v(t) : v;   // titles may change over time
     title(ctx, at(skit.title), at(skit.subtitle), skit.titleBottom);
     if (globalThis.SHOW_SAFE) safeOverlay(ctx);

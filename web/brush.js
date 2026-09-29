@@ -148,6 +148,7 @@ const Brush = (() => {
   // Thicken (k > 1) or thin all lines drawn after this call, until the next
   // frame. Characters drawn small keep a bold ink look with setWeight(1.3).
   function setWeight(k) { weight = k; }
+  const getWeight = () => weight;
 
-  return { INK, frame, setWeight, stroke, fill, outline, blob, ellipsePts, spline, random };
+  return { INK, frame, setWeight, getWeight, stroke, fill, outline, blob, ellipsePts, spline, random };
 })();

@@ -11,13 +11,18 @@ const Animals = (() => {
   const W = '#fff';
   const shape = (ctx, pts, col, w = 8) => { fill(ctx, pts, col, 0.6); outline(ctx, pts, { w }); };
 
+  // Animals are characters too: keep their on-screen line weight close to the
+  // cast's (outline ~11 at scale 1.45) whatever scale they're drawn at.
   function place(ctx, p, draw) {
+    const w0 = Brush.getWeight();
+    Brush.setWeight(w0 * Math.max(1, Math.min(2.4, 1.9 / (p.s ?? 1))));
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.scale((p.s ?? 1) * (p.dir ?? 1), p.s ?? 1);
     ctx.rotate(p.rot ?? 0);
     draw();
     ctx.restore();
+    Brush.setWeight(w0);
   }
 
   // One side-on eye (the house eye, just a single one).

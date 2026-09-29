@@ -33,17 +33,17 @@ const Emotions = (() => {
     neutral:   { mouth: 'flat' },
     happy:     { mouth: 'smile', brow: -0.2 },
     laughing:  { lid: 1, happy: true, mouth: 'yell', open: 0.45, brow: -0.4, tilt: -0.1, ...both([72, -176], 'out') },   // hands on belly
-    excited:   { pupil: 15, sparkle: true, mouth: 'yell', open: 0.35, brow: -0.6, ...both([178, -372], 'down') },   // sparkly eyes, fists pumped
+    excited:   { pupil: 15, sparkle: true, mouth: 'yell', open: 0.5, mouthScale: 1.2, stretch: 0.5, brow: -0.6, ...both([178, -372], 'down') },   // sparkly eyes, fists pumped
     smirk:     { mouth: 'grinwide', lid: 0.42, lowLid: 0.3, brow: 0.2, lookX: 0.35 },   // eyes narrowed by the grin
     sad:       { mouth: 'wobbly', brow: -1, lid: 0.25, lookY: 0.3, tears: true, tilt: 0.07 },   // tears welling
     sobbing:   { mouth: 'grimace', open: 0.7, lid: 1, streams: true, brow: -1, tilt: -0.08 },   // eyes shut, tears streaming
-    angry:     { mouth: 'frown', brow: 1, pupil: 9, lid: 0.15, ...both([124, -170], 'out') },   // fists at hips
+    angry:     { mouth: 'clench', stretch: -0.8, brow: 1.1, pupil: 9, lid: 0.15, ...both([124, -170], 'out') },   // fists at hips
     yelling:   { mouth: 'rage', open: 1, squint: true, brow: 1.3, ...both([124, -196], 'out') },   // furious: anime rage eyes, shark teeth, fists clenched
-    scared:    { mouth: 'wobbly', brow: -1, pupil: 6, sweat: true, lean: -0.05, ...both([46, -328], 'out', true) },   // fists pulled in under the chin, elbows out
-    shocked:   { mouth: 'gape', open: 1, eyeScale: 1.2, pupil: 4, stress: true, brow: -0.8, ...both([112, -392], 'down', true) },   // big eyes, tiny pupils, hands on cheeks
+    scared:    { mouth: 'wobbly', mouthScale: 1.3, stretch: 0.4, brow: -1, pupil: 6, sweat: true, lean: -0.05, ...both([46, -328], 'out', true) },   // fists pulled in under the chin, elbows out
+    shocked:   { mouth: 'gape', open: 1, mouthScale: 1.2, stretch: 1, eyeScale: 1.2, pupil: 4, stress: true, brow: -0.8, ...both([112, -392], 'down', true) },   // big eyes, tiny pupils, hands on cheeks
     stunned:   { mouth: 'tiny', blank: true, brow: -0.1 },   // blank stare: small round empty eyes, arms limp
-    hurt:      { mouth: 'grimace', open: 0.15, pinch: true, brow: -0.8, tilt: 0.06 },   // eyes squeezed > <
-    dizzy:     { mouth: 'gape', open: 0.4, spiral: true, brow: -0.5, tilt: 0.12 },   // spiral eyes
+    hurt:      { mouth: 'grimace', open: 0.3, mouthScale: 1.25, stretch: -0.5, pinch: true, brow: -0.8, tilt: 0.06 },   // eyes squeezed > <
+    dizzy:     { mouth: 'gape', open: 0.4, mouthScale: 1.2, spiral: true, brow: -0.5, tilt: 0.12 },   // spiral eyes
     nervous:   { mouth: 'wobbly', brow: -0.6, lookX: -0.8, sweat: true },
     dread:     { mouth: 'wobbly', lid: 0.5, pupil: 9, lookY: 0.3, gloom: true, brow: -0.8 },   // heavy lids, shading down the forehead
     confused:  { mouth: 'o', open: 0.25, browL: 0.6, browLiftL: 8, browR: -0.2, browLiftR: -16, lookX: -0.5, lookY: -0.6, tilt: 0.16,

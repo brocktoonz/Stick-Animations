@@ -16,6 +16,9 @@ const Cameos = (() => {
   const hh = i => { const x = Math.sin(i * 12.9898 + 4.1) * 43758.5453; return x - Math.floor(x); };
 
   // ---------- body: the kid's build, a little taller ----------
+  // o.body overrides rig proportions (taller, stockier...); o.headScale
+  // [sx, sy] reshapes the head. Pose arm targets shift with the neck so the
+  // shared emotion poses still land on the head and hips.
   function build(o) {
     const S = {
       hipY: -150, neckY: -320, headUp: 118, legTop: 30, hipX: 26, footX: 28, stride: 36, lift: 26,
@@ -29,8 +32,15 @@ const Cameos = (() => {
       torso: (n, h) => [[-48, n], [48, n], [66, n + 64], [68, h - 4], [-68, h - 4], [-66, n + 64]],
       torsoFill: o.shirt ?? W,
       torsoDetail: o.detail,
+      ...o.body,
     };
-    return (ctx, p) => figure(ctx, { mouth: 'smile', ...p }, S);
+    if (o.headScale) {
+      const [sx, sy] = o.headScale, h = S.head;
+      S.head = (ctx, p) => { ctx.save(); ctx.scale(sx, sy); h(ctx, p); ctx.restore(); };
+    }
+    const dy = S.neckY + 320;
+    const shift = a => a && [a[0], a[1] + dy];
+    return (ctx, p) => figure(ctx, { mouth: 'smile', ...p, ...(dy ? { armL: shift(p.armL), armR: shift(p.armR) } : {}) }, S);
   }
 
   // ---------- head ----------
@@ -39,6 +49,10 @@ const Cameos = (() => {
     return (ctx, p) => {
       const fx = p.face ?? 12;
       if (p.eyesOnly) return eyes(ctx, fx, -6, p);
+      // p.stretch: + stretches the head tall (shock), - squashes it wide (anger)
+      const st = p.stretch ?? 0;
+      ctx.save();
+      if (st) { ctx.translate(0, RY * 0.8); ctx.scale(1 - 0.09 * st, 1 + 0.13 * st); ctx.translate(0, -RY * 0.8); }
       o.back?.(ctx);   // behind the head: hoods, long hair
       // a yell drops the jaw: the head stretches down and the mouth rides up
       // a little, so even a wide-open mouth stays inside the chin
@@ -59,10 +73,11 @@ const Cameos = (() => {
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
       } else brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
       if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
-      else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, open ? 0.85 : 1);
+      else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
       o.front?.(ctx, fx, rage);
       o.hat?.(ctx);
       if (p.sweat) { sweat(ctx, -126, -30); sweat(ctx, 150, -60, 0.8); }
+      ctx.restore();
     };
   }
 
@@ -96,14 +111,23 @@ const Cameos = (() => {
 
   // Ludwig: blond (white + ink outline) side part with a swoop to the right.
   const swoop = (height = 1.6) => ctx => {
-    const pts = [[-RX * 1.0, -RY * 0.15], [-RX * 0.98, -RY * 0.62], [-RX * 0.72, -RY * 0.96], [-RX * 0.44, -RY * 1.02],
-                 [-RX * 0.32, -RY * (height - 0.2)], [RX * 0.2, -RY * height], [RX * 0.82, -RY * (height - 0.16)],
-                 [RX * 1.12, -RY * 0.84], [RX * 1.02, -RY * 0.22], [RX * 0.9, -RY * 0.52], [RX * 0.5, -RY * 0.7],
-                 [-RX * 0.05, -RY * 0.76], [-RX * 0.44, -RY * 0.94], [-RX * 0.72, -RY * 0.62], [-RX * 0.92, -RY * 0.3]];
+    // outer edge broken up with a couple of flicks; the fringe edge falls in
+    // pointed locks, so it reads as hair rather than a cap
+    const pts = [[-RX * 1.0, -RY * 0.15], [-RX * 0.98, -RY * 0.62], [-RX * 1.06, -RY * 0.8], [-RX * 0.8, -RY * 0.92], [-RX * 0.44, -RY * 1.02],
+                 [-RX * 0.32, -RY * (height - 0.2)], [-RX * 0.12, -RY * (height - 0.02)], [RX * 0.2, -RY * height], [RX * 0.5, -RY * (height + 0.06)],
+                 [RX * 0.82, -RY * (height - 0.16)], [RX * 1.2, -RY * (height - 0.3)], [RX * 1.0, -RY * 1.04],
+                 [RX * 1.12, -RY * 0.84], [RX * 1.02, -RY * 0.22],
+                 [RX * 0.9, -RY * 0.52], [RX * 0.8, -RY * 0.38], [RX * 0.66, -RY * 0.64], [RX * 0.5, -RY * 0.7],
+                 [RX * 0.34, -RY * 0.52], [RX * 0.2, -RY * 0.74], [-RX * 0.05, -RY * 0.76],
+                 [-RX * 0.2, -RY * 0.6], [-RX * 0.3, -RY * 0.86], [-RX * 0.44, -RY * 0.94], [-RX * 0.58, -RY * 0.7], [-RX * 0.72, -RY * 0.62], [-RX * 0.92, -RY * 0.3]];
     fill(ctx, pts, BLOND, 1.2);
     outline(ctx, pts, { w: 11 });
-    stroke(ctx, [[-RX * 0.38, -RY * 1.05], [RX * 0.15, -RY * (height - 0.12)], [RX * 0.85, -RY * (height - 0.28)]], { w: 7 });
-    stroke(ctx, [[-RX * 0.3, -RY * 0.92], [RX * 0.3, -RY * 1.1], [RX * 0.95, -RY * 0.9]], { w: 6 });
+    for (const [a, b, c, w] of [[[-0.38, -1.05], [0.15, -(height - 0.12)], [0.85, -(height - 0.28)], 7],
+                                [[-0.3, -0.92], [0.3, -1.1], [0.95, -0.9], 6],
+                                [[-0.62, -0.84], [-0.2, -(height - 0.3)], [0.4, -(height - 0.08)], 5],
+                                [[0.1, -0.82], [0.55, -0.98], [1.0, -1.1], 5],
+                                [[-0.86, -0.5], [-0.8, -0.8], [-0.6, -1.0], 5]])
+      stroke(ctx, [[RX * a[0], RY * a[1]], [RX * b[0], RY * b[1]], [RX * c[0], RY * c[1]]], { w, taper0: 0.3, taper1: 0.5 });
   };
 
   // MrBeast: short sides, hair swept across with a fringe flick over the forehead.
@@ -196,14 +220,21 @@ const Cameos = (() => {
   // Ludwig: light-grey blond swoop, short-sleeved pineapple shirt.
   const ludwig = build({
     shirt: W, sleeveHem: 0.42,
+    body: { hipY: -172, neckY: -352, legW: 21, footX: 18, hipX: 20, torso: (n, h) => [[-42, n], [42, n], [56, n + 60], [58, h - 4], [-58, h - 4], [-56, n + 60]] },
+    headScale: [0.92, 1.06],
     head: head({ hair: swoop() }),
     detail: (ctx, n) => {
       outline(ctx, [[-40, n - 2], [0, n + 44], [-18, n + 60]], { w: 7 });
       outline(ctx, [[40, n - 2], [0, n + 44], [18, n + 60]], { w: 7 });
-      for (let i = 0; i < 4; i++) {
-        const x = [-40, 36, -20, 46][i], y = n + [80, 90, 140, 150][i];
-        blob(ctx, x, y, 10, 14, { fill: W, w: 5, n: 8 });
-        stroke(ctx, [[x - 7, y - 14], [x, y - 28], [x + 7, y - 14]], { w: 5 });
+      for (let i = 0; i < 4; i++) {   // pineapples: crosshatched body, crown of leaves
+        const x = [-40, 36, -20, 46][i], y = n + [82, 92, 142, 152][i];
+        for (const a of [-0.9, -0.35, 0.2, 0.75]) {
+          const r = a === -0.35 || a === 0.2 ? 20 : 14;
+          stroke(ctx, [[x, y - 14], [x + Math.sin(a) * r, y - 14 - Math.cos(a) * r]], { w: 5, taper0: 0.1, taper1: 0.9 });
+        }
+        blob(ctx, x, y, 11, 15, { fill: W, w: 5, n: 8 });
+        stroke(ctx, [[x - 8, y - 6], [x + 7, y + 9]], { w: 2.5 });
+        stroke(ctx, [[x + 8, y - 6], [x - 7, y + 9]], { w: 2.5 });
       }
     },
   });
@@ -253,13 +284,18 @@ const Cameos = (() => {
       stroke(ctx, [[RX * x0, RY * y0], [RX * (x0 + x1) / 2 + 10, RY * (y0 + y1) / 2], [RX * x1, RY * y1]], { w: 5, color: '#9a9a9a' });
     }
   };
+  // Glasses read as glasses (not goggle eyes): lenses wider than the eyes and
+  // set outward so the rims aren't concentric with them, an arched bridge,
+  // temples running back into the hair, and a glint on each lens.
   const roundGlasses = (ctx, fx) => {
     for (const side of [-1, 1]) {
-      const g = Brush.ellipsePts(fx + side * 42, -6, 44, 46, 14);
-      fill(ctx, g, 'rgba(255,255,255,0)', 0);
-      outline(ctx, g, { w: 9 });
+      const cx = fx + side * 56;
+      const g = Brush.ellipsePts(cx, -4, 44, 42, 16);
+      outline(ctx, g, { w: 8 });
+      stroke(ctx, [[cx + side * 44, -12], [cx + side * 70, -18]], { w: 7, taper0: 0, taper1: 0.6 });   // temple
+      stroke(ctx, [[cx - side * 12 - 14, -34], [cx - side * 12 - 4, -40]], { w: 5, color: '#9a9a9a' });   // glint
     }
-    stroke(ctx, [[fx - 6, -14], [fx + 6, -14]], { w: 8 });
+    stroke(ctx, [[fx - 14, -14], [fx, -24], [fx + 14, -14]], { w: 7 });   // bridge
   };
   // ---- Nick hair alternatives (from the reference photos) ----
   // Curl texture: small "c" strokes scattered inside a region test.
@@ -625,6 +661,9 @@ const Cameos = (() => {
   };
   const nickBack = Object.fromEntries(Object.entries(NICK_BACK_OPTS).map(([k, b]) => [k, build({
     shirt: INK, sleeve: '#222', behind: b || undefined,
+    // shorter and stockier than Ludwig, with a rounder head
+    body: { hipY: -140, neckY: -300, legW: 27, footX: 42, hipX: 30, torso: (n, h) => [[-54, n], [54, n], [74, n + 60], [76, h - 4], [-76, h - 4], [-74, n + 60]] },
+    headScale: [1.04, 0.98],
     head: head({ hair: b ? SEAMLESS_FRONT : (ctx => NICK_OUTLINE.sweptWave(ctx)), front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) })]));
   const nickOutline = Object.fromEntries(Object.entries(NICK_OUTLINE).map(([k, h]) => [k, nickWith(h)]));
@@ -658,11 +697,13 @@ const Cameos = (() => {
                    [-RX * 0.5, RY * 0.4], [-RX * 0.78, RY * 0.3], [-RX * 0.9, -RY * 0.02]];
     const shape = [...outer.reverse(), ...inner];
     fill(ctx, shape, '#b8b8b8', 1);
-    for (let i = 0; i < 320; i++) {   // stubbly texture
-      const a = Math.PI * (0.08 + 0.84 * hh(i + 7)), r = 0.66 + 0.32 * hh(i + 50);
-      const x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r;
-      if (y < RY * 0.42 && Math.abs(x) < RX * 0.8) continue;
-      stroke(ctx, [[x, y], [x + 1 + (hh(i + 90) - 0.5) * 4, y + 6 + hh(i + 3) * 4]], { w: 3.5, color: hh(i + 11) > 0.5 ? '#333' : '#666', jit: 0.3 });
+    // stubble: a sparse, even stipple in one tone (a busy two-tone texture
+    // was the noisiest thing in the frame)
+    for (let gy = -RY * 0.1; gy < RY * 1.0; gy += 17) for (let gx = -RX; gx < RX; gx += 19) {
+      const k = Math.round(gx * 7 + gy * 13);
+      const x = gx + (hh(k) - 0.5) * 8, y = gy + (hh(k + 5) - 0.5) * 8;
+      if ((x / RX) ** 2 + (y / RY) ** 2 > 0.9 || (y < RY * 0.42 && Math.abs(x) < RX * 0.8) || y < RY * 0.02 * Math.abs(x) / RX) continue;
+      blob(ctx, x, y, 2.6, 2.6, { fill: '#5a5a5a', w: 0, n: 5 });
     }
   };
   const slimeStache = (ctx, fx, rage) => {

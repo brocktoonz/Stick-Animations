@@ -309,10 +309,11 @@ const Chars = (() => {
       stroke(ctx, [[x - 58 * s, y - 14 * s], [x - 30 * s, y + 12 * s], [x, y + 20 * s], [x + 30 * s, y + 12 * s], [x + 58 * s, y - 14 * s]], { w: 7 * s, color });
     } else if (k === 'gape') {   // shock / horror: big round open mouth
       const w2 = (22 + 14 * open) * s, h = (26 + 44 * open) * s;
-      const pts = Brush.ellipsePts(x, y + h * 0.45, w2, h * 0.55, 14);
+      const cy = y + h * 0.18;   // centred high so even a big gape stays above the chin
+      const pts = Brush.ellipsePts(x, cy, w2, h * 0.52, 14);
       fill(ctx, pts, INK, 0.6);
-      ctx.save(); ctx.beginPath(); ctx.ellipse(x, y + h * 0.45, w2, h * 0.55, 0, 0, 7); ctx.clip();
-      ctx.fillStyle = '#9a9a9a'; ctx.beginPath(); ctx.ellipse(x, y + h * 0.95, w2 * 0.7, h * 0.3, 0, 0, 7); ctx.fill();
+      ctx.save(); ctx.beginPath(); ctx.ellipse(x, cy, w2, h * 0.52, 0, 0, 7); ctx.clip();
+      ctx.fillStyle = '#9a9a9a'; ctx.beginPath(); ctx.ellipse(x, cy + h * 0.45, w2 * 0.7, h * 0.28, 0, 0, 7); ctx.fill();
       ctx.restore();
       outline(ctx, pts, { w: 6 * s });
     } else if (k === 'grimace') {   // hurt / sobbing: wavy open mouth
@@ -320,6 +321,8 @@ const Chars = (() => {
       const pts = [[x - w2, y], [x - w2 * 0.5, y - 7 * s], [x, y + 1 * s], [x + w2 * 0.5, y - 7 * s], [x + w2, y],
                    [x + w2 * 0.7, y + h], [x + w2 * 0.25, y + h * 0.82], [x - w2 * 0.25, y + h * 1.05], [x - w2 * 0.7, y + h * 0.85]];
       fill(ctx, pts, INK, 0.6); outline(ctx, pts, { w: 6 * s });
+    } else if (k === 'clench') {   // angry: big clenched teeth
+      talkMouth(ctx, x, y, { kind: 'teeth' }, s * 1.7, color);
     } else if (k === 'tiny') {   // small blank pout (stunned)
       stroke(ctx, [[x - 13 * s, y + 3 * s], [x, y], [x + 13 * s, y + 3 * s]], { w: 7 * s, color });
     } else if (k === 'rage') {
