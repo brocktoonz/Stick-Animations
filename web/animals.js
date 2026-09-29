@@ -63,10 +63,15 @@ const Animals = (() => {
     const toe = [ankle[0] + H * 0.26, -lift];
     const seed = 900 + Math.round(hip[0]);
     for (const [ww, c] of [[w + 10, INK], [w, col]]) {
-      stroke(ctx, [hip, knee], { w: ww * 1.5, taper0: 0, taper1: 0.35, minW: 0.5, seed, color: c });
-      stroke(ctx, [knee, ankle, toe], { w: ww * 0.7, taper0: 0, taper1: 0, minW: 1, seed: seed + 1, color: c });
+      stroke(ctx, [hip, knee], { w: ww * 1.15, taper0: 0, taper1: 0.45, minW: 0.5, seed, color: c });   // thigh
+      stroke(ctx, [knee, ankle], { w: ww * 0.55, taper0: 0, taper1: 0, minW: 1, seed: seed + 1, color: c });   // shin
     }
-    for (const a of [-0.15, 0.25, 0.65]) stroke(ctx, [toe, [toe[0] + Math.cos(a) * 24, toe[1] + Math.sin(a) * 6 - 2]], { w: 7, taper0: 0, taper1: 0.9 });
+    // foot: three outlined toes fanning forward from the ankle
+    for (const a of [-0.25, 0.1, 0.45]) {
+      const tip = [ankle[0] + Math.cos(a) * H * 0.3, ankle[1] + H * 0.2 + Math.sin(a) * H * 0.05];
+      stroke(ctx, [ankle, [(ankle[0] + tip[0]) / 2, tip[1] - 4], tip], { w: w * 0.5 + 8, taper0: 0, taper1: 0.8, seed: seed + 7 });
+      stroke(ctx, [ankle, [(ankle[0] + tip[0]) / 2, tip[1] - 4], tip], { w: w * 0.5, taper0: 0, taper1: 0.8, seed: seed + 7, color: col });
+    }
   }
   // Theropods (raptor, T-rex) share one body plan.
   function theropod(ctx, p, o) {

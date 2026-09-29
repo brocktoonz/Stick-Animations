@@ -83,7 +83,7 @@ Skits.extinct = (() => {
   // ---------- sets (drawn wide so any framing stays inside them) ----------
   function sky(ctx) {
     ctx.fillStyle = W; ctx.fillRect(-700, -900, 2500, 3600);
-    for (const [x, y, k] of [[160, 250, 1], [880, 150, 1.2], [560, 420, 0.7], [-260, 380, 1], [1320, 330, 0.9]]) cloud(ctx, x, y, k);
+    for (const [x, y, k] of [[140, 230, 0.9], [900, 230, 1.0], [-260, 380, 1], [1320, 330, 0.9]]) cloud(ctx, x, y, k);   // kept clear of the caption block
   }
   // Cloud: a union of round puffs on a flat-ish base. Every puff is outlined
   // first, then all are filled white on top, so only the outer edge shows.
@@ -308,8 +308,8 @@ Skits.extinct = (() => {
       // back row: mammoth (left) and T-rex (right), clear of each other; front row: raptor, dodo
       const pops = [[1.8, 225, 0.8, FLOOR - 70, (x, y) => A.mammoth(ctx, { x, y, s: 0.8, t, eyes: 'happy' })],
                     [2.05, 850, 1.0, FLOOR - 80, (x, y) => A.trex(ctx, { x, y, s: 1.0, t, dir: -1, open: 0.6 * seg(t, 2.3, 2.5) })],
-                    [2.3, 330, 0.85, FLOOR + 120, (x, y) => A.dodo(ctx, { x, y, s: 0.85, t })],
-                    [2.55, 720, 0.85, FLOOR + 130, (x, y) => A.raptor(ctx, { x, y, s: 0.85, t, walk: true })]];
+                    [2.3, 420, 0.7, FLOOR + 130, (x, y) => A.dodo(ctx, { x, y, s: 0.7, t })],
+                    [2.55, 800, 0.7, FLOOR + 150, (x, y) => A.raptor(ctx, { x, y, s: 0.7, t, walk: true })]];
       for (const [t0, x, sc, y, draw] of pops) {
         const k = seg(t, t0, t0 + 0.28);
         if (k > 0) shadow(ctx, x, 110 * sc * Math.min(1, k * 2), y + 6);
@@ -340,17 +340,17 @@ Skits.extinct = (() => {
     // only), laughing behind Ludwig's shoulder.
     [9.45, 10.75, (ctx, t) => {
       const z = 1.35, sc = S * z, g = GEO.lud;
-      const headSx = 590, headSy = Math.max(1200, capBottom() + HEAD_GAP + g.hair * sc);
+      const headSx = 590, headSy = Math.max(1080, capBottom() + HEAD_GAP + g.hair * sc);
       const bodySx = headSx - g.offset * sc;                       // body line that puts the head at centre
       const cwx = LX - (bodySx - 540) / z, cwy = FLOOR - g.head * S;
       const toWorld = (x, y) => [cwx + (x - 540) / z, cwy + (y - headSy) / z];
       ctx.save(); cam(ctx, cwx, cwy, z, headSy);
       stage(ctx);
       if (t >= 9.85) {
-        const k = loud('extinct', t), slide = easeOutBack(seg(t, 9.85, 10.02)), lean = 0.42, ss = S * 0.8;   // smaller: further back
+        const k = loud('extinct', t), slide = easeOutBack(seg(t, 9.85, 10.02)), lean = 0.3, ss = S * 0.8;   // smaller: further back
         // Slime's head centre on screen: slides in from off the left edge,
         // face just clear of Ludwig's head
-        const hx = lerp(-360, 265, slide), hy = headSy - 30;
+        const hx = lerp(-360, 265, slide), hy = headSy + 230;
         const [wx, wy] = toWorld(hx, hy), R = 438 * ss;
         Cameos.slime(ctx, { t, x: wx - Math.sin(lean) * R, y: wy + Math.cos(lean) * R, s: ss, dir: 1, lean,
           ...E.laughing, open: 0.3 + 0.5 * k, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
@@ -369,13 +369,13 @@ Skits.extinct = (() => {
     // "...or get an equal amount of new animals": cutaway, new creatures pop in
     [14.0, 16.0, (ctx, t) => {
       newWorld(ctx, t);
-      const pops = [[14.1, 190, 1.2, () => A.fishLegs(ctx, { x: 190, y: FLOOR + 60, s: 1.2, t, walk: true })],
+      const pops = [[14.1, 260, 1.2, () => A.fishLegs(ctx, { x: 260, y: FLOOR + 60, s: 1.2, t, walk: true })],
                     [14.55, 570, 1.4, () => A.longCat(ctx, { x: 570, y: FLOOR + 20, s: 1.4, t })],
                     [15.0, 895, 1.1, () => A.wingPig(ctx, { x: 895, y: FLOOR - 120, s: 1.1, t, dir: -1 })]];
       for (const [t0, x, sc, draw] of pops) {
         const k = seg(t, t0, t0 + 0.25);
         if (k <= 0) continue;
-        if (x !== 895) shadow(ctx, x, 90 * sc * k, FLOOR + (x === 190 ? 62 : 26));
+        if (x !== 895) shadow(ctx, x, 90 * sc * k, FLOOR + (x === 260 ? 62 : 26));
         ctx.save(); ctx.translate(x, FLOOR); const e = easeOutBack(k); ctx.scale(e, e); ctx.translate(-x, -FLOOR); draw(); ctx.restore();
         const sk = seg(t, t0, t0 + 0.6);
         if (sk < 1) for (let i = 0; i < 4; i++) sparkle(ctx, x + Math.cos(i * 1.7) * 170 * sk, FLOOR - 250 + Math.sin(i * 1.7) * 150 * sk, 30 * (1 - sk), sk * 3);
@@ -398,7 +398,7 @@ Skits.extinct = (() => {
       const step = t < 17.08 ? 0.6 * wind : lerp(0.6, -1.5, kick) * (1 - 0.6 * fly);
       // the yell: big open mouth held for the whole line, following the audio's loudness; jaw drops, head stretches and tips
       const yellOpen = clamp(0.55 + 0.6 * loud('extinct', t), 0.55, 1);
-      lud(ctx, { t, x: 640, ...(t < 17.0 ? { ...E.excited, pupil: 10, lookX: 0.9, ...talkLine(t, 13, { intensity: 1.4 }) }
+      lud(ctx, { t, x: 640, ...(t < 17.0 ? { ...E.excited, pupil: 10, lookX: 1, ...talkLine(t, 13, { intensity: 1.4 }) }
                                           : { ...E.yelling, ...Ar.both([124, -196], 'out'), mouth: 'yell', open: yellOpen, mouthScale: 1.25, stretch: 0.7, tilt: -0.1 }),
                  step, lean: -0.1 * kick * (1 - fly) + 0.05 * wind, ...(t > 16.98 ? { weight: 0 } : {}) });
       // a small raptor wanders in on its own from the left (separate from the
@@ -440,11 +440,12 @@ Skits.extinct = (() => {
       ctx.save();
       prehistoric(ctx, t);
       const look = t > 22.35;
-      const x1 = 330 + (look ? 0 : Math.sin(t * 3) * 60), x2 = 760 - (look ? 0 : Math.sin(t * 3) * 60);
-      shadow(ctx, x1 + 20, 110, FLOOR + 44); shadow(ctx, x2 - 20, 100, FLOOR + 64);
+      ctx.translate(540, FLOOR); ctx.scale(1.25, 1.25); ctx.translate(-540, -FLOOR - 40);   // push in so the raptors fill the middle of the frame
+      const x1 = 330 + (look ? 0 : Math.sin(t * 3) * 50), x2 = 760 - (look ? 0 : Math.sin(t * 3) * 50);
+      shadow(ctx, x1 + 20, 130, FLOOR + 44); shadow(ctx, x2 - 20, 120, FLOOR + 64);
       // when the meteor shows up they look up at it (pupils up-left toward it)
-      A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 1, t, walk: !look, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
-      A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 0.9, t: t + 0.3, walk: !look, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
+      A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 1.3, t, walk: !look, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
+      A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 1.2, t: t + 0.3, walk: !look, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
       const m = seg(t, 22.2, hit);
       if (m > 0 && m < 1) A.meteor(ctx, lerp(-200, 560, m), lerp(-200, FLOOR - 40, m), lerp(60, 150, m), t);
       ctx.restore();
@@ -453,8 +454,19 @@ Skits.extinct = (() => {
     [23.02, 24.25, (ctx, t) => {
       ctx.save(); shake(ctx, 18 * (1 - seg(t, 23.02, 23.4)), Math.floor(t * 30));
       prehistoric(ctx, t);
-      const crater = [[260, FLOOR + 10], [420, FLOOR + 90], [700, FLOOR + 90], [860, FLOOR + 10]];
-      fill(ctx, crater, '#9a9a9a', 0.4); outline(ctx, crater, { w: 12 });
+      // crater: dark pit with a raised, jagged rim of broken rock, debris still settling
+      const pit = Brush.ellipsePts(560, FLOOR + 40, 300, 70, 20);
+      fill(ctx, pit, '#3a3a3a', 0.4); outline(ctx, pit, { w: 12 });
+      const rim = [];
+      for (let i = 0; i <= 16; i++) { const a = Math.PI * (1 + i / 16); rim.push([560 + Math.cos(a) * 330, FLOOR + 40 + Math.sin(a) * (110 + (i % 2) * 45)]); }
+      rim.push([890, FLOOR + 40], [230, FLOOR + 40]);
+      fill(ctx, rim, '#9a9a9a', 0.4); outline(ctx, rim, { w: 12 });
+      fill(ctx, Brush.ellipsePts(560, FLOOR + 40, 250, 40, 16), '#3a3a3a', 0.3);
+      for (let i = 0; i < 7; i++) {   // rocks thrown out, landing in the first half second
+        const land = seg(t, 23.02 + i * 0.04, 23.35 + i * 0.05), x = 560 + (i - 3) * 110 + (i % 2 ? 20 : -20);
+        const y = FLOOR + 30 + (i % 3) * 18 - (1 - land) * (180 + 60 * (i % 3)) * 4 * land;
+        blob(ctx, x, y, 22 + (i % 3) * 6, 16 + (i % 2) * 5, { fill: '#6a6a6a', w: 8, n: 8 });
+      }
       ctx.restore();
     }],
     // everyone cracking up: a chest-up huddle. Nick and Ludwig behind on
