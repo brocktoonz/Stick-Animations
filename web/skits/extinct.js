@@ -137,7 +137,11 @@ Skits.extinct = (() => {
     sky(ctx);
     const hills = [[-700, 1320], [-200, 1180], [300, 1270], [980, 1150], [1800, 1300], [1800, 1700], [-700, 1700]];
     fill(ctx, hills, '#e8e8e8', 0.4); outline(ctx, hills, { w: 9 });
-    const volcano = [[440, FLOOR], [680, 880], [800, 860], [1040, FLOOR]];
+    const corners = [[440, FLOOR], [690, 880], [790, 870], [1040, FLOOR]], volcano = [];
+    for (let i = 0; i < 4; i++) {   // points along each edge keep the brush's spline from bulging past the corners
+      const [a, b] = [corners[i], corners[(i + 1) % 4]];
+      for (let k = 0; k < 8; k++) volcano.push([a[0] + (b[0] - a[0]) * k / 8, a[1] + (b[1] - a[1]) * k / 8]);
+    }
     fill(ctx, volcano, '#cfcfcf', 0.4); outline(ctx, volcano, { w: 12 });
     palm(ctx, 130, FLOOR, 1.15, t);
     ground(ctx, '#d9d9d9');
@@ -210,13 +214,15 @@ Skits.extinct = (() => {
   // Eyelines: Nick is always screen-left facing right (dir 1), Ludwig always
   // screen-right facing left (dir -1). Never flipped.
   const nick = (ctx, p) => {
-    const q = { x: NX, y: FLOOR, s: S, lookX: 0.4, lid: blink(p.t ?? 0, 3.3, 0.4), ...p, dir: 1 };
-    shadow(ctx, q.x, 95 * q.s / S, q.y + 6);
+    const q = { x: NX, y: FLOOR, s: S, lookX: 0.95, lid: blink(p.t ?? 0, 3.3, 0.4), ...p, dir: 1 };
+    if ((q.pupil ?? 13) > 11) q.pupil = 11;
+    if (q.shadow !== false) shadow(ctx, q.x, 95 * q.s / S, q.y + 6);
     Cameos.nick(ctx, { ...q, ...acting(q, q.t ?? 0, 1), ...(p.lean !== undefined ? { lean: p.lean } : {}) });
   };
   const lud = (ctx, p) => {
-    const q = { x: LX, y: FLOOR, s: S, lookX: 0.4, lid: blink(p.t ?? 0, 2.9, 1.1), ...p, dir: -1 };
-    shadow(ctx, q.x, 80 * q.s / S, q.y + 6);
+    const q = { x: LX, y: FLOOR, s: S, lookX: 0.95, lid: blink(p.t ?? 0, 2.9, 1.1), ...p, dir: -1 };
+    if ((q.pupil ?? 13) > 11) q.pupil = 11;
+    if (q.shadow !== false) shadow(ctx, q.x, 80 * q.s / S, q.y + 6);
     Cameos.ludwig(ctx, { ...q, ...acting(q, q.t ?? 0, 4), ...(p.lean !== undefined ? { lean: p.lean } : {}) });
   };
   const slime = (ctx, p) => Cameos.slime(ctx, { x: 540, y: FLOOR + 300, s: 2.0, dir: 1, lid: blink(p.t ?? 0, 3.7), weight: stance(p.t ?? 0, 7), ...p });
@@ -255,14 +261,15 @@ Skits.extinct = (() => {
   function single(ctx, t, who, pose, z, sy, behind) {
     const g = GEO[who], sc = (pose.s ?? S) * z;
     const hairTop = g.hair * sc;
-    sy = Math.max(sy, capBottom() + HEAD_GAP + hairTop);
+    const cb = capBottom();
+    sy = cb <= 250 ? cb + HEAD_GAP + hairTop + 40 : Math.max(sy, cb + HEAD_GAP + hairTop);   // no caption: head high in frame
     // own side: Nick's body line at screen ~420; Ludwig's *head* centred at
     // ~640 (right of centre), pulled in only as far as a 30 px right margin needs
     let sx;
     if (who === 'nick') sx = Math.max(400, g.half * sc + 40);
-    else sx = Math.min(640, 1050 - g.half * sc) - g.offset * sc;
+    else sx = Math.min(640, 1000 - g.half * sc) - g.offset * sc;
     // eyeline: pupils toward the other character (across the frame), never at camera
-    pose = { ...pose, lookX: Math.max(who === 'nick' ? 0.95 : 0.8, pose.lookX ?? 0), lookY: Math.max(-0.2, Math.min(0.2, pose.lookY ?? 0)), ...((pose.pupil ?? 13) > 11 ? { pupil: 10 } : {}) };
+    pose = { ...pose, lookX: Math.max(0.95, pose.lookX ?? 0), lookY: Math.max(-0.2, Math.min(0.2, pose.lookY ?? 0)), ...((pose.pupil ?? 13) > 11 ? { pupil: 10 } : {}) };
     const wx = who === 'nick' ? NX : LX, wy = FLOOR - g.head * (pose.s ?? S);
     ctx.save(); cam(ctx, wx - (sx - 540) / z, wy, z, sy);
     stage(ctx);
@@ -271,13 +278,13 @@ Skits.extinct = (() => {
     ctx.restore();
     heads.push(sy - hairTop);
   }
-  const mediumNick = (ctx, t, pose, z = 1.35) => single(ctx, t, 'nick', pose, z, 1010);
+  const mediumNick = (ctx, t, pose, z = 1.2) => single(ctx, t, 'nick', pose, z, 1010);
   const mediumLud = (ctx, t, pose, z = 1.3, behind) => single(ctx, t, 'lud', pose, z, 1060, behind);
-  const closeNick = (ctx, t, pose, z = 1.45) => single(ctx, t, 'nick', pose, z, 1200);
+  const closeNick = (ctx, t, pose, z = 1.25) => single(ctx, t, 'nick', pose, z, 1200);
   const closeLud = (ctx, t, pose, z = 1.7) => single(ctx, t, 'lud', pose, z, 1260);
   // Two-shot: both full-body with clear space between them (used for the
   // establishing shot and when one physically reacts to or points at the other).
-  const TS = 1.15, TNX = 300, TLX = 810;
+  const TS = 1.2, TNX = 305, TLX = 828;
   function twoShot(ctx, t, n, l) {
     const top = capBottom() + HEAD_GAP;                     // Ludwig's hair top (the taller one) lands here
     const wy = FLOOR - (GEO.lud.head + GEO.lud.hair) * TS;
@@ -343,7 +350,7 @@ Skits.extinct = (() => {
         const k = loud('extinct', t), slide = easeOutBack(seg(t, 9.85, 10.02)), lean = 0.42, ss = S * 0.8;   // smaller: further back
         // Slime's head centre on screen: slides in from off the left edge,
         // face just clear of Ludwig's head
-        const hx = lerp(-360, 210, slide), hy = headSy - 30;
+        const hx = lerp(-360, 265, slide), hy = headSy - 30;
         const [wx, wy] = toWorld(hx, hy), R = 438 * ss;
         Cameos.slime(ctx, { t, x: wx - Math.sin(lean) * R, y: wy + Math.cos(lean) * R, s: ss, dir: 1, lean,
           ...E.laughing, open: 0.3 + 0.5 * k, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
@@ -404,16 +411,16 @@ Skits.extinct = (() => {
     }],
     // "Why?": the big reaction, close and pushing in
     [17.5, 18.18, (ctx, t) => single(ctx, t, 'nick', { mouth: 'flat', lid: 0.5, flatLid: true, pupil: 8, brow: 0.7, tilt: 0.05,
-      ...Ar.both([112, -176], 'out'), ...talkLine(t, 15) }, 1.35, 1160)],   // annoyed: heavy flat lids, brows down, hands on hips
+      ...Ar.both([112, -176], 'out'), ...talkLine(t, 15) }, 1.22, 1160)],   // annoyed: heavy flat lids, brows down, hands on hips
     // "they died for a reason": deadpan close-up
     [18.18, 18.75, (ctx, t) => closeLud(ctx, t, { ...E.unimpressed, lookX: 0.8, ...talkLine(t, 16) }, 1.8)],
     // "you don't wanna see a f*ckin'... Velociraptor": one continuous shot on
     // Nick (no cut, no jump); calm while explaining, then the raptor rears up
     // behind him, he lights up and the camera pushes in
     [18.75, 20.7, (ctx, t) => {
-      const zk = easeOut(seg(t, 19.75, 19.95)), z = lerp(1.2, 1.4, zk), sc = S * z;
-      const sx = Math.max(400, GEO.nick.half * sc + 30), hairTop = GEO.nick.hair * sc;
-      const sy = Math.max(1010, capBottom() + HEAD_GAP + GEO.nick.hair * S * 1.4);   // fixed across the push
+      const zk = easeOut(seg(t, 19.75, 19.95)), z = lerp(1.15, 1.3, zk), sc = S * z;
+      const sx = Math.max(400, GEO.nick.half * sc + 40), hairTop = GEO.nick.hair * sc;
+      const sy = Math.max(1010, capBottom() + HEAD_GAP + GEO.nick.hair * S * 1.3);   // fixed across the push
       ctx.save(); cam(ctx, NX - (sx - 540) / z, FLOOR - GEO.nick.head * S, z, sy);
       stage(ctx);
       const k = seg(t, 19.7, 19.95);
@@ -456,11 +463,11 @@ Skits.extinct = (() => {
       // staggered in depth with clear gaps between heads: Nick and Ludwig
       // behind on their own sides (shadows only, no ground line to show
       // through Slime's arms), Slime in front and lower, chest-up
-      const k = loud('extinct', t), back = 1400;
+      const k = loud('extinct', t), back = 1290;
       ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040);
-      lud(ctx, { t, x: 790, y: back, s: 1.2, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(1, [60, -176], 'out'), ...Ar.arm(-1, [-112, -176], 'out') });
-      nick(ctx, { t, x: 295, y: back, s: 1.2, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(1, [170, -150], 'down'), ...Ar.arm(-1, [-72, -176], 'out') });
-      Cameos.slime(ctx, { t, x: 540, y: 1331 + 438 * 1.7, s: 1.7, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
+      lud(ctx, { t, x: 790, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out') });
+      nick(ctx, { t, x: 295, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(-1, [-72, -176], 'out') });
+      Cameos.slime(ctx, { t, x: 540, y: 1221 + 438 * 1.7, s: 1.7, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
     }],
   ];
 

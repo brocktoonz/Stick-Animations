@@ -91,7 +91,8 @@ const Chars = (() => {
       }
       blob(ctx, ex, y, rx, ry, { w: 6 * size, n: 12 });
       const pr = (p.pupil ?? 13) * size;
-      const px = ex + (p.lookX ?? 0) * (rx - pr - 4), py = y + (p.lookY ?? 0) * (ry - pr - 6);
+      // pupils can travel right to the rim, so a sideways look reads at phone size
+      const px = ex + (p.lookX ?? 0) * (rx - pr * 0.75 - 3), py = y + (p.lookY ?? 0) * (ry - pr - 6);
       fill(ctx, Brush.ellipsePts(px, py, pr, pr * 1.1, 8), INK, 0.4);
       if (p.sparkle) {   // excited: a white star in each pupil
         const r = pr * 0.85, q = r * 0.28;
