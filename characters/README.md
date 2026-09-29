@@ -18,7 +18,7 @@ what a skit draws. Use an emotion in a skit by name:
     Hero.main(ctx, { x, y, s, ...Emotions.shocked })
 
 The emotions are defined once in `web/emotions.js`: neutral, happy, laughing,
-excited, smirk, innocent, sad, sobbing, angry, yelling, scared, shocked,
+excited, smirk, sad, sobbing, angry, yelling, scared, shocked,
 stunned, hurt, dizzy, nervous, dread, confused, thinking, unimpressed, sleepy. After changing an emotion or a character, re-render
 the folders:
 

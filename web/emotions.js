@@ -34,7 +34,6 @@ const Emotions = (() => {
     laughing:  { lid: 1, happy: true, mouth: 'yell', open: 0.45, brow: -0.4, tilt: -0.1, ...both([72, -176], 'out') },   // hands on belly
     excited:   { pupil: 15, sparkle: true, mouth: 'yell', open: 0.35, brow: -0.6, ...both([178, -372], 'down') },   // sparkly eyes, fists pumped
     smirk:     { mouth: 'grinwide', lid: 0.42, lowLid: 0.3, brow: 0.2, lookX: 0.35 },   // eyes narrowed by the grin
-    innocent:  { mouth: 'bigsmile', eyeScale: 1.3, pupil: 3.5, brow: -0.3 },   // huge eyes, tiny pupils, wide smile
     sad:       { mouth: 'wobbly', brow: -1, lid: 0.25, lookY: 0.3, tears: true, tilt: 0.07 },   // tears welling
     sobbing:   { mouth: 'grimace', open: 0.7, lid: 1, streams: true, brow: -1, tilt: -0.08 },   // eyes shut, tears streaming
     angry:     { mouth: 'frown', brow: 1, pupil: 9, lid: 0.15, ...both([124, -170], 'out') },   // fists at hips
