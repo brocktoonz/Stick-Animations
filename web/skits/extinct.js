@@ -11,7 +11,7 @@ Skits.extinct = (() => {
 
   // [start, end, speaker colour, text] — exactly as captioned in the original
   const LINES = [
-    [0.25, 1.72, NICK, 'Ludwig would you\nrather bring back'],
+    [0.46, 1.72, NICK, 'Would you rather\nbring back'],   // trimmed: the clip starts after "Ludwig"
     [1.75, 3.2, NICK, 'every single\nextinct animal'],
     [3.4, 3.97, NICK, "but there's no-"],
     [4.0, 4.7, LUD, 'other option'],
@@ -426,7 +426,9 @@ Skits.extinct = (() => {
   ];
 
   return {
-    title: '', subtitle: '', duration: 25.16,
+    // start: skip the opening "Ludwig" (its /g/ release ends at 0.46 s in the
+    // clip); times stay in clip time and export.cjs trims the audio to match
+    title: '', subtitle: '', duration: 25.16, start: 0.46,
     draw(ctx, t) {
       const shot = shots.find(([a, b]) => t >= a && t < b) ?? shots[shots.length - 1];
       SHOT = [shot[0], shot[1]]; heads.length = 0;

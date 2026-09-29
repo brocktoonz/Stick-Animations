@@ -7,7 +7,8 @@ Slime green) are taken from the original's burned-in captions, and are
 listed in web/skits/extinct.js.
 
 Beats:
-- 0.25–3.2   Nick asks; every extinct animal bursts out of the ground
+- 0.0–0.46   "Ludwig" (trimmed from the video: skit.start = 0.46)
+- 0.46–3.2   Nick asks; every extinct animal bursts out of the ground
 - 3.4–9.9    "but there's no-" / "other option" back-and-forth
 - 9.9–10.7   Slime cracks up (driven by the audio envelope)
 - 10.75–13.2 "you don't wanna engage with the hypothetical" / "what was the second one"

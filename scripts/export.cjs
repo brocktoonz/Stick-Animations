@@ -31,6 +31,7 @@ const path = require('path');
   await page.evaluate(() => window.ready);
   if (safe) await page.evaluate(() => { window.SHOW_SAFE = true; });
   const total = await page.evaluate(() => window.skitFrames);
+  const start = await page.evaluate(() => window.skitStart);   // audio is trimmed to match skit.start
   const grab = f => page.evaluate(f => { renderFrame(f); return document.getElementById('c').toDataURL('image/png'); }, f)
     .then(u => Buffer.from(u.split(',')[1], 'base64'));
 
@@ -40,7 +41,7 @@ const path = require('path');
   } else {
     fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
     const inputs = ['-f', 'image2pipe', '-framerate', '30', '-i', '-'];
-    const audioArgs = audio ? ['-i', audio, '-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '160k', '-af', 'apad', '-t', String(total / 30)] : [];
+    const audioArgs = audio ? [...(start ? ['-ss', String(start)] : []), '-i', audio, '-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '160k', '-af', 'apad', '-t', String(total / 30)] : [];
     const ff = spawn(process.env.FFMPEG || 'ffmpeg', ['-y', '-loglevel', 'error', ...inputs, ...audioArgs,
       '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out],
       { stdio: ['pipe', 'inherit', 'inherit'] });

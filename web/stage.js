@@ -304,10 +304,10 @@ const Stage = (() => {
   function frame(ctx, f, skit) {
     Brush.frame(f, 3);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    skit.draw(ctx, f / FPS);
+    skit.draw(ctx, f / FPS + (skit.start ?? 0));
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (skit.fade) bottomFade(ctx);   // opt-in: a soft grey fade reads as a render glitch in the ink style
-    const t = f / FPS, at = v => typeof v === 'function' ? v(t) : v;   // titles may change over time
+    const t = f / FPS + (skit.start ?? 0), at = v => typeof v === 'function' ? v(t) : v;   // titles may change over time
     title(ctx, at(skit.title), at(skit.subtitle), skit.titleBottom);
     if (globalThis.SHOW_SAFE) safeOverlay(ctx);
   }

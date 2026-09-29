@@ -56,7 +56,9 @@
   const name = params.get('skit') || 'thermostat';
   const skit = Skits[name];
   window.SHOW_SAFE = params.has('safe');   // ?safe=1 shades the caption no-go areas
-  window.skitFrames = Math.round(skit.duration * Stage.FPS);
+  // skit.start (s) trims the head of a skit: frame 0 shows time `start`
+  window.skitStart = skit.start ?? 0;
+  window.skitFrames = Math.round((skit.duration - skitStart) * Stage.FPS);
   window.renderFrame = f => Stage.frame(ctx, f, skit);
   document.getElementById('nav').innerHTML = Object.keys(Skits)
     .map(k => `<a href="?skit=${k}" class="${k === name ? 'on' : ''}">${k}</a>`).join('');
