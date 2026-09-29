@@ -190,10 +190,8 @@ const Chars = (() => {
     const dShape = (w, h) => [[-w * 0.8, -lift * 0.6], [-w * 0.35, -5 * s], [w * 0.45, -7 * s], [w, -3 * s - lift],
                               [w * 0.85, h * 0.62], [w * 0.2, h], [-w * 0.45, h * 0.8], [-w * 0.8, h * 0.3]];
     switch (v.kind) {
-      case 'mbp':   // lips pressed together: a firmer line with the lower lip tucked under
-        stroke(ctx, [[-20 * s, 1 * s], [0, -1 * s], [21 * s, 0 - lift]], { w: 10 * s, color });
-        for (const sd of [-1, 1]) stroke(ctx, [[sd * 21 * s, -7 * s], [sd * 25 * s, 0], [sd * 21 * s, 7 * s]], { w: 3.5 * s, color });   // lips pressed: creases at the corners
-        stroke(ctx, [[-9 * s, 10 * s], [2 * s, 13 * s], [11 * s, 10 * s]], { w: 4 * s, color });
+      case 'mbp':
+        stroke(ctx, [[-15 * s, 0], [15 * s, -1 * s - lift * 0.5]], { w: 9 * s, taper0: 0.15, taper1: 0.15, color });   // lips pressed: a short, straight, firm line
         break;
       case 'ee': {   // wide stretched mouth, teeth across, dark corners
         const w = 36 * s, h = 10 * s;
@@ -216,11 +214,10 @@ const Chars = (() => {
         outline(ctx, pts, { w: 5.5 * s, jit: 0.4, color });
         break;
       }
-      case 'oo': {   // pucker: tiny dark O with a thick rim and little pucker creases
-        const pts = Brush.ellipsePts(0, 5 * s, 11 * s, 13 * s, 10);
+      case 'oo': {   // oo / w / r
+        const pts = Brush.ellipsePts(0, 4 * s, 8 * s, 10 * s, 10);   // a small dark O (OH is the big one)
         fill(ctx, pts, INK, 0.2);
-        outline(ctx, pts, { w: 10 * s, jit: 0.3, color });
-        for (const sd of [-1, 1]) stroke(ctx, [[sd * 20 * s, -3 * s], [sd * 25 * s, 5 * s], [sd * 20 * s, 13 * s]], { w: 4 * s, color });
+        outline(ctx, pts, { w: 5 * s, jit: 0.3, color });
         break;
       }
       case 'fv': {   // top teeth resting on the lower lip
