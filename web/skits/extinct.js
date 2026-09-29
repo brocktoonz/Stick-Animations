@@ -190,7 +190,7 @@ Skits.extinct = (() => {
   // Weight shift held per beat, so full-body poses are never parallel planted legs.
   function stance(t, seed) {
     const b = Math.floor(t * 0.7 + seed);
-    return (hh(b + seed * 17) > 0.5 ? 1 : -1) * (0.55 + 0.45 * hh(b + 3));
+    return (hh(b + seed * 17) > 0.5 ? 1 : -1) * (0.8 + 0.2 * hh(b + 3));   // always a clear bend
   }
   function acting(p, t, seed) {
     const base = { bob: Math.sin(t * 2.3 + seed) * 3, weight: stance(t, seed) };
@@ -217,7 +217,9 @@ Skits.extinct = (() => {
   // feet, hair top above the head centre, and hair half-width (with glasses).
   const GEO = {
     nick: { head: 418, hair: 185, half: 190 },
-    lud: { head: 470, hair: 245, halfL: 150, halfR: 165 },
+    // Ludwig's head (and swoop) sits ~40 left of his body line when facing
+    // left; measured half-width of the head+hair is ~160
+    lud: { head: 470, hair: 245, half: 160, offset: -40 },
   };
 
   // ---------- caption clearance ----------
@@ -243,10 +245,13 @@ Skits.extinct = (() => {
     const g = GEO[who], sc = (pose.s ?? S) * z;
     const hairTop = g.hair * sc;
     sy = Math.max(sy, capBottom() + HEAD_GAP + hairTop);
-    // own side: Nick left (screen ~420), Ludwig right (~660), clamped so hair keeps a 30 px margin
-    let sx = who === 'nick' ? 420 : 660;
-    if (who === 'nick') sx = Math.max(sx, g.half * sc + 30);
-    else sx = Math.min(Math.max(sx, g.halfL * sc + 30), 1080 - g.halfR * sc - 30);
+    // own side: Nick's body line at screen ~420; Ludwig's *head* centred at
+    // ~640 (right of centre), pulled in only as far as a 30 px right margin needs
+    let sx;
+    if (who === 'nick') sx = Math.max(420, g.half * sc + 30);
+    else sx = Math.min(640, 1050 - g.half * sc) - g.offset * sc;
+    // eyeline: pupils toward the other character (across the frame), never at camera
+    pose = { ...pose, lookX: Math.max(0.65, pose.lookX ?? 0), lookY: Math.max(-0.2, Math.min(0.2, pose.lookY ?? 0)) };
     const wx = who === 'nick' ? NX : LX, wy = FLOOR - g.head * (pose.s ?? S);
     ctx.save(); cam(ctx, wx - (sx - 540) / z, wy, z, sy);
     stage(ctx);
@@ -257,7 +262,7 @@ Skits.extinct = (() => {
   const mediumNick = (ctx, t, pose, z = 1.35) => single(ctx, t, 'nick', pose, z, 1010);
   const mediumLud = (ctx, t, pose, z = 1.3) => single(ctx, t, 'lud', pose, z, 1060);
   const closeNick = (ctx, t, pose, z = 1.45) => single(ctx, t, 'nick', pose, z, 1200);
-  const closeLud = (ctx, t, pose, z = 1.8) => single(ctx, t, 'lud', pose, z, 1260);
+  const closeLud = (ctx, t, pose, z = 1.7) => single(ctx, t, 'lud', pose, z, 1260);
   // Two-shot: both full-body with clear space between them (used for the
   // establishing shot and when one physically reacts to or points at the other).
   const TS = 1.3, TNX = 285, TLX = 815;
@@ -296,7 +301,7 @@ Skits.extinct = (() => {
       ? { ...E.happy, pointR: -1.2, ...Ar.arm(1, [170, -400], 'down', true), ...talkLine(t, 2) }
       : { ...E.stunned })],
     // Ludwig, smug about it: slow push
-    [4.7, 6.0, (ctx, t) => single(ctx, t, 'lud', { ...E.smirk }, lerp(1.4, 1.7, easeInOut(seg(t, 4.7, 6.0))), 1160)],
+    [4.7, 6.0, (ctx, t) => single(ctx, t, 'lud', { ...E.smirk }, lerp(1.35, 1.5, easeInOut(seg(t, 4.7, 6.0))), 1160)],
     // "what do you mean other option"
     [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...talkLine(t, 4) })],
     // "give me the other option" (points at him) / "why you don't want that?":
@@ -307,7 +312,7 @@ Skits.extinct = (() => {
     // "whatever the other option is I'll ... take it": one shot, snapping in on "take it"
     [8.5, 9.85, (ctx, t) => {
       const pose = { ...E.smirk, ...(t < 9.45 ? Ar.both([90, -200], 'out') : {}), ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it") };
-      t < 9.45 ? mediumLud(ctx, t, pose) : closeLud(ctx, t, pose, 2.0);
+      t < 9.45 ? mediumLud(ctx, t, pose) : closeLud(ctx, t, pose, 1.8);
     }],
     // Slime loses it
     [9.85, 10.75, (ctx, t) => {
@@ -365,7 +370,7 @@ Skits.extinct = (() => {
     [17.5, 18.18, (ctx, t) => single(ctx, t, 'nick', { ...E.shocked, ...talkLine(t, 15), mouth: 'gape', open: 1 },
       lerp(1.3, 1.45, easeOut(seg(t, 17.5, 18.18))), 1160)],
     // "they died for a reason": deadpan close-up
-    [18.18, 18.75, (ctx, t) => closeLud(ctx, t, { ...E.unimpressed, lookX: 0.8, ...talkLine(t, 16) }, 1.95)],
+    [18.18, 18.75, (ctx, t) => closeLud(ctx, t, { ...E.unimpressed, lookX: 0.8, ...talkLine(t, 16) }, 1.8)],
     // "you don't wanna see a f*ckin'..."
     [18.75, 19.75, (ctx, t) => mediumNick(ctx, t, { ...E.excited, ...talkLine(t, 17) }, 1.3)],
     // "...Velociraptor": punch in as the raptor pops up behind him
@@ -417,11 +422,14 @@ Skits.extinct = (() => {
     // everyone cracking up: a chest-up huddle. Nick and Ludwig behind on
     // their own sides, Slime closer to camera in front, heads filling the frame
     [24.25, 25.2, (ctx, t) => {
+      // staggered in depth with clear gaps between heads: Nick and Ludwig
+      // behind on their own sides (shadows only, no ground line to show
+      // through Slime's arms), Slime in front and lower, chest-up
       const k = loud('extinct', t), back = 1400;
-      stage(ctx, back);
-      lud(ctx, { t, x: 775, y: back, s: 1.35, ...E.smirk });
-      nick(ctx, { t, x: 320, y: back, s: 1.35, ...E.laughing, open: 0.3 + 0.4 * k });
-      Cameos.slime(ctx, { t, x: 540, y: 1200 + 438 * 2.1, s: 2.1, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
+      ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040);
+      lud(ctx, { t, x: 790, y: back, s: 1.2, ...E.smirk });
+      nick(ctx, { t, x: 295, y: back, s: 1.2, ...E.laughing, open: 0.3 + 0.4 * k });
+      Cameos.slime(ctx, { t, x: 540, y: 1400 + 438 * 2.1, s: 2.1, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
     }],
   ];
 

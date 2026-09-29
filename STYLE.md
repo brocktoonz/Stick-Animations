@@ -81,7 +81,11 @@ disagree, the rule wins.
   side of the screen and one facing for the whole video (The Yard: Nick
   screen-left facing right, Ludwig screen-right facing left). In singles,
   place the character off-centre toward their own side, looking across the
-  frame toward the other.
+  frame toward the other. Place by where the head actually sits on screen
+  (hair can shift it well off the body line), and point the pupils toward
+  the other character: nobody in a dialogue single looks at the camera.
+- If a clip is trimmed (e.g. a name cut from the start with `skit.start`),
+  the caption follows the trimmed audio, not the original caption.
 - Open with one establishing shot of the people together (with clear space
   between them), then give each line a single on the speaker.
 - Don't cut on every line in a rapid back-and-forth: hold each shot at

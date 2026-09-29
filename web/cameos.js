@@ -128,13 +128,13 @@ const Cameos = (() => {
                  [-RX * 0.2, -RY * 0.6], [-RX * 0.3, -RY * 0.86], [-RX * 0.44, -RY * 0.94], [-RX * 0.58, -RY * 0.7], [-RX * 0.72, -RY * 0.62], [-RX * 0.92, -RY * 0.3]];
     fill(ctx, pts, BLOND, 1.2);
     outline(ctx, pts, { w: 11 });
-    // strands all flow one way: from the crown (left) up and over to the tips (right)
-    const lo = [[-0.62, -0.86], [0.1, -1.04], [0.92, -1.0]];
-    const hi = [[-0.36, -(height - 0.22)], [0.22, -(height - 0.04)], [0.9, -(height - 0.3)]];
-    for (const k of [0.12, 0.38, 0.62, 0.86]) {
-      const pts = lo.map((a, i) => [RX * (a[0] + (hi[i][0] - a[0]) * k), RY * (a[1] + (hi[i][1] - a[1]) * k)]);
-      stroke(ctx, pts, { w: 5.5, taper0: 0.5, taper1: 0.8 });
-    }
+    // strands start up at the crown and curve down into the pointed fringe
+    // tips, so the hair reads as falling locks rather than a knit cap
+    for (const [a, b, c] of [[[-0.36, -(height - 0.34)], [-0.5, -1.02], [-0.56, -0.82]],
+                             [[0.04, -(height - 0.16)], [-0.08, -1.1], [-0.18, -0.72]],
+                             [[0.44, -(height - 0.1)], [0.42, -1.1], [0.33, -0.64]],
+                             [[0.86, -(height - 0.32)], [0.9, -0.95], [0.8, -0.5]]])
+      stroke(ctx, [[RX * a[0], RY * a[1]], [RX * b[0], RY * b[1]], [RX * c[0], RY * c[1]]], { w: 5.5, taper0: 0.5, taper1: 0.85 });
   };
 
   // MrBeast: short sides, hair swept across with a fringe flick over the forehead.
@@ -704,10 +704,14 @@ const Cameos = (() => {
                    [-RX * 0.5, RY * 0.4], [-RX * 0.78, RY * 0.3], [-RX * 0.9, -RY * 0.02]];
     const shape = [...outer.reverse(), ...inner];
     fill(ctx, shape, '#c4c4c4', 1);
-    // stubble: flat grey, with a few short strokes along the jaw edge
-    for (let i = 0; i < 9; i++) {
-      const a = Math.PI * (0.14 + 0.72 * i / 8), c = Math.cos(a), sn = Math.sin(a);
-      stroke(ctx, [[c * RX * 0.95, sn * RY * 0.99], [c * RX * 0.84, sn * RY * 0.87]], { w: 4, taper0: 0.2, taper1: 0.6, color: '#6a6a6a' });
+    // stubble edge: short broken ticks all along the fill boundary (inner
+    // cheek line and jaw), so the grey reads as hair, not a smudge
+    const ring = Brush.spline([...shape], true, 4);
+    for (let i = 0; i < ring.length; i += 3) {
+      const [x, y] = ring[i], [x2, y2] = ring[(i + 2) % ring.length];
+      const d = Math.hypot(x2 - x, y2 - y) || 1, nx = -(y2 - y) / d, ny = (x2 - x) / d;
+      const len = 7 + 5 * hh(i), off = (hh(i + 3) - 0.5) * 4;
+      stroke(ctx, [[x + nx * off, y + ny * off], [x + nx * (off - len), y + ny * (off - len)]], { w: 3.2, taper0: 0.1, taper1: 0.7, color: '#5a5a5a' });
     }
   };
   const slimeStache = (ctx, fx, rage) => {
