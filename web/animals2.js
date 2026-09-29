@@ -46,10 +46,10 @@ const Animals2 = (() => {
     }
   }
   // big round cartoon eye: white, ink ring, large pupil toward lookX, highlight
-  function eye(ctx, x, y, r, p, lw) {
+  function eye(ctx, x, y, r, p, lw, hs = 1.3, hw = 1.1) {   // hs, hw: happy arc width (x r) and stroke (x lw)
     const kind = p.eyes ?? (p.snarl ? 'angry' : 'normal'), ring = lw * 0.6;
     r *= 1.12;
-    if (kind === 'happy') { const h = r * 1.3; stroke(ctx, [[x - h, y + h * 0.3], [x, y - h * 0.6], [x + h, y + h * 0.3]], { w: lw * 1.1, taper0: 0.25, taper1: 0.25 }); return; }
+    if (kind === 'happy') { const h = r * hs; stroke(ctx, [[x - h, y + h * 0.3], [x, y - h * 0.6], [x + h, y + h * 0.3]], { w: lw * hw, taper0: 0.25, taper1: 0.25 }); return; }
     blob(ctx, x, y, r, r * 1.08, { fill: W, w: ring, n: 16, jit: 0.3, wob: 0.3 });
     if (kind === 'blank') return;
     const lx = (p.lookX ?? 0.3) * r * 0.3, ly = (p.lookY ?? 0) * r * 0.3;
@@ -127,7 +127,7 @@ const Animals2 = (() => {
     // when snarling so the claws stay clear of the dropped jaw)
     const ay = p.snarl ? -152 : -186, arm = [
       T([[118, ay], [156, ay + 6]], 18),                                  // stub
-      T([[152, ay], [182, ay - 3]], 12, 1), T([[148, ay + 10], [160, ay + 36]], 12, 1),   // two claw points
+      T([[152, ay - 2], [178, ay - 12]], 12, 1), T([[152, ay + 8], [176, ay + 22]], 12, 1),   // two claw points
     ];
     silhouette(ctx, leg(-45, -120, 60, ph + Math.PI, wk, { off: -30, knee: 14, foot: 42 }), '#7c7c7c', lw, 10);   // far leg
     silhouette(ctx, [
@@ -160,7 +160,7 @@ const Animals2 = (() => {
     const ph = t * 12, wk = !!p.walk, open = p.open ?? 0;
     if (p.snarl) ctx.rotate(0.08);   // lean forward into the snarl
     // enlarged sickle claw: a hooked blade raised off the front of the visible foot
-    const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 14, y - 6], [x + 24, y - 36], [x + 48, y - 46], [x + 62, y - 28]], 22, 1)], col, lw * 0.8, seed);
+    const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 14, y - 6], [x + 24, y - 36], [x + 48, y - 46], [x + 62, y - 28]], 26, 1)], col, lw * 0.8, seed);
     const far = leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 });
     silhouette(ctx, far, '#989898', lw, 20);   // far leg, set well back
     const near = leg(18, -118, 30, ph, wk, { off: 14, knee: 20, foot: 30 }), [fx, fy] = near[1].e;
@@ -182,13 +182,13 @@ const Animals2 = (() => {
     if (p.snarl) snarl(ctx, [[132, -234], [212, -242]], [[196, -176], [132, -208]], lw, 4, 20);
     else if (open > 0.1) jaw(ctx, [[128, -222], [200, -210], [192, -198 + 14 * open], [132, -206 + 12 * open]], true, open);
     else {   // closed: jaw line low on the snout with little fangs
-      line(ctx, [[204, -204], [166, -208], [132, -212], ...(p.eyes === 'happy' ? [[120, -226]] : [])], lw);
+      line(ctx, [[204, -204], [166, -208], [134, -214], ...(p.eyes === 'happy' ? [[124, -222], [122, -232]] : [])], lw);
       fangs(ctx, 144, -210, 198, -205, 3, 12, lw);
     }
     // enlarged sickle claw: a hooked toe claw raised on the visible foot
-    claw([fx, fy], '#f4f4f4', 29);
+    claw([fx, fy], '#5a5a5a', 29);
     marks(ctx, -20, -185, 2, 26, lw);
-    eye(ctx, p.snarl ? 96 : 102, p.snarl ? -246 : -238, 22, p, lw);
+    eye(ctx, p.snarl ? 96 : 102, p.snarl ? -246 : p.eyes === 'happy' ? -230 : -238, 22, p, lw, 0.95, 0.7);
   });
 
   const mammoth = (ctx, p) => place(ctx, p, (lw, t) => {
@@ -274,7 +274,7 @@ const Animals2 = (() => {
       E(hx, hy, 78, 60),                                                  // head
       T([[hx - 46, hy - 26], [hx - 40, hy - 76]], 38, 1), T([[hx + 46, hy - 26], [hx + 40, hy - 76]], 38, 1),   // ears
     ], '#7a7a7a', lw, 81);
-    for (const sd of [-1, 1]) eye(ctx, hx + sd * 34, hy - 8, 26, p, lw);   // the shared big eye, both facing the viewer
+    for (const sd of [-1, 1]) eye(ctx, hx + sd * 34, hy - 8, 26, p, lw, 0.8, 0.8);   // the shared big eye, both facing the viewer
     mouth(ctx, hx + 4, hy + 38, 12, lw);
     marks(ctx, -30, -112, 3, 20, lw, '#5a5a5a');
   });
