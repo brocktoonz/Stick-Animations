@@ -106,6 +106,14 @@ disagree, the rule wins.
 - Nobody stands dead still: breathing, a lean toward whoever they're talking
   to, head tilts that change (and hold) through a line.
 - Shadows are flat ink shapes under feet. No soft fades or blurs anywhere.
+- T-rex arms are tiny stubs set high on the chest, just under the jaw, with
+  two small claw points: comically useless, never an elbow or a hand. Keep a
+  clear gap between the claws and the jaw, snarling included.
+- The raptor always shows its enlarged, hooked sickle claw on the visible
+  foot, in every expression.
+- All animals use the shared single big eye (`eye()` in `web/animals2.js`:
+  white, one ink ring, big pupil, highlight). Animals facing the viewer get
+  two of the same eye, not smaller or double-ringed ones.
 - Animals and props use the characters' line weight (`web/animals.js` scales
   it automatically), and sets use outlines of at least ~9 px.
 - Repeated set details (grass, planks, bulbs) vary in spacing and size.
