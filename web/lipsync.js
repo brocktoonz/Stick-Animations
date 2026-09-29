@@ -86,34 +86,56 @@ const LipSync = (() => {
   }
 
   // ---------- swap lip sync (the default) ----------
-  // Cartoon-style talking, as in stick-figure channels: a handful of simple
-  // mouth drawings that SNAP from one to the next (no morphing), one per
-  // syllable, changing at most every 3 frames (animating "on threes").
-  //   closed: a short line          teeth: clenched, dark wedge at one corner
-  //   small:  a little dark O       half:  half open, top teeth
-  //   open:   open, teeth + tongue  wide:  big yell (loud lines only)
-  const OPEN = { closed: 0, teeth: 0.2, small: 0.3, half: 0.4, open: 0.6, wide: 1 };
-  function syllables(text, loud) {
+  // Cartoon-style talking, as in stick-figure channels: a set of simple mouth
+  // drawings (a Preston Blair / Rhubarb-style chart) that SNAP from one to the
+  // next with no morphing, changing at most every 3 frames ("on threes").
+  // Fast consonants that fall between beats are skipped, as animators do.
+  //   rest   neutral closed line        mbp   lips pressed together
+  //   teeth  clenched (s t d k n g ...) ee    wide stretched teeth
+  //   half   half open, top teeth       open  open, teeth + tongue (a)
+  //   wide   big yell (loud a)          oh    round open (o, aw)
+  //   oo     pucker (oo, w, r)          fv    top teeth on lower lip
+  //   lth    tongue up to the teeth (l, th)
+  const OPEN = { rest: 0, closed: 0, mbp: 0, teeth: 0.15, fv: 0.15, ee: 0.2, oo: 0.2, half: 0.4, lth: 0.45, oh: 0.5, open: 0.6, wide: 1 };
+  const VOWEL = 1, CONS = 0.55;
+  function sounds(text, loud) {
     const out = [];
-    const words = text.toLowerCase().split(/(\s+|[,.!?;:…-]+)/);
-    for (const w of words) {
-      if (!w) continue;
-      if (/^[,.!?;:…-]+$/.test(w)) { out.push({ kind: 'closed', w: 1.4 }); continue; }
-      if (/^\s+$/.test(w)) { out.push({ kind: 'gap', w: 0.15 }); continue; }
-      const letters = w.replace(/[^a-z0-9']/g, '').replace(/(^|[^aeiou])y(?=[aeiou])/g, '$1j');   // y before a vowel is a consonant
-      // onset consonants + vowel group = one syllable
-      const re = /([^aeiouy]*)([aeiouy]+|$)/g;
-      let m, any = false;
-      while ((m = re.exec(letters)) && m[0]) {
-        const [, onset, nuc] = m;
-        if (!nuc) { if (!any) out.push({ kind: 'teeth', w: 0.8 }); break; }   // no vowel: "hm", "mm"
-        any = true;
-        let kind = /^(o|u|oo|ou|ow)/.test(nuc) || /w$/.test(onset) ? 'small'
-                 : /^(e|y|ee|ea|ie)/.test(nuc) ? 'half' : 'open';
-        if (loud && kind === 'open') kind = 'wide';
-        const lips = /[mbp]$/.test(onset) ? 'closed' : /([fv]|s|z|ch|sh|t)$/.test(onset) ? 'teeth' : null;
-        out.push({ kind, lips, w: 1 + 0.25 * (nuc.length - 1) });
-      }
+    const push = (kind, w) => {
+      const last = out[out.length - 1];
+      if (last && last.kind === kind) { last.w += w * 0.7; return; }
+      out.push({ kind, w });
+    };
+    const s = text.toLowerCase().replace(/(^|[^aeiou])y(?=[aeiou])/g, '$1j');   // y before a vowel is a consonant
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i], two = s.slice(i, i + 2), three = s.slice(i, i + 3);
+      const endOfWord = !/[a-z]/.test(s[i + 1] ?? ' ');
+      if (/[,.!?;:…]/.test(c)) { push('rest', 1.4); continue; }
+      if (c === '-') { push('rest', 0.8); continue; }
+      if (/\s/.test(c)) { push('gap', 0.25); continue; }
+      if (!/[a-z0-9]/.test(c)) continue;
+      // vowels and vowel pairs
+      if (three === 'igh') { push(loud ? 'wide' : 'open', VOWEL); i += 2; continue; }
+      if (two === 'oo' || two === 'ew' || two === 'ue') { push('oo', VOWEL); i++; continue; }
+      if (two === 'ou') { push(/[dl]/.test(s[i + 2] ?? '') || !/[a-z]/.test(s[i + 2] ?? ' ') ? 'oo' : 'oh', VOWEL); i++; continue; }
+      if (two === 'ow' || two === 'aw' || two === 'au' || two === 'oa') { push('oh', VOWEL); i++; continue; }
+      if (two === 'ee' || two === 'ea' || two === 'ey' || two === 'ie') { push('ee', VOWEL); i++; continue; }
+      if (two === 'ai' || two === 'ay') { push('half', VOWEL); i++; continue; }
+      if (two === 'th') { push('lth', CONS); i++; continue; }
+      if (two === 'ch' || two === 'sh') { push('teeth', CONS); i++; continue; }
+      if (two === 'wh') { push('oo', CONS); i++; continue; }
+      if (c === 'e' && endOfWord && i > 0 && /[a-z]{2}$/.test(s.slice(Math.max(0, i - 3), i)) && s[i - 1] !== 'e') continue;   // silent final e
+      if (c === 'a') { push(loud ? 'wide' : 'open', VOWEL); continue; }
+      if (c === 'i') { push('half', VOWEL); continue; }
+      if (c === 'e') { push('half', VOWEL * 0.9); continue; }
+      if (c === 'o') { push('oh', VOWEL); continue; }
+      if (c === 'u') { push('half', VOWEL * 0.8); continue; }
+      if (c === 'y') { push('ee', VOWEL * 0.8); continue; }
+      // consonants
+      if ('mbp'.includes(c)) { push('mbp', CONS); continue; }
+      if ('fv'.includes(c)) { push('fv', CONS); continue; }
+      if (c === 'l') { push('lth', CONS); continue; }
+      if (c === 'w' || c === 'r' || c === 'q') { push('oo', CONS); continue; }
+      push('teeth', CONS * 0.8);   // s t d n k g c j x z h and digits
     }
     return out;
   }
@@ -123,23 +145,27 @@ const LipSync = (() => {
     if (t < t0 || t > t1) return null;
     const loud = (o.intensity ?? 1) > 1.3;
     const key = text + (loud ? '!' : '');
-    let syl = swapCache.get(key);
-    if (!syl) { syl = syllables(text, loud); swapCache.set(key, syl); }
-    const tq = t0 + Math.floor((t - t0) / STEP) * STEP;          // on threes
-    let kind = 'closed';
-    if (t1 - tq > STEP) {                                          // close on the last beat
-      const total = syl.reduce((a, s) => a + s.w, 0) || 1;
-      const u = ((tq - t0) / (t1 - t0)) * total;
-      let acc = 0, i = 0;
-      while (i < syl.length - 1 && acc + syl[i].w <= u) { acc += syl[i].w; i++; }
-      const sy = syl[i], slotT = (sy.w / total) * (t1 - t0);
-      if (sy.kind === 'gap') kind = syl[i - 1]?.kind === 'closed' ? 'closed' : (syl[i - 1]?.kind ?? 'closed');
-      else if (sy.lips && (u - acc) / sy.w * slotT < STEP && slotT >= STEP * 2) kind = sy.lips;   // m/b/p, f/v lead-in
-      else kind = sy.kind;
-      // the same drawing twice in a row reads as a freeze: alternate it
-      const prev = syl[i - 1];
-      if (prev && prev.kind === kind && (u - acc) / sy.w < 0.5 && kind !== 'closed')
-        kind = kind === 'open' || kind === 'wide' ? 'half' : 'open';
+    let seq = swapCache.get(key);
+    if (!seq) { seq = sounds(text, loud); swapCache.set(key, seq); }
+    const tq = t0 + Math.floor((t - t0) / STEP) * STEP;           // on threes
+    let kind = 'rest';
+    if (t1 - tq > STEP) {                                           // settle on the last beat
+      const total = seq.reduce((a, s) => a + s.w, 0) || 1;
+      const at = u => {                                             // the sound under position u
+        let acc = 0, i = 0;
+        while (i < seq.length - 1 && acc + seq[i].w <= u) { acc += seq[i].w; i++; }
+        return seq[i];
+      };
+      // within this 3-frame beat, show the most open sound (vowels win over
+      // the consonants around them); gaps hold the previous drawing
+      const span = (STEP / (t1 - t0)) * total, u0 = ((tq - t0) / (t1 - t0)) * total;
+      let best = null;
+      for (let k = 0; k < 3; k++) {
+        const sd = at(u0 + span * (k + 0.5) / 3);
+        if (sd.kind === 'gap') continue;
+        if (!best || OPEN[sd.kind] > OPEN[best.kind] || (best.kind === 'rest' && sd.kind !== 'rest')) best = sd;
+      }
+      kind = best ? best.kind : (swap(text, t0, t1, tq - STEP, o)?.kind ?? 'rest');
     }
     // a slightly different tilt each time the drawing changes, like redrawn frames
     const beat = Math.floor((tq - t0) / STEP);

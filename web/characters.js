@@ -190,6 +190,59 @@ const Chars = (() => {
     const dShape = (w, h) => [[-w * 0.8, -lift * 0.6], [-w * 0.35, -5 * s], [w * 0.45, -7 * s], [w, -3 * s - lift],
                               [w * 0.85, h * 0.62], [w * 0.2, h], [-w * 0.45, h * 0.8], [-w * 0.8, h * 0.3]];
     switch (v.kind) {
+      case 'mbp':   // lips pressed together: a firmer line with the lower lip tucked under
+        stroke(ctx, [[-20 * s, 1 * s], [0, -1 * s], [21 * s, 0 - lift]], { w: 10 * s, color });
+        for (const sd of [-1, 1]) stroke(ctx, [[sd * 21 * s, -7 * s], [sd * 25 * s, 0], [sd * 21 * s, 7 * s]], { w: 3.5 * s, color });   // lips pressed: creases at the corners
+        stroke(ctx, [[-9 * s, 10 * s], [2 * s, 13 * s], [11 * s, 10 * s]], { w: 4 * s, color });
+        break;
+      case 'ee': {   // wide stretched mouth, teeth across, dark corners
+        const w = 36 * s, h = 10 * s;
+        const pts = [[-w, -1 * s], [-w * 0.4, -h], [w * 0.5, -h * 1.05], [w, -2 * s - lift], [w * 0.5, h * 0.9], [-w * 0.4, h * 0.85]];
+        fill(ctx, pts, W, 0.3);
+        clipTo(pts);
+        for (const sd of [-1, 1]) fill(ctx, [[sd * w * 0.8, -h * 2], [sd * w * 1.3, -h * 2], [sd * w * 1.3, h * 2], [sd * w * 0.8, h * 2], [sd * w * 0.9, 0]], INK, 0.2);
+        ctx.restore();
+        stroke(ctx, [[-w * 0.75, 0], [w * 0.75, -1 * s]], { w: 3.5 * s, color });
+        outline(ctx, pts, { w: 5.5 * s, jit: 0.4, color });
+        break;
+      }
+      case 'oh': {   // round open mouth, a little top teeth, tongue
+        const pts = Brush.ellipsePts(0, 10 * s, 19 * s, 24 * s, 12, 0.12);
+        fill(ctx, pts, INK, 0.4);
+        clipTo(pts);
+        fill(ctx, [[-22 * s, -18 * s], [22 * s, -18 * s], [22 * s, -6 * s], [-22 * s, -8 * s]], W, 0.2);
+        tongue(3 * s, 30 * s, 13 * s, 8 * s);
+        ctx.restore();
+        outline(ctx, pts, { w: 5.5 * s, jit: 0.4, color });
+        break;
+      }
+      case 'oo': {   // pucker: tiny dark O with a thick rim and little pucker creases
+        const pts = Brush.ellipsePts(0, 5 * s, 11 * s, 13 * s, 10);
+        fill(ctx, pts, INK, 0.2);
+        outline(ctx, pts, { w: 10 * s, jit: 0.3, color });
+        for (const sd of [-1, 1]) stroke(ctx, [[sd * 20 * s, -3 * s], [sd * 25 * s, 5 * s], [sd * 20 * s, 13 * s]], { w: 4 * s, color });
+        break;
+      }
+      case 'fv': {   // top teeth resting on the lower lip
+        const w = 18 * s;
+        const teeth = [[-w, -10 * s], [w, -11 * s - lift], [w * 0.9, 4 * s], [-w * 0.9, 4 * s]];
+        fill(ctx, teeth, W, 0.2);
+        outline(ctx, teeth, { w: 5 * s, jit: 0.3, color });
+        stroke(ctx, [[-w * 0.3, -5 * s], [-w * 0.3, 2 * s]], { w: 3 * s, color });
+        stroke(ctx, [[-w * 1.3, 2 * s], [-w * 0.6, 9 * s], [w * 0.6, 9 * s], [w * 1.3, 1 * s]], { w: 7 * s, color });   // lower lip tucked under the teeth
+        break;
+      }
+      case 'lth': {   // open, tongue raised to the top teeth
+        const pts = dShape(26 * s, 28 * s);
+        fill(ctx, pts, INK, 0.4);
+        clipTo(pts);
+        fill(ctx, [[-30 * s, -12 * s], [30 * s, -12 * s], [30 * s, 3 * s - lift], [-30 * s, 1 * s]], W, 0.2);
+        tongue(3 * s, 12 * s, 11 * s, 10 * s);
+        ctx.restore();
+        outline(ctx, pts, { w: 6 * s, jit: 0.5, color });
+        break;
+      }
+      case 'rest':
       case 'closed':
         stroke(ctx, [[-18 * s, 3 * s - lift * 0.5], [0, -2 * s], [20 * s, 4 * s - lift]], { w: 7 * s, color });
         break;

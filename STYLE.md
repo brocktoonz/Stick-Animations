@@ -8,9 +8,10 @@ disagree, the rule wins.
 ## Motion: nothing on a fixed beat
 
 - **No mouth flapping on a sine wave.** Speech uses the text-driven lip sync
-  (`Stage.say`), which swaps between a few simple mouth drawings (closed line,
-  clenched teeth, small O, open D with tongue, wide yell) once per syllable,
-  on threes. Mouths snap, they never morph. Wordless sounds (screams, gasps, laughs) follow the audio's
+  (`Stage.say`), which swaps between a chart of simple mouth drawings (rest,
+  M/B/P, teeth, EE, F/V, half, L/TH, OH, OO, open, wide; see
+  `?skit=mouth_sheet`) per sound, on threes. Mouths snap, never morph, and
+  are drawn lopsided. Wordless sounds (screams, gasps, laughs) follow the audio's
   loudness: bake it with `python3 scripts/envelope.py <clip> <name>` and read
   it with `Stage.loud(name, t)`. The envelope snaps open and releases slowly,
   so a yell opens and *holds*.
