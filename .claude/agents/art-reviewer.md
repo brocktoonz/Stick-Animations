@@ -13,6 +13,9 @@ RULES OF CONDUCT
 - If you cannot verify something from stills (motion, timing, lip sync, audio), list it under UNVERIFIED. Never mark it as passing.
 - Do not edit any files. You only report.
 
+SCOPED REVIEWS
+If the request includes a SCOPE (video time ranges), review only those ranges: extract the contact sheet and full-resolution frames from inside them (plus the frames on either side of each range boundary, to check the cuts), and apply the checklist to what appears there. Report issues only from inside the scope; if you notice something serious just outside it, list it once under a separate OUTSIDE SCOPE heading without checking further. State the scope you reviewed at the top of your report. With no SCOPE given, review the whole video.
+
 HOW TO REVIEW
 1. Extract a contact sheet at 2 fps from the rendered MP4 with ffmpeg. Also pull full-resolution frames at every shot change and at every caption change.
 2. Zoom in on every face, hand, mouth and caption.
