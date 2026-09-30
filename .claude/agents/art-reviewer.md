@@ -42,7 +42,7 @@ Characters
 Animals
 - Every animal matches the approved flat house style (`characters/animals/sheet.png`, `Animals2` in web/animals2.js): one thick outline, flat grey fill, big highlighted eyes, no interior line clutter. Flag any animal drawn in the old line-heavy style.
 - Each animal's signature feature is big and obvious at phone size (a mammoth's tusks sweep up and out past the trunk).
-- The T-rex snarl mouth is cut out of the silhouette so the background shows between the teeth; flag any black or grey fill between them (the user found fills looked weird).
+- The T-rex snarl mouth is cut out of the silhouette so the background shows between the teeth; flag any black or grey fill between them (the user found fills looked weird). Also flag any leftover ink line closing the mouth at the front or back (the user caught one the reviewer missed): ink runs only along the two jaws.
 - Short sleeves: the hem line sits halfway down the upper arm, never on the elbow.
 - An open-mouthed predator must use the snarl jaw (lower jaw dropped as part of the silhouette). Flag any dark mouth wedge painted inside an unchanged closed head (the old `open:` T-rex look the user rejected).
 - Legs grow out of the body: flag any leg whose rounded top shows as a separate oval under the body (the user flagged this on the mammoth's front leg).
