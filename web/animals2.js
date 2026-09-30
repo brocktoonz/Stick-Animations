@@ -249,6 +249,8 @@ const Animals2 = (() => {
     const flap = Math.sin(t * 22), hover = Math.sin(t * 6) * 12;
     ctx.translate(0, -60 + hover);
     silhouette(ctx, [...leg(-30, -60, 26, 0, false, { off: -14 }), ...leg(58, -60, 26, 0, false, { off: 4 })], '#b8b8b8', lw, 70);   // far legs
+    // p.wing2 (preview): a full-weight corkscrew tail in the body grey, tucked into the rump
+    if (p.wing2) silhouette(ctx, [T([[-82, -112], [-114, -114], [-134, -130], [-128, -152], [-108, -154], [-104, -138]], 12, 0.5)], '#d6d6d6', lw, 69);
     silhouette(ctx, [
       ...leg(-55, -60, 26, 0, false, { off: 4, knee: -6 }), ...leg(34, -60, 26, 0, false, { off: 14 }),
       E(0, -100, 100, 62),                                                // body
@@ -256,10 +258,20 @@ const Animals2 = (() => {
       E(58, -156, 18, 28, 0.7),                                           // floppy ear
     ], '#d6d6d6', lw, 71);
     for (const [x, y] of [[110, -103], [120, -100]]) blob(ctx, x, y, 3, 4.5, { fill: INK, w: 0, n: 6 });   // nostrils side by side, tipped slightly
-    line(ctx, [[-96, -108], [-118, -116], [-126, -134], [-112, -146], [-102, -134], [-112, -126]], lw);   // corkscrew tail off the rump
+    if (!p.wing2) line(ctx, [[-96, -108], [-118, -116], [-126, -134], [-112, -146], [-102, -134], [-112, -126]], lw);   // corkscrew tail off the rump
     // one wing rooted on the shoulder, fanned up and back, filled like the dodo's wing
-    ctx.save(); ctx.translate(0, -122); ctx.rotate(1.15 + flap * 0.3);
-    silhouette(ctx, [E(-56, 0, 62, 26), E(-104, 16, 20, 15), E(-76, 23, 20, 15), E(-48, 22, 18, 14)], '#b4b4b4', lw * 0.5, 61);
+    ctx.save(); ctx.translate(0, -122);
+    if (p.wing2) {   // preview: swept back, four feather tips on the trailing edge, full outline weight
+      ctx.rotate(0.85 + flap * 0.3);
+      silhouette(ctx, [
+        E(-52, 0, 58, 22),
+        T([[-28, 8], [-34, 42]], 22, 0.6), T([[-52, 10], [-64, 46]], 22, 0.6),
+        T([[-76, 8], [-96, 40]], 22, 0.6), T([[-98, 2], [-126, 24]], 20, 0.6),
+      ], '#a8a8a8', lw, 61);
+    } else {
+      ctx.rotate(1.15 + flap * 0.3);
+      silhouette(ctx, [E(-56, 0, 62, 26), E(-104, 16, 20, 15), E(-76, 23, 20, 15), E(-48, 22, 18, 14)], '#b4b4b4', lw * 0.5, 61);
+    }
     ctx.restore();
     eye(ctx, p.eyes === 'happy' ? 58 : 64, p.eyes === 'happy' ? -116 : -126, 20, p, lw, 0.95, 0.9);   // happy arc sits lower, clear of the ear
   });
