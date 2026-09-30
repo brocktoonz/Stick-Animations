@@ -160,7 +160,7 @@ const Animals2 = (() => {
     const ph = t * 12, wk = !!p.walk, open = p.open ?? 0;
     if (p.snarl) ctx.rotate(0.08);   // lean forward into the snarl
     // enlarged sickle claw: a hooked blade raised off the front of the visible foot
-    const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 12, y - 4], [x + 18, y - 22], [x + 32, y - 29], [x + 41, y - 18]], 16, 1)], col, lw * 0.8, seed);
+    const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 14, y - 4], [x + 18, y - 14], [x + 27, y - 19], [x + 33, y - 12]], 11, 1)], col, lw * 0.6, seed);
     const far = leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 });
     silhouette(ctx, far, '#989898', lw, 20);   // far leg, set well back
     const near = leg(18, -118, 30, ph, wk, { off: 14, knee: 20, foot: 30 }), [fx, fy] = near[1].e;

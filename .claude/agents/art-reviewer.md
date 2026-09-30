@@ -40,7 +40,8 @@ Characters
 - Silhouettes stay distinct between characters.
 - Anatomy is correct: no backwards elbows, and no hands detached from arms.
 Animals
-- Each animal's signature feature is big and obvious at phone size (a mammoth's tusks sweep up and out past the trunk; a raptor has a visible sickle claw).
+- Each animal's signature feature is big and obvious at phone size (a mammoth's tusks sweep up and out past the trunk).
+- The raptor's sickle claw is deliberately SMALL (the user overruled requests to enlarge it). Check only that a small hook is present on the visible foot in every expression. Flag it if it grows past about a third of the lower leg; never ask for it to be bigger.
 - Predators that scare someone show menace: teeth on the jaw line, and a snarl (angry brow, fangs top and bottom) in the scare shot. A toothless smile reads as a friendly gecko; a snout with a line down the middle reads as a beak.
 - Head tufts read as hair or fur, not antennae.
 - Wings, ears and other attached parts are joined to the body, not floating outlines, and use the same fill treatment as the matching part on other animals.

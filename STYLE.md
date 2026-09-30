@@ -109,8 +109,9 @@ disagree, the rule wins.
 - T-rex arms are tiny stubs set high on the chest, just under the jaw, with
   two small claw points: comically useless, never an elbow or a hand. Keep a
   clear gap between the claws and the jaw, snarling included.
-- The raptor always shows its enlarged, hooked sickle claw on the visible
-  foot, in every expression.
+- The raptor always shows its hooked sickle claw on the visible foot, in
+  every expression. Keep it small (user decision): a little hook on the toe,
+  well under a third of the lower leg, never a big blade.
 - All animals use the shared single big eye (`eye()` in `web/animals2.js`:
   white, one ink ring, big pupil, highlight). Animals facing the viewer get
   two of the same eye, not smaller or double-ringed ones.
