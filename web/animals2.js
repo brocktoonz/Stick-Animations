@@ -125,7 +125,7 @@ const Animals2 = (() => {
     const ph = t * 10, wk = !!p.walk, open = p.open ?? 0;
     // uselessly tiny arm high on the chest, just under the jaw (a little lower
     // when snarling so the claws stay clear of the dropped jaw)
-    const ay = p.snarl ? -148 : -168, arm = [
+    const ay = p.snarl ? -136 : -168, arm = [
       T([[118, ay], [156, ay + 6]], 18),                                  // stub
       T([[152, ay - 2], [178, ay - 12]], 12, 1), T([[152, ay + 8], [176, ay + 22]], 12, 1),   // two claw points
     ];
@@ -153,14 +153,14 @@ const Animals2 = (() => {
       fangs(ctx, 140, -263, 222, -262, 5, 16, lw);
     }
     marks(ctx, -45, -275, 3, 36, lw);
-    eye(ctx, 118, -338, 34, p, lw);
+    eye(ctx, 120, -336, 29, p, lw);
   });
 
   const raptor = (ctx, p) => place(ctx, p, (lw, t) => {
     const ph = t * 12, wk = !!p.walk, open = p.open ?? 0;
     if (p.snarl) ctx.rotate(0.08);   // lean forward into the snarl
     // enlarged sickle claw: a hooked blade raised off the front of the visible foot
-    const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 14, y - 4], [x + 18, y - 14], [x + 27, y - 19], [x + 33, y - 12]], 11, 1)], col, lw * 0.6, seed);
+    const claw = ([x, y]) => stroke(ctx, [[x + 16, y - 20], [x + 21, y - 34], [x + 33, y - 39], [x + 41, y - 28]], { w: 13, taper0: 0, taper1: 1, minW: 0.02, jit: 0.3, wob: 0.3 });   // small pointed hook, ink only
     const far = leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 });
     silhouette(ctx, far, '#989898', lw, 20);   // far leg, set well back
     const near = leg(18, -118, 30, ph, wk, { off: 14, knee: 20, foot: 30 }), [fx, fy] = near[1].e;
@@ -186,7 +186,7 @@ const Animals2 = (() => {
       fangs(ctx, 144, -210, 198, -205, 3, 12, lw);
     }
     // enlarged sickle claw: a hooked toe claw raised on the visible foot
-    claw([fx, fy], '#5a5a5a', 29);
+    claw([fx, fy]);
     marks(ctx, -20, -185, 2, 26, lw);
     eye(ctx, p.snarl ? 96 : p.eyes === 'happy' ? 104 : 102, p.snarl ? -246 : p.eyes === 'happy' ? -228 : -238, 22, p, lw, 0.85, 0.7);
   });
