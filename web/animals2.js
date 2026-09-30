@@ -257,9 +257,11 @@ const Animals2 = (() => {
     ], '#d6d6d6', lw, 71);
     for (const [x, y] of [[110, -103], [120, -100]]) blob(ctx, x, y, 3, 4.5, { fill: INK, w: 0, n: 6 });   // nostrils side by side, tipped slightly
     // corkscrew tail: about 1.5 turns out of the rump, a skinny line so the curl reads
-    const tail = [[-104, -124], [-112, -126]];   // a short stalk off the rump, so the curl sits clear of the back
-    for (let k = 0; k <= 48; k++) { const a = -k * (Math.PI * 3 / 48), r = 24 - k * 0.3; tail.push([-142 + Math.cos(a) * r, -126 + Math.sin(a) * r]); }
-    stroke(ctx, tail, { w: lw * 0.5, taper0: 0, taper1: 0.2, step: 2, jit: 0.3, wob: 0.3 });
+    // grows out of the rump in one smooth curve: up and back, round in a loop,
+    // and a smaller curl inside it
+    const tail = [[-98, -118], [-112, -130], [-128, -142], [-146, -146], [-160, -136], [-158, -118], [-144, -110],
+      [-130, -118], [-130, -132], [-140, -138], [-148, -130], [-144, -122]];
+    stroke(ctx, tail, { w: lw * 0.5, taper0: 0, taper1: 0.3, step: 2, jit: 0.3, wob: 0.3 });
     // one wing rooted on the shoulder, swept back, four rounded feather lobes
     // on the trailing edge, the dodo wing's grey at full outline weight
     ctx.save(); ctx.translate(0, -122); ctx.rotate(1.1 + flap * 0.25);
