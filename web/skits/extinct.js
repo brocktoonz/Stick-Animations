@@ -358,17 +358,17 @@ Skits.extinct = (() => {
     // laughing behind Ludwig's shoulder.
     [8.5, 10.75, (ctx, t) => {
       const z = 1.35, sc = S * z, g = GEO.lud;
-      const headSx = 590, headSy = Math.max(1080, capBottom() + HEAD_GAP + g.hair * sc) - 260 * easeInOut(seg(t, 9.95, 10.35));   // tilt up once the caption clears
+      const headSx = 590, headSy = Math.max(1080, capBottom() + HEAD_GAP + g.hair * sc);   // one framing for the whole shot, no pan
       const bodySx = headSx - g.offset * sc;                       // body line that puts the head at centre
       const cwx = LX - (bodySx - 540) / z, cwy = FLOOR - g.head * S;
       const toWorld = (x, y) => [cwx + (x - 540) / z, cwy + (y - headSy) / z];
       ctx.save(); cam(ctx, cwx, cwy, z, headSy);
       stage(ctx);
       if (t >= 9.85) {
-        const k = loud('extinct', t), slide = easeOutBack(seg(t, 9.85, 10.02)), lean = 0.3, ss = S * 0.8;   // smaller: further back
+        const k = loud('extinct', t), slide = easeOut(seg(t, 9.8, 10.25)), lean = 0.55, ss = S * 0.8;   // leans in steeply and eases in, no pop   // smaller: further back
         // Slime's head centre on screen: slides in from off the left edge,
         // face just clear of Ludwig's head
-        const hx = lerp(-360, 200, slide), hy = headSy + 150;   // high enough that Ludwig's hip arm stays below his mouth
+        const hx = lerp(-300, 185, slide), hy = headSy - 10;   // head up beside Ludwig's, body off the left edge   // high enough that Ludwig's hip arm stays below his mouth
         const [wx, wy] = toWorld(hx, hy), R = 438 * ss;
         Cameos.slime(ctx, { t, x: wx - Math.sin(lean) * R, y: wy + Math.cos(lean) * R, s: ss, dir: 1, lean,
           ...E.laughing, open: 0.3 + 0.5 * k, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
