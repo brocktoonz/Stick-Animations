@@ -450,7 +450,7 @@ Skits.extinct = (() => {
       const rs = 1.1, headWx = NX - (sx - 540) / z + (870 - 540) / z;
       if (k > 0) A.raptor(ctx, { x: headWx + 70 * rs - 60, y: FLOOR - 170, s: rs * easeOutBack(k), t, dir: -1, rot: -0.55, snarl: t > 19.9 });   // rears up, jaw over his shoulder
       nick(ctx, t < 19.75 ? { t, ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 17) }
-                          : { t, ...E.confused, ...talkLine(t, 18) });
+                          : { t, mouth: E.confused.mouth, open: E.confused.open, browL: E.confused.browL, browLiftL: E.confused.browLiftL, browR: E.confused.browR, browLiftR: E.confused.browLiftR, tilt: E.confused.tilt, ...Ar.both([175, -236], 'down'), ...talkLine(t, 18) });   // confused face only: no head-scratch arm across his glasses
       ctx.restore();
       heads.push(sy - hairTop);
     }],

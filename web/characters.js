@@ -551,13 +551,21 @@ const Chars = (() => {
       // arms folded: upper arms down the sides to the elbows, forearms across
       // the chest, the right one over the left, fists peeking out at each end
       const elY = neckY + S.shY + (hipY - neckY) * 0.42;
+      // The far (left) forearm goes under, its hand tucked beneath the near
+      // upper arm; the near forearm angles up over it to a fist by the far elbow.
       for (const side of [-1, 1]) {
         const sh = [side * S.shX, neckY + S.shY], el = [side * (S.shX + S.armW * 0.5), elY];
-        const hd = [-side * S.shX * 0.75, elY + (side < 0 ? 6 : -14)];
+        const hd = side < 0 ? [S.shX + S.armW * 0.2, elY - S.armW * 0.6] : [-S.shX * 0.95, elY - S.armW * 1.1];
+        if (side < 0) {   // under: forearm and hidden hand first
+          tube(ctx, el, hd, 0.05, S.armW, S.armFill ?? W, darkTorso);
+          hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);
+        }
         tube(ctx, sh, el, side * -0.08, S.armW, S.armFill ?? W, darkTorso);
         if (S.sleeveHem) sleeveHem(ctx, sh, el, side * -0.08, S.armW, Math.min(0.8, S.sleeveHem * 2));   // this segment is the upper arm only
-        tube(ctx, el, hd, side * 0.05, S.armW, S.armFill ?? W, darkTorso);
-        hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);
+        if (side > 0) {
+          tube(ctx, el, hd, -0.08, S.armW, S.armFill ?? W, darkTorso);
+          hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);
+        }
       }
     } else {
       if (!p.armLFront) arm(-1, p.armL, p.bendL, null, p.holdL);
