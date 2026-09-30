@@ -38,7 +38,7 @@ Characters
 - Each character matches their design notes in STYLE.md and cameos.js/hero.js.
 - Hair reads as hair (not a cap, leaf or helmet). Facial hair reads as hair (not a smear or mask).
 - Silhouettes stay distinct between characters.
-- Anatomy is correct: no backwards elbows, and no hands detached from arms.
+- Anatomy is correct: no backwards elbows, and no hands detached from arms. Check this on characters that are only partly in frame too (e.g. Slime leaning in from the edge): the user caught arms bending backwards there that the reviewer missed.
 Animals
 - Every animal matches the approved flat house style (`characters/animals/sheet.png`, `Animals2` in web/animals2.js): one thick outline, flat grey fill, big highlighted eyes, no interior line clutter. Flag any animal drawn in the old line-heavy style.
 - Each animal's signature feature is big and obvious at phone size (a mammoth's tusks sweep up and out past the trunk).
