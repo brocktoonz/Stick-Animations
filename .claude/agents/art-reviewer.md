@@ -53,7 +53,9 @@ Animals
 - All animals share one eye design (size, ring weight, pupil and highlight). Flag any animal whose eyes look like a different artist drew them.
 Acting
 - Full-body poses have a weight shift, lean, or bent knee. Flag any shot with parallel planted legs and hanging arms.
-- The expression is strong enough to read at phone size. Mouth size and shape match the emotion.
+- The expression is strong enough to read at phone size.
+- Continuity: a character's stance and legs don't jump between two similar shots (e.g. two two-shots of the same pair), and nothing moves unmotivated to make room for something else (e.g. animals backing away before a meteor).
+- The expression fits the beat and the character's attitude: flag faces that fight the line (e.g. excited on a deadpan reveal, or angry when the character is meant to stay smug and unbothered). Mouth size and shape match the emotion.
 Captions
 - The text is the exact words, with nothing dropped or added.
 - Font size is consistent. Color follows the speaker mapping in STYLE.md.
