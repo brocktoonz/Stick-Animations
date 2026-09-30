@@ -375,7 +375,7 @@ Skits.extinct = (() => {
         const [wx, wy] = toWorld(hx, hy), R = 438 * ss;
         Cameos.slime(ctx, { t, x: wx - Math.sin(lean) * R, y: wy + Math.cos(lean) * R, s: ss, dir: 1, lean,
           ...E.laughing, /* Duck Hunt dog chuckle: near hand over his mouth, far hand on his belly */
-          ...Ar.arm(1, [-26, -362], 'down', true), ...Ar.arm(-1, [4, -130], 'down'), open: 0.3 + 0.2 * k, mouthScale: 1.05, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
+          ...Ar.arm(1, [-26, -362], 'out', true), ...Ar.arm(-1, [4, -130], 'down'), open: 0.3 + 0.2 * k, mouthScale: 1.05, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
       }
       lud(ctx, { t, ...E.smirk, ...Ar.both([90, -200], 'out'), lookX: 0.95, pupil: 10,
                  lid: t >= 9.9 ? 1 : 0.42, lowLid: t >= 9.9 ? 0 : 0.3, brow: t >= 9.9 ? 0.45 : 0.2,
@@ -464,11 +464,11 @@ Skits.extinct = (() => {
       prehistoric(ctx, t);
       const look = t > 22.35;
       ctx.translate(540, FLOOR); ctx.scale(1.25, 1.25); ctx.translate(-540, -FLOOR - 40);   // push in so the raptors fill the middle of the frame
-      const x1 = 215, x2 = 880;   // they stay put, far enough apart for the meteor to land between them
-      shadow(ctx, x1 + 20, 100, FLOOR + 44); shadow(ctx, x2 - 20, 95, FLOOR + 64);
+      const x1 = 300, x2 = 780;   // they stay put, far enough apart for the meteor to land between them
+      shadow(ctx, x1 + 20, 85, FLOOR + 44); shadow(ctx, x2 - 20, 80, FLOOR + 64);
       // when the meteor shows up they look up at it (pupils up-left toward it)
-      A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 0.85, t, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
-      A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 0.8, t: t + 0.3, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
+      A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 0.7, t, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
+      A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 0.68, t: t + 0.3, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
       const m = seg(t, 22.2, hit);
       if (m > 0 && m < 1) A.meteor(ctx, lerp(260, 555, m), lerp(-250, FLOOR - 40, m), lerp(60, 150, m), t);   // steep, down the gap between them
       ctx.restore();

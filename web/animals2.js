@@ -135,7 +135,7 @@ const Animals2 = (() => {
     // snarling: the mouth is cut out of the silhouette, so the background
     // shows between the teeth (no black or grey fill in there)
     const mUp = [[120, -272], [236, -290]], mLo = [[214, -222], [118, -254]];
-    const cut = [[120, -272], [236, -290], [290, -300], [270, -214], [214, -222], [118, -254]];   // runs out past the jaw tips, so the mouth is open at the front
+    const cut = [[112, -276], [236, -290], [290, -300], [270, -214], [214, -222], [108, -250]];   // back corner opened a little so no ink pools at the hinge   // runs out past the jaw tips, so the mouth is open at the front
     if (p.snarl) {
       ctx.save(); ctx.beginPath(); ctx.rect(-2000, -2000, 4000, 4000);
       const mp = cut; ctx.moveTo(...mp[0]); mp.forEach(q => ctx.lineTo(...q)); ctx.closePath();
@@ -157,7 +157,7 @@ const Animals2 = (() => {
     ], '#8a8a8a', lw, 11);
     if (p.snarl) {
       ctx.restore();
-      for (const lip of [mUp, [mLo[1], mLo[0]]]) stroke(ctx, lip, { w: lw * 1.1, taper0: 0.3, taper1: 0, minW: 1, jit: 0.3, wob: 0.3 });   // ink along each jaw only; nothing closes the mouth
+      for (const lip of [mUp, [mLo[1], mLo[0]]]) stroke(ctx, lip, { w: lw * 0.9, taper0: 0.5, taper1: 0, minW: 1, jit: 0.3, wob: 0.3 });   // ink along each jaw only; nothing closes the mouth
       fangs(ctx, ...mUp[0], ...mUp[1], 5, 22, lw, 1);
       fangs(ctx, mLo[1][0] + (mLo[0][0] - mLo[1][0]) * 0.22, mLo[1][1] + (mLo[0][1] - mLo[1][1]) * 0.22, ...mLo[0], 4, 17.6, lw, -1);
       for (const dx of [0, 16]) line(ctx, [[178 + dx, -358], [186 + dx, -346]], lw);   // snout wrinkles
