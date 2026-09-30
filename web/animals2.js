@@ -160,7 +160,7 @@ const Animals2 = (() => {
     const ph = t * 12, wk = !!p.walk, open = p.open ?? 0;
     if (p.snarl) ctx.rotate(0.08);   // lean forward into the snarl
     // enlarged sickle claw: a hooked blade raised off the front of the visible foot
-    const claw = ([x, y]) => stroke(ctx, [[x + 16, y - 20], [x + 21, y - 34], [x + 33, y - 39], [x + 41, y - 28]], { w: 17, taper0: 0, taper1: 1, minW: 0.02, jit: 0.3, wob: 0.3 });   // small pointed hook, ink only
+    const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 14, y - 4], [x + 18, y - 14], [x + 27, y - 19], [x + 33, y - 12]], 11, 1)], col, lw * 0.6, seed);   // small hooked toe claw (user-approved size)
     const far = leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 });
     silhouette(ctx, far, '#989898', lw, 20);   // far leg, set well back
     const near = leg(18, -118, 30, ph, wk, { off: 14, knee: 20, foot: 30 }), [fx, fy] = near[1].e;
@@ -186,7 +186,7 @@ const Animals2 = (() => {
       fangs(ctx, 144, -210, 198, -205, 3, 12, lw);
     }
     // enlarged sickle claw: a hooked toe claw raised on the visible foot
-    claw([fx, fy]);
+    claw([fx, fy], '#5a5a5a', 29);
     marks(ctx, -20, -185, 2, 26, lw);
     eye(ctx, p.snarl ? 96 : p.eyes === 'happy' ? 104 : 102, p.snarl ? -246 : p.eyes === 'happy' ? -234 : -238, 22, p, lw, 0.75, 0.95);
   });

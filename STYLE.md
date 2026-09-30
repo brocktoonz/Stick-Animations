@@ -111,7 +111,8 @@ disagree, the rule wins.
   clear gap between the claws and the jaw, snarling included.
 - The raptor always shows its hooked sickle claw on the visible foot, in
   every expression. Keep it small (user decision): a little hook on the toe,
-  well under a third of the lower leg, never a big blade.
+  well under a third of the lower leg, never a big blade. The approved
+  version is the small grey outlined hook in `claw()` in `web/animals2.js`.
 - All animals use the shared single big eye (`eye()` in `web/animals2.js`:
   white, one ink ring, big pupil, highlight). Animals facing the viewer get
   two of the same eye, not smaller or double-ringed ones.
