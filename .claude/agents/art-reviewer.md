@@ -42,6 +42,7 @@ Characters
 Animals
 - Every animal matches the approved flat house style (`characters/animals/sheet.png`, `Animals2` in web/animals2.js): one thick outline, flat grey fill, big highlighted eyes, no interior line clutter. Flag any animal drawn in the old line-heavy style.
 - Each animal's signature feature is big and obvious at phone size (a mammoth's tusks sweep up and out past the trunk).
+- The T-rex snarl mouth is dark grey inside; flag solid black between the teeth (the user found it looked weird).
 - An open-mouthed predator must use the snarl jaw (lower jaw dropped as part of the silhouette). Flag any dark mouth wedge painted inside an unchanged closed head (the old `open:` T-rex look the user rejected).
 - Legs grow out of the body: flag any leg whose rounded top shows as a separate oval under the body (the user flagged this on the mammoth's front leg).
 - The raptor's sickle claw is deliberately SMALL (the user overruled requests to enlarge it). Check only that a small hook is present on the visible foot in every expression. Flag it if it grows past about a third of the lower leg; never ask for it to be bigger. The current small grey outlined hook on the toe is the user-approved design: don't ask to change its size, fill or shape.
