@@ -234,13 +234,13 @@ Skits.extinct = (() => {
     const q = { x: NX, y: FLOOR, s: S, lookX: 0.95, lid: blink(p.t ?? 0, 3.3, 0.4), ...p, dir: 1 };
     if ((q.pupil ?? 13) > 11) q.pupil = 11;
     if (q.shadow !== false) shadow(ctx, q.x, 95 * q.s / S, q.y + 6);
-    Cameos.nick(ctx, { ...q, ...acting(q, q.t ?? 0, 1), ...(p.lean !== undefined ? { lean: p.lean } : {}) });
+    Cameos.nick(ctx, { ...q, ...acting(q, q.t ?? 0, 1), ...(p.lean !== undefined ? { lean: p.lean } : {}), ...(p.weight !== undefined ? { weight: p.weight } : {}) });
   };
   const lud = (ctx, p) => {
     const q = { x: LX, y: FLOOR, s: S, lookX: 0.95, lid: blink(p.t ?? 0, 2.9, 1.1), ...p, dir: -1 };
     if ((q.pupil ?? 13) > 11) q.pupil = 11;
     if (q.shadow !== false) shadow(ctx, q.x, 80 * q.s / S, q.y + 6);
-    Cameos.ludwig(ctx, { ...q, ...acting(q, q.t ?? 0, 4), ...(p.lean !== undefined ? { lean: p.lean } : {}) });
+    Cameos.ludwig(ctx, { ...q, ...acting(q, q.t ?? 0, 4), ...(p.lean !== undefined ? { lean: p.lean } : {}), ...(p.weight !== undefined ? { weight: p.weight } : {}) });
   };
   const slime = (ctx, p) => Cameos.slime(ctx, { x: 540, y: FLOOR + 300, s: 2.0, dir: 1, lid: blink(p.t ?? 0, 3.7), weight: stance(p.t ?? 0, 7), ...p });
   const Ar = Arms;
@@ -312,12 +312,15 @@ Skits.extinct = (() => {
     heads.push(top);
   }
 
+  // both two-shots hold the same stance, so the legs match between them
+  const TS_WN = stance(7.36, 1), TS_WL = stance(7.36, 4);
+
   // ---------- shots ----------
   const shots = [
     // establishing two-shot: Nick poses the question
     [0, 1.75, (ctx, t) => twoShot(ctx, t,
-      { ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 0) },
-      { ...E.neutral, ...Ar.arm(-1, [-112, -176], 'out'), ...Ar.arm(1, [60, -150], 'out') })],   // hand on hip
+      { ...E.happy, ...Ar.arm(1, [150, -250], 'down'), weight: TS_WN, ...talkLine(t, 0) },
+      { ...E.neutral, ...Ar.arm(-1, [-112, -176], 'out'), ...Ar.arm(1, [60, -150], 'out'), weight: TS_WL })],   // hand on hip
     // ...every single extinct animal: they burst out of the ground
     [1.75, 3.35, (ctx, t) => {
       ctx.save(); cam(ctx, 540, FLOOR - 330, 1.05, 1330);
@@ -347,10 +350,10 @@ Skits.extinct = (() => {
     [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...talkLine(t, 4) })],
     // "give me the other option" (points at him) / "why you don't want that?":
     // fastest stretch, and Ludwig points at Nick, so both in one two-shot
-    [7.0, 7.72, (ctx, t) => twoShot(ctx, t, { ...E.confused, mouth: 'flat' },
-      { ...E.neutral, pointR: -0.25, ...Ar.arm(1, [160, -330], 'down'), ...Ar.arm(-1, [-112, -176], 'out'), ...talkLine(t, 5) })],
+    [7.0, 7.72, (ctx, t) => twoShot(ctx, t, { ...E.confused, mouth: 'flat', weight: TS_WN },
+      { ...E.neutral, weight: TS_WL, pointR: -0.25, ...Ar.arm(1, [160, -330], 'down'), ...Ar.arm(-1, [-112, -176], 'out'), ...talkLine(t, 5) })],
     // "why you don't want that?"
-    [7.72, 8.5, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...Ar.both([172, -236], 'down'), browLiftL: 0, browLiftR: -10, ...talkLine(t, 6) })],
+    [7.72, 8.5, (ctx, t) => mediumNick(ctx, t, { mouth: 'flat', lid: 0.5, flatLid: true, pupil: 8, brow: 0.7, ...Ar.both([172, -236], 'down'), ...talkLine(t, 6) })],   // annoyed: heavy half-closed lids
     // "whatever the other option is I'll ... take it": one shot, snapping in on "take it"
     // "whatever the other option is I'll take it", then Slime cracks up: one
     // continuous shot on Ludwig (no cut mid-line), centred, hands on hips.
@@ -416,10 +419,10 @@ Skits.extinct = (() => {
       // visible arc off the left edge
       const wind = seg(t, 16.98, 17.08), kick = seg(t, 17.08, 17.14), fly = seg(t, 17.14, 17.5);
       const step = t < 17.08 ? 0.6 * wind : lerp(0.6, -1.5, kick) * (1 - 0.6 * fly);
-      // the yell: big open mouth held for the whole line, following the audio's loudness; jaw drops, head stretches and tips
-      const yellOpen = clamp(0.55 + 0.6 * loud('extinct', t), 0.55, 1);
-      lud(ctx, { t, x: 640, ...(t < 17.0 ? { ...E.excited, pupil: 10, lookX: 1, ...talkLine(t, 13, { intensity: 1.4 }) }
-                                          : { ...E.yelling, ...Ar.both([124, -196], 'out'), mouth: 'yell', open: yellOpen, mouthScale: 1.25, stretch: 0.7, tilt: -0.1 }),
+      // smug the whole time: eyes closed, arms folded, and he never opens his
+      // eyes or changes expression, even for the kick
+      lud(ctx, { t, x: 640, ...E.smirk, lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06, crossArms: true,
+                 ...talkLine(t, t < 16.985 ? 13 : 14),
                  step, lean: -0.1 * kick * (1 - fly) + 0.05 * wind, ...(t > 16.98 ? { weight: 0 } : {}) });
       // a small raptor wanders in on its own from the left (separate from the
       // new animals behind him), stops at his foot, and gets punted
@@ -447,7 +450,7 @@ Skits.extinct = (() => {
       const rs = 1.1, headWx = NX - (sx - 540) / z + (870 - 540) / z;
       if (k > 0) A.raptor(ctx, { x: headWx + 70 * rs - 60, y: FLOOR - 170, s: rs * easeOutBack(k), t, dir: -1, rot: -0.55, snarl: t > 19.9 });   // rears up, jaw over his shoulder
       nick(ctx, t < 19.75 ? { t, ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 17) }
-                          : { t, ...E.excited, ...Ar.both([175, -236], 'down'), ...talkLine(t, 18) });
+                          : { t, ...E.confused, ...talkLine(t, 18) });
       ctx.restore();
       heads.push(sy - hairTop);
     }],
@@ -461,13 +464,13 @@ Skits.extinct = (() => {
       prehistoric(ctx, t);
       const look = t > 22.35;
       ctx.translate(540, FLOOR); ctx.scale(1.25, 1.25); ctx.translate(-540, -FLOOR - 40);   // push in so the raptors fill the middle of the frame
-      const x1 = 250 + (look ? 0 : Math.sin(t * 3) * 35), x2 = 850 - (look ? 0 : Math.sin(t * 3) * 35);   // snouts stay ~90 px apart
-      shadow(ctx, x1 + 20, 130, FLOOR + 44); shadow(ctx, x2 - 20, 120, FLOOR + 64);
+      const x1 = 215, x2 = 880;   // they stay put, far enough apart for the meteor to land between them
+      shadow(ctx, x1 + 20, 100, FLOOR + 44); shadow(ctx, x2 - 20, 95, FLOOR + 64);
       // when the meteor shows up they look up at it (pupils up-left toward it)
-      A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 1.1, t, walk: !look, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
-      A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 1.0, t: t + 0.3, walk: !look, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
+      A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 0.85, t, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
+      A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 0.8, t: t + 0.3, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
       const m = seg(t, 22.2, hit);
-      if (m > 0 && m < 1) A.meteor(ctx, lerp(-200, 560, m), lerp(-200, FLOOR - 40, m), lerp(60, 150, m), t);
+      if (m > 0 && m < 1) A.meteor(ctx, lerp(260, 555, m), lerp(-250, FLOOR - 40, m), lerp(60, 150, m), t);   // steep, down the gap between them
       ctx.restore();
     }],
     // aftermath: just the crater, both raptors gone
