@@ -424,8 +424,8 @@ Skits.extinct = (() => {
       ctx.save(); cam(ctx, NX - (sx - 540) / z, FLOOR - GEO.nick.head * S, z, sy);
       stage(ctx);
       const k = seg(t, 19.7, 19.95);
-      const rs = 1.5, headWx = NX - (sx - 540) / z + (870 - 540) / z;
-      if (k > 0) A.raptor(ctx, { x: headWx + 90 * rs, y: FLOOR - 40, s: rs * easeOutBack(k), t, dir: -1, rot: -0.4, snarl: t > 19.9 });   // rears up, jaw over his shoulder
+      const rs = 1.25, headWx = NX - (sx - 540) / z + (870 - 540) / z;
+      if (k > 0) A.raptor(ctx, { x: headWx + 100 * rs, y: FLOOR - 40, s: rs * easeOutBack(k), t, dir: -1, rot: -0.4, snarl: t > 19.9 });   // rears up, jaw over his shoulder
       nick(ctx, t < 19.75 ? { t, ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 17) }
                           : { t, ...E.excited, ...Ar.both([175, -236], 'down'), ...talkLine(t, 18) });
       ctx.restore();
@@ -441,11 +441,11 @@ Skits.extinct = (() => {
       prehistoric(ctx, t);
       const look = t > 22.35;
       ctx.translate(540, FLOOR); ctx.scale(1.25, 1.25); ctx.translate(-540, -FLOOR - 40);   // push in so the raptors fill the middle of the frame
-      const x1 = 330 + (look ? 0 : Math.sin(t * 3) * 50), x2 = 760 - (look ? 0 : Math.sin(t * 3) * 50);
+      const x1 = 250 + (look ? 0 : Math.sin(t * 3) * 35), x2 = 850 - (look ? 0 : Math.sin(t * 3) * 35);   // snouts stay ~90 px apart
       shadow(ctx, x1 + 20, 130, FLOOR + 44); shadow(ctx, x2 - 20, 120, FLOOR + 64);
       // when the meteor shows up they look up at it (pupils up-left toward it)
-      A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 1.3, t, walk: !look, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
-      A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 1.2, t: t + 0.3, walk: !look, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
+      A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 1.1, t, walk: !look, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
+      A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 1.0, t: t + 0.3, walk: !look, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
       const m = seg(t, 22.2, hit);
       if (m > 0 && m < 1) A.meteor(ctx, lerp(-200, 560, m), lerp(-200, FLOOR - 40, m), lerp(60, 150, m), t);
       ctx.restore();
