@@ -352,11 +352,11 @@ Skits.extinct = (() => {
     // "why you don't want that?"
     [7.72, 8.5, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...Ar.both([172, -236], 'down'), browLiftL: 0, browLiftR: -10, ...talkLine(t, 6) })],
     // "whatever the other option is I'll ... take it": one shot, snapping in on "take it"
-    [8.5, 9.45, (ctx, t) => mediumLud(ctx, t, { ...E.smirk, ...Ar.both([90, -200], 'out'), ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it") })],
-    // "take it", then Slime cracks up: one continuous close-up on Ludwig,
-    // centred. Slime leans in from off the left edge at an angle (torso up
-    // only), laughing behind Ludwig's shoulder.
-    [9.45, 10.75, (ctx, t) => {
+    // "whatever the other option is I'll take it", then Slime cracks up: one
+    // continuous shot on Ludwig (no cut mid-line), centred, hands on hips.
+    // Slime leans in from off the left edge at an angle (torso up only),
+    // laughing behind Ludwig's shoulder.
+    [8.5, 10.75, (ctx, t) => {
       const z = 1.35, sc = S * z, g = GEO.lud;
       const headSx = 590, headSy = Math.max(1080, capBottom() + HEAD_GAP + g.hair * sc);
       const bodySx = headSx - g.offset * sc;                       // body line that puts the head at centre
@@ -373,7 +373,8 @@ Skits.extinct = (() => {
         Cameos.slime(ctx, { t, x: wx - Math.sin(lean) * R, y: wy + Math.cos(lean) * R, s: ss, dir: 1, lean,
           ...E.laughing, open: 0.3 + 0.5 * k, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
       }
-      lud(ctx, { t, ...E.smirk, lid: t >= 9.9 ? 1 : 0.42, lowLid: t >= 9.9 ? 0 : 0.3, brow: t >= 9.9 ? 0.45 : 0.2,
+      lud(ctx, { t, ...E.smirk, ...Ar.both([90, -200], 'out'), lookX: 0.95, pupil: 10,
+                 lid: t >= 9.9 ? 1 : 0.42, lowLid: t >= 9.9 ? 0 : 0.3, brow: t >= 9.9 ? 0.45 : 0.2,
                  ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it"), lean: 0.02 });
       ctx.restore();
       heads.push(headSy - g.hair * sc);

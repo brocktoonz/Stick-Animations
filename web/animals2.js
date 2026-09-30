@@ -82,8 +82,10 @@ const Animals2 = (() => {
   };
   // snarl: a wide dark mouth with fangs top and bottom. up = [back, front]
   // points of the upper jaw, lo = [front, back] of the lower jaw
-  const snarl = (ctx, up, lo, lw, n, size) => {
-    fill(ctx, [...up, ...lo], INK, 0.3);
+  // mouth: fill colour inside (INK, or a grey so there's no black between the teeth)
+  const snarl = (ctx, up, lo, lw, n, size, mouth = INK) => {
+    fill(ctx, [...up, ...lo], mouth, 0.3);
+    if (mouth !== INK) Brush.outline(ctx, [...up, ...lo], { w: lw * 0.6, jit: 0.3, wob: 0.3 });
     fangs(ctx, ...up[0], ...up[1], n, size, lw, 1);
     const [[bx0, by0], [bx1, by1]] = [lo[1], lo[0]], k = 0.22;   // lower row starts further forward, clear of the back upper fang
     fangs(ctx, bx0 + (bx1 - bx0) * k, by0 + (by1 - by0) * k, bx1, by1, n - 1, size * 0.8, lw, -1);
@@ -145,7 +147,7 @@ const Animals2 = (() => {
       ...arm,
     ], '#8a8a8a', lw, 11);
     if (p.snarl) {
-      snarl(ctx, [[120, -272], [236, -290]], [[214, -222], [118, -254]], lw, 5, 22);
+      snarl(ctx, [[120, -272], [236, -290]], [[214, -222], [118, -254]], lw, 5, 22, '#5e5e5e');   // dark grey inside, not black
       for (const dx of [0, 16]) line(ctx, [[178 + dx, -358], [186 + dx, -346]], lw);   // snout wrinkles
     } else if (open > 0.1) jaw(ctx, [[130, -278], [228, -284], [220, -250 + 22 * open], [140, -252 + 18 * open]], true, open);
     else {   // closed: a straight jaw line with fangs poking over it
