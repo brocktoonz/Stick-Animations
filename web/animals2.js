@@ -160,7 +160,7 @@ const Animals2 = (() => {
     const ph = t * 12, wk = !!p.walk, open = p.open ?? 0;
     if (p.snarl) ctx.rotate(0.08);   // lean forward into the snarl
     // enlarged sickle claw: a hooked blade raised off the front of the visible foot
-    const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 14, y - 6], [x + 24, y - 36], [x + 48, y - 46], [x + 62, y - 28]], 26, 1)], col, lw * 0.8, seed);
+    const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 12, y - 4], [x + 18, y - 22], [x + 32, y - 29], [x + 41, y - 18]], 16, 1)], col, lw * 0.8, seed);
     const far = leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 });
     silhouette(ctx, far, '#989898', lw, 20);   // far leg, set well back
     const near = leg(18, -118, 30, ph, wk, { off: 14, knee: 20, foot: 30 }), [fx, fy] = near[1].e;
@@ -255,7 +255,7 @@ const Animals2 = (() => {
       E(100, -104, 24, 26),                                               // snout
       E(58, -156, 18, 28, 0.7),                                           // floppy ear
     ], '#d6d6d6', lw, 71);
-    for (const y of [-112, -96]) blob(ctx, 106, y, 4, 5, { fill: INK, w: 0, n: 6 });
+    for (const [x, y] of [[96, -103], [110, -100]]) blob(ctx, x, y, 4, 5, { fill: INK, w: 0, n: 6 });   // nostrils side by side, tipped slightly
     line(ctx, [[-96, -108], [-118, -116], [-126, -134], [-112, -146], [-102, -134], [-112, -126]], lw);   // corkscrew tail off the rump
     // one wing rooted on the shoulder, fanned up and back, filled like the dodo's wing
     ctx.save(); ctx.translate(0, -122); ctx.rotate(1.15 + flap * 0.3);
