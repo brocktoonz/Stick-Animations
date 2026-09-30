@@ -307,7 +307,7 @@ Skits.extinct = (() => {
       prehistoric(ctx, t);
       // back row: mammoth (left) and T-rex (right), clear of each other; front row: raptor, dodo
       const pops = [[1.8, 225, 0.8, FLOOR - 70, (x, y) => A.mammoth(ctx, { x, y, s: 0.8, t, eyes: 'happy' })],
-                    [2.05, 850, 1.0, FLOOR - 80, (x, y) => A.trex(ctx, { x, y, s: 1.0, t, dir: -1, open: 0.6 * seg(t, 2.3, 2.5) })],
+                    [2.05, 850, 1.0, FLOOR - 80, (x, y) => A.trex(ctx, { x, y, s: 1.0, t, dir: -1, snarl: t > 2.3 })],
                     [2.3, 420, 0.7, FLOOR + 130, (x, y) => A.dodo(ctx, { x, y, s: 0.7, t })],
                     [2.55, 800, 0.7, FLOOR + 150, (x, y) => A.raptor(ctx, { x, y, s: 0.7, t, walk: true })]];
       for (const [t0, x, sc, y, draw] of pops) {
@@ -324,7 +324,8 @@ Skits.extinct = (() => {
       ? { ...E.happy, pointR: -1.2, ...Ar.arm(1, [170, -400], 'down', true), ...talkLine(t, 2) }
       : { ...E.stunned })],
     // Ludwig, smug about it: slow push
-    [4.7, 6.0, (ctx, t) => single(ctx, t, 'lud', { ...E.smirk, lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06, ...Ar.both([112, -176], 'out') }, lerp(1.35, 1.5, easeInOut(seg(t, 4.7, 6.0))), 1160)],
+    [4.7, 6.0, (ctx, t) => single(ctx, t, 'lud', { ...E.smirk, mouth: 'smirk', lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06,
+      ...Ar.arm(1, [-58, -206], 'out', true), ...Ar.arm(-1, [58, -194], 'out', true) }, lerp(1.35, 1.5, easeInOut(seg(t, 4.7, 6.0))), 1160)],
     // "what do you mean other option"
     [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...talkLine(t, 4) })],
     // "give me the other option" (points at him) / "why you don't want that?":

@@ -195,14 +195,14 @@ const Animals2 = (() => {
     const ph = t * 8, wk = !!p.walk, sw = Math.sin(t * 2.5) * 6;
     const fur = [-150, -115, -40, 0, 35].map((x, i) => T([[x, -128], [x - 12, -78 + (i % 2) * 12]], 30, 1));   // belly fringe, clear of the leg gap
     const shag = [[-176, -250], [-186, -200], [-176, -150]].map(([x, y]) => T([[x + 20, y], [x - 16, y + 22]], 30, 1));   // shaggy rump
-    silhouette(ctx, [...leg(-68, -120, 54, ph + Math.PI, wk, { off: -6 }), ...leg(58, -120, 54, ph, wk, { off: 8 })], '#4a4a4a', lw, 30);   // far legs
+    silhouette(ctx, [...leg(-68, -120, 54, ph + Math.PI, wk, { off: -6 }), ...leg(58, -190, 54, ph, wk, { off: 8 })], '#4a4a4a', lw, 30);   // far legs
     silhouette(ctx, [
       ...shag,
       T([[-160, -215], [-196, -190]], 26, 1),                             // tail tuft
       E(-30, -200, 150, 100, -0.14),                                      // body, back sloping down to the tail
       E(70, -250, 95, 88),                                                // shoulder dome
       ...fur,                                                             // shaggy fringe under the belly
-      ...leg(-125, -120, 58, ph, wk, { off: 14, knee: -10 }), ...leg(115, -120, 58, ph + Math.PI, wk, { off: -4 }),
+      ...leg(-125, -120, 58, ph, wk, { off: 14, knee: -10 }), ...leg(115, -190, 58, ph + Math.PI, wk, { off: -4 }),   // front leg rises into the shoulder so it grows out of the body
       E(150, -262, 78, 82),                                               // head
       T([[118, -322], [104, -354]], 34, 1), T([[140, -330], [138, -366]], 38, 1), T([[160, -326], [174, -354]], 32, 1),   // one shaggy crown
       T([[205, -238], [228, -170], [238, -100], [252 + sw, -58], [280 + sw, -52], [288 + sw, -76]], 36, 1),   // trunk hanging below the tusk, curled at the tip
