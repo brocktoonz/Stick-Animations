@@ -142,10 +142,27 @@ Skits.extinct = (() => {
       const [a, b] = [corners[i], corners[(i + 1) % 4]];
       for (let k = 0; k < 8; k++) volcano.push([a[0] + (b[0] - a[0]) * k / 8, a[1] + (b[1] - a[1]) * k / 8]);
     }
+    smoke(ctx, t);   // drawn first so its base tucks behind the crater rim
     fill(ctx, volcano, '#cfcfcf', 0.4); outline(ctx, volcano, { w: 12 });
     palm(ctx, 130, FLOOR, 1.15, t);
     ground(ctx, '#d9d9d9');
     for (const x of [360, 1010]) fern(ctx, x, FLOOR + 14);
+  }
+  // one continuous column of smoke out of the crater: overlapping puffs merged
+  // into a single silhouette (ink grown, then fill), widening as it rises and
+  // leaning a little downwind; the puffs scroll upward so the column churns
+  function smoke(ctx, t) {
+    const n = 18, rise = (t * 0.5) % 1, puffs = [];
+    for (let i = 0; i < n; i++) {
+      const u = (i + rise) / n, r = 30 + u * 34;
+      // rises out of the crater, then bends downwind to the right, into the
+      // open sky beside the captions
+      const x = 752 + 230 * u * u + Math.sin(i * 1.7 + u * 3) * 8 * u, y = 890 - 380 * u + 60 * u * u;
+      puffs.push([x, y, r * (1.05 + hh(i) * 0.2), r * 0.9]);
+    }
+    puffs.push([752, 880, 32, 28]);   // the column's root in the crater
+    for (const [col, g] of [[INK, 11], ['#b9b9b9', 0]])
+      for (const [x, y, rx, ry] of puffs) fill(ctx, Brush.ellipsePts(x, y, rx + g, ry + g, 18), col, g ? 0.8 : 0.4);
   }
   function palm(ctx, x, y, s, t) {
     const trunk = [[x, y], [x + 30 * s, y - 250 * s], [x + 20 * s, y - 470 * s]];
