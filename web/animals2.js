@@ -175,15 +175,15 @@ const Animals2 = (() => {
         T([[118, -206], [202, -164]], 22, 0.3),                           // lower jaw dropped wide
       ] : [
         E(108, -228, 44, 34, -0.1),                                       // head
-        T([[122, -228], [170, -222], [206, -212]], 34, 0.3),              // long snout with a blunt, rounded tip
+        T([[122, -228], [170, -225], [208, -222]], 34, 0.12),             // long snout, level, ending in a blunt rounded tip
       ]),
       T([[62, -140], [88, -122], [98, -132]], 14),                        // little arm
     ], '#a8a8a8', lw, 21);
     if (p.snarl) snarl(ctx, [[132, -234], [212, -242]], [[196, -176], [132, -208]], lw, 4, 20);
     else if (open > 0.1) jaw(ctx, [[128, -222], [200, -210], [192, -198 + 14 * open], [132, -206 + 12 * open]], true, open);
     else {   // closed: jaw line low on the snout with little fangs
-      line(ctx, p.eyes === 'happy' ? [[204, -204], [166, -210], [142, -212], [134, -218]] : [[204, -204], [166, -208], [134, -214]], lw);
-      fangs(ctx, 144, -210, 198, -205, 3, 12, lw);
+      line(ctx, p.eyes === 'happy' ? [[212, -212], [166, -212], [142, -213], [134, -219]] : [[212, -212], [166, -212], [120, -214]], lw);   // runs back under the eye
+      fangs(ctx, 136, -213, 208, -212, 5, 12, lw);
     }
     // enlarged sickle claw: a hooked toe claw raised on the visible foot
     claw([fx, fy], '#5a5a5a', 29);
