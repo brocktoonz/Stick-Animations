@@ -255,7 +255,7 @@ const Animals2 = (() => {
       E(100, -104, 24, 26),                                               // snout
       E(58, -156, 18, 28, 0.7),                                           // floppy ear
     ], '#d6d6d6', lw, 71);
-    for (const [x, y] of [[96, -103], [110, -100]]) blob(ctx, x, y, 4, 5, { fill: INK, w: 0, n: 6 });   // nostrils side by side, tipped slightly
+    for (const [x, y] of [[110, -103], [120, -100]]) blob(ctx, x, y, 3, 4.5, { fill: INK, w: 0, n: 6 });   // nostrils side by side, tipped slightly
     line(ctx, [[-96, -108], [-118, -116], [-126, -134], [-112, -146], [-102, -134], [-112, -126]], lw);   // corkscrew tail off the rump
     // one wing rooted on the shoulder, fanned up and back, filled like the dodo's wing
     ctx.save(); ctx.translate(0, -122); ctx.rotate(1.15 + flap * 0.3);
