@@ -325,7 +325,7 @@ Skits.extinct = (() => {
       : { ...E.stunned })],
     // Ludwig, smug about it: slow push
     [4.7, 6.0, (ctx, t) => single(ctx, t, 'lud', { ...E.smirk, mouth: 'smirk', lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06,
-      ...Ar.arm(1, [-58, -206], 'out', true), ...Ar.arm(-1, [58, -194], 'out', true) }, lerp(1.35, 1.5, easeInOut(seg(t, 4.7, 6.0))), 1160)],
+      crossArms: true }, lerp(1.35, 1.5, easeInOut(seg(t, 4.7, 6.0))), 1160)],
     // "what do you mean other option"
     [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...talkLine(t, 4) })],
     // "give me the other option" (points at him) / "why you don't want that?":
@@ -405,8 +405,8 @@ Skits.extinct = (() => {
       // a small raptor wanders in on its own from the left (separate from the
       // new animals behind him), stops at his foot, and gets punted
       const walk = seg(t, 16.1, 16.9), dinoX = lerp(-160, 480, walk);   // stops with its snout at his toe
-      if (fly === 0) { shadow(ctx, dinoX, 55, FLOOR + 6); A.raptor(ctx, { x: dinoX, y: FLOOR, s: 0.55, t, walk: walk > 0 && walk < 1, eyes: kick > 0.5 ? 'blank' : 'normal', lookX: 1, lookY: -1 }); }
-      else if (fly < 1) A.raptor(ctx, { x: lerp(480, -300, fly), y: FLOOR - 900 * 4 * fly * (1 - fly * 0.7), s: 0.55, t, rot: -fly * 8, eyes: 'blank' });
+      if (fly === 0) { shadow(ctx, dinoX, 55, FLOOR + 6); A.raptor(ctx, { x: dinoX, y: FLOOR, s: 0.55, t, walk: walk > 0 && walk < 1, eyes: 'normal', lookX: 1, lookY: -1 }); }
+      else if (fly < 1) A.raptor(ctx, { x: lerp(480, -300, fly), y: FLOOR - 900 * 4 * fly * (1 - fly * 0.7), s: 0.55, t, rot: -fly * 8, lookX: -1 });
       ctx.restore();
       heads.push(headTop + dy);
     }],
@@ -425,8 +425,8 @@ Skits.extinct = (() => {
       ctx.save(); cam(ctx, NX - (sx - 540) / z, FLOOR - GEO.nick.head * S, z, sy);
       stage(ctx);
       const k = seg(t, 19.7, 19.95);
-      const rs = 1.25, headWx = NX - (sx - 540) / z + (870 - 540) / z;
-      if (k > 0) A.raptor(ctx, { x: headWx + 70 * rs, y: FLOOR - 170, s: rs * easeOutBack(k), t, dir: -1, rot: -0.55, snarl: t > 19.9 });   // rears up, jaw over his shoulder
+      const rs = 1.1, headWx = NX - (sx - 540) / z + (870 - 540) / z;
+      if (k > 0) A.raptor(ctx, { x: headWx + 70 * rs - 60, y: FLOOR - 170, s: rs * easeOutBack(k), t, dir: -1, rot: -0.55, snarl: t > 19.9 });   // rears up, jaw over his shoulder
       nick(ctx, t < 19.75 ? { t, ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 17) }
                           : { t, ...E.excited, ...Ar.both([175, -236], 'down'), ...talkLine(t, 18) });
       ctx.restore();

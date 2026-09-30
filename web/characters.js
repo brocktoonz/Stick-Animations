@@ -12,6 +12,7 @@
 //   viz        LipSync shape, used when mouth === 'talk' (see Stage.say)
 //   armL/armR  hand target [x,y] in the character's local space (default: at sides)
 //   bendL/R    elbow bend   pointR  finger direction or null
+//   crossArms  arms folded across the chest (overrides armL/armR)
 //   armLFront/armRFront  draw that arm in front of the head (hand on face etc.);
 //              by default arms go behind the head, which sits on the shoulders
 //   holdR(ctx, x, y)  draws a prop at the right hand (before the hand, so it grips it)
@@ -546,8 +547,22 @@ const Chars = (() => {
       hold?.(ctx, hnd[0], hnd[1]);
       hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W);
     };
-    if (!p.armLFront) arm(-1, p.armL, p.bendL, null, p.holdL);
-    if (!p.armRFront) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
+    if (p.crossArms) {
+      // arms folded: upper arms down the sides to the elbows, forearms across
+      // the chest, the right one over the left, fists peeking out at each end
+      const elY = neckY + S.shY + (hipY - neckY) * 0.42;
+      for (const side of [-1, 1]) {
+        const sh = [side * S.shX, neckY + S.shY], el = [side * (S.shX + S.armW * 0.5), elY];
+        const hd = [-side * S.shX * 0.75, elY + (side < 0 ? 6 : -14)];
+        tube(ctx, sh, el, side * -0.08, S.armW, S.armFill ?? W, darkTorso);
+        if (S.sleeveHem) sleeveHem(ctx, sh, el, side * -0.08, S.armW, S.sleeveHem);
+        tube(ctx, el, hd, side * 0.05, S.armW, S.armFill ?? W, darkTorso);
+        hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);
+      }
+    } else {
+      if (!p.armLFront) arm(-1, p.armL, p.bendL, null, p.holdL);
+      if (!p.armRFront) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
+    }
 
     ctx.save();
     const jaw = p.mouth === 'talk' && p.viz ? p.viz.open ?? 0 : 0;
@@ -556,8 +571,8 @@ const Chars = (() => {
     S.head(ctx, p);
     ctx.restore();
 
-    if (p.armLFront) arm(-1, p.armL, p.bendL, null, p.holdL);
-    if (p.armRFront) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
+    if (p.armLFront && !p.crossArms) arm(-1, p.armL, p.bendL, null, p.holdL);
+    if (p.armRFront && !p.crossArms) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
     ctx.restore();
   }
 
