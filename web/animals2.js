@@ -249,8 +249,6 @@ const Animals2 = (() => {
     const flap = Math.sin(t * 22), hover = Math.sin(t * 6) * 12;
     ctx.translate(0, -60 + hover);
     silhouette(ctx, [...leg(-30, -60, 26, 0, false, { off: -14 }), ...leg(58, -60, 26, 0, false, { off: 4 })], '#b8b8b8', lw, 70);   // far legs
-    // p.wing2 (preview): a full-weight corkscrew tail in the body grey, tucked into the rump
-
     silhouette(ctx, [
       ...leg(-55, -60, 26, 0, false, { off: 4, knee: -6 }), ...leg(34, -60, 26, 0, false, { off: 14 }),
       E(0, -100, 100, 62),                                                // body
@@ -258,23 +256,17 @@ const Animals2 = (() => {
       E(58, -156, 18, 28, 0.7),                                           // floppy ear
     ], '#d6d6d6', lw, 71);
     for (const [x, y] of [[110, -103], [120, -100]]) blob(ctx, x, y, 3, 4.5, { fill: INK, w: 0, n: 6 });   // nostrils side by side, tipped slightly
-    if (p.wing2) {   // preview: a bold ink corkscrew at outline weight, about 1.5 turns out of the rump
-      const tail = [];
-      for (let k = 0; k <= 18; k++) { const a = -k * (Math.PI * 3 / 18), r = 16 - k * 0.6; tail.push([-112 + Math.cos(a) * r, -126 + Math.sin(a) * r]); }
-      stroke(ctx, tail, { w: lw * 0.9, taper0: 0, taper1: 0.15 });
-    } else line(ctx, [[-96, -108], [-118, -116], [-126, -134], [-112, -146], [-102, -134], [-112, -126]], lw);   // corkscrew tail off the rump
-    // one wing rooted on the shoulder, fanned up and back, filled like the dodo's wing
-    ctx.save(); ctx.translate(0, -122);
-    if (p.wing2) {   // preview: swept back, four feather tips on the trailing edge, full outline weight
-      ctx.rotate(0.95 + flap * 0.3);
-      silhouette(ctx, [
-        E(-52, 0, 58, 22),
-        E(-30, 24, 14, 20, 0.2), E(-58, 28, 15, 21, 0.35), E(-86, 24, 15, 20, 0.55), E(-110, 12, 14, 18, 0.8),   // rounded feather lobes
-      ], '#a8a8a8', lw, 61);
-    } else {
-      ctx.rotate(1.15 + flap * 0.3);
-      silhouette(ctx, [E(-56, 0, 62, 26), E(-104, 16, 20, 15), E(-76, 23, 20, 15), E(-48, 22, 18, 14)], '#b4b4b4', lw * 0.5, 61);
-    }
+    // corkscrew tail: about 1.5 turns out of the rump, a skinny line so the curl reads
+    const tail = [];
+    for (let k = 0; k <= 48; k++) { const a = -k * (Math.PI * 3 / 48), r = 24 - k * 0.3; tail.push([-116 + Math.cos(a) * r, -126 + Math.sin(a) * r]); }
+    stroke(ctx, tail, { w: lw * 0.5, taper0: 0, taper1: 0.2, step: 2, jit: 0.3, wob: 0.3 });
+    // one wing rooted on the shoulder, swept back, four rounded feather lobes
+    // on the trailing edge, the dodo wing's grey at full outline weight
+    ctx.save(); ctx.translate(0, -122); ctx.rotate(1.1 + flap * 0.25);
+    silhouette(ctx, [
+      E(-52, 0, 58, 22),
+      E(-30, 24, 14, 20, 0.2), E(-58, 28, 15, 21, 0.35), E(-86, 24, 15, 20, 0.55), E(-110, 12, 14, 18, 0.8),
+    ], '#a8a8a8', lw, 61);
     ctx.restore();
     eye(ctx, p.eyes === 'happy' ? 58 : 64, p.eyes === 'happy' ? -116 : -126, 20, p, lw, 0.95, 0.9);   // happy arc sits lower, clear of the ear
   });
