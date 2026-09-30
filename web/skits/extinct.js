@@ -372,7 +372,7 @@ Skits.extinct = (() => {
         const [wx, wy] = toWorld(hx, hy), R = 438 * ss;
         Cameos.slime(ctx, { t, x: wx - Math.sin(lean) * R, y: wy + Math.cos(lean) * R, s: ss, dir: 1, lean,
           ...E.laughing, /* Duck Hunt dog chuckle: near hand over his mouth, far hand on his belly */
-          ...Ar.arm(1, [34, -368], 'down', true), ...Ar.arm(-1, [14, -196], 'down'), mouth: 'bigsmile', mouthScale: 1.35, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
+          ...Ar.arm(1, [34, -368], 'down', true), ...Ar.arm(-1, [4, -130], 'down'), mouth: 'bigsmile', mouthScale: 1.35, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
       }
       lud(ctx, { t, ...E.smirk, ...Ar.both([90, -200], 'out'), lookX: 0.95, pupil: 10,
                  lid: t >= 9.9 ? 1 : 0.42, lowLid: t >= 9.9 ? 0 : 0.3, brow: t >= 9.9 ? 0.45 : 0.2,
