@@ -555,7 +555,7 @@ const Chars = (() => {
         const sh = [side * S.shX, neckY + S.shY], el = [side * (S.shX + S.armW * 0.5), elY];
         const hd = [-side * S.shX * 0.75, elY + (side < 0 ? 6 : -14)];
         tube(ctx, sh, el, side * -0.08, S.armW, S.armFill ?? W, darkTorso);
-        if (S.sleeveHem) sleeveHem(ctx, sh, el, side * -0.08, S.armW, S.sleeveHem);
+        if (S.sleeveHem) sleeveHem(ctx, sh, el, side * -0.08, S.armW, Math.min(0.8, S.sleeveHem * 2));   // this segment is the upper arm only
         tube(ctx, el, hd, side * 0.05, S.armW, S.armFill ?? W, darkTorso);
         hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);
       }

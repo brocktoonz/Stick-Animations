@@ -139,8 +139,8 @@ with `?skit=animals2_sheet`).
   grey, full outline) and skinny natural corkscrew tail; the long cat's neck.
 - Predators are cute by default but always show teeth on the jaw line, and
   have a `snarl: true` state (angry brow, dropped jaw, fangs top and bottom)
-  for scare beats. The T-rex's open mouth is dark grey inside, never solid black
-  between the teeth. Use `snarl` whenever a predator opens its mouth; the old
+  for scare beats. The T-rex's open mouth is cut out of its silhouette, so the
+  background shows between the teeth: no black or grey fill in there. Use `snarl` whenever a predator opens its mouth; the old
   `open:` wedge inside a closed head looks wrong.
 - Legs grow out of the body: the top of each leg sits inside the body or
   shoulder, never a separate oval hanging under it. The raptor's snout is blunt and rounded, never a beak.

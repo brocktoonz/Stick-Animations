@@ -217,7 +217,7 @@ const Cameos = (() => {
 
   // Ludwig: light-grey blond swoop, short-sleeved pineapple shirt.
   const ludwig = build({
-    shirt: W, sleeveHem: 0.42,
+    shirt: W, sleeveHem: 0.24,   // halfway down the upper arm, clear of the elbow
     body: { hipY: -172, neckY: -352, legW: 21, footX: 18, hipX: 20, torso: (n, h) => [[-42, n], [42, n], [56, n + 60], [58, h - 4], [-58, h - 4], [-56, n + 60]] },
     headScale: [0.92, 1.06],
     head: head({ hair: swoop() }),

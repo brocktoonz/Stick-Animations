@@ -132,6 +132,14 @@ const Animals2 = (() => {
       T([[152, ay - 2], [178, ay - 12]], 12, 1), T([[152, ay + 8], [176, ay + 22]], 12, 1),   // two claw points
     ];
     silhouette(ctx, leg(-45, -120, 60, ph + Math.PI, wk, { off: -30, knee: 14, foot: 42 }), '#7c7c7c', lw, 10);   // far leg
+    // snarling: the mouth is cut out of the silhouette, so the background
+    // shows between the teeth (no black or grey fill in there)
+    const mUp = [[120, -272], [236, -290]], mLo = [[214, -222], [118, -254]];
+    if (p.snarl) {
+      ctx.save(); ctx.beginPath(); ctx.rect(-2000, -2000, 4000, 4000);
+      const mp = Brush.spline([...mUp, ...mLo], true, 4); ctx.moveTo(...mp[0]); mp.forEach(q => ctx.lineTo(...q)); ctx.closePath();
+      ctx.clip('evenodd');
+    }
     silhouette(ctx, [
       T([[-60, -190], [-190, -190], [-300, -150]], 90, 1),               // tail
       E(0, -195, 125, 100, -0.25),                                        // body
@@ -147,7 +155,10 @@ const Animals2 = (() => {
       ...arm,
     ], '#8a8a8a', lw, 11);
     if (p.snarl) {
-      snarl(ctx, [[120, -272], [236, -290]], [[214, -222], [118, -254]], lw, 5, 22, '#5e5e5e');   // dark grey inside, not black
+      ctx.restore();
+      Brush.outline(ctx, [...mUp, ...mLo], { w: lw * 1.2, jit: 0.3, wob: 0.3 });   // lips: the silhouette outline carried round the cut-out
+      fangs(ctx, ...mUp[0], ...mUp[1], 5, 22, lw, 1);
+      fangs(ctx, mLo[1][0] + (mLo[0][0] - mLo[1][0]) * 0.22, mLo[1][1] + (mLo[0][1] - mLo[1][1]) * 0.22, ...mLo[0], 4, 17.6, lw, -1);
       for (const dx of [0, 16]) line(ctx, [[178 + dx, -358], [186 + dx, -346]], lw);   // snout wrinkles
     } else if (open > 0.1) jaw(ctx, [[130, -278], [228, -284], [220, -250 + 22 * open], [140, -252 + 18 * open]], true, open);
     else {   // closed: a straight jaw line with fangs poking over it
