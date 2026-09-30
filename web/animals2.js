@@ -182,13 +182,13 @@ const Animals2 = (() => {
     if (p.snarl) snarl(ctx, [[132, -234], [212, -242]], [[196, -176], [132, -208]], lw, 4, 20);
     else if (open > 0.1) jaw(ctx, [[128, -222], [200, -210], [192, -198 + 14 * open], [132, -206 + 12 * open]], true, open);
     else {   // closed: jaw line low on the snout with little fangs
-      line(ctx, [[204, -204], [166, -208], [134, -214], ...(p.eyes === 'happy' ? [[124, -222], [122, -232]] : [])], lw);
+      line(ctx, [[204, -204], [166, -208], [134, -214], ...(p.eyes === 'happy' ? [[126, -221]] : [])], lw);
       fangs(ctx, 144, -210, 198, -205, 3, 12, lw);
     }
     // enlarged sickle claw: a hooked toe claw raised on the visible foot
     claw([fx, fy], '#5a5a5a', 29);
     marks(ctx, -20, -185, 2, 26, lw);
-    eye(ctx, p.snarl ? 96 : p.eyes === 'happy' ? 104 : 102, p.snarl ? -246 : p.eyes === 'happy' ? -228 : -238, 22, p, lw, 0.8, 0.9);
+    eye(ctx, p.snarl ? 96 : p.eyes === 'happy' ? 104 : 102, p.snarl ? -246 : p.eyes === 'happy' ? -228 : -238, 22, p, lw, 0.85, 0.7);
   });
 
   const mammoth = (ctx, p) => place(ctx, p, (lw, t) => {
@@ -261,7 +261,7 @@ const Animals2 = (() => {
     ctx.save(); ctx.translate(0, -122); ctx.rotate(1.15 + flap * 0.3);
     silhouette(ctx, [E(-56, 0, 62, 26), E(-104, 16, 20, 15), E(-76, 23, 20, 15), E(-48, 22, 18, 14)], '#b4b4b4', lw * 0.5, 61);
     ctx.restore();
-    eye(ctx, 64, -126, 20, p, lw);
+    eye(ctx, p.eyes === 'happy' ? 58 : 64, p.eyes === 'happy' ? -116 : -126, 20, p, lw, 0.95, 0.9);   // happy arc sits lower, clear of the ear
   });
 
   const longCat = (ctx, p) => place(ctx, p, (lw, t) => {
