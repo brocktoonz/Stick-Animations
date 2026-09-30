@@ -403,9 +403,9 @@ Skits.extinct = (() => {
                  step, lean: -0.1 * kick * (1 - fly) + 0.05 * wind, ...(t > 16.98 ? { weight: 0 } : {}) });
       // a small raptor wanders in on its own from the left (separate from the
       // new animals behind him), stops at his foot, and gets punted
-      const walk = seg(t, 16.1, 16.9), dinoX = lerp(-160, 400, walk);
+      const walk = seg(t, 16.1, 16.9), dinoX = lerp(-160, 480, walk);   // stops with its snout at his toe
       if (fly === 0) { shadow(ctx, dinoX, 55, FLOOR + 6); A.raptor(ctx, { x: dinoX, y: FLOOR, s: 0.55, t, walk: walk > 0 && walk < 1, eyes: kick > 0.5 ? 'blank' : 'normal', lookX: 1, lookY: -1 }); }
-      else if (fly < 1) A.raptor(ctx, { x: lerp(400, -300, fly), y: FLOOR - 900 * 4 * fly * (1 - fly * 0.7), s: 0.55, t, rot: -fly * 8, eyes: 'blank' });
+      else if (fly < 1) A.raptor(ctx, { x: lerp(480, -300, fly), y: FLOOR - 900 * 4 * fly * (1 - fly * 0.7), s: 0.55, t, rot: -fly * 8, eyes: 'blank' });
       ctx.restore();
       heads.push(headTop + dy);
     }],
@@ -425,7 +425,7 @@ Skits.extinct = (() => {
       stage(ctx);
       const k = seg(t, 19.7, 19.95);
       const rs = 1.25, headWx = NX - (sx - 540) / z + (870 - 540) / z;
-      if (k > 0) A.raptor(ctx, { x: headWx + 100 * rs, y: FLOOR - 40, s: rs * easeOutBack(k), t, dir: -1, rot: -0.4, snarl: t > 19.9 });   // rears up, jaw over his shoulder
+      if (k > 0) A.raptor(ctx, { x: headWx + 70 * rs, y: FLOOR - 170, s: rs * easeOutBack(k), t, dir: -1, rot: -0.55, snarl: t > 19.9 });   // rears up, jaw over his shoulder
       nick(ctx, t < 19.75 ? { t, ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 17) }
                           : { t, ...E.excited, ...Ar.both([175, -236], 'down'), ...talkLine(t, 18) });
       ctx.restore();
