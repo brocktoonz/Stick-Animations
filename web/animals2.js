@@ -125,7 +125,7 @@ const Animals2 = (() => {
     const ph = t * 10, wk = !!p.walk, open = p.open ?? 0;
     // uselessly tiny arm high on the chest, just under the jaw (a little lower
     // when snarling so the claws stay clear of the dropped jaw)
-    const ay = p.snarl ? -152 : -186, arm = [
+    const ay = p.snarl ? -148 : -168, arm = [
       T([[118, ay], [156, ay + 6]], 18),                                  // stub
       T([[152, ay - 2], [178, ay - 12]], 12, 1), T([[152, ay + 8], [176, ay + 22]], 12, 1),   // two claw points
     ];
@@ -188,7 +188,7 @@ const Animals2 = (() => {
     // enlarged sickle claw: a hooked toe claw raised on the visible foot
     claw([fx, fy], '#5a5a5a', 29);
     marks(ctx, -20, -185, 2, 26, lw);
-    eye(ctx, p.snarl ? 96 : 102, p.snarl ? -246 : p.eyes === 'happy' ? -230 : -238, 22, p, lw, 0.95, 0.7);
+    eye(ctx, p.snarl ? 96 : p.eyes === 'happy' ? 104 : 102, p.snarl ? -246 : p.eyes === 'happy' ? -228 : -238, 22, p, lw, 0.8, 0.9);
   });
 
   const mammoth = (ctx, p) => place(ctx, p, (lw, t) => {
