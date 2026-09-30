@@ -5,6 +5,10 @@ particular: never animate a mouth (or anything expressive) on a sine wave or
 fixed beat. Speech uses `Stage.say`; wordless sounds use `Stage.loud` with an
 envelope baked by `scripts/envelope.py`.
 
+Animals always use the flat house style in `web/animals2.js` (`Animals2`); see
+the Animals section of `STYLE.md` and `characters/animals/sheet.png`. Don't use
+the legacy `web/animals.js` for new work.
+
 Render stills to check work: `NODE_PATH=$(npm root -g) node scripts/export.cjs <skit> <dir> <frames...> [--safe]`.
 
 ## Mandatory review loop (every session, every render)

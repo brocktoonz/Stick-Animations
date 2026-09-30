@@ -27,3 +27,10 @@ the folders:
 
 To add a character, add it to `CAST` in `web/skits/emotions.js` and
 `scripts/emotion_sheets.py`.
+
+## Animals
+
+`animals/sheet.png` is the approved look sheet for the house animal style
+(`Animals2` in `web/animals2.js`): neutral, happy and snarl. Re-render it
+from `?skit=animals2_sheet` after changing an animal. The rules are in the
+Animals section of `STYLE.md`.

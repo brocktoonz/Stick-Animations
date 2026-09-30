@@ -288,5 +288,7 @@ const Animals2 = (() => {
     marks(ctx, -30, -112, 3, 20, lw, '#5a5a5a');
   });
 
-  return { raptor, trex, mammoth, dodo, fishLegs, wingPig, longCat };
+  // the meteor is a prop, not an animal: it still comes from animals.js
+  const meteor = (...a) => Animals.meteor(...a);
+  return { raptor, trex, mammoth, dodo, fishLegs, wingPig, longCat, meteor };
 })();

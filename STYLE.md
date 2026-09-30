@@ -106,6 +106,40 @@ disagree, the rule wins.
 - Nobody stands dead still: breathing, a lean toward whoever they're talking
   to, head tilts that change (and hold) through a line.
 - Shadows are flat ink shapes under feet. No soft fades or blurs anywhere.
+- Props use the characters' line weight, and sets use outlines of at least
+  ~9 px. (Animals: see the Animals section.)
+- Repeated set details (grass, planks, bulbs) vary in spacing and size.
+- Clouds and other soft shapes are unions of round puffs outlined with the
+  brush, never polygons.
+- Anything drawn behind a head (back hair, hoods) squashes and stretches
+  with it, so no fill shows past the outline.
+
+## Animals
+
+Every animal uses the flat house style in `web/animals2.js` (`Animals2`),
+approved by the user and modelled on Jaiden Animations' cat Tostada. The
+older line-heavy `web/animals.js` (`Animals`) is legacy: don't use it for new
+animals, except `Animals.meteor`, which `Animals2.meteor` reuses. Reference
+look sheet: `characters/animals/sheet.png` (neutral, happy, snarl; re-render
+with `?skit=animals2_sheet`).
+
+- One silhouette per animal: flat grey fill and ONE thick outline around the
+  whole shape (the `silhouette()` helper: parts drawn grown in ink, then
+  filled on top, so overlaps merge). No interior lines except a few accents.
+- Line weight matches the cast (`place()` keeps ~13 px on screen at any
+  scale). Tapered parts (tails, trunk, ears) keep the full outline to a
+  rounded tip.
+- Big round eyes, a big pupil and a white highlight; happy is a `^` arc. A
+  tiny `:3` mouth on the cute ones. Only a couple of soft spot accents.
+- Stubby rounded legs with a weight shift; far-side legs drawn behind in a
+  slightly darker grey.
+- Each animal keeps one or two signature features big and obvious: mammoth's
+  tusk sweeping up and out past the trunk plus a shaggy crown and fringe; the
+  dodo's hooked pale beak and tail plumes; the pig's feathered wing (dodo-wing
+  grey, full outline) and skinny natural corkscrew tail; the long cat's neck.
+- Predators are cute by default but always show teeth on the jaw line, and
+  have a `snarl: true` state (angry brow, dropped jaw, fangs top and bottom)
+  for scare beats. The raptor's snout is blunt and rounded, never a beak.
 - T-rex arms are tiny stubs set high on the chest, just under the jaw, with
   two small claw points: comically useless, never an elbow or a hand. Keep a
   clear gap between the claws and the jaw, snarling included.
@@ -116,13 +150,6 @@ disagree, the rule wins.
 - All animals use the shared single big eye (`eye()` in `web/animals2.js`:
   white, one ink ring, big pupil, highlight). Animals facing the viewer get
   two of the same eye, not smaller or double-ringed ones.
-- Animals and props use the characters' line weight (`web/animals.js` scales
-  it automatically), and sets use outlines of at least ~9 px.
-- Repeated set details (grass, planks, bulbs) vary in spacing and size.
-- Clouds and other soft shapes are unions of round puffs outlined with the
-  brush, never polygons.
-- Anything drawn behind a head (back hair, hoods) squashes and stretches
-  with it, so no fill shows past the outline.
 
 ## Captions
 

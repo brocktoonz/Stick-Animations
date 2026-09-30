@@ -5,7 +5,7 @@
 Skits.extinct = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { seg, lerp, easeOut, easeInOut, easeOutBack, say, loud, blink, shake, burst, clamp } = Stage;
-  const A = Animals, E = Emotions, W = '#fff';
+  const A = Animals2, E = Emotions, W = '#fff';
   const FLOOR = 1680, S = 1.45;
   const NICK = '#4f9be8', LUD = '#ffffff', SLIME = '#4fd34f';
 
@@ -424,8 +424,8 @@ Skits.extinct = (() => {
       ctx.save(); cam(ctx, NX - (sx - 540) / z, FLOOR - GEO.nick.head * S, z, sy);
       stage(ctx);
       const k = seg(t, 19.7, 19.95);
-      const rs = 2.4, headWx = NX - (sx - 540) / z + (870 - 540) / z;
-      if (k > 0) A.raptor(ctx, { x: headWx + 150 * rs, y: FLOOR + 20, s: rs * easeOutBack(k), t, dir: -1, open: t > 19.9 ? 0.8 : 0 });
+      const rs = 1.5, headWx = NX - (sx - 540) / z + (870 - 540) / z;
+      if (k > 0) A.raptor(ctx, { x: headWx + 90 * rs, y: FLOOR - 40, s: rs * easeOutBack(k), t, dir: -1, rot: -0.4, snarl: t > 19.9 });   // rears up, jaw over his shoulder
       nick(ctx, t < 19.75 ? { t, ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 17) }
                           : { t, ...E.excited, ...Ar.both([175, -236], 'down'), ...talkLine(t, 18) });
       ctx.restore();
