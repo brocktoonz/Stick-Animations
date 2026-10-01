@@ -140,7 +140,7 @@ Skits.powernap = (() => {
     [0, 2.55, (ctx, t) => {
       const ang = 0.85 + 0.06 * easeInOut(seg(t, 2.15, 2.5));
       const [hx, hy] = frame(CFX, CFY, ang)(HEAD * CS, 0);
-      ctx.save(); cam(ctx, hx - 110, hy + 60, lerp(1.12, 1.18, easeInOut(seg(t, 0, 2.55))), 470, 1080);
+      ctx.save(); cam(ctx, hx - 110, hy + 60, lerp(1.12, 1.18, easeInOut(seg(t, 0, 2.55))), 470, 1170);
       bedClose(ctx);
       const pose = t > 2.2 ? slack(clamp(0.6 + 0.5 * loud('powernap', t), 0.6, 1), 0.3)
                            : { ...tired, lid: Math.max(tired.lid, blink(t, 2.7, 0.3)), lookX: 0.3, lookY: -0.3, tilt: -0.1,
