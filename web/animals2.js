@@ -178,6 +178,15 @@ const Animals2 = (() => {
     const far = leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 });
     silhouette(ctx, far, '#989898', lw, 20);   // far leg, set well back
     const near = leg(18, -118, 30, ph, wk, { off: 14, knee: 20, foot: 30 }), [fx, fy] = near[1].e;
+    // snarling: the mouth is cut out of the silhouette like the T-rex's, so the
+    // background shows between the teeth, with ink only along the two jaws
+    const mUp = [[132, -234], [212, -242]], mLo = [[196, -176], [132, -208]];
+    if (p.snarl) {
+      const cut = [[124, -236], [212, -242], [252, -252], [238, -150], [196, -176], [122, -210]];   // runs out past the jaw tips, so the mouth is open at the front
+      ctx.save(); ctx.beginPath(); ctx.rect(-2000, -2000, 4000, 4000);
+      ctx.moveTo(...cut[0]); cut.forEach(q => ctx.lineTo(...q)); ctx.closePath();
+      ctx.clip('evenodd');
+    }
     silhouette(ctx, [
       T([[-40, -155], [-150, -168], [-250, -160]], 44, 1),                // long straight tail
       E(0, -150, 82, 42, -0.08),                                          // level body
@@ -193,8 +202,12 @@ const Animals2 = (() => {
       ]),
       T([[62, -140], [88, -122], [98, -132]], 14),                        // little arm
     ], '#a8a8a8', lw, 21);
-    if (p.snarl) snarl(ctx, [[132, -234], [212, -242]], [[196, -176], [132, -208]], lw, 4, 20);
-    else if (open > 0.1) jaw(ctx, [[128, -222], [200, -210], [192, -198 + 14 * open], [132, -206 + 12 * open]], true, open);
+    if (p.snarl) {
+      ctx.restore();
+      for (const lip of [mUp, [mLo[1], mLo[0]]]) stroke(ctx, lip, { w: lw * 0.9, taper0: 0.5, taper1: 0, minW: 1, jit: 0.3, wob: 0.3 });
+      fangs(ctx, ...mUp[0], ...mUp[1], 4, 20, lw, 1);
+      fangs(ctx, mLo[1][0] + (mLo[0][0] - mLo[1][0]) * 0.22, mLo[1][1] + (mLo[0][1] - mLo[1][1]) * 0.22, ...mLo[0], 3, 16, lw, -1);
+    } else if (open > 0.1) jaw(ctx, [[128, -222], [200, -210], [192, -198 + 14 * open], [132, -206 + 12 * open]], true, open);
     else {   // closed: jaw line low on the snout with little fangs
       line(ctx, p.eyes === 'happy' ? [[212, -212], [166, -212], [142, -213], [134, -219]] : [[212, -212], [166, -212], [120, -214]], lw);   // runs back under the eye
       fangs(ctx, 136, -213, 208, -212, 5, 12, lw);

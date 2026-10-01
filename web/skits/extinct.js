@@ -427,11 +427,11 @@ Skits.extinct = (() => {
         const k = loud('extinct', REAL), slide = easeOut(seg(t, 9.8, 10.25)), lean = 0.55, ss = S * 0.8;   // leans in steeply and eases in, no pop   // smaller: further back
         // Slime's head centre on screen: slides in from off the left edge,
         // face just clear of Ludwig's head
-        const hx = lerp(-300, 215, slide), hy = headSy - 10;   // head up beside Ludwig's, body off the left edge   // high enough that Ludwig's hip arm stays below his mouth
+        const hx = lerp(-300, 185, slide), hy = headSy - 10;   // head up beside Ludwig's, body off the left edge   // high enough that Ludwig's hip arm stays below his mouth
         const [wx, wy] = toWorld(hx, hy), R = 438 * ss;
         Cameos.slime(ctx, { t, x: wx - Math.sin(lean) * R, y: wy + Math.cos(lean) * R, s: ss, dir: 1, lean,
           ...E.laughing, /* Duck Hunt dog chuckle: near hand over his mouth, far hand on his belly */
-          ...Ar.arm(1, [-10, -335], 'out', true), ...Ar.arm(-1, [4, -130], 'down'), open: 0.3 + 0.2 * k, mouthScale: 1.05, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
+          ...Ar.arm(1, [-26, -362], 'out', true), ...Ar.arm(-1, [4, -130], 'down'), open: 0.3 + 0.2 * k, mouthScale: 1.05, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
       }
       lud(ctx, { t, ...E.smirk, ...Ar.both([90, -200], 'out'), lookX: 0.95, pupil: 10,
                  lid: t >= 9.9 ? 1 : 0.42, lowLid: t >= 9.9 ? 0 : 0.3, brow: t >= 9.9 ? 0.45 : 0.2,
@@ -528,7 +528,7 @@ Skits.extinct = (() => {
       A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 0.7, t, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
       A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 0.68, t: t + 0.3, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
       const m = seg(t, 22.2, hit);
-      if (m > 0 && m < 1) A.meteor(ctx, lerp(-12, 555, m), lerp(1032, FLOOR - 40, m), lerp(60, 150, m), t);   // in from the left edge below the caption, down the gap between them
+      if (m > 0 && m < 1) A.meteor(ctx, lerp(150, 555, m), lerp(900, FLOOR - 40, m), lerp(60, 150, m), t);   // steep, from beside the caption down the gap between them, clear of both heads
       ctx.restore();
     }],
     // aftermath: just the crater, both raptors gone
