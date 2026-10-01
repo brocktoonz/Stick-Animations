@@ -26,7 +26,7 @@ const Cameos = (() => {
       hipY: -150, neckY: -320, headUp: 118, legTop: 30, hipX: 26, footX: 28, stride: 36, lift: 26,
       legW: 24, shoeRx: 34, shX: 56, shY: 34, restX: 104, restY: 16, armW: 24, handS: 1,
       skin: o.skin ?? W, armFill: o.sleeve ?? o.skin ?? W,
-      sleeveHem: o.sleeveHem,
+      sleeveHem: o.sleeveHem, sleeveFill: o.sleeveFill,
       head: o.head,
       behind: o.behind,
       bottoms: (ctx, hipY) => fill(ctx, [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56],
@@ -1051,5 +1051,151 @@ const Cameos = (() => {
     beard: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', sleeveHem: 0.42, head: head({ hair: shaggy, beard: fullBeard }), detail: collarTee }),
   };
 
-  return { speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  // ---------- Squeex: three drafts (not used in any video yet) ----------
+  // Short near-black hair with the temples set back, a full short beard (a
+  // shade lighter than the hair) with a thin moustache lifted off the mouth,
+  // and a big grin. Light-grey skin (the cameos stay grayscale). Each draft
+  // leans on a different signature item from the photos.
+  const SQ_HAIR = '#2b2b2b', SQ_LINE = '#5e5e5e', SQ_BEARD = '#555555', SQ_TICK = '#3a3a3a', SQ_SKIN = '#d4d4d4';
+  // Full short beard along the jaw. It starts below the ears, so skin shows
+  // between it and the hair, and its jaw edge is tufted so it reads as hair.
+  // The window around the mouth is wide, so the beard never outlines the lips.
+  // full > 0 grows it below the chin.
+  const sqBeard = ({ full = 0, flecks = false } = {}) => ctx => {
+    const outer = [];
+    for (let i = 0; i <= 26; i++) {
+      const a = Math.PI * (0.07 + 0.86 * i / 26), dn = Math.max(0, Math.sin(a));
+      const r = 1.0 + (i % 2 ? 0.03 + 0.05 * hh(i + 500) : 0) * dn;   // uneven hair points along the jaw
+      outer.push([Math.cos(a) * r, Math.sin(a) * (r + full * dn * dn)]);
+    }
+    const inner = [[-0.92, 0.22], [-0.82, 0.36], [-0.68, 0.42], [-0.62, 0.62], [-0.44, 0.8], [-0.2, 0.86], [0.06, 0.88],
+                   [0.32, 0.84], [0.54, 0.74], [0.68, 0.58], [0.76, 0.4], [0.88, 0.36], [0.94, 0.22]];
+    fill(ctx, hu([...outer, ...inner]), SQ_BEARD, 1);
+    stroke(ctx, hu(outer), { w: 9, taper0: 0.3, taper1: 0.3 });   // ink only on the jaw side: the beard grows out of the face
+    for (let i = 0; i < 12; i++) {   // short hair ticks, inside the beard at the chin
+      const x = (hh(i + 300) - 0.5) * 1.1, y = 0.93 + 0.04 * hh(i + 330) - 0.12 * x * x;
+      stroke(ctx, hu([[x, y], [x * 1.03, y + 0.05]]), { w: 4, color: SQ_TICK, taper0: 0.2, taper1: 0.5 });
+    }
+    if (flecks) for (let i = 0; i < 8; i++) {   // a few grey hairs, inside the beard at the chin
+      const x = (hh(i + 400) - 0.5) * 0.6, y = 0.95 + hh(i + 430) * 0.04 + full * 0.4;
+      stroke(ctx, hu([[x, y], [x + 0.015, y + 0.05]]), { w: 3, color: '#b4b4b4', taper0: 0.2, taper1: 0.5 });
+    }
+  };
+  // Moustache: a thin band well above the top lip, drooping at the corners,
+  // with a ragged lower edge. Lifts higher over open mouths.
+  const sqStache = (ctx, fx, rage) => {
+    const up = rage ? 18 : 0;
+    const m = [[fx - 54, 38], [fx - 44, 20], [fx - 18, 14], [fx + 4, 18], [fx + 28, 14], [fx + 54, 20], [fx + 64, 38],
+               [fx + 50, 30], [fx + 42, 34], [fx + 30, 28], [fx + 18, 32], [fx + 6, 26], [fx - 6, 32], [fx - 18, 27], [fx - 30, 33], [fx - 42, 29]]
+      .map(([x, y]) => [x, y - up]);
+    fill(ctx, m, SQ_BEARD, 1);
+    outline(ctx, m, { w: 6 });
+  };
+  // Rectangular frames, ink along the top and a lighter rim below (the
+  // two-tone frames from the photos), fitted around the eyes, arms back to the ears.
+  const rectGlasses = (ctx, fx) => {
+    for (const side of [-1, 1]) {
+      const cx = fx + side * 50, l = cx - 42, r = cx + 42, t = -34, b = 16;
+      const lens = [[l, t + 4], [l + 6, t], [r - 6, t - 1], [r, t + 4], [r + 1, b - 6], [r - 6, b], [l + 6, b + 1], [l, b - 6]];
+      outline(ctx, lens, { w: 8, color: '#7a7a7a', jit: 0.6 });
+      stroke(ctx, [[l - 2, t + 8], [l + 4, t], [r - 4, t - 1], [r + 2, t + 8]], { w: 12, taper0: 0, taper1: 0, minW: 1 });   // dark top bar
+      const ox = side > 0 ? r : l;
+      stroke(ctx, [[ox, t + 6], [side * RX * 0.97, t + 12]], { w: 9, taper0: 0, taper1: 0, minW: 1 });   // arm back to the ear
+      stroke(ctx, [[cx - side * 24, t + 14], [cx - side * 12, t + 8]], { w: 5, color: '#b0b0b0' });   // glint
+    }
+    stroke(ctx, [[fx - 10, -26], [fx, -31], [fx + 10, -26]], { w: 9 });   // bridge
+  };
+  // Hair. All three keep the temples set back (a high, rounded hairline).
+  // Outline style: points and waves in the silhouette, a few short inner
+  // strokes in the hair direction.
+  const SQ_CROP = [   // A: short crop, messy little points on top
+    [[-0.98, -0.2], [-1.06, -0.58], [-0.94, -0.84], [-1.02, -0.96], [-0.76, -1.04], [-0.66, -1.24], [-0.44, -1.14], [-0.3, -1.32],
+     [-0.12, -1.16], [0.06, -1.34], [0.22, -1.16], [0.42, -1.3], [0.54, -1.1], [0.8, -1.12], [0.82, -0.96], [1.06, -0.7], [0.98, -0.2]],
+    [[0.88, -0.24], [0.84, -0.52], [0.64, -0.6], [0.5, -0.76], [0.24, -0.78], [0.04, -0.7], [-0.2, -0.78], [-0.46, -0.76], [-0.62, -0.6], [-0.84, -0.52], [-0.88, -0.24]],
+    [[[-0.5, -0.86], [-0.44, -1.04]], [[-0.04, -0.86], [0.02, -1.08]], [[0.4, -0.88], [0.48, -1.06]]]];
+  const SQ_TUFT = [   // B: taller textured top, points pushed up and forward, a pointed fringe
+    [[-0.98, -0.2], [-1.06, -0.62], [-0.92, -0.9], [-1.0, -1.06], [-0.72, -1.12], [-0.64, -1.36], [-0.4, -1.22], [-0.26, -1.48],
+     [-0.04, -1.28], [0.12, -1.52], [0.3, -1.3], [0.54, -1.46], [0.62, -1.18], [0.9, -1.12], [0.86, -0.94], [1.06, -0.66], [0.98, -0.2]],
+    [[0.88, -0.24], [0.84, -0.5], [0.7, -0.66], [0.62, -0.56], [0.48, -0.74], [0.34, -0.6], [0.2, -0.78], [0.04, -0.62], [-0.12, -0.78],
+     [-0.28, -0.62], [-0.44, -0.76], [-0.58, -0.58], [-0.7, -0.68], [-0.84, -0.5], [-0.88, -0.24]],
+    [[[-0.5, -0.92], [-0.42, -1.1]], [[-0.08, -0.94], [0.0, -1.14]], [[0.34, -0.94], [0.44, -1.12]]]];
+  const SQ_UP = [   // C: pushed up and back in three locks, the front one lifting off
+    [[-0.98, -0.2], [-1.08, -0.5], [-0.98, -0.64], [-1.08, -0.86], [-0.84, -1.0], [-0.8, -1.16], [-0.5, -1.2], [-0.36, -1.34],
+     [-0.06, -1.3], [0.08, -1.46], [0.34, -1.4], [0.46, -1.56], [0.7, -1.46], [0.66, -1.28], [0.9, -1.1], [0.88, -0.92], [1.06, -0.66], [0.98, -0.2]],
+    [[0.88, -0.24], [0.84, -0.52], [0.66, -0.62], [0.58, -0.82], [0.44, -0.7], [0.24, -0.8], [0.06, -0.68], [-0.16, -0.78],
+     [-0.36, -0.64], [-0.54, -0.72], [-0.66, -0.56], [-0.84, -0.52], [-0.88, -0.24]],
+    [[[-0.52, -0.9], [-0.4, -1.06]], [[-0.06, -0.92], [0.06, -1.14]], [[0.4, -0.94], [0.5, -1.18]]]];
+  const sqHair = h => outlineHair(...h, SQ_HAIR, { lineColor: SQ_LINE });
+  const sqEars = ctx => {
+    for (const side of [-1, 1]) {
+      const e = Brush.ellipsePts(side * RX * 1.0, 6, 26, 36, 10);
+      fill(ctx, e, SQ_SKIN, 0.4); outline(ctx, e, { w: 8 });
+      stroke(ctx, [[side * RX * 1.0, -12], [side * RX * 1.06, 6], [side * RX * 1.0, 22]], { w: 5 });
+    }
+  };
+  // B: big over-ear headphones: band over the hair, cream cups on the ears.
+  const headphones = ctx => {
+    const band = [];
+    for (let i = 0; i <= 14; i++) { const a = Math.PI * (1.06 + 0.88 * i / 14); band.push([Math.cos(a) * RX * 1.12, Math.sin(a) * RY * 1.26 - 6]); }
+    stroke(ctx, band, { w: 30, taper0: 0, taper1: 0, minW: 1 });
+    stroke(ctx, band, { w: 14, taper0: 0, taper1: 0, minW: 1, color: '#e6e6e6' });
+    for (const side of [-1, 1]) {
+      const cup = Brush.ellipsePts(side * RX * 1.04, 4, 34, 52, 14);
+      fill(ctx, cup, '#e6e6e6', 0.5); outline(ctx, cup, { w: 10 });
+      const pad = Brush.ellipsePts(side * RX * 0.96, 4, 14, 40, 10);
+      fill(ctx, pad, '#9a9a9a', 0.4); outline(ctx, pad, { w: 6 });
+    }
+  };
+
+  // Outfits
+  const jacketHoodie = (ctx, n, h) => {   // A: open black jacket over a grey hoodie
+    const panel = [[-30, n + 4], [30, n + 4], [34, h + 2], [-34, h + 2]];
+    fill(ctx, panel, '#6a6a6a', 0.2);
+    outline(ctx, panel, { w: 7 });
+    stroke(ctx, [[-30, h - 50], [-20, h - 78], [20, h - 78], [30, h - 50]], { w: 5, color: '#d0d0d0' });   // pocket
+    stroke(ctx, [[-30, n + 4], [-14, n + 28], [14, n + 28], [30, n + 4]], { w: 7, color: '#d0d0d0' });   // hoodie neck
+    for (const sd of [-1, 1]) {
+      stroke(ctx, [[sd * 10, n + 26], [sd * 12, n + 104]], { w: 6, color: '#d0d0d0' });   // drawstrings
+      outline(ctx, [[sd * 30, n + 2], [sd * 60, n + 54], [sd * 36, n + 74]], { w: 6, color: '#8a8a8a' });   // jacket collar
+      stroke(ctx, [[sd * 38, n + 80], [sd * 40, h - 8]], { w: 5, color: '#8a8a8a' });   // zip edge
+    }
+  };
+  const boxrTee = (ctx, n) => {   // B: white tee with the BOXR print
+    collarTee(ctx, n);
+    Stage.text(ctx, 'BOXR', 4, n + 86, 40, 'Luckiest Guy', INK);
+    stroke(ctx, [[-36, n + 104], [42, n + 102]], { w: 4 });
+    stroke(ctx, [[-30, n + 116], [36, n + 114]], { w: 3, color: '#9a9a9a' });
+  };
+  const overshirt = (ctx, n, h) => {   // C: open dark overshirt over a grey tee
+    const tee = [[-28, n], [28, n], [32, h - 4], [-32, h - 4]];
+    fill(ctx, tee, '#8f8f8f', 0.4);
+    outline(ctx, tee, { w: 7 });
+    stroke(ctx, [[-24, n + 2], [0, n + 22], [24, n + 2]], { w: 6 });
+    for (const sd of [-1, 1]) {   // shirt tails hanging past the hem
+      const tail = [[sd * 34, h - 6], [sd * 70, h - 6], [sd * 72, h + 26], [sd * 50, h + 34], [sd * 34, h + 22]];
+      fill(ctx, tail, '#3a3a3a', 0.4); outline(ctx, tail, { w: 7 });
+    }
+    for (let i = 0; i < 3; i++) blob(ctx, -40, n + 70 + i * 44, 5, 5, { fill: '#9a9a9a', w: 3, n: 6 });   // buttons on the placket
+    for (const sd of [-1, 1]) {
+      const col = [[sd * 26, n - 2], [sd * 56, n - 4], [sd * 40, n + 52]];
+      fill(ctx, col, '#3a3a3a', 0.3); outline(ctx, col, { w: 6, color: '#9a9a9a' });
+    }
+  };
+
+  const squeex = {
+    glasses: build({ skin: SQ_SKIN, shirt: INK, sleeve: '#3a3a3a', headScale: [1.02, 1.0],
+      head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_CROP), beard: sqBeard(), front: (ctx, fx, rage) => { sqStache(ctx, fx, rage); rectGlasses(ctx, fx); }, browW: 9 }),
+      detail: jacketHoodie }),
+    headset: build({ skin: SQ_SKIN, shirt: W, sleeveHem: 0.24, sleeveFill: W,
+      head: head({ skin: SQ_SKIN, hair: sqHair(SQ_TUFT), beard: sqBeard(), front: sqStache, hat: headphones, browW: 9 }),
+      detail: boxrTee }),
+    overshirt: build({ skin: SQ_SKIN, shirt: '#3a3a3a', sleeve: '#3a3a3a', headScale: [1.04, 0.98],
+      body: { legColor: '#8a8a8a',   // khakis, a mid grey so they don't read as bare legs, waist to ankle
+        bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
+          fill(ctx, b, '#8a8a8a', 1.2); outline(ctx, b, { w: 9 }); } },
+      head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_UP), beard: sqBeard({ full: 0.12, flecks: true }), front: sqStache, browW: 9 }),
+      detail: overshirt }),
+  };
+
+  return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();

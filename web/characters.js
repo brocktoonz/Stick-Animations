@@ -384,6 +384,17 @@ const Chars = (() => {
     stroke(ctx, [[x - 18 * s, y - 6 * s], [x - 28 * s, y - 18 * s], [x - 20 * s, y - 24 * s]], { w: 6 * s });
   }
 
+  // Short sleeve in a different colour from the skin (opt-in, S.sleeveFill):
+  // repaints the arm's fill from the shoulder to the hem, along the same curve.
+  function sleeveFill(ctx, a, b, bend, w, at, col) {
+    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+    const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
+    const e = [mx - dy / d * bend * d, my + dx / d * bend * d];
+    const c = [2 * e[0] - mx, 2 * e[1] - my];
+    const q = t => { const u = 1 - t; return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]; };
+    stroke(ctx, [a, q(at / 2), q(at)], { w: w * 0.45, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: col });
+  }
+
   // Short-sleeve hem: a line across the arm, a fraction `at` of the way from
   // shoulder to hand. Follows the same curve as tube() so it sits on the arm.
   function sleeveHem(ctx, a, b, bend, w, at) {
@@ -561,6 +572,7 @@ const Chars = (() => {
       // The white halo only matters over dark clothes; on light shirts it would
       // erase the shirt's outline next to the arm.
       tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, darkTorso);
+      if (S.sleeveHem && S.sleeveFill) sleeveFill(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem, S.sleeveFill);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
       hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W);
