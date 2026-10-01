@@ -11,12 +11,12 @@ Skits.powernap = (() => {
 
   // [start, end, colour, text]: the original's captions, word for word
   const LINES = [
-    [0.33, 1.15, W, 'Alrighty'],
-    [1.17, 2.15, W, 'Just a 10 minute\npower nap'],
-    [3.45, 6.45, RED, 'Few hours later'],
-    [8.1, 8.75, W, 'Where am I?'],
+    [0.33, 1.17, W, 'ALRIGHTY'],
+    [1.17, 2.15, W, 'JUST A 10 MINUTE\nPOWER NAP'],
+    [3.45, 6.45, RED, 'FEW HOURS LATER'],
+    [8.1, 8.75, W, 'WHERE AM I?'],
   ];
-  const talk = (t, i) => say(t, LINES[i][0], LINES[i][1], LINES[i][3].replace(/\n/g, ' ').replace('10', 'ten'));
+  const talk = (t, i) => say(t, LINES[i][0], LINES[i][1], LINES[i][3].replace(/\n/g, ' ').replace('10', 'ten').toLowerCase());
   const CAP = 84;
   function caption(ctx, t) {
     const l = LINES.find(([a, b]) => t >= a && t < b);
@@ -77,10 +77,11 @@ Skits.powernap = (() => {
     for (let i = 0; i < 140; i++) {
       const u = hh(i), a = Math.PI * (0.5 + (u - 0.5) * Math.abs(u - 0.5) * 2.2), r = (98 + 20 * hh(i + 9)) * s;
       const x = hx + Math.cos(a) * r * 0.95, y = hy + 36 * s + Math.sin(a) * r * 0.66;
+      if (((x - hx - 6 * s) / (60 * s)) ** 2 + ((y - hy - 95 * s) / (34 * s)) ** 2 < 1) continue;   // keep the mouth clear
       stroke(ctx, [[x, y], [x + (hh(i + 3) - 0.5) * 3 * s, y + 4 * s]], { w: 1.5 * s, taper0: 0, taper1: 0, color: '#6a6a6a', jit: 0.2, wob: 0 });
     }
     for (let i = 0; i < 26; i++) {   // upper lip
-      const x = hx + 4 * s + (hh(i + 60) - 0.5) * 70 * s, y = hy + 78 * s + hh(i + 90) * 10 * s;
+      const x = hx + 4 * s + (hh(i + 60) - 0.5) * 70 * s, y = hy + 52 * s + hh(i + 90) * 8 * s;
       stroke(ctx, [[x, y], [x, y + 4 * s]], { w: 1.5 * s, taper0: 0, taper1: 0, color: '#6a6a6a', jit: 0.2, wob: 0 });
     }
   }
@@ -115,7 +116,7 @@ Skits.powernap = (() => {
   function room(ctx) {
     ctx.fillStyle = BACKDROP; ctx.fillRect(-2000, -2000, 5000, 6000);
     ctx.fillStyle = '#e2e2e2'; ctx.fillRect(-2000, WALL, 5000, 3000);        // floor, running toward us
-    stroke(ctx, [[-900, WALL], [540, WALL + 3], [2000, WALL - 3]], { w: 6, taper0: 0, taper1: 0 });
+    stroke(ctx, [[-900, WALL], [540, WALL + 3], [2000, WALL - 3]], { w: 9, taper0: 0, taper1: 0 });
   }
   function bed(ctx, tilt) {
     fill(ctx, Brush.ellipsePts(540, WALL + 6, 380, 18, 16), '#cfcfcf', 0.4);   // flat shadow
@@ -133,17 +134,17 @@ Skits.powernap = (() => {
   }
 
   const tired = { lid: 0.45, lowLid: 0.25, brow: -0.3, pupil: 9 };
-  const slack = (open, k = 0) => ({ lid: 1, brow: -0.15, mouth: 'gape', open, mouthScale: 0.95, stretch: 0.2 + 0.3 * k });   // yawn/snore: tall round mouth, lids shut
+  const slack = (open, k = 0) => ({ lid: 1, brow: -0.15, mouth: 'gape', open, mouthScale: 1.6, stretch: 0.45 + 0.4 * k });   // yawn/snore: tall round mouth, lids shut
   const shots = [
     // propped up in bed: "Alrighty... just a 10 minute power nap", then a yawn
     [0, 2.55, (ctx, t) => {
       const ang = 0.85 + 0.06 * easeInOut(seg(t, 2.15, 2.5));
       const [hx, hy] = frame(CFX, CFY, ang)(HEAD * CS, 0);
-      ctx.save(); cam(ctx, hx - 110, hy + 60, lerp(1.12, 1.18, easeInOut(seg(t, 0, 2.55))), 540, 1080);
+      ctx.save(); cam(ctx, hx - 110, hy + 60, lerp(1.12, 1.18, easeInOut(seg(t, 0, 2.55))), 470, 1080);
       bedClose(ctx);
-      const pose = t > 2.2 ? slack(clamp(0.35 + 0.5 * loud('powernap', t), 0.35, 0.85), 0.3)
+      const pose = t > 2.2 ? slack(clamp(0.6 + 0.5 * loud('powernap', t), 0.6, 1), 0.3)
                            : { ...tired, lid: Math.max(tired.lid, blink(t, 2.7, 0.3)), lookX: 0.3, lookY: -0.3, tilt: -0.1,
-                               ...(t < 0.33 ? { mouth: 'flat' } : talk(t, t < 1.16 ? 0 : 1)) };
+                               ...(t < 0.33 ? { mouth: 'flat' } : talk(t, t < 1.17 ? 0 : 1)) };
       inBed(ctx, ang, pose);
       ctx.restore();
     }],
@@ -151,9 +152,9 @@ Skits.powernap = (() => {
     [2.55, 3.45, (ctx, t) => {
       const ang = 0.95, k = loud('powernap', t);
       const [hx, hy] = frame(CFX, CFY, ang)(HEAD * CS, 0);
-      ctx.save(); cam(ctx, hx - 30, hy + 30, lerp(1.8, 1.86, seg(t, 2.55, 3.45)), 520, 1220);
+      ctx.save(); cam(ctx, hx - 30, hy + 30, lerp(1.8, 1.86, seg(t, 2.55, 3.45)), 430, 1000);
       bedClose(ctx);
-      inBed(ctx, ang, { ...slack(clamp(0.45 + 0.5 * k, 0.45, 0.95), k), tilt: -0.22 });
+      inBed(ctx, ang, { ...slack(clamp(0.7 + 0.4 * k, 0.7, 1), k), tilt: -0.22 });
       ctx.restore();
     }],
     // FEW HOURS LATER: the room, clock spinning, a terrible night
@@ -162,30 +163,30 @@ Skits.powernap = (() => {
       ctx.save(); cam(ctx, 540, 1250, 1.3, 540, 1150);
       Brush.setWeight(1.2);
       room(ctx);
-      clock(ctx, 540, 960, 80, t);
+      clock(ctx, 230, 930, 75, t);
       bed(ctx, -0.07 * easeOut(fall));
       const s = WS, headDown = 125 * s;     // his head is wider than his body: rest the head, not the chest
       if (t < 5.12) {
         // asleep, then tossing: rolls and kicks at uneven moments, kicking the blanket off
         const beat = Math.floor((t - 4.3) / 0.13), jit = toss > 0 && toss < 1 ? hh(beat) - 0.5 : 0;
         const ang = Math.PI / 2 + jit * 0.35, fx = MX0 + 40 + jit * 30, fy = MTOP - headDown - Math.abs(jit) * 30;
-        pillow(ctx, [MX0 + 40 + HEAD * WS + 20, MTOP - 32], 95, 34, -0.05);
+        pillow(ctx, [MX0 + 40 + HEAD * WS + 20, MTOP - 40], 110, 48, -0.05);
         lying(ctx, fx, fy, ang, s, { lid: 1, mouth: 'flat', tilt: -0.5, step: toss > 0 ? (hh(beat + 5) - 0.5) * 2.4 : 0,
-          ...(toss > 0 ? Arms.both([120 + 60 * hh(beat + 2), -380 - 60 * hh(beat + 3)], 'out') : {}) });
+          ...(toss > 0 ? Arms.both([230 + 40 * hh(beat + 2), -230 - 60 * hh(beat + 3)], 'down') : {}) });
         if (toss < 0.35) blanket(ctx, frame(fx, fy, ang), s, 0.7, 20);
         else drape(ctx, 0);
       } else {
         // rolls off the front edge (toward us) in an arc, lands on the floor in
         // front of the bed, and then, still asleep, floats up spread-eagled
-        const e = easeInOut(fall), floorY = WALL + 60;
+        const e = easeInOut(fall), floorY = WALL + 150;
         const fx = MX0 + 60 + 50 * e, fyFall = lerp(MTOP - headDown, floorY, e) - Math.sin(Math.PI * e) * 90;
-        const fy = lift > 0 ? lerp(floorY, MTOP - 330, easeOutBack(lift)) + Math.sin((t - 6.2) * 6) * 5 * seg(t, 6.2, 6.3) : fyFall;
-        const ang = Math.PI / 2 + 0.3 * Math.sin(Math.PI * e) * (1 - lift);
-        pillow(ctx, [MX0 + 40 + HEAD * WS + 20, MTOP - 32], 95, 34, -0.05);
+        const fy = lift > 0 ? lerp(floorY, MTOP - 230, easeOutBack(lift)) + Math.sin((t - 6.2) * 6) * 5 * seg(t, 6.2, 6.3) : fyFall;
+        const ang = Math.PI / 2 + 0.3 * Math.sin(Math.PI * e) * (1 - lift) - 0.25 * lift;
+        pillow(ctx, [MX0 + 40 + HEAD * WS + 20, MTOP - 40], 110, 48, -0.05);
         drape(ctx, e);
-        if (lift === 0) fill(ctx, Brush.ellipsePts(fx + 200, floorY + 90, 250 * e, 14, 14), '#cfcfcf', 0.4);   // his shadow on the floor
+        if (lift === 0) if (e > 0.85) fill(ctx, Brush.ellipsePts(fx + 200, floorY + 100, 250, 14, 14), '#cfcfcf', 0.4);   // his shadow on the floor
         lying(ctx, fx, fy, ang, s, { lid: 1, mouth: 'o', open: 0.15, tilt: -0.5,
-          step: lerp(0.6 * e, 1.6, lift), ...Arms.both([lerp(160, 250, lift), lerp(-330, -300, lift)], 'out') });
+          step: lerp(0.6 * e, 1.6, lift), ...Arms.both([lerp(160, 230, lift), lerp(-330, -470, lift)], 'out') });
       }
       Brush.setWeight(1);
       ctx.restore();
@@ -197,8 +198,8 @@ Skits.powernap = (() => {
       const hx = 540, hy = fy - HEAD * s, asking = t >= 8.1 && t < 8.75;
       Hero.main(ctx, { x: hx, y: fy, s, lid: 0.55, flatLid: true, lowLid: 0.35, pupil: 7, lookX: -0.2,
         weight: -1,
-        ...Arms.arm(-1, [-150, -150], 'out'), ...Arms.arm(1, [70, -200], 'down'),   // one hand propped on the blanket, the other slack
-        ...(asking ? { ...talk(t, 3), browL: 0.5, browLiftL: 10, browR: -0.2, browLiftR: -6 } : { mouth: 'flat', brow: -0.1 }), shadow: false });
+        ...Arms.arm(-1, [-150, -150], 'out'), ...Arms.arm(1, [140, -160], 'out'),   // one hand propped on the blanket, the other slack
+        ...(asking ? { ...talk(t, 3), browL: -0.5, browLiftL: 6, browR: -0.2, browLiftR: 14, mouthScale: 1.3 } : { mouth: 'flat', brow: -0.1 }), shadow: false });
       stubble(ctx, hx, hy, s);
       const lap = [[-80, 1790], [200, 1745], [420, 1778], [650, 1738], [900, 1772], [1160, 1748], [1160, 2000], [-80, 2000]];
       shape(ctx, lap, '#bdbdbd', 12);                                            // the blanket bunched up in his lap
