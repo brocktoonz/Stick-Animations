@@ -18,7 +18,7 @@ Skits.extinct = (() => {
     [1.44, 3.3, NICK, 'every single\nextinct animal'],
     [3.44, 3.92, NICK, "but there's no-"],
     [3.92, 4.6, LUD, 'other option'],
-    [5.58, 6.48, NICK, 'what do you mean\nother option'],
+    [5.86, 6.48, NICK, 'what do you mean\nother option'],
     [6.48, 7.24, LUD, 'give me the\nother option'],
     [7.24, 8.22, NICK, "why you don't want\nthat?"],
     [8.22, 9.26, LUD, "whatever the other\noption is I'll"],
@@ -44,7 +44,7 @@ Skits.extinct = (() => {
     [[1.44, 1.82, 'every'], [1.82, 2.14, 'single'], [2.14, 2.5, 'extinct'], [2.5, 2.92, 'animal']],
     [[3.44, 3.56, 'but'], [3.56, 3.78, "there's"], [3.78, 3.92, 'no']],
     [[3.92, 4.12, 'other'], [4.12, 4.32, 'option']],
-    [[5.58, 5.68, 'what'], [5.68, 5.76, 'do'], [5.76, 5.84, 'you'], [5.84, 5.96, 'mean'], [5.96, 6.16, 'other'], [6.16, 6.48, 'option']],
+    [[5.86, 5.93, 'what'], [5.93, 5.98, 'do'], [5.98, 6.04, 'you'], [6.04, 6.12, 'mean'], [6.12, 6.26, 'other'], [6.26, 6.48, 'option']],
     [[6.48, 6.62, 'give'], [6.62, 6.76, 'me'], [6.76, 6.8, 'the'], [6.8, 6.96, 'other'], [6.96, 7.2, 'option']],
     [[7.24, 7.6, 'why'], [7.6, 7.72, 'you'], [7.72, 7.8, "don't"], [7.8, 7.9, 'want'], [7.9, 8.22, 'that']],
     [[8.22, 8.48, 'whatever'], [8.48, 8.66, 'the'], [8.66, 8.78, 'other'], [8.78, 9.02, 'option'], [9.02, 9.14, 'is'], [9.14, 9.26, "I'll"]],
@@ -65,7 +65,7 @@ Skits.extinct = (() => {
   // Shots are written in "script time" (the old caption-led timeline). This
   // maps audio time to script time so each cut and in-shot beat lands on the
   // speech: [audio time, script time] anchors, piecewise linear.
-  const WARP = [[0, 0], [1.44, 1.75], [3.35, 3.35], [4.6, 4.7], [5.58, 6.0], [6.48, 7.0], [7.24, 7.72], [8.22, 8.5],
+  const WARP = [[0, 0], [1.44, 1.75], [3.35, 3.35], [4.6, 4.7], [5.86, 6.0], [6.48, 7.0], [7.24, 7.72], [8.22, 8.5],
     [9.26, 9.45], [9.92, 10.75], [11.92, 12.0], [13.14, 13.25], [13.82, 14.0], [15.78, 16.0], [16.64, 17.0],
     [17.36, 17.5], [17.9, 18.18], [18.68, 18.75], [19.52, 19.75], [20.5, 20.7], [21.86, 21.55], [23.02, 23.02], [99, 99]];
   const pw = (pairs, x) => { for (let i = 1; i < pairs.length; i++) if (x <= pairs[i][0]) { const [a0, b0] = pairs[i - 1], [a1, b1] = pairs[i]; return b0 + (b1 - b0) * (x - a0) / (a1 - a0); } return x; };
@@ -492,7 +492,7 @@ Skits.extinct = (() => {
     }],
     // "Why?": the big reaction, close and pushing in
     [17.5, 18.18, (ctx, t) => single(ctx, t, 'nick', { mouth: 'flat', lid: 0.5, flatLid: true, pupil: 8, brow: 0.7, tilt: 0.05,
-      ...Ar.both([112, -176], 'out'), ...talkLine(t, 15) }, 1.22, 1110)],   // annoyed: heavy flat lids, brows down, hands on hips
+      ...Ar.both([112, -176], 'out'), ...talkLine(t, 15) }, 1.4, 980)],   // annoyed: heavy flat lids, brows down, hands on hips
     // "they died for a reason": deadpan close-up
     [18.18, 18.75, (ctx, t) => closeLud(ctx, t, { ...E.unimpressed, lookX: 0.8, ...talkLine(t, 16) }, 1.8)],
     // "you don't wanna see a f*ckin'... Velociraptor": one continuous shot on
@@ -528,7 +528,7 @@ Skits.extinct = (() => {
       A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 0.7, t, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
       A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 0.68, t: t + 0.3, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
       const m = seg(t, 22.2, hit);
-      if (m > 0 && m < 1) A.meteor(ctx, lerp(150, 555, m), lerp(900, FLOOR - 40, m), lerp(60, 150, m), t);   // steep, from beside the caption down the gap between them, clear of both heads
+      if (m > 0 && m < 1) A.meteor(ctx, lerp(150, 540, m), lerp(900, FLOOR - 40, m), lerp(50, 85, m), t);   // steep, from beside the caption down the gap between them, clear of both heads
       ctx.restore();
     }],
     // aftermath: just the crater, both raptors gone
@@ -556,12 +556,11 @@ Skits.extinct = (() => {
       // staggered in depth with clear gaps between heads: Nick and Ludwig
       // behind on their own sides (shadows only, no ground line to show
       // through Slime's arms), Slime in front and lower, chest-up
-      const k = loud('extinct', REAL), back = 1000;
+      const k = loud('extinct', REAL), back = 1290;
       ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040);
-      // Slime's big head in front hides Nick's and Ludwig's legs
-      lud(ctx, { t, x: 810, y: back, s: 1.25, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out') });
-      nick(ctx, { t, x: 275, y: back, s: 1.25, shadow: false, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(-1, [-72, -176], 'out') });
-      Cameos.slime(ctx, { t, x: 540, y: 1960, s: 2.2, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
+      lud(ctx, { t, x: 790, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out') });
+      nick(ctx, { t, x: 295, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(-1, [-72, -176], 'out') });
+      Cameos.slime(ctx, { t, x: 540, y: 1221 + 438 * 1.7, s: 1.7, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
     }],
   ];
 
