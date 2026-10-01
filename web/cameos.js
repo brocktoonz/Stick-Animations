@@ -1187,6 +1187,128 @@ const Cameos = (() => {
     }
   };
 
+  // ---- C beard options (drawn from scratch; each pairs a beard with its moustache) ----
+  // clip to a smooth closed shape, for texture inside a beard
+  const clipTo = (ctx, pts) => {
+    const sp = Brush.spline(pts, true, 4);
+    ctx.beginPath(); ctx.moveTo(sp[0][0], sp[0][1]);
+    for (const q of sp) ctx.lineTo(q[0], q[1]);
+    ctx.clip();
+  };
+  // a jaw edge from ear to ear, a little tufted below the cheeks; full grows it below the chin
+  const jawEdge = (r0, bump, full = 0, n = 24, a0 = 0.03, a1 = 0.97) => Array.from({ length: n + 1 }, (_, i) => {
+    const a = Math.PI * (a0 + (a1 - a0) * i / n), dn = Math.max(0, Math.sin(a));
+    const r = r0 + (i % 2 ? bump * dn : 0);
+    return [Math.cos(a) * r, Math.sin(a) * (r + full * dn * dn)];
+  });
+
+  // 1. Trimmed: mid-grey, stippled, a crisp cheek line; the moustache drops at
+  // the corners to join the beard beside the mouth.
+  const TRIM = '#6e6e6e', TRIM_DOT = '#3a3a3a';
+  const trimShape = () => hu([...jawEdge(1.0, 0.035), [-0.95, 0.06], [-0.86, 0.28], [-0.62, 0.4], [-0.5, 0.62], [-0.28, 0.78],
+                              [0.06, 0.82], [0.4, 0.78], [0.6, 0.62], [0.72, 0.4], [0.9, 0.28], [0.96, 0.06]]);
+  const stipple = (ctx, x0, x1, y0, y1, k0) => {
+    for (let y = y0; y < y1; y += 9) for (let x = x0; x < x1; x += 10) {
+      const k = Math.round(x * 7 + y * 13) + k0;
+      if (hh(k) > 0.55) continue;
+      blob(ctx, x + (hh(k + 3) - 0.5) * 8, y + (hh(k + 5) - 0.5) * 7, 2.2, 2.2, { fill: TRIM_DOT, w: 0, n: 5 });
+    }
+  };
+  const beardTrim = ctx => {
+    const sh = trimShape();
+    fill(ctx, sh, TRIM, 1);
+    ctx.save(); clipTo(ctx, sh); stipple(ctx, -RX, RX, 0, RY * 1.1, 0); ctx.restore();
+    stroke(ctx, hu(jawEdge(1.0, 0.035)), { w: 9, taper0: 0.3, taper1: 0.3 });   // ink on the jaw side only
+  };
+  const stacheTrim = (ctx, fx, rage) => {
+    const up = rage ? 18 : 0;
+    const m = [[fx - 84, 60], [fx - 62, 30], [fx - 22, 20], [fx + 4, 25], [fx + 32, 20], [fx + 70, 30], [fx + 90, 60],
+               [fx + 74, 52], [fx + 52, 38], [fx + 4, 38], [fx - 44, 38], [fx - 66, 52]].map(([x, y]) => [x, y - up]);
+    fill(ctx, m, TRIM, 1);
+    ctx.save(); clipTo(ctx, m); stipple(ctx, fx - 90, fx + 96, 14 - up, 62 - up, 77); ctx.restore();
+    stroke(ctx, m.slice(0, 7), { w: 6, taper0: 0.4, taper1: 0.4 });
+  };
+
+  // 2. Full dark: as dark and curly as his hair, rounding out below the chin,
+  // with a few grey hairs; the window round the mouth is wide, so it never hugs the lips.
+  const fullOuter = () => {
+    const pts = [];
+    for (let i = 0; i <= 14; i++) {   // curl bumps, like the hair
+      const a = Math.PI * (-0.02 + 1.04 * i / 14), dn = Math.max(0, Math.sin(a));
+      for (const [f, r] of [[0, 1.0], [0.5, 1.07]]) {
+        if (i === 14 && f) break;
+        const aa = a + f * Math.PI * 1.04 / 14, d2 = Math.max(0, Math.sin(aa));
+        pts.push([Math.cos(aa) * r, Math.sin(aa) * (r + 0.16 * d2 * d2)]);
+      }
+    }
+    return pts;
+  };
+  const beardFull = ctx => {
+    const outer = fullOuter();
+    const inner = [[-0.97, -0.04], [-0.9, 0.22], [-0.66, 0.32], [-0.5, 0.56], [-0.3, 0.82], [0.08, 0.9], [0.44, 0.82],
+                   [0.64, 0.56], [0.78, 0.32], [0.92, 0.22], [0.98, -0.04]];
+    const sh = hu([...outer, ...inner]);
+    fill(ctx, sh, SQ_HAIR, 1);
+    outline(ctx, sh, { w: 9 });
+    for (const [x0, y0, x1, y1] of [[-0.74, 0.6, -0.62, 0.8], [-0.2, 1.02, -0.1, 1.12], [0.3, 1.0, 0.38, 1.1], [0.76, 0.56, 0.7, 0.76]])
+      stroke(ctx, hu([[x0, y0], [x1, y1]]), { w: 6, color: SQ_LINE, taper0: 0.2, taper1: 0.5 });
+    for (let i = 0; i < 7; i++) {   // salt in the pepper, at the chin
+      const x = -0.3 + 0.62 * hh(i + 610), y = 0.96 + 0.1 * hh(i + 640);
+      stroke(ctx, hu([[x, y], [x + 0.02, y + 0.06]]), { w: 3.5, color: '#b4b4b4', taper0: 0.2, taper1: 0.5 });
+    }
+  };
+  // two tapered halves parted in the middle, hair points along the bottom, well
+  // clear of the lip, so the dark never reads as an outline round the mouth
+  const stacheFull = (ctx, fx, rage) => {
+    const up = rage ? 18 : 0;
+    for (const sd of [-1, 1]) {
+      const X = x => fx + 4 + sd * x;
+      const h = [[X(4), 14], [X(26), 8], [X(50), 12], [X(66), 26], [X(70), 38], [X(58), 30], [X(52), 34], [X(42), 26],
+                 [X(34), 30], [X(24), 24], [X(14), 27], [X(4), 22]].map(([x, y]) => [x, y - up]);
+      fill(ctx, h, SQ_HAIR, 1);
+      outline(ctx, h, { w: 6 });
+      stroke(ctx, [[X(22), 15 - up], [X(38), 15 - up]], { w: 4, color: SQ_LINE });
+    }
+  };
+
+  // 3. Inked: a pale beard drawn mostly with short ink hatching, like a comic
+  // panel; the hatching thickens toward the jaw.
+  const INKED = '#b4b4b4';
+  const hatch = (ctx, sh, x0, x1, y0, y1, dense, k0) => {
+    ctx.save(); clipTo(ctx, sh);
+    for (let y = y0; y < y1; y += 11) for (let x = x0; x < x1; x += 12) {
+      const k = Math.round(x * 5 + y * 11) + k0, depth = dense(x, y);
+      if (hh(k) > depth) continue;
+      const px = x + (hh(k + 2) - 0.5) * 9, py = y + (hh(k + 4) - 0.5) * 8, lean = px / RX * 0.5;
+      stroke(ctx, [[px, py], [px + lean * 10, py + 13]], { w: 3.5, taper0: 0.2, taper1: 0.6, jit: 0.3 });
+    }
+    ctx.restore();
+  };
+  const beardInked = ctx => {
+    const outer = jawEdge(1.0, 0.05, 0.06, 28, 0.04, 0.96);
+    const sh = hu([...outer, [-0.93, 0.1], [-0.82, 0.34], [-0.6, 0.44], [-0.5, 0.66], [-0.28, 0.82], [0.06, 0.86],
+                   [0.4, 0.82], [0.6, 0.66], [0.7, 0.44], [0.86, 0.34], [0.95, 0.1]]);
+    fill(ctx, sh, INKED, 1);
+    hatch(ctx, sh, -RX, RX, 0, RY * 1.12, (x, y) => Math.min(0.9, Math.max(0.15, (Math.hypot(x / RX, y / RY) - 0.6) * 2.2)), 0);
+    stroke(ctx, hu(outer), { w: 8, taper0: 0.3, taper1: 0.3 });
+  };
+  const stacheInked = (ctx, fx, rage) => {
+    const up = rage ? 18 : 0;
+    const m = [[fx - 62, 44], [fx - 50, 22], [fx - 18, 14], [fx + 4, 20], [fx + 28, 14], [fx + 60, 22], [fx + 72, 44],
+               [fx + 46, 36], [fx + 4, 38], [fx - 38, 36]].map(([x, y]) => [x, y - up]);
+    fill(ctx, m, INKED, 1);
+    hatch(ctx, m, fx - 70, fx + 80, 8 - up, 44 - up, () => 0.8, 91);
+    stroke(ctx, m.slice(0, 7), { w: 6, taper0: 0.4, taper1: 0.4 });
+  };
+
+  // C, with any beard and moustache: everything else is the chosen draft C
+  const sqC = (beard, stache) => build({ skin: SQ_SKIN, shirt: '#3a3a3a', sleeve: '#3a3a3a', headScale: [1.04, 0.98],
+    body: { legColor: '#8a8a8a',   // khakis, a mid grey so they don't read as bare legs, waist to ankle
+      bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
+        fill(ctx, b, '#8a8a8a', 1.2); outline(ctx, b, { w: 9 }); } },
+    head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_UP), beard, front: stache, browW: 9 }),
+    detail: overshirt });
+
   const squeex = {
     glasses: build({ skin: SQ_SKIN, shirt: INK, sleeve: '#3a3a3a', headScale: [1.02, 1.0],
       head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_CROP), beard: sqBeard(), front: (ctx, fx, rage) => { sqStache(ctx, fx, rage); rectGlasses(ctx, fx); }, browW: 9 }),
@@ -1194,12 +1316,8 @@ const Cameos = (() => {
     headset: build({ skin: SQ_SKIN, shirt: W, sleeveHem: 0.24, sleeveFill: W,
       head: head({ skin: SQ_SKIN, hair: sqHair(SQ_TUFT), beard: sqBeard(), front: sqStache, hat: headphones, browW: 9 }),
       detail: boxrTee }),
-    overshirt: build({ skin: SQ_SKIN, shirt: '#3a3a3a', sleeve: '#3a3a3a', headScale: [1.04, 0.98],
-      body: { legColor: '#8a8a8a',   // khakis, a mid grey so they don't read as bare legs, waist to ankle
-        bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
-          fill(ctx, b, '#8a8a8a', 1.2); outline(ctx, b, { w: 9 }); } },
-      head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_UP), beard: sqBeard({ full: 0.12, flecks: true }), front: sqStache, browW: 9 }),
-      detail: overshirt }),
+    overshirt: sqC(sqBeard({ full: 0.12, flecks: true }), sqStache),
+    beards: { trimmed: sqC(beardTrim, stacheTrim), full: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
   };
 
   return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
