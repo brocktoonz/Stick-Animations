@@ -1119,37 +1119,17 @@ const Cameos = (() => {
     [[0.88, -0.24], [0.84, -0.5], [0.7, -0.66], [0.62, -0.56], [0.48, -0.74], [0.34, -0.6], [0.2, -0.78], [0.04, -0.62], [-0.12, -0.78],
      [-0.28, -0.62], [-0.44, -0.76], [-0.58, -0.58], [-0.7, -0.68], [-0.84, -0.5], [-0.88, -0.24]],
     [[[-0.5, -0.92], [-0.42, -1.1]], [[-0.08, -0.94], [0.0, -1.14]], [[0.34, -0.94], [0.44, -1.12]]]];
-  // C: receded crown of curls, growing out of sqBackHair (the band round the
-  // dome behind the head). The ends start on that band, so only the curly top
-  // and the hairline are inked and the crown never reads as a separate cap.
-  // The hairline is an M: deep bare notches over each brow, a small rounded lobe in the middle.
-  const SQ_CROWN = [[-0.91, -0.54], [-0.98, -0.7], [-0.88, -0.9], [-0.74, -1.04], [-0.6, -1.12], [-0.46, -1.18], [-0.36, -1.32],
-                    [-0.2, -1.28], [-0.06, -1.4], [0.1, -1.32], [0.24, -1.46], [0.4, -1.38], [0.56, -1.42], [0.68, -1.24],
-                    [0.82, -1.1], [0.94, -0.9], [1.0, -0.7], [0.91, -0.54]];
-  const SQ_LINE_M = [[0.8, -0.5], [0.68, -0.64], [0.52, -0.76], [0.36, -0.83], [0.22, -0.82], [0.12, -0.8], [0.05, -0.78],
-                     [0, -0.77], [-0.05, -0.78], [-0.12, -0.8], [-0.22, -0.82], [-0.36, -0.83], [-0.52, -0.76], [-0.68, -0.64], [-0.8, -0.5]];
-  const sqCrown = ctx => {
-    fill(ctx, hu([...SQ_CROWN, ...SQ_LINE_M]), SQ_HAIR, 1);
-    stroke(ctx, hu(SQ_CROWN), { w: 11, taper0: 0.3, taper1: 0.3 });   // the ends sit on the back band, outside the head outline
-    stroke(ctx, hu(SQ_LINE_M), { w: 11, taper0: 0.5, taper1: 0.5 });
-    stroke(ctx, hu([[-0.04, -1.0], [0.06, -1.2]]), { w: 7, taper0: 0.15, taper1: 0.35, color: SQ_LINE });
-  };
-  // C: hair behind the head, round the top of the dome under the crown and
-  // down to the ears at the sides. It breaks at the temples, so bare skin
-  // meets the head outline there.
-  const sqBackHair = ctx => {
-    for (const [a0, a1] of [[0.97, 1.12], [1.18, 1.82], [1.88, 2.03]]) {
-      const outer = [], inner = [], n = Math.round((a1 - a0) * 24);
-      for (let i = 0; i <= n; i++) {
-        const a = Math.PI * (a0 + (a1 - a0) * i / n), r = 1.07 + (i % 2 ? 0.035 : 0);   // a little curl in the edge
-        outer.push([Math.cos(a) * r, Math.sin(a) * r]);
-        inner.push([Math.cos(a) * 0.86, Math.sin(a) * 0.86]);
-      }
-      const band = hu([...outer, ...inner.reverse()]);
-      fill(ctx, band, SQ_HAIR, 1);
-      outline(ctx, band, { w: 10 });
-    }
-  };
+  const SQ_UP = [   // C: pushed up and back in three locks, the front one lifting off
+    // the corners sit low and close to the head (thinner hair there), the volume stays in the middle
+    [[-0.98, -0.2], [-1.06, -0.5], [-0.98, -0.62], [-1.03, -0.8], [-0.86, -0.92], [-0.76, -1.04], [-0.54, -1.1], [-0.36, -1.3],
+     [-0.06, -1.3], [0.08, -1.44], [0.34, -1.38], [0.44, -1.46], [0.6, -1.32], [0.62, -1.18], [0.84, -1.02], [0.88, -0.86], [1.03, -0.64], [0.98, -0.2]],
+    // receding hairline: a tall bare forehead with deep corners at the temples
+    // (cut back almost to the head outline, which they must stay inside), a
+    // widow's peak pointing down in the middle and thin hair down the sides
+    [[0.93, -0.24], [0.92, -0.34], [0.84, -0.5], [0.72, -0.64], [0.6, -0.74], [0.5, -0.84], [0.4, -0.9], [0.3, -0.86], [0.24, -0.9],
+     [0.16, -0.84], [0.08, -0.78], [0.0, -0.66], [-0.08, -0.78], [-0.16, -0.84], [-0.22, -0.86], [-0.3, -0.84], [-0.38, -0.91],
+     [-0.48, -0.86], [-0.6, -0.76], [-0.74, -0.62], [-0.84, -0.46], [-0.92, -0.34], [-0.93, -0.24]],
+    [[[-0.5, -1.0], [-0.4, -1.12]], [[-0.06, -0.96], [0.06, -1.16]], [[0.42, -1.0], [0.5, -1.2]]]];
   const sqHair = h => outlineHair(...h, SQ_HAIR, { lineColor: SQ_LINE });
   const sqEars = ctx => {
     for (const side of [-1, 1]) {
@@ -1218,7 +1198,7 @@ const Cameos = (() => {
       body: { legColor: '#8a8a8a',   // khakis, a mid grey so they don't read as bare legs, waist to ankle
         bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
           fill(ctx, b, '#8a8a8a', 1.2); outline(ctx, b, { w: 9 }); } },
-      head: head({ skin: SQ_SKIN, back: ctx => { sqBackHair(ctx); sqEars(ctx); }, hair: sqCrown, beard: sqBeard({ full: 0.12, flecks: true }), front: sqStache, browW: 9 }),
+      head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_UP), beard: sqBeard({ full: 0.12, flecks: true }), front: sqStache, browW: 9 }),
       detail: overshirt }),
   };
 
