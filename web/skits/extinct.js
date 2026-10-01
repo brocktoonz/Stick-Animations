@@ -9,36 +9,84 @@ Skits.extinct = (() => {
   const FLOOR = 1680, S = 1.45;
   const NICK = '#4f9be8', LUD = '#ffffff', SLIME = '#4fd34f';
 
-  // [start, end, speaker colour, text] — exactly as captioned in the original
+  // [start, end, speaker colour, text]: words exactly as captioned in the
+  // original, timed to the speech itself (word timestamps from
+  // references/yard-extinct-animals/words.json; the original's burned-in
+  // captions lag the audio by 0.3-0.6 s). Each caption holds until the next.
   const LINES = [
-    [0.46, 1.72, NICK, 'Would you rather\nbring back'],   // trimmed: the clip starts after "Ludwig"
-    [1.75, 3.2, NICK, 'every single\nextinct animal'],
-    [3.4, 3.97, NICK, "but there's no-"],
-    [4.0, 4.7, LUD, 'other option'],
-    [6.0, 6.95, NICK, 'what do you mean\nother option'],
-    [7.0, 7.6, LUD, 'give me the\nother option'],
-    [7.72, 8.47, NICK, "why you don't want\nthat?"],
-    [8.5, 9.4, LUD, "whatever the other\noption is I'll"],
-    [9.45, 9.9, LUD, 'take it'],
-    [10.75, 12.0, NICK, "you don't wanna\nengage with the\nhypothetical"],
-    [12.0, 13.2, LUD, 'What was the\nsecond one'],
-    [13.25, 13.97, NICK, 'the second one\nwas-'],
-    [14.0, 15.97, NICK, 'or get an equal amount\nof new animals'],
-    [16.0, 16.97, LUD, 'Gimme the\nnew ones'],
-    [17.0, 17.47, LUD, 'f*ck the\nold ones'],
-    [17.5, 18.12, NICK, 'Why?'],
-    [18.2, 18.72, LUD, 'they died for a\nreason'],
-    [18.75, 19.72, NICK, "you don't wanna see\na f*ckin'"],
-    [19.75, 20.65, NICK, 'Velociraptor'],
-    [20.72, 22.1, SLIME, "God didn't love\nvelociraptors"],
-    [22.2, 23.2, SLIME, 'thats why he sent\nthe meteor'],
+    [0.46, 1.44, NICK, 'Would you rather\nbring back'],   // trimmed: the clip starts after "Ludwig"
+    [1.44, 3.3, NICK, 'every single\nextinct animal'],
+    [3.44, 3.92, NICK, "but there's no-"],
+    [3.92, 4.6, LUD, 'other option'],
+    [5.58, 6.48, NICK, 'what do you mean\nother option'],
+    [6.48, 7.24, LUD, 'give me the\nother option'],
+    [7.24, 8.22, NICK, "why you don't want\nthat?"],
+    [8.22, 9.26, LUD, "whatever the other\noption is I'll"],
+    [9.26, 9.7, LUD, 'take it'],
+    [9.92, 11.92, NICK, "you don't wanna\nengage with the\nhypothetical"],
+    [11.92, 12.95, LUD, 'What was the\nsecond one'],
+    [13.14, 13.75, NICK, 'the second one\nwas-'],
+    [13.82, 15.78, NICK, 'or get an equal amount\nof new animals'],
+    [15.78, 16.64, LUD, 'Gimme the\nnew ones'],
+    [16.64, 17.36, LUD, 'f*ck the\nold ones'],
+    [17.36, 17.62, NICK, 'Why?'],
+    [17.62, 18.68, LUD, 'they died for a\nreason'],
+    [18.68, 19.52, NICK, "you don't wanna see\na f*ckin'"],
+    [19.52, 20.5, NICK, 'Velociraptor'],
+    [20.5, 21.86, SLIME, "God didn't love\nvelociraptors"],
+    [21.86, 23.0, SLIME, 'thats why he sent\nthe meteor'],
   ];
+  // [start, end, word] per line, from the word timestamps (gaps whisper
+  // missed: "take it", "with the hypothetical", "what was the second one" and
+  // "the second one was" are placed from the loudness)
+  const WORDS = [
+    [[0.46, 0.48, 'would'], [0.48, 0.62, 'you'], [0.62, 0.84, 'rather'], [0.84, 1.14, 'bring'], [1.14, 1.44, 'back']],
+    [[1.44, 1.82, 'every'], [1.82, 2.14, 'single'], [2.14, 2.5, 'extinct'], [2.5, 2.92, 'animal']],
+    [[3.44, 3.56, 'but'], [3.56, 3.78, "there's"], [3.78, 3.92, 'no']],
+    [[3.92, 4.12, 'other'], [4.12, 4.32, 'option']],
+    [[5.58, 5.68, 'what'], [5.68, 5.76, 'do'], [5.76, 5.84, 'you'], [5.84, 5.96, 'mean'], [5.96, 6.16, 'other'], [6.16, 6.48, 'option']],
+    [[6.48, 6.62, 'give'], [6.62, 6.76, 'me'], [6.76, 6.8, 'the'], [6.8, 6.96, 'other'], [6.96, 7.2, 'option']],
+    [[7.24, 7.6, 'why'], [7.6, 7.72, 'you'], [7.72, 7.8, "don't"], [7.8, 7.9, 'want'], [7.9, 8.22, 'that']],
+    [[8.22, 8.48, 'whatever'], [8.48, 8.66, 'the'], [8.66, 8.78, 'other'], [8.78, 9.02, 'option'], [9.02, 9.14, 'is'], [9.14, 9.26, "I'll"]],
+    [[9.26, 9.4, 'take'], [9.4, 9.48, 'it']],
+    [[9.92, 10.3, 'you'], [10.3, 10.68, "don't"], [10.68, 10.86, 'wanna'], [10.86, 11.2, 'engage'], [11.2, 11.32, 'with'], [11.32, 11.42, 'the'], [11.42, 11.9, 'hypothetical']],
+    [[11.92, 12.06, 'what'], [12.06, 12.22, 'was'], [12.3, 12.5, 'the'], [12.5, 12.7, 'second'], [12.7, 12.88, 'one']],
+    [[13.14, 13.22, 'the'], [13.22, 13.42, 'second'], [13.42, 13.5, 'one'], [13.5, 13.62, 'was']],
+    [[13.82, 14.06, 'or'], [14.06, 14.36, 'get'], [14.36, 14.48, 'an'], [14.48, 14.8, 'equal'], [14.8, 15.04, 'amount'], [15.04, 15.18, 'of'], [15.18, 15.34, 'new'], [15.34, 15.78, 'animals']],
+    [[15.78, 16.04, 'and'], [16.04, 16.24, 'gimme'], [16.24, 16.32, 'the'], [16.32, 16.4, 'new'], [16.4, 16.64, 'ones']],
+    [[16.64, 16.92, 'fuck'], [16.92, 17.04, 'the'], [17.04, 17.12, 'old'], [17.12, 17.36, 'ones']],
+    [[17.36, 17.62, 'why']],
+    [[17.62, 18.08, 'they'], [18.08, 18.26, 'died'], [18.26, 18.42, 'for'], [18.42, 18.5, 'a'], [18.5, 18.68, 'reason']],
+    [[18.68, 18.8, 'you'], [18.8, 18.92, "don't"], [18.92, 19.06, 'wanna'], [19.06, 19.18, 'see'], [19.18, 19.3, 'a'], [19.3, 19.52, 'fuckin']],
+    [[19.52, 20.48, 'velociraptor']],
+    [[20.5, 20.88, 'god'], [20.88, 21.28, "didn't"], [21.28, 21.42, 'love'], [21.42, 21.86, 'velociraptors']],
+    [[21.86, 22.1, 'thats'], [22.1, 22.22, 'why'], [22.22, 22.28, 'he'], [22.28, 22.42, 'sent'], [22.42, 22.56, 'the'], [22.56, 22.92, 'meteor']],
+  ];
+  // Shots are written in "script time" (the old caption-led timeline). This
+  // maps audio time to script time so each cut and in-shot beat lands on the
+  // speech: [audio time, script time] anchors, piecewise linear.
+  const WARP = [[0, 0], [1.44, 1.75], [3.35, 3.35], [4.5, 4.7], [5.58, 6.0], [6.48, 7.0], [7.24, 7.72], [8.22, 8.5],
+    [9.26, 9.45], [9.92, 10.75], [11.92, 12.0], [13.14, 13.25], [13.82, 14.0], [15.78, 16.0], [16.64, 17.0],
+    [17.36, 17.5], [17.9, 18.18], [18.68, 18.75], [19.52, 19.75], [20.5, 20.7], [21.86, 21.55], [23.02, 23.02], [99, 99]];
+  const pw = (pairs, x) => { for (let i = 1; i < pairs.length; i++) if (x <= pairs[i][0]) { const [a0, b0] = pairs[i - 1], [a1, b1] = pairs[i]; return b0 + (b1 - b0) * (x - a0) / (a1 - a0); } return x; };
+  const warp = x => pw(WARP, x), unwarp = x => pw(WARP.map(([a, b]) => [b, a]), x);
+  let REAL = 0;   // the audio time of the frame being drawn
+  // lip sync for line i, driven by its word timings and the audio loudness:
+  // each word's mouth shapes play inside that word, the mouth closes in the
+  // gaps between words and wherever the audio drops out
+  const talkLine = (_t, i, o) => {
+    const ws = WORDS[i], t = REAL;
+    if (t < ws[0][0] || t > ws[ws.length - 1][1] + 0.05) return {};
+    const w = ws.find(([a, b]) => t >= a && t <= b);
+    const rest = { mouth: 'talk', viz: LipSync.shape('m', 0, 1, 0.99, o) };
+    if (!w) return rest;
+    if (Stage.loud('extinct_fast', t) < 0.1) return rest;
+    const viz = LipSync.shape(w[2].replace(/\*/g, 'u'), w[0], w[1] + 0.001, t, o);
+    return viz ? { mouth: 'talk', viz } : rest;
+  };
   // a caption holds through gaps under 0.15 s so it doesn't blink off between lines
-  const cutIn = (a, b) => shots.some(([s0]) => s0 > a && s0 <= b);   // a shot cut inside (a, b]
+  const cutIn = (a, b) => shots.some(([s0]) => unwarp(s0) > a && unwarp(s0) <= b);   // a shot cut inside (a, b]
   const line = t => LINES.find(([a, b], i) => t >= a && (t < b || (LINES[i + 1] && t < LINES[i + 1][0] && LINES[i + 1][0] - b < 0.15 && !cutIn(b, t))));
-  // lip sync for whoever is talking in [a, b]
-  const talk = (t, a, b, text, o) => say(t, a, b, text.replace(/\n/g, ' ').replace(/\*/g, 'u'), o);
-  const talkLine = (t, i, o) => talk(t, LINES[i][0], LINES[i][1], LINES[i][3], o);
 
   // Captions: one size throughout (words wrap instead of shrinking), in the
   // speaker's colour from the original with a heavy black outline.
@@ -368,7 +416,7 @@ Skits.extinct = (() => {
       ctx.save(); cam(ctx, cwx, cwy, z, headSy);
       stage(ctx);
       if (t >= 9.85) {
-        const k = loud('extinct', t), slide = easeOut(seg(t, 9.8, 10.25)), lean = 0.55, ss = S * 0.8;   // leans in steeply and eases in, no pop   // smaller: further back
+        const k = loud('extinct', REAL), slide = easeOut(seg(t, 9.8, 10.25)), lean = 0.55, ss = S * 0.8;   // leans in steeply and eases in, no pop   // smaller: further back
         // Slime's head centre on screen: slides in from off the left edge,
         // face just clear of Ludwig's head
         const hx = lerp(-300, 185, slide), hy = headSy - 10;   // head up beside Ludwig's, body off the left edge   // high enough that Ludwig's hip arm stays below his mouth
@@ -379,7 +427,7 @@ Skits.extinct = (() => {
       }
       lud(ctx, { t, ...E.smirk, ...Ar.both([90, -200], 'out'), lookX: 0.95, pupil: 10,
                  lid: t >= 9.9 ? 1 : 0.42, lowLid: t >= 9.9 ? 0 : 0.3, brow: t >= 9.9 ? 0.45 : 0.2,
-                 ...talk(t, 8.5, 9.9, "whatever the other option is I'll take it"), lean: 0.02 });
+                 ...(REAL < 9.26 ? talkLine(t, 7) : talkLine(t, 8)), lean: 0.02 });
       ctx.restore();
       heads.push(headSy - g.hair * sc);
     }],
@@ -498,7 +546,7 @@ Skits.extinct = (() => {
       // staggered in depth with clear gaps between heads: Nick and Ludwig
       // behind on their own sides (shadows only, no ground line to show
       // through Slime's arms), Slime in front and lower, chest-up
-      const k = loud('extinct', t), back = 1290;
+      const k = loud('extinct', REAL), back = 1290;
       ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040);
       lud(ctx, { t, x: 790, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out') });
       nick(ctx, { t, x: 295, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(-1, [-72, -176], 'out') });
@@ -511,9 +559,10 @@ Skits.extinct = (() => {
     // clip); times stay in clip time and export.cjs trims the audio to match
     title: '', subtitle: '', duration: 25.16, start: 0.46,
     draw(ctx, t) {
-      const shot = shots.find(([a, b]) => t >= a && t < b) ?? shots[shots.length - 1];
-      SHOT = [shot[0], shot[1]]; heads.length = 0;
-      shot[2](ctx, t);
+      REAL = t;
+      const ts = warp(t), shot = shots.find(([a, b]) => ts >= a && ts < b) ?? shots[shots.length - 1];
+      SHOT = [unwarp(shot[0]), unwarp(shot[1])]; heads.length = 0;
+      shot[2](ctx, ts);
       // caption check: no head may reach into the caption block
       const cb = capBottom();
       if (line(t) && heads.some(y => y < cb)) throw new Error(`extinct: caption overlaps a head at ${t.toFixed(2)}s`);

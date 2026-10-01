@@ -122,6 +122,8 @@ const LipSync = (() => {
       if (two === 'ai' || two === 'ay') { push('half', VOWEL); i++; continue; }
       if (two === 'th') { push('lth', CONS); i++; continue; }
       if (two === 'ch' || two === 'sh') { push('teeth', CONS); i++; continue; }
+      if (two === 'ph') { push('fv', CONS); i++; continue; }
+      if (two === 'ck') { push('teeth', CONS); i++; continue; }   // one k sound, not c + k
       if (two === 'wh') { push('oo', CONS); i++; continue; }
       if (c === 'e' && endOfWord && i > 0 && /[a-z]{2}$/.test(s.slice(Math.max(0, i - 3), i)) && s[i - 1] !== 'e') continue;   // silent final e
       if (c === 'a') { push(loud ? 'wide' : 'open', VOWEL); continue; }
