@@ -70,19 +70,27 @@ Skits.extinct = (() => {
     [17.36, 17.5], [17.9, 18.18], [18.68, 18.75], [19.52, 19.75], [20.5, 20.7], [21.86, 21.55], [23.02, 23.02], [99, 99]];
   const pw = (pairs, x) => { for (let i = 1; i < pairs.length; i++) if (x <= pairs[i][0]) { const [a0, b0] = pairs[i - 1], [a1, b1] = pairs[i]; return b0 + (b1 - b0) * (x - a0) / (a1 - a0); } return x; };
   const warp = x => pw(WARP, x), unwarp = x => pw(WARP.map(([a, b]) => [b, a]), x);
-  let REAL = 0;   // the audio time of the frame being drawn
+  let REAL = 0, SHOT_T0 = 0;   // the audio time of the frame being drawn
   // lip sync for line i, driven by its word timings and the audio loudness:
   // each word's mouth shapes play inside that word, the mouth closes in the
   // gaps between words and wherever the audio drops out
-  const talkLine = (_t, i, o) => {
-    const ws = WORDS[i], t = REAL;
-    if (t < ws[0][0] || t > ws[ws.length - 1][1] + 0.05) return {};
-    const w = ws.find(([a, b]) => t >= a && t <= b);
-    const rest = { mouth: 'talk', viz: LipSync.shape('m', 0, 1, 0.99, o) };
-    if (!w) return rest;
-    if (Stage.loud('extinct_fast', t) < 0.1) return rest;
-    const viz = LipSync.shape(w[2].replace(/\*/g, 'u'), w[0], w[1] + 0.001, t, o);
-    return viz ? { mouth: 'talk', viz } : rest;
+  const talkLine = (_t, i) => {
+    const ws = WORDS[i], t = REAL, t0 = ws[0][0];
+    if (t < t0 || t > ws[ws.length - 1][1] + 0.05) return {};
+    // On threes on one grid for the whole line (not restarting per word, so
+    // short words like "the" still get a drawing): within each 3-frame beat,
+    // show the most open sound under it. A sample outside every word, or where
+    // the audio drops out, counts as closed.
+    const STEP = 0.1, beat = Math.floor((t - t0) / STEP), tq = t0 + beat * STEP;
+    let kind = 'rest';
+    for (let k = 0; k < 3; k++) {
+      const ts = tq + STEP * (k + 0.5) / 3;
+      const w = ws.find(([a, b]) => ts >= a && ts < b);
+      if (!w || Stage.loud('extinct_fast', ts) < 0.1) continue;
+      const sd = LipSync.soundAt(w[2].replace(/\*/g, 'u'), (ts - w[0]) / (w[1] - w[0]));
+      if (sd !== 'gap' && (kind === 'rest' || LipSync.OPEN[sd] > LipSync.OPEN[kind])) kind = sd;
+    }
+    return { mouth: 'talk', viz: { kind, open: LipSync.OPEN[kind], intensity: 1, smile: 0, side: 1, var: (beat * 7919 % 5) / 4 } };
   };
   // a caption holds through gaps under 0.15 s so it doesn't blink off between lines
   const cutIn = (a, b) => shots.some(([s0]) => unwarp(s0) > a && unwarp(s0) <= b);   // a shot cut inside (a, b]
@@ -272,7 +280,7 @@ Skits.extinct = (() => {
     // lean and head tilt are always on (held per beat, changing only on a
     // beat), so nothing pops when a line starts or ends
     const beat = Math.floor(t * 1.8 + seed), talking = p.mouth === 'talk';
-    return { bob: Math.sin(t * 2.3 + seed) * 3, weight: stance(t, seed),
+    return { bob: Math.sin(t * 2.3 + seed) * 3, weight: stance(SHOT_T0, seed),   // legs hold one stance per shot
              lean: 0.04 + (talking ? 0.03 * (hh(beat) - 0.5) : 0),
              tilt: (p.tilt ?? 0) + (talking ? 0.09 * (hh(beat + 9) - 0.5) : 0) };
   }
@@ -564,7 +572,7 @@ Skits.extinct = (() => {
     draw(ctx, t) {
       REAL = t;
       const ts = warp(t), shot = shots.find(([a, b]) => ts >= a && ts < b) ?? shots[shots.length - 1];
-      SHOT = [unwarp(shot[0]), unwarp(shot[1])]; heads.length = 0;
+      SHOT = [unwarp(shot[0]), unwarp(shot[1])]; SHOT_T0 = shot[0] + 0.05; heads.length = 0;
       shot[2](ctx, ts);
       // caption check: no head may reach into the caption block
       const cb = capBottom();

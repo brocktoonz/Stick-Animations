@@ -174,5 +174,16 @@ const LipSync = (() => {
     return { kind, open: OPEN[kind], intensity: o.intensity ?? 1, smile: o.smile ?? 0, side: o.side ?? 1, var: (beat * 7919 % 5) / 4 };
   }
 
-  return { shape: swap, morph: shape, plan, VISEMES: V };
+  // The sound at position u (0..1) through a word, for callers that place
+  // words from their own timings and pick the drawing on a shared beat.
+  function soundAt(text, u) {
+    let seq = swapCache.get(text);
+    if (!seq) { seq = sounds(text, false); swapCache.set(text, seq); }
+    const total = seq.reduce((a, x) => a + x.w, 0) || 1;
+    let acc = 0, i = 0;
+    while (i < seq.length - 1 && acc + seq[i].w <= u * total) { acc += seq[i].w; i++; }
+    return seq[i]?.kind ?? 'rest';
+  }
+
+  return { shape: swap, morph: shape, plan, soundAt, OPEN, VISEMES: V };
 })();
