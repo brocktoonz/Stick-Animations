@@ -74,22 +74,41 @@ Skits.extinct = (() => {
   // lip sync for line i, driven by its word timings and the audio loudness:
   // each word's mouth shapes play inside that word, the mouth closes in the
   // gaps between words and wherever the audio drops out
+  // Lip sync for line i. The audio drives the timing: the mouth opens with
+  // each syllable's loudness and closes in the dips (so it keeps up with fast
+  // talk), and the word under it only picks which drawing (ee, oh, oo, f/v,
+  // m/b/p...). Drawings change on twos.
+  const VOWELS = new Set(['open', 'wide', 'half', 'oh', 'oo', 'ee']);
+  const lineLevel = [];   // per line: its loud level (90th percentile), so quiet and loud speakers both open fully
+  const level = i => {
+    if (lineLevel[i] === undefined) {
+      const ws = WORDS[i], v = [];
+      for (let t = ws[0][0]; t < ws[ws.length - 1][1]; t += 1 / 30) v.push(Stage.loud('extinct_fast', t));
+      v.sort((a, b) => a - b);
+      lineLevel[i] = Math.max(0.2, v[Math.floor(v.length * 0.9)] ?? 0.5);
+    }
+    return lineLevel[i];
+  };
   const talkLine = (_t, i) => {
     const ws = WORDS[i], t = REAL, t0 = ws[0][0];
-    if (t < t0 || t > ws[ws.length - 1][1] + 0.05) return {};
-    // On threes on one grid for the whole line (not restarting per word, so
-    // short words like "the" still get a drawing): within each 3-frame beat,
-    // show the most open sound under it. A sample outside every word, or where
-    // the audio drops out, counts as closed.
-    const STEP = 0.1, beat = Math.floor((t - t0) / STEP), tq = t0 + beat * STEP;
-    let kind = 'rest';
-    for (let k = 0; k < 3; k++) {
-      const ts = tq + STEP * (k + 0.5) / 3;
-      const w = ws.find(([a, b]) => ts >= a && ts < b);
-      if (!w || Stage.loud('extinct_fast', ts) < 0.1) continue;
-      const sd = LipSync.soundAt(w[2].replace(/\*/g, 'u'), (ts - w[0]) / (w[1] - w[0]));
-      if (sd !== 'gap' && (kind === 'rest' || LipSync.OPEN[sd] > LipSync.OPEN[kind])) kind = sd;
-    }
+    if (t < t0 - 0.05 || t > ws[ws.length - 1][1] + 0.05) return {};
+    const STEP = 2 / 30, beat = Math.floor((t - t0) / STEP), tq = t0 + beat * STEP + STEP / 2;
+    const L = x => Stage.loud('extinct_fast', x);
+    const e = (L(tq - 1 / 60) + L(tq + 1 / 60)) / 2, abs = e / level(i);
+    let near = 0; for (let k = -3; k <= 3; k++) near = Math.max(near, L(tq + k / 30));
+    const r = e / Math.max(near, 1e-3);   // against the loudest moment nearby: syllable peaks ~1, the dips between them lower
+    const w = ws.find(([a, b]) => tq >= a && tq < b) ?? ws.reduce((m, x) => (Math.abs((x[0] + x[1]) / 2 - tq) < Math.abs((m[0] + m[1]) / 2 - tq) ? x : m));
+    const seq = LipSync.soundsOf(w[2].replace(/\*/g, 'u')), u = clamp((tq - w[0]) / (w[1] - w[0]));
+    const here = seq.find(x => u >= x.u0 && u <= x.u1) ?? seq[seq.length - 1];
+    // the word's vowel nearest this moment sets the open shape
+    const vs = seq.filter(x => VOWELS.has(x.kind) && x.kind !== 'oo' || x.kind === 'oo' && x.u1 - x.u0 > 0.15);
+    const vowel = vs.length ? vs.reduce((m, x) => (Math.abs((x.u0 + x.u1) / 2 - u) < Math.abs((m.u0 + m.u1) / 2 - u) ? x : m)).kind : 'half';
+    const cons = ['mbp', 'fv', 'ee', 'oo', 'teeth', 'lth'].includes(here.kind) ? here.kind : 'teeth';
+    let kind;
+    if (abs < 0.2) kind = here.kind === 'mbp' ? 'mbp' : 'rest';                           // silence: closed
+    else if (r < 0.8) kind = here.kind === 'mbp' ? 'mbp' : r < 0.65 ? 'rest' : cons;      // dip between syllables: close down
+    else if (r < 0.93 || abs < 0.55) kind = VOWELS.has(here.kind) ? (vowel === 'open' || vowel === 'wide' ? 'half' : vowel) : cons;   // on the way in/out
+    else kind = vowel === 'half' && abs > 0.8 ? 'open' : vowel;                            // syllable peak
     return { mouth: 'talk', viz: { kind, open: LipSync.OPEN[kind], intensity: 1, smile: 0, side: 1, var: (beat * 7919 % 5) / 4 } };
   };
   // a caption holds through gaps under 0.15 s so it doesn't blink off between lines

@@ -125,7 +125,7 @@ const LipSync = (() => {
       if (two === 'ph') { push('fv', CONS); i++; continue; }
       if (two === 'ck') { push('teeth', CONS); i++; continue; }   // one k sound, not c + k
       if (two === 'wh') { push('oo', CONS); i++; continue; }
-      if (c === 'e' && endOfWord && i > 0 && /[a-z]{2}$/.test(s.slice(Math.max(0, i - 3), i)) && s[i - 1] !== 'e') continue;   // silent final e
+      if (c === 'e' && endOfWord && i > 0 && /[a-z]{2}$/.test(s.slice(Math.max(0, i - 3), i)) && s[i - 1] !== 'e' && /[aeiouy]/.test(s.slice(0, i).split(/[^a-z']/).pop())) continue;   // silent final e (not in "the", "she": the word needs another vowel)
       if (c === 'a') { push(loud ? 'wide' : 'open', VOWEL); continue; }
       if (c === 'i') { push('half', VOWEL); continue; }
       if (c === 'e') { push('half', VOWEL * 0.9); continue; }
@@ -185,5 +185,14 @@ const LipSync = (() => {
     return seq[i]?.kind ?? 'rest';
   }
 
-  return { shape: swap, morph: shape, plan, soundAt, OPEN, VISEMES: V };
+  // The word's sounds with their spans through it (u0..u1 in 0..1).
+  function soundsOf(text) {
+    let seq = swapCache.get(text);
+    if (!seq) { seq = sounds(text, false); swapCache.set(text, seq); }
+    const total = seq.reduce((a, x) => a + x.w, 0) || 1;
+    let acc = 0;
+    return seq.map(x => { const r = { kind: x.kind, u0: acc / total, u1: (acc + x.w) / total }; acc += x.w; return r; });
+  }
+
+  return { shape: swap, morph: shape, plan, soundAt, soundsOf, OPEN, VISEMES: V };
 })();
