@@ -406,9 +406,11 @@ Skits.extinct = (() => {
     }],
     // "but there's no-" ... Ludwig cuts in off-screen ("other option"): stay
     // on Nick and let him go blank while Ludwig speaks
-    [3.35, 4.7, (ctx, t) => mediumNick(ctx, t, t < 4.0
-      ? { ...E.happy, pointR: -1.2, ...Ar.arm(1, [170, -400], 'down', true), ...talkLine(t, 2) }
-      : { ...E.stunned, lookX: 0.75 })],
+    // his raised hand drops to his side over a few frames as he goes blank
+    [3.35, 4.7, (ctx, t) => { const d = easeInOut(seg(t, 4.0, 4.2)), hand = [lerp(170, 120, d), lerp(-400, -150, d)];
+      mediumNick(ctx, t, t < 4.0
+        ? { ...E.happy, pointR: -1.2, ...Ar.arm(1, hand, 'down', true), ...talkLine(t, 2) }
+        : { ...E.stunned, lookX: 0.75, ...Ar.arm(1, hand, 'down', d < 0.5) }); }],
     // Ludwig, smug about it: slow push
     [4.7, 6.0, (ctx, t) => single(ctx, t, 'lud', { ...E.smirk, mouth: 'smirk', lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06,
       crossArms: true }, lerp(1.35, 1.5, easeInOut(seg(t, 4.7, 6.0))), 1160)],
@@ -458,13 +460,13 @@ Skits.extinct = (() => {
     // "...or get an equal amount of new animals": cutaway, new creatures pop in
     [14.0, 16.0, (ctx, t) => {
       newWorld(ctx, t);
-      const pops = [[14.1, 260, 1.2, () => A.fishLegs(ctx, { x: 260, y: FLOOR + 60, s: 1.2, t, walk: true })],
+      const pops = [[14.1, 225, 1.2, () => A.fishLegs(ctx, { x: 225, y: FLOOR + 60, s: 1.2, t, walk: true })],
                     [14.55, 570, 1.4, () => A.longCat(ctx, { x: 570, y: FLOOR + 20, s: 1.4, t })],
                     [15.0, 895, 1.1, () => A.wingPig(ctx, { x: 895, y: FLOOR - 120, s: 1.1, t, dir: -1 })]];
       for (const [t0, x, sc, draw] of pops) {
         const k = seg(t, t0, t0 + 0.25);
         if (k <= 0) continue;
-        if (x !== 895) shadow(ctx, x, 90 * sc * k, FLOOR + (x === 260 ? 62 : 26));
+        if (x !== 895) shadow(ctx, x, 90 * sc * k, FLOOR + (x === 225 ? 62 : 26));
         ctx.save(); ctx.translate(x, FLOOR); const e = easeOutBack(k); ctx.scale(e, e); ctx.translate(-x, -FLOOR); draw(); ctx.restore();
         const sk = seg(t, t0, t0 + 0.6);
         if (sk < 1) for (let i = 0; i < 4; i++) sparkle(ctx, x + Math.cos(i * 1.7) * 170 * sk, FLOOR - 250 + Math.sin(i * 1.7) * 150 * sk, 30 * (1 - sk), sk * 3);
