@@ -1123,10 +1123,11 @@ const Cameos = (() => {
   // dome behind the head). The ends start on that band, so only the curly top
   // and the hairline are inked and the crown never reads as a separate cap.
   // The hairline is an M: deep bare notches over each brow, a small rounded lobe in the middle.
-  const SQ_CROWN = [[-0.64, -0.84], [-0.7, -1.0], [-0.6, -1.12], [-0.46, -1.16], [-0.36, -1.32], [-0.2, -1.28], [-0.06, -1.4],
-                    [0.1, -1.32], [0.24, -1.46], [0.4, -1.38], [0.56, -1.44], [0.64, -1.26], [0.78, -1.14], [0.74, -0.98], [0.66, -0.82]];
-  const SQ_LINE_M = [[0.54, -0.8], [0.42, -0.88], [0.3, -0.94], [0.2, -0.92], [0.13, -0.88], [0.07, -0.84], [0, -0.83],
-                     [-0.07, -0.84], [-0.13, -0.88], [-0.2, -0.92], [-0.3, -0.94], [-0.42, -0.88], [-0.54, -0.8]];
+  const SQ_CROWN = [[-0.77, -0.72], [-0.84, -0.86], [-0.72, -1.0], [-0.6, -1.12], [-0.46, -1.16], [-0.36, -1.32], [-0.2, -1.28],
+                    [-0.06, -1.4], [0.1, -1.32], [0.24, -1.46], [0.4, -1.38], [0.56, -1.44], [0.64, -1.26], [0.78, -1.14],
+                    [0.86, -0.94], [0.77, -0.72]];
+  const SQ_LINE_M = [[0.66, -0.66], [0.5, -0.8], [0.34, -0.88], [0.22, -0.86], [0.12, -0.82], [0.05, -0.79], [0, -0.78],
+                     [-0.05, -0.79], [-0.12, -0.82], [-0.22, -0.86], [-0.34, -0.88], [-0.5, -0.8], [-0.66, -0.66]];
   const sqCrown = ctx => {
     fill(ctx, hu([...SQ_CROWN, ...SQ_LINE_M]), SQ_HAIR, 1);
     stroke(ctx, hu(SQ_CROWN), { w: 11, taper0: 0.3, taper1: 0.3 });   // the ends sit on the back band, outside the head outline
@@ -1137,7 +1138,7 @@ const Cameos = (() => {
   // down to the ears at the sides. It breaks at the temples, so bare skin
   // meets the head outline there.
   const sqBackHair = ctx => {
-    for (const [a0, a1] of [[0.97, 1.12], [1.28, 1.72], [1.88, 2.03]]) {
+    for (const [a0, a1] of [[0.97, 1.14], [1.22, 1.78], [1.86, 2.03]]) {
       const outer = [], inner = [], n = Math.round((a1 - a0) * 24);
       for (let i = 0; i <= n; i++) {
         const a = Math.PI * (a0 + (a1 - a0) * i / n), r = 1.07 + (i % 2 ? 0.035 : 0);   // a little curl in the edge
