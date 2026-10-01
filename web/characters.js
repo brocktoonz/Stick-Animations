@@ -5,6 +5,7 @@
 // Pose fields shared by all full-body characters:
 //   x y        ground position of the feet (world px)      s    scale
 //   dir        1 faces right, -1 faces left                 lean body tilt (rad)
+//   kick       front leg swung straight from the hip: 1 = kicked out forward, negative = wound back
 //   step       -1..1 walk cycle (feet swap)                 bob  body offset (neg = up)
 //   tilt       head tilt (rad)                              face horizontal face offset
 //   lookX/Y    pupils -1..1   pupil  pupil radius   lid 0..1 (>=1 closed eyes)
@@ -522,9 +523,17 @@ const Chars = (() => {
       const free = wt && Math.sign(wt) !== side ? Math.abs(wt) : 0;
       // free leg: foot stepped out to its own side and resting on its toe, knee
       // bent forward. It never crosses the standing leg.
-      const fx = side * Math.max(S.footX, 24) + ph * S.stride + side * 30 * free, lift = Math.max(0, ph) * S.lift + 14 * free;
-      const hip = [side * S.hipX + wt * 14, hipY + S.legTop], foot = [fx, -12 - lift];
-      const leg = [hip, [(hip[0] + fx) / 2 + 8 + 30 * free + side * 6 * free, (hip[1] + foot[1]) / 2 - 6 * free], foot];
+      let fx = side * Math.max(S.footX, 24) + ph * S.stride + side * 30 * free, lift = Math.max(0, ph) * S.lift + 14 * free;
+      const hip = [side * S.hipX + wt * 14, hipY + S.legTop];
+      let foot = [fx, -12 - lift];
+      let leg = [hip, [(hip[0] + fx) / 2 + 8 + 30 * free + side * 6 * free, (hip[1] + foot[1]) / 2 - 6 * free], foot];
+      const kick = side === 1 ? (p.kick ?? 0) : 0;
+      if (kick) {   // the front leg swings straight from the hip (negative = drawn back for the wind-up)
+        const L = -12 - hip[1], a = kick * 1.15;
+        foot = [hip[0] + L * Math.sin(a), hip[1] + L * Math.cos(a)];
+        fx = foot[0]; lift = -12 - foot[1];
+        leg = [hip, [(hip[0] + foot[0]) / 2 + 6, (hip[1] + foot[1]) / 2 + 4], foot];
+      }
       if (S.legColor) {   // coloured trousers: ink edge, colour inside
         stroke(ctx, leg, { w: S.legW + 10, taper0: 0, taper1: 0, minW: 1, seed: 70 + side, pressure: 0.03 });
         stroke(ctx, leg, { w: S.legW, taper0: 0, taper1: 0, minW: 1, seed: 70 + side, pressure: 0, color: S.legColor });

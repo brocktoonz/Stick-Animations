@@ -65,7 +65,7 @@ Skits.extinct = (() => {
   // Shots are written in "script time" (the old caption-led timeline). This
   // maps audio time to script time so each cut and in-shot beat lands on the
   // speech: [audio time, script time] anchors, piecewise linear.
-  const WARP = [[0, 0], [1.44, 1.75], [3.35, 3.35], [4.5, 4.7], [5.58, 6.0], [6.48, 7.0], [7.24, 7.72], [8.22, 8.5],
+  const WARP = [[0, 0], [1.44, 1.75], [3.35, 3.35], [4.6, 4.7], [5.58, 6.0], [6.48, 7.0], [7.24, 7.72], [8.22, 8.5],
     [9.26, 9.45], [9.92, 10.75], [11.92, 12.0], [13.14, 13.25], [13.82, 14.0], [15.78, 16.0], [16.64, 17.0],
     [17.36, 17.5], [17.9, 18.18], [18.68, 18.75], [19.52, 19.75], [20.5, 20.7], [21.86, 21.55], [23.02, 23.02], [99, 99]];
   const pw = (pairs, x) => { for (let i = 1; i < pairs.length; i++) if (x <= pairs[i][0]) { const [a0, b0] = pairs[i - 1], [a1, b1] = pairs[i]; return b0 + (b1 - b0) * (x - a0) / (a1 - a0); } return x; };
@@ -371,13 +371,13 @@ Skits.extinct = (() => {
       { ...E.neutral, ...Ar.arm(-1, [-112, -176], 'out'), ...Ar.arm(1, [60, -150], 'out'), weight: TS_WL })],   // hand on hip
     // ...every single extinct animal: they burst out of the ground
     [1.75, 3.35, (ctx, t) => {
-      ctx.save(); cam(ctx, 540, FLOOR - 330, 1.05, 1330);
+      ctx.save(); cam(ctx, 540, FLOOR - 330, 1.05, 1290);
       prehistoric(ctx, t);
       // back row: mammoth (left) and T-rex (right), clear of each other; front row: raptor, dodo
       const pops = [[1.8, 225, 0.8, FLOOR - 70, (x, y) => A.mammoth(ctx, { x, y, s: 0.8, t, eyes: 'happy' })],
                     [2.05, 850, 1.0, FLOOR - 80, (x, y) => A.trex(ctx, { x, y, s: 1.0, t, dir: -1, snarl: t > 2.3 })],
-                    [2.3, 420, 0.7, FLOOR + 130, (x, y) => A.dodo(ctx, { x, y, s: 0.7, t })],
-                    [2.55, 800, 0.7, FLOOR + 150, (x, y) => A.raptor(ctx, { x, y, s: 0.7, t, walk: true })]];
+                    [2.3, 420, 0.7, FLOOR + 201, (x, y) => A.dodo(ctx, { x, y, s: 0.7, t })],
+                    [2.55, 800, 0.7, FLOOR + 221, (x, y) => A.raptor(ctx, { x, y, s: 0.7, t, walk: true })]];
       for (const [t0, x, sc, y, draw] of pops) {
         const k = seg(t, t0, t0 + 0.28);
         if (k > 0) shadow(ctx, x, 110 * sc * Math.min(1, k * 2), y + 6);
@@ -390,7 +390,7 @@ Skits.extinct = (() => {
     // on Nick and let him go blank while Ludwig speaks
     [3.35, 4.7, (ctx, t) => mediumNick(ctx, t, t < 4.0
       ? { ...E.happy, pointR: -1.2, ...Ar.arm(1, [170, -400], 'down', true), ...talkLine(t, 2) }
-      : { ...E.stunned })],
+      : { ...E.stunned, lookX: 0.75 })],
     // Ludwig, smug about it: slow push
     [4.7, 6.0, (ctx, t) => single(ctx, t, 'lud', { ...E.smirk, mouth: 'smirk', lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06,
       crossArms: true }, lerp(1.35, 1.5, easeInOut(seg(t, 4.7, 6.0))), 1160)],
@@ -466,12 +466,14 @@ Skits.extinct = (() => {
       // wind-up, contact at 17.12, then a
       // visible arc off the left edge
       const wind = seg(t, 16.98, 17.08), kick = seg(t, 17.08, 17.14), fly = seg(t, 17.14, 17.5);
-      const step = t < 17.08 ? 0.6 * wind : lerp(0.6, -1.5, kick) * (1 - 0.6 * fly);
+      // the front leg winds back, swings straight out at the raptor, holds through
+      // contact and lowers once it's flying; the back leg stays planted
+      const kickAmt = t < 17.08 ? -0.35 * easeOut(wind) : kick < 1 ? lerp(-0.35, 1, kick) : 1 - easeInOut(seg(fly, 0.35, 1));
       // smug the whole time: eyes closed, arms folded, and he never opens his
       // eyes or changes expression, even for the kick
       lud(ctx, { t, x: 640, ...E.smirk, lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06, crossArms: true,
                  ...talkLine(t, t < 16.985 ? 13 : 14),
-                 step, lean: -0.1 * kick * (1 - fly) + 0.05 * wind, ...(t > 16.98 ? { weight: 0 } : {}) });
+                 kick: kickAmt, lean: -0.1 * kick * (1 - fly) + 0.05 * wind, ...(t > 16.98 ? { weight: -0.6 } : {}) });
       // a small raptor wanders in on its own from the left (separate from the
       // new animals behind him), stops at his foot, and gets punted
       const walk = seg(t, 16.1, 16.9), dinoX = lerp(-160, 480, walk);   // stops with its snout at his toe
@@ -496,9 +498,9 @@ Skits.extinct = (() => {
       stage(ctx);
       const k = seg(t, 19.7, 19.95);
       const rs = 1.1, headWx = NX - (sx - 540) / z + (870 - 540) / z;
-      if (k > 0) A.raptor(ctx, { x: headWx + 70 * rs - 60, y: FLOOR - 170, s: rs * easeOutBack(k), t, dir: -1, rot: -0.55, snarl: t > 19.9 });   // rears up, jaw over his shoulder
+      if (k > 0) A.raptor(ctx, { x: headWx + 70 * rs - 5, y: FLOOR - 20, s: rs * easeOutBack(k), t, dir: -1, rot: -0.55, snarl: t > 19.9 });   // rears up, jaw over his shoulder
       nick(ctx, t < 19.75 ? { t, ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 17) }
-                          : { t, mouth: E.confused.mouth, open: E.confused.open, browL: E.confused.browL, browLiftL: E.confused.browLiftL, browR: E.confused.browR, browLiftR: E.confused.browLiftR, tilt: E.confused.tilt, ...Ar.both([175, -236], 'down'), ...talkLine(t, 18) });   // confused face only: no head-scratch arm across his glasses
+                          : { t, mouth: E.confused.mouth, open: E.confused.open, browL: E.confused.browL, browLiftL: E.confused.browLiftL, browR: E.confused.browR, browLiftR: E.confused.browLiftR, tilt: E.confused.tilt, ...Ar.arm(-1, [-175, -236], 'down'), ...Ar.arm(1, [85, -300], 'down'), ...talkLine(t, 18) });   // near hand up, clear of the raptor's jaws   // confused face only: no head-scratch arm across his glasses
       ctx.restore();
       heads.push(sy - hairTop);
     }],
@@ -518,7 +520,7 @@ Skits.extinct = (() => {
       A.raptor(ctx, { x: x1, y: FLOOR + 40, s: 0.7, t, eyes: look ? 'normal' : 'happy', lookX: look ? -1 : 0, lookY: look ? -1 : 0 });
       A.raptor(ctx, { x: x2, y: FLOOR + 60, s: 0.68, t: t + 0.3, dir: -1, eyes: look ? 'normal' : 'happy', lookX: look ? 1 : 0, lookY: look ? -1 : 0 });
       const m = seg(t, 22.2, hit);
-      if (m > 0 && m < 1) A.meteor(ctx, lerp(260, 555, m), lerp(-250, FLOOR - 40, m), lerp(60, 150, m), t);   // steep, down the gap between them
+      if (m > 0 && m < 1) A.meteor(ctx, lerp(-12, 555, m), lerp(1032, FLOOR - 40, m), lerp(60, 150, m), t);   // in from the left edge below the caption, down the gap between them
       ctx.restore();
     }],
     // aftermath: just the crater, both raptors gone
@@ -546,11 +548,12 @@ Skits.extinct = (() => {
       // staggered in depth with clear gaps between heads: Nick and Ludwig
       // behind on their own sides (shadows only, no ground line to show
       // through Slime's arms), Slime in front and lower, chest-up
-      const k = loud('extinct', REAL), back = 1290;
+      const k = loud('extinct', REAL), back = 1134;
       ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040);
-      lud(ctx, { t, x: 790, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out') });
-      nick(ctx, { t, x: 295, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(-1, [-72, -176], 'out') });
-      Cameos.slime(ctx, { t, x: 540, y: 1221 + 438 * 1.7, s: 1.7, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
+      // Slime's big head in front hides Nick's and Ludwig's legs
+      lud(ctx, { t, x: 820, y: back, s: 1.3, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out') });
+      nick(ctx, { t, x: 260, y: back, s: 1.3, shadow: false, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(-1, [-72, -176], 'out') });
+      Cameos.slime(ctx, { t, x: 540, y: 2000, s: 2.2, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
     }],
   ];
 
