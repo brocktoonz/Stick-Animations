@@ -345,7 +345,7 @@ Skits.extinct = (() => {
   }
   const mediumNick = (ctx, t, pose, z = 1.2) => single(ctx, t, 'nick', pose, z, 1010);
   const mediumLud = (ctx, t, pose, z = 1.3, behind) => single(ctx, t, 'lud', pose, z, 1060, behind);
-  const closeNick = (ctx, t, pose, z = 1.25) => single(ctx, t, 'nick', pose, z, 1200);
+  const closeNick = (ctx, t, pose, z = 1.5) => single(ctx, t, 'nick', pose, z, 1000);
   const closeLud = (ctx, t, pose, z = 1.7) => single(ctx, t, 'lud', pose, z, 1260);
   // Two-shot: both full-body with clear space between them (used for the
   // establishing shot and when one physically reacts to or points at the other).
@@ -419,11 +419,11 @@ Skits.extinct = (() => {
         const k = loud('extinct', REAL), slide = easeOut(seg(t, 9.8, 10.25)), lean = 0.55, ss = S * 0.8;   // leans in steeply and eases in, no pop   // smaller: further back
         // Slime's head centre on screen: slides in from off the left edge,
         // face just clear of Ludwig's head
-        const hx = lerp(-300, 185, slide), hy = headSy - 10;   // head up beside Ludwig's, body off the left edge   // high enough that Ludwig's hip arm stays below his mouth
+        const hx = lerp(-300, 215, slide), hy = headSy - 10;   // head up beside Ludwig's, body off the left edge   // high enough that Ludwig's hip arm stays below his mouth
         const [wx, wy] = toWorld(hx, hy), R = 438 * ss;
         Cameos.slime(ctx, { t, x: wx - Math.sin(lean) * R, y: wy + Math.cos(lean) * R, s: ss, dir: 1, lean,
           ...E.laughing, /* Duck Hunt dog chuckle: near hand over his mouth, far hand on his belly */
-          ...Ar.arm(1, [-26, -362], 'out', true), ...Ar.arm(-1, [4, -130], 'down'), open: 0.3 + 0.2 * k, mouthScale: 1.05, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
+          ...Ar.arm(1, [-10, -335], 'out', true), ...Ar.arm(-1, [4, -130], 'down'), open: 0.3 + 0.2 * k, mouthScale: 1.05, tilt: -0.1 - 0.08 * k, bob: -10 * k, weight: 0 });
       }
       lud(ctx, { t, ...E.smirk, ...Ar.both([90, -200], 'out'), lookX: 0.95, pupil: 10,
                  lid: t >= 9.9 ? 1 : 0.42, lowLid: t >= 9.9 ? 0 : 0.3, brow: t >= 9.9 ? 0.45 : 0.2,
@@ -484,7 +484,7 @@ Skits.extinct = (() => {
     }],
     // "Why?": the big reaction, close and pushing in
     [17.5, 18.18, (ctx, t) => single(ctx, t, 'nick', { mouth: 'flat', lid: 0.5, flatLid: true, pupil: 8, brow: 0.7, tilt: 0.05,
-      ...Ar.both([112, -176], 'out'), ...talkLine(t, 15) }, 1.22, 1160)],   // annoyed: heavy flat lids, brows down, hands on hips
+      ...Ar.both([112, -176], 'out'), ...talkLine(t, 15) }, 1.22, 1110)],   // annoyed: heavy flat lids, brows down, hands on hips
     // "they died for a reason": deadpan close-up
     [18.18, 18.75, (ctx, t) => closeLud(ctx, t, { ...E.unimpressed, lookX: 0.8, ...talkLine(t, 16) }, 1.8)],
     // "you don't wanna see a f*ckin'... Velociraptor": one continuous shot on
@@ -498,7 +498,7 @@ Skits.extinct = (() => {
       stage(ctx);
       const k = seg(t, 19.7, 19.95);
       const rs = 1.1, headWx = NX - (sx - 540) / z + (870 - 540) / z;
-      if (k > 0) A.raptor(ctx, { x: headWx + 70 * rs - 5, y: FLOOR - 20, s: rs * easeOutBack(k), t, dir: -1, rot: -0.55, snarl: t > 19.9 });   // rears up, jaw over his shoulder
+      if (k > 0) A.raptor(ctx, { x: headWx + 70 * rs + 15, y: FLOOR + 40, s: rs * easeOutBack(k), t, dir: -1, rot: -0.55, snarl: t > 19.9 });   // rears up, jaw over his shoulder
       nick(ctx, t < 19.75 ? { t, ...E.happy, ...Ar.arm(1, [150, -250], 'down'), ...talkLine(t, 17) }
                           : { t, mouth: E.confused.mouth, open: E.confused.open, browL: E.confused.browL, browLiftL: E.confused.browLiftL, browR: E.confused.browR, browLiftR: E.confused.browLiftR, tilt: E.confused.tilt, ...Ar.arm(-1, [-175, -236], 'down'), ...Ar.arm(1, [85, -300], 'down'), ...talkLine(t, 18) });   // near hand up, clear of the raptor's jaws   // confused face only: no head-scratch arm across his glasses
       ctx.restore();
@@ -548,12 +548,12 @@ Skits.extinct = (() => {
       // staggered in depth with clear gaps between heads: Nick and Ludwig
       // behind on their own sides (shadows only, no ground line to show
       // through Slime's arms), Slime in front and lower, chest-up
-      const k = loud('extinct', REAL), back = 1134;
+      const k = loud('extinct', REAL), back = 1000;
       ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040);
       // Slime's big head in front hides Nick's and Ludwig's legs
-      lud(ctx, { t, x: 820, y: back, s: 1.3, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out') });
-      nick(ctx, { t, x: 260, y: back, s: 1.3, shadow: false, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(-1, [-72, -176], 'out') });
-      Cameos.slime(ctx, { t, x: 540, y: 2000, s: 2.2, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
+      lud(ctx, { t, x: 810, y: back, s: 1.25, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out') });
+      nick(ctx, { t, x: 275, y: back, s: 1.25, shadow: false, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(-1, [-72, -176], 'out') });
+      Cameos.slime(ctx, { t, x: 540, y: 1960, s: 2.2, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
     }],
   ];
 
