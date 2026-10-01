@@ -46,9 +46,9 @@ const Chars = (() => {
     const one = side => {
       const ex = fx + side * gap;
       const lid = p.lid ?? 0;
-      if (p.blank) {   // stunned: small, perfectly round, thick rim, no pupil; nudged toward lookX
+      if (p.blank) {   // stunned: small, perfectly round, thick rim, no pupil
         const r = rx * 0.72;
-        blob(ctx, ex + (p.lookX ?? 0) * rx * 0.5, y, r, r, { fill: W, w: 10 * size, n: 12, jit: 0.6 });
+        blob(ctx, ex, y, r, r, { fill: W, w: 10 * size, n: 12, jit: 0.6 });
         return;
       }
       if (p.spiral) {   // dizzy: an empty eye with a spiral in it
