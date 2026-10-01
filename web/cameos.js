@@ -668,13 +668,15 @@ const Cameos = (() => {
   // Trial (not the approved design): middle part, wavy sides ending around the
   // jaw. A symmetric top shared by the front piece and the silhouette behind.
   const MID_TOP = [[-1.04, -0.86], [-0.56, -1.22], [0, -1.32], [0.56, -1.22], [1.04, -0.86]];
-  const midBack = ({ len = 0.8, wide = 1.24, waves = 3 } = {}) => ctx => {
+  const midBack = ({ len = 0.8, wide = 1.24, waves = 3, strands = false } = {}) => ctx => {
     const bottom = [];
     for (let i = 0; i <= 6; i++) { const x = wide - 2 * wide * i / 6; bottom.push([x, len - (i % 2) * 0.12]); }
     const poly = [...wavyEdge([-wide - 0.02, len - 0.16], [-1.18, -0.36], waves, 0.07), ...MID_TOP,
       ...wavyEdge([1.18, -0.36], [wide + 0.02, len - 0.16], waves, 0.07), ...bottom];
     fill(ctx, hu(poly), W, 1);
     outline(ctx, hu(poly), { w: 11 });
+    if (strands) for (const sx of [-1, 1])   // a wave down each longer back piece, below the front layer
+      stroke(ctx, hu([[sx * 1.02, 0.34], [sx * 1.08, 0.52], [sx * 1.02, len - 0.18]]), { w: 6, taper0: 0.2, taper1: 0.4 });
   };
   const MID_FRONT = outlineHair(
     [[-0.96, 0.74], [-1.1, 0.8], [-1.24, 0.7], ...wavyEdge([-1.18, 0.48], [-1.16, -0.36], 3, 0.05), ...MID_TOP,
@@ -684,6 +686,22 @@ const Cameos = (() => {
     [[[0.0, -0.98], [0.02, -1.14], [0.05, -1.28]],                        // the part
      [[0.1, -1.04], [0.52, -0.98], [0.9, -0.56]], [[-0.1, -1.04], [-0.52, -0.98], [-0.9, -0.56]],   // curtains falling away from it
      [[1.0, -0.36], [1.1, -0.06], [1.02, 0.24], [1.12, 0.52]], [[-1.0, -0.36], [-1.1, -0.06], [-1.02, 0.24], [-1.12, 0.52]]]);   // waves down the sides
+  // Trial 2: same middle part, short at the front (face-framing pieces end at
+  // the cheek) and longer towards the back (the layer behind hangs to the neck).
+  const MID_SHORT_FRONT = outlineHair(
+    [[-0.94, 0.16], [-1.06, 0.26], [-1.2, 0.18], ...wavyEdge([-1.17, 0.0], [-1.16, -0.36], 2, 0.05), ...MID_TOP,
+     ...wavyEdge([1.16, -0.36], [1.17, 0.0], 2, 0.05), [1.2, 0.18], [1.06, 0.26], [0.94, 0.16]],
+    [[0.88, 0.08], [0.9, -0.16], [0.78, -0.46], [0.5, -0.68], [0.22, -0.8],
+     [0.05, -0.96], [-0.05, -0.96], [-0.22, -0.8], [-0.5, -0.68], [-0.78, -0.46], [-0.9, -0.16], [-0.88, 0.08]],
+    [[[0.0, -0.98], [0.02, -1.14], [0.05, -1.28]],
+     [[0.1, -1.04], [0.52, -0.98], [0.9, -0.56]], [[-0.1, -1.04], [-0.52, -0.98], [-0.9, -0.56]]],
+    W, { seamless: true, tips: 3 });
+  const nickMidLayered = build({
+    shirt: INK, sleeve: '#222', behind: midBack({ len: 0.86, wide: 1.1, waves: 3, strands: true }),
+    body: { hipY: -140, neckY: -300, legW: 27, footX: 42, hipX: 30, torso: (n, h) => [[-54, n], [54, n], [74, n + 60], [76, h - 4], [-76, h - 4], [-74, n + 60]] },
+    headScale: [1.04, 0.98],
+    head: head({ hair: MID_SHORT_FRONT, front: roundGlasses }),
+    detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
   const nickMidPart = build({
     shirt: INK, sleeve: '#222',
     body: { hipY: -140, neckY: -300, legW: 27, footX: 42, hipX: 30, torso: (n, h) => [[-54, n], [54, n], [74, n + 60], [76, h - 4], [-76, h - 4], [-74, n + 60]] },
@@ -1032,5 +1050,5 @@ const Cameos = (() => {
     beard: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', sleeveHem: 0.42, head: head({ hair: shaggy, beard: fullBeard }), detail: collarTee }),
   };
 
-  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
