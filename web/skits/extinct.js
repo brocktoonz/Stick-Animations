@@ -97,6 +97,7 @@ Skits.extinct = (() => {
     const e = (L(tq - 1 / 60) + L(tq + 1 / 60)) / 2, abs = e / level(i);
     let near = 0; for (let k = -3; k <= 3; k++) near = Math.max(near, L(tq + k / 30));
     const r = e / Math.max(near, 1e-3);   // against the loudest moment nearby: syllable peaks ~1, the dips between them lower
+    const inWord = ws.some(([a, b]) => tq >= a + 0.03 && tq < b - 0.03);
     const w = ws.find(([a, b]) => tq >= a && tq < b) ?? ws.reduce((m, x) => (Math.abs((x[0] + x[1]) / 2 - tq) < Math.abs((m[0] + m[1]) / 2 - tq) ? x : m));
     const seq = LipSync.soundsOf(w[2].replace(/\*/g, 'u')), u = clamp((tq - w[0]) / (w[1] - w[0]));
     const here = seq.find(x => u >= x.u0 && u <= x.u1) ?? seq[seq.length - 1];
@@ -106,7 +107,7 @@ Skits.extinct = (() => {
     const cons = ['mbp', 'fv', 'ee', 'oo', 'teeth', 'lth'].includes(here.kind) ? here.kind : 'teeth';
     let kind;
     if (abs < 0.2) kind = here.kind === 'mbp' ? 'mbp' : 'rest';                           // silence: closed
-    else if (r < 0.8) kind = here.kind === 'mbp' ? 'mbp' : r < 0.65 ? 'rest' : cons;      // dip between syllables: close down
+    else if (r < 0.8) kind = here.kind === 'mbp' ? 'mbp' : r < 0.65 && !inWord ? 'rest' : cons;   // dip: close down (fully only between words; inside a word, to a consonant)
     else if (r < 0.93 || abs < 0.55) kind = VOWELS.has(here.kind) ? (vowel === 'open' || vowel === 'wide' ? 'half' : vowel) : cons;   // on the way in/out
     else kind = vowel === 'half' && abs > 0.8 ? 'open' : vowel;                            // syllable peak
     return { mouth: 'talk', viz: { kind, open: LipSync.OPEN[kind], intensity: 1, smile: 0, side: 1, var: (beat * 7919 % 5) / 4 } };
