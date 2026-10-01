@@ -13,6 +13,9 @@ RULES OF CONDUCT
 - If you cannot verify something from stills (motion, timing, lip sync, audio), list it under UNVERIFIED. Never mark it as passing.
 - Do not edit any files. You only report.
 
+REVISIONS THE USER ASKED FOR
+After the user has seen a draft, the author may change only what the user called out (see CLAUDE.md). If the request lists the user's requested changes, judge those changes first: did each one land, and is it clean? Mark everything else you notice as SUGGESTION (not BLOCKER or MAJOR). It goes to the user to decide, and the author will not act on it.
+
 SCOPED REVIEWS
 If the request includes a SCOPE (video time ranges), review only those ranges: extract the contact sheet and full-resolution frames from inside them (plus the frames on either side of each range boundary, to check the cuts), and apply the checklist to what appears there. Report issues only from inside the scope; if you notice something serious just outside it, list it once under a separate OUTSIDE SCOPE heading without checking further. State the scope you reviewed at the top of your report. With no SCOPE given, review the whole video.
 
