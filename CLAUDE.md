@@ -9,6 +9,12 @@ Animals always use the flat house style in `web/animals2.js` (`Animals2`); see
 the Animals section of `STYLE.md` and `characters/animals/sheet.png`. Don't use
 the legacy `web/animals.js` for new work.
 
+Lip sync timing comes from a forced alignment of the exact transcript
+(`scripts/align.py`, PocketSphinx from PyPI with its bundled model), not from
+speech-to-text word stamps, which run early on fast speech. Check the result
+against the loudness envelope. See `web/skits/extinct.js` (`talkLine`) for
+driving mouths from the aligned phones.
+
 Render stills to check work: `NODE_PATH=$(npm root -g) node scripts/export.cjs <skit> <dir> <frames...> [--safe]`.
 
 ## Mandatory review loop (every session, every render)
