@@ -1208,7 +1208,7 @@ const Cameos = (() => {
 
   // 1. Trimmed: mid-grey, stippled, a crisp cheek line; the moustache drops at
   // the corners to join the beard beside the mouth.
-  const TRIM = '#6e6e6e', TRIM_DOT = '#3a3a3a';
+  const TRIM = '#5e5e5e', TRIM_DOT = '#2e2e2e';
   const trimShape = () => hu([...jawEdge(1.0, 0.035), [-0.95, 0.06], [-0.86, 0.28], [-0.62, 0.4], [-0.5, 0.62], [-0.28, 0.78],
                               [0.06, 0.82], [0.4, 0.78], [0.6, 0.62], [0.72, 0.4], [0.9, 0.28], [0.96, 0.06]]);
   const stipple = (ctx, x0, x1, y0, y1, k0) => {
@@ -1227,10 +1227,11 @@ const Cameos = (() => {
   const stacheTrim = (ctx, fx, rage, p) => {
     const up = stacheLift(rage, p);
     const m = [[fx - 84, 60], [fx - 62, 30], [fx - 22, 20], [fx + 4, 25], [fx + 32, 20], [fx + 70, 30], [fx + 90, 60],
-               [fx + 74, 52], [fx + 52, 38], [fx + 4, 38], [fx - 44, 38], [fx - 66, 52]].map(([x, y]) => [x, y - up]);
+               [fx + 76, 50], [fx + 66, 54], [fx + 54, 40], [fx + 40, 44], [fx + 26, 37], [fx + 12, 41], [fx + 4, 36], [fx - 6, 41],
+               [fx - 20, 37], [fx - 34, 44], [fx - 48, 40], [fx - 60, 54], [fx - 70, 50]].map(([x, y]) => [x, y - up]);
     fill(ctx, m, TRIM, 1);
     ctx.save(); clipTo(ctx, m); stipple(ctx, fx - 90, fx + 96, 14 - up, 62 - up, 77); ctx.restore();
-    stroke(ctx, m.slice(0, 7), { w: 6, taper0: 0.4, taper1: 0.4 });
+    outline(ctx, m, { w: 6 });
   };
 
   // 2. Full dark: as dark and curly as his hair, rounding out below the chin,
@@ -1238,10 +1239,10 @@ const Cameos = (() => {
   const fullOuter = () => {
     const pts = [];
     for (let i = 0; i <= 14; i++) {   // curl bumps, like the hair
-      const a = Math.PI * (0.02 + 1.0 * i / 14);
+      const a = Math.PI * (0.08 + 0.84 * i / 14);
       for (const f of [0, 0.5]) {
         if (i === 14 && f) break;
-        const aa = a + f * Math.PI * 1.0 / 14, d2 = Math.max(0, Math.sin(aa));
+        const aa = a + f * Math.PI * 0.84 / 14, d2 = Math.max(0, Math.sin(aa));
         const r = 0.98 + (f ? 0.08 * d2 * d2 : 0);   // curls only below the cheeks, the sides stay on the head outline
         pts.push([Math.cos(aa) * r, Math.sin(aa) * (r + 0.16 * d2 * d2)]);
       }
@@ -1250,8 +1251,8 @@ const Cameos = (() => {
   };
   const beardFull = ctx => {
     const outer = fullOuter();
-    const inner = [[-0.94, 0.06], [-0.9, 0.22], [-0.66, 0.32], [-0.5, 0.56], [-0.3, 0.82], [0.08, 0.9], [0.44, 0.82],
-                   [0.64, 0.56], [0.78, 0.32], [0.92, 0.22], [0.95, 0.06]];
+    const inner = [[-0.9, 0.26], [-0.86, 0.3], [-0.66, 0.32], [-0.5, 0.56], [-0.3, 0.82], [0.08, 0.9], [0.44, 0.82],
+                   [0.64, 0.56], [0.78, 0.32], [0.88, 0.3], [0.92, 0.26]];
     const sh = hu([...outer, ...inner]);
     fill(ctx, sh, SQ_HAIR, 1);
     outline(ctx, sh, { w: 9 });
@@ -1262,13 +1263,15 @@ const Cameos = (() => {
   };
 
   // two tapered halves parted in the middle, hair points along the bottom, well
-  // clear of the lip, so the dark never reads as an outline round the mouth
+  // clear of the lip; the outer ends drop to join the beard beside the mouth.
+  // Over a shocked gape a skin-tone lip line keeps it apart from the dark mouth.
   const stacheFull = (ctx, fx, rage, p) => {
     const up = stacheLift(rage, p);
     for (const sd of [-1, 1]) {
       const X = x => fx + 4 + sd * x;
-      const h = [[X(4), 14], [X(26), 8], [X(50), 12], [X(66), 26], [X(70), 38], [X(58), 30], [X(52), 34], [X(42), 26],
-                 [X(34), 30], [X(24), 24], [X(14), 27], [X(4), 22]].map(([x, y]) => [x, y - up]);
+      const h = [[X(4), 14], [X(26), 8], [X(50), 12], [X(70), 26], [X(86), 42], [X(96), 60], [X(82), 50], [X(68), 38],
+                 [X(56), 32], [X(46), 34], [X(36), 28], [X(24), 31], [X(14), 26], [X(4), 22]].map(([x, y]) => [x, y - up]);
+      if (up < 0) stroke(ctx, h.slice(6).map(([x, y]) => [x, y + 7]), { w: 9, color: SQ_SKIN, taper0: 0, taper1: 0, minW: 1 });
       fill(ctx, h, SQ_HAIR, 1);
       outline(ctx, h, { w: 6 });
       stroke(ctx, [[X(22), 15 - up], [X(38), 15 - up]], { w: 4, color: SQ_LINE });
