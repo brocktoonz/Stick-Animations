@@ -665,8 +665,9 @@ const Cameos = (() => {
     headScale: [1.04, 0.98],
     head: head({ hair: b ? SEAMLESS_FRONT : (ctx => NICK_OUTLINE.sweptWave(ctx)), front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) })]));
-  // Trial (not the approved design): middle part, wavy sides ending around the
-  // jaw. A symmetric top shared by the front piece and the silhouette behind.
+  // Nick's approved hair (Cameos.nick): middle part, wavy sides ending around
+  // the jaw, back hair the same length. The previous design is Cameos.nickOld.
+  // A symmetric top shared by the front piece and the silhouette behind.
   const MID_TOP = [[-1.04, -0.86], [-0.56, -1.22], [0, -1.32], [0.56, -1.22], [1.04, -0.86]];
   const midBack = ({ len = 0.8, wide = 1.24, waves = 3, strands = false } = {}) => ctx => {
     const bottom = [];
@@ -1050,5 +1051,5 @@ const Cameos = (() => {
     beard: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', sleeveHem: 0.42, head: head({ hair: shaggy, beard: fullBeard }), detail: collarTee }),
   };
 
-  return { speed, ludwig, beast, nick: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
