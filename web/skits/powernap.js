@@ -163,7 +163,7 @@ Skits.powernap = (() => {
     // order: asleep, tossing, floating up spread-eagled above the bed, then
     // dropping off the front of the bed onto the floor (where he wakes up)
     [3.45, 6.45, (ctx, t) => {
-      const toss = seg(t, 4.3, 5.0), lift = easeInOut(seg(t, 5.0, 5.55)), drop = seg(t, 5.75, 6.2);
+      const toss = seg(t, 4.3, 5.0), lift = easeInOut(seg(t, 5.0, 5.55)), back = seg(t, 5.7, 5.86), roll = seg(t, 5.98, 6.24);
       ctx.save(); cam(ctx, 540, 1250, 1.3, 540, 1150);
       Brush.setWeight(1.2);
       room(ctx);
@@ -180,45 +180,64 @@ Skits.powernap = (() => {
         if (toss < 0.35) blanket(ctx, frame(fx, fy, ang), s, 0.7, 20);
         else drape(ctx, 0);
       } else {
-        drape(ctx, drop);
+        drape(ctx, roll);
         // still asleep: rises slowly off the mattress and hangs there spread-eagled,
-        // then drops forward off the front edge and lands on the floor
-        const floatY = MTOP - 230, bob = Math.sin((t - 5.55) * 7) * 6 * seg(t, 5.55, 5.6) * (1 - drop);
-        const g = drop * drop;                                          // gravity: slow off the edge, fast at the end
-        const fx = MX0 + 40 + 70 * drop, fy = drop > 0 ? lerp(floatY, floorY, g) : lerp(MTOP - headDown, floatY, lift) + bob;
-        const ang = Math.PI / 2 - 0.25 * lift + 0.45 * drop;
-        if (drop > 0.8) fill(ctx, Brush.ellipsePts(fx + 200, floorY + 100, 250, 14, 14), '#cfcfcf', 0.4);   // his shadow on the floor as he lands
+        // drops back onto the mattress with a bounce, then rolls off the front
+        // edge and lands on the floor in front of the bed with a squash
+        const floatY = MTOP - 230, bedY = MTOP - headDown;
+        let fx = MX0 + 40, fy, ang = Math.PI / 2, spread = lift, sq = 1;
+        if (back === 0) fy = lerp(bedY, floatY, lift) + Math.sin((t - 5.55) * 7) * 6 * seg(t, 5.55, 5.6);   // hangs in the air
+        else if (roll === 0) {                                                       // falls back onto the bed and bounces once
+          const bounce = Math.sin(Math.PI * seg(t, 5.86, 5.98)) * 26;
+          fy = lerp(floatY, bedY, back * back) - bounce; spread = 1 - back;
+          if (t > 5.86 && t < 5.92) sq = 0.9;
+        } else {                                                                     // rolls off the front edge, drops, lands
+          fx = MX0 + 40 + 60 * roll; fy = lerp(bedY, floorY, roll * roll); spread = 0;
+          ang = Math.PI / 2 + 0.5 * Math.sin(Math.PI * Math.min(1, roll * 1.15));   // tips forward over the edge, flattens out on the floor
+          if (t > 6.24 && t < 6.32) sq = 0.86;                                         // impact squash
+        }
+        ang -= 0.25 * spread;
+        if (roll > 0.8) fill(ctx, Brush.ellipsePts(fx + 200, floorY + 100, 250, 14, 14), '#cfcfcf', 0.4);   // his shadow on the floor as he lands
+        ctx.save(); ctx.translate(fx, fy); ctx.scale(1, sq); ctx.translate(-fx, -fy);
         lying(ctx, fx, fy, ang, s, { lid: 1, mouth: 'o', open: 0.15, tilt: -0.5,
-          step: lerp(0, 1.6, lift) * (1 - drop) + 0.5 * drop, ...Arms.both([lerp(160, 230, lift * (1 - drop)), lerp(-330, -470, lift * (1 - drop))], 'out') });
+          step: 1.6 * spread + 0.5 * roll, ...Arms.both([lerp(160, 230, spread), lerp(-330, -470, spread)], 'out') });
+        ctx.restore();
       }
       Brush.setWeight(1);
       ctx.restore();
     }],
-    // sits up into a close-up on the floor beside the bed: the side of the bed
-    // behind him, the pillow on the floor, the blanket tangled round him.
+    // sits up on the floor in front of the bed, framed wide enough to see it:
+    // the bed side-on behind him (mattress, base, a leg), the blanket hanging
+    // off the mattress over his legs, his pillow on the floor beside him.
     // Bleary, stubbled, "Where am I?", then holds the confused look
     [6.45, END, (ctx, t) => {
-      const s = 2.2, rise = easeOut(seg(t, 6.45, 6.68)), fy = lerp(2700, 2170, rise);
+      const s = 1.55, FL = 1600, rise = easeOut(seg(t, 6.45, 6.68)), fy = lerp(2250, 1880, rise);
       ctx.fillStyle = BACKDROP; ctx.fillRect(0, 0, 1080, 1920);
-      // the bed he fell out of, side on behind him: base, mattress, a sheet corner hanging down
-      panel(ctx, box(560, 1240, 1200, 1700), '#7a7a7a', 12);
-      panel(ctx, box(540, 1120, 1200, 1250), '#e6e6e6', 12);
-      shape(ctx, [[600, 1236], [760, 1240], [745, 1420], [700, 1380], [660, 1440], [618, 1350]], '#bdbdbd', 10);
-      ctx.fillStyle = '#e2e2e2'; ctx.fillRect(0, 1640, 1080, 400);                                   // the floor
-      stroke(ctx, [[0, 1640], [540, 1643], [1080, 1638]], { w: 9, taper0: 0, taper1: 0 });
+      ctx.fillStyle = '#e2e2e2'; ctx.fillRect(0, FL, 1080, 400);                                     // the floor
+      stroke(ctx, [[0, FL], [540, FL + 3], [1080, FL - 2]], { w: 9, taper0: 0, taper1: 0 });
+      // the bed, side-on behind him
+      panel(ctx, box(440, 1330, 1130, 1560), '#7a7a7a', 11);                                       // base
+      panel(ctx, box(470, 1560, 520, FL + 4, 2), '#555', 9);                                       // leg
+      panel(ctx, box(420, 1250, 1130, 1340), '#e6e6e6', 11);                                       // mattress
+      pillow(ctx, [930, 1215], 120, 48, -0.04);                                                    // the other pillow, still on the bed
+      // the blanket, dragged off the mattress and down over his legs onto the floor
+      const blanketFall = [[600, 1250], [760, 1258], [800, 1340], [770, 1470], [820, 1640], [900, 1760], [700, 1800], [520, 1772], [300, 1800], [160, 1760], [250, 1690], [430, 1680], [560, 1560], [600, 1420]];
+      shape(ctx, blanketFall, '#bdbdbd', 11);
+      stroke(ctx, [[700, 1290], [690, 1450]], { w: 5 });
+      fill(ctx, Brush.ellipsePts(470, FL + 150, 300, 22, 16), '#cfcfcf', 0.4);                    // his shadow on the floor
       const hx = 470, hy = fy - HEAD * s, asking = t >= 8.1 && t < 8.75;
       const confused = { browL: -0.5, browLiftL: 6, browR: -0.2, browLiftR: 14 };
       Hero.main(ctx, { x: hx, y: fy, s, lid: 0.55, flatLid: true, lowLid: 0.35, pupil: 7, lookX: -0.2,
         weight: -1,
-        ...Arms.arm(-1, [-150, -150], 'out'), ...Arms.arm(1, [140, -160], 'out'),   // one hand propped on the floor, the other slack
+        ...Arms.arm(-1, [-150, -150], 'out'), ...Arms.arm(1, [140, -160], 'out'),   // hands propped on the floor
         ...(asking ? { ...talk(t, 3), ...confused, mouthScale: 1.3 }
           : t >= 8.75 ? { ...confused, mouth: 'o', open: 0.12, lookX: lerp(-0.2, 0.5, easeInOut(seg(t, 9.1, 9.4))) }   // holds the confused look, glancing round
           : { mouth: 'flat', brow: -0.1 }), shadow: false });
       stubble(ctx, hx, hy, s);
-      const lap = [[140, 1870], [300, 1810], [470, 1838], [640, 1800], [820, 1846], [1160, 1830], [1160, 2000], [80, 2000]];
-      shape(ctx, lap, '#bdbdbd', 12);                                            // the blanket tangled round him
-      stroke(ctx, [[400, 1850], [440, 1920]], { w: 6 }); stroke(ctx, [[760, 1838], [720, 1920]], { w: 6 });
-      pillow(ctx, [110, 1760], 120, 56, 0.18);                                   // his pillow, on the floor beside him
+      const lap = [[180, 1800], [330, 1745], [470, 1770], [620, 1740], [820, 1790], [860, 1920], [140, 1920]];
+      shape(ctx, lap, '#bdbdbd', 11);                                           // the blanket heaped over his legs
+      stroke(ctx, [[420, 1790], [450, 1880]], { w: 5 });
+      pillow(ctx, [175, 1715], 105, 48, 0.2);                                   // his pillow, on the floor beside him
     }],
   ];
 
