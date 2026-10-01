@@ -170,7 +170,8 @@ Skits.powernap = (() => {
       clock(ctx, 230, 930, 75, t);
       bed(ctx, -0.07 * easeOut(seg(t, 4.6, 5.0)));   // the mattress gets knocked askew while he tosses
       const s = WS, headDown = 125 * s, floorY = WALL + 40;     // his head is wider than his body: rest the head, not the chest
-      pillow(ctx, [MX0 + 40 + HEAD * WS + 20, MTOP - 40], 110, 48, -0.05);
+      const roll0 = seg(t, 5.98, 6.24), pk = easeInOut(seg(t, 6.02, 6.3));   // the pillow gets knocked off with him
+      pillow(ctx, [lerp(MX0 + 40 + HEAD * WS + 20, MX0 + 40 + HEAD * WS + 230, pk), lerp(MTOP - 40, floorY + 40, pk * pk)], 110, 48, lerp(-0.05, 0.25, pk));
       if (t < 5.0) {
         // asleep, then tossing: rolls and kicks at uneven moments, kicking the blanket off
         const beat = Math.floor((t - 4.3) / 0.13), jit = toss > 0 && toss < 1 ? hh(beat) - 0.5 : 0;
@@ -180,7 +181,7 @@ Skits.powernap = (() => {
         if (toss < 0.35) blanket(ctx, frame(fx, fy, ang), s, 0.7, 20);
         else drape(ctx, 0);
       } else {
-        drape(ctx, roll);
+        if (roll < 0.5) drape(ctx, roll);   // the blanket comes off the foot of the bed with him
         // still asleep: rises slowly off the mattress and hangs there spread-eagled,
         // drops back onto the mattress with a bounce, then rolls off the front
         // edge and lands on the floor in front of the bed with a squash
@@ -201,6 +202,7 @@ Skits.powernap = (() => {
         ctx.save(); ctx.translate(fx, fy); ctx.scale(1, sq); ctx.translate(-fx, -fy);
         lying(ctx, fx, fy, ang, s, { lid: 1, mouth: 'o', open: 0.15, tilt: -0.5,
           step: 1.6 * spread + 0.5 * roll, ...Arms.both([lerp(160, 230, spread), lerp(-330, -470, spread)], 'out') });
+        if (roll >= 0.5) blanket(ctx, frame(fx, fy, ang), s, 0.45 * seg(roll, 0.5, 1), 20);   // tangled over his legs as he lands
         ctx.restore();
       }
       Brush.setWeight(1);
@@ -213,13 +215,15 @@ Skits.powernap = (() => {
     [6.45, END, (ctx, t) => {
       const s = 1.55, FL = 1600, rise = easeOut(seg(t, 6.45, 6.68)), fy = lerp(2250, 1880, rise);
       ctx.fillStyle = BACKDROP; ctx.fillRect(0, 0, 1080, 1920);
-      ctx.fillStyle = '#e2e2e2'; ctx.fillRect(0, FL, 1080, 400);                                     // the floor
-      stroke(ctx, [[0, FL], [540, FL + 3], [1080, FL - 2]], { w: 9, taper0: 0, taper1: 0 });
+      ctx.translate(470, 560); ctx.scale(1.25, 1.25); ctx.translate(-470, -880);   // pushed in: his hair just under the caption
+      ctx.fillStyle = '#e2e2e2'; ctx.fillRect(-200, FL, 1500, 600);                                  // the floor
+      stroke(ctx, [[-200, FL], [540, FL + 3], [1300, FL - 2]], { w: 9, taper0: 0, taper1: 0 });
       // the bed, side-on behind him
       panel(ctx, box(440, 1330, 1130, 1560), '#7a7a7a', 11);                                       // base
       panel(ctx, box(470, 1560, 520, FL + 4, 2), '#555', 9);                                       // leg
-      panel(ctx, box(420, 1250, 1130, 1340), '#e6e6e6', 11);                                       // mattress
-      pillow(ctx, [930, 1215], 120, 48, -0.04);                                                    // the other pillow, still on the bed
+      ctx.save(); ctx.translate(780, 1340); ctx.rotate(-0.05);                                       // mattress, still knocked askew
+      panel(ctx, box(-360, -90, 350, 0), '#e6e6e6', 11);
+      ctx.restore();
       // the blanket, dragged off the mattress and down over his legs onto the floor
       const blanketFall = [[600, 1250], [760, 1258], [800, 1340], [770, 1470], [820, 1640], [900, 1760], [700, 1800], [520, 1772], [300, 1800], [160, 1760], [250, 1690], [430, 1680], [560, 1560], [600, 1420]];
       shape(ctx, blanketFall, '#bdbdbd', 11);
@@ -237,7 +241,7 @@ Skits.powernap = (() => {
       const lap = [[180, 1800], [330, 1745], [470, 1770], [620, 1740], [820, 1790], [860, 1920], [140, 1920]];
       shape(ctx, lap, '#bdbdbd', 11);                                           // the blanket heaped over his legs
       stroke(ctx, [[420, 1790], [450, 1880]], { w: 5 });
-      pillow(ctx, [175, 1715], 105, 48, 0.2);                                   // his pillow, on the floor beside him
+      pillow(ctx, [235, 1715], 105, 48, 0.2);                                   // his pillow, on the floor beside him
     }],
   ];
 
