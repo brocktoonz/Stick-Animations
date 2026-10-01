@@ -41,13 +41,15 @@ const Chars = (() => {
   function eyes(ctx, fx, y, p, size = 1, lashes = false) {
     size *= p.eyeScale ?? 1;
     const rx = 30 * size, ry = 40 * size, gap = 40 * size;
-    for (const side of [-1, 1]) {
+    // p.eyeLop {side, dy, s}: one eye sits a little lower and bigger (lopsided, per
+    // character design); drawn by shifting and scaling that eye about its centre
+    const one = side => {
       const ex = fx + side * gap;
       const lid = p.lid ?? 0;
       if (p.blank) {   // stunned: small, perfectly round, thick rim, no pupil; nudged toward lookX
         const r = rx * 0.72;
         blob(ctx, ex + (p.lookX ?? 0) * rx * 0.5, y, r, r, { fill: W, w: 10 * size, n: 12, jit: 0.6 });
-        continue;
+        return;
       }
       if (p.spiral) {   // dizzy: an empty eye with a spiral in it
         blob(ctx, ex, y, rx, ry, { fill: W, w: 6 * size, n: 12 });
@@ -57,12 +59,12 @@ const Chars = (() => {
           pts.push([ex + Math.cos(a) * rx * 0.82 * t, y + Math.sin(a) * ry * 0.82 * t]);
         }
         stroke(ctx, pts, { w: 5 * size, taper0: 0.2, taper1: 0.2 });
-        continue;
+        return;
       }
       if (p.pinch) {   // hurt: squeezed shut into > <
         stroke(ctx, [[ex + side * rx, y - ry * 0.45], [ex - side * rx * 0.7, y + 2 * size], [ex + side * rx, y + ry * 0.45]],
           { w: 8 * size, taper0: 0.3, taper1: 0.3 });
-        continue;
+        return;
       }
       if (p.squint) {
         // rage (anime style): a big white eye with its top cut off by a thick
@@ -77,13 +79,13 @@ const Chars = (() => {
         blob(ctx, ex, y, erx, ery, { fill: W, w: 6 * size, n: 12 });
         ctx.restore();
         stroke(ctx, [[ox, oy], [ex, (oy + iy) / 2 - 2 * size], [ix, iy]], { w: 13 * size, taper0: 0.5, taper1: 0.2 });
-        continue;
+        return;
       }
       if (lid >= 1) {   // closed: a curved line
         const up = p.happy || p.streams ? -1 : 1;   // happy/sobbing: ^ arcs squeezed shut; otherwise gently closed
         stroke(ctx, [[ex - rx, y + 4 * size], [ex, y + (4 + 8 * up) * size - (up < 0 ? 8 * size : 0)], [ex + rx, y + 4 * size]], { w: (p.streams ? 9 : 7) * size });
         if (p.streams) tearStream(ctx, ex + side * rx * 0.55, y + 16 * size, size, side);
-        continue;
+        return;
       }
       const lowY = p.lowLid ? y + ry - p.lowLid * ry * 1.2 : null;
       if (lowY != null) {   // smug: everything below the raised lower lid is hidden
@@ -135,6 +137,13 @@ const Chars = (() => {
           stroke(ctx, [[bx, by], [bx + Math.cos(a) * 16 * size, by + Math.sin(a) * 16 * size]], { w: 5 * size, taper0: 0, taper1: 0.6 });
         }
       }
+    };
+    for (const side of [-1, 1]) {
+      const lop = p.eyeLop && p.eyeLop.side === side ? p.eyeLop : null;
+      if (!lop) { one(side); continue; }
+      const cx = fx + side * gap;
+      ctx.save(); ctx.translate(cx, y + lop.dy * ry); ctx.scale(lop.s, lop.s); ctx.translate(-cx, -y);
+      one(side); ctx.restore();
     }
   }
 

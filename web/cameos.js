@@ -51,7 +51,7 @@ const Cameos = (() => {
   }
 
   // ---------- head ----------
-  // o: skin back hair beard browW front(ctx, fx) hat
+  // o: skin back hair beard browW front(ctx, fx) hat eyeLop
   function head(o) {
     return (ctx, p) => {
       const fx = p.face ?? 12;
@@ -75,7 +75,7 @@ const Cameos = (() => {
           stroke(ctx, [[fx + x, -RY * 0.62], [fx + x + 2, -36 + Math.abs(x) * 0.1]], { w: 3.5, taper0: 0.1, taper1: 0.8, seed: 300 + x });
         ctx.restore();
       }
-      eyes(ctx, fx, p.squint ? -22 : -6, p, 1, !!o.lashes);   // rage eyes sit higher, clear of the teeth
+      eyes(ctx, fx, p.squint ? -22 : -6, o.eyeLop ? { eyeLop: o.eyeLop, ...p } : p, 1, !!o.lashes);   // rage eyes sit higher, clear of the teeth
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
       } else brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
@@ -220,7 +220,7 @@ const Cameos = (() => {
     shirt: W, sleeveHem: 0.24,   // halfway down the upper arm, clear of the elbow
     body: { hipY: -172, neckY: -352, legW: 21, footX: 18, hipX: 20, torso: (n, h) => [[-42, n], [42, n], [56, n + 60], [58, h - 4], [-58, h - 4], [-56, n + 60]] },
     headScale: [0.92, 1.06],
-    head: head({ hair: swoop() }),
+    head: head({ hair: swoop(), eyeLop: { side: -1, dy: 0.12, s: 1.07 } }),   // lopsided eyes: the screen-right eye (he faces left) a little lower and bigger
     detail: (ctx, n) => {
       outline(ctx, [[-40, n - 2], [0, n + 44], [-18, n + 60]], { w: 7 });
       outline(ctx, [[40, n - 2], [0, n + 44], [18, n + 60]], { w: 7 });
