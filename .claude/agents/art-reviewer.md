@@ -55,6 +55,8 @@ Acting
 - Full-body poses have a weight shift, lean, or bent knee. Flag any shot with parallel planted legs and hanging arms.
 - The expression is strong enough to read at phone size.
 - Continuity: a character's stance and legs don't jump between two similar shots (e.g. two two-shots of the same pair), and nothing moves unmotivated to make room for something else (e.g. animals backing away before a meteor).
+- Legs stay still within a shot unless the character is walking, kicking or reacting: flag a stance that swaps or shuffles mid-shot for no reason (the user caught Nick's legs shifting during "Velociraptor").
+- Lip sync: from frames at 0.1 s steps through each line, the mouth should be open on the spoken words, including short ones ("the", "new", "a"), and closed in pauses. Flag runs of closed mouths during speech (the user caught this through the whole second half).
 - The expression fits the beat and the character's attitude: flag faces that fight the line (e.g. excited on a deadpan reveal, or angry when the character is meant to stay smug and unbothered). Mouth size and shape match the emotion.
 Captions
 - The text is the exact words, with nothing dropped or added.
