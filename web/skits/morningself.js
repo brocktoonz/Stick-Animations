@@ -59,41 +59,40 @@ Skits.morningself = (() => {
     stroke(ctx, [[20, top + 480], [120, top + 610]], { w: 5 });
   }
   // ---------- the bedroom: one set for night and morning ----------
-  const BED_TOP = 1330, STAND = [705, 1370, 945], LAMP_X = 870, PHONE = [800, 1360];
+  const BED_TOP = 1330, STAND = [740, 1370, 1050], LAMP_X = 985, PHONE = [835, 1366];
+  const WIN = [700, 720, 920, 1000];
   function windowPane(ctx, day) {
-    const [x0, y0, x1, y1] = [690, 720, 910, 1000];
-    if (day) fill(ctx, [[x1, y0], [x0, y1], [x0 - 520, 1900], [x1 - 380, 1900]], '#f9f9f9', 0.3);   // flat sunbeam falling across the bed
+    const [x0, y0, x1, y1] = WIN, mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
     panel(ctx, box(x0, y0, x1, y1), day ? W : '#5f5f5f', 11);
+    ctx.save(); ctx.beginPath(); ctx.rect(x0 + 6, y0 + 6, x1 - x0 - 12, y1 - y0 - 12); ctx.clip();   // sky stays inside the frame
     if (day) {
-      blob(ctx, x0 + 85, y0 + 95, 46, 46, { fill: W, w: 8, n: 12 });                       // the sun, low in the corner
-      for (let i = 0; i < 7; i++) {
-        const a = 0.25 + i * 0.36;
-        stroke(ctx, [[x0 + 85 + Math.cos(a) * 66, y0 + 95 + Math.sin(a) * 66], [x0 + 85 + Math.cos(a) * (88 + 10 * hh(i)), y0 + 95 + Math.sin(a) * (88 + 10 * hh(i))]], { w: 6 });
+      const [cx, cy] = [x0 + 52, y0 + 66];   // the sun, in the top-left pane
+      for (let i = 0; i < 9; i++) {
+        const a = i * Math.PI * 2 / 9 + 0.2, r0 = 32, r1 = 44 + 6 * hh(i);
+        stroke(ctx, [[cx + Math.cos(a) * r0, cy + Math.sin(a) * r0], [cx + Math.cos(a) * r1, cy + Math.sin(a) * r1]], { w: 5 });
       }
+      blob(ctx, cx, cy, 23, 23, { fill: W, w: 7, n: 12 });
     } else {
-      // a crescent moon: a pale disc with a pane-coloured disc taken out of it
-      blob(ctx, x0 + 190, y0 + 100, 42, 42, { fill: '#e8e8e8', w: 7, n: 12 });
-      blob(ctx, x0 + 212, y0 + 86, 38, 38, { fill: '#5f5f5f', w: 0, n: 12 });
-      for (const [sx, sy] of [[x0 + 60, y0 + 70], [x0 + 110, y0 + 210], [x0 + 220, y0 + 260]]) {
-        stroke(ctx, [[sx - 10, sy], [sx + 10, sy]], { w: 4, color: '#e8e8e8' }); stroke(ctx, [[sx, sy - 10], [sx, sy + 10]], { w: 4, color: '#e8e8e8' });
+      // a crescent moon in the top-right pane: a pale disc with a pane-coloured bite
+      blob(ctx, mx + 52, y0 + 64, 32, 32, { fill: '#e8e8e8', w: 6, n: 12 });
+      blob(ctx, mx + 66, y0 + 54, 28, 28, { fill: '#5f5f5f', w: 0, n: 12 });
+      for (const [sx, sy] of [[x0 + 40, y0 + 46], [x0 + 70, y1 - 46], [x1 - 36, y1 - 70]]) {
+        stroke(ctx, [[sx - 9, sy], [sx + 9, sy]], { w: 4, color: '#e8e8e8' }); stroke(ctx, [[sx, sy - 9], [sx, sy + 9]], { w: 4, color: '#e8e8e8' });
       }
     }
-    stroke(ctx, [[(x0 + x1) / 2, y0 + 6], [(x0 + x1) / 2 + 2, y1 - 6]], { w: 8 });   // glazing bars
-    stroke(ctx, [[x0 + 6, (y0 + y1) / 2], [x1 - 6, (y0 + y1) / 2 + 3]], { w: 8 });
+    ctx.restore();
+    stroke(ctx, [[mx, y0 + 6], [mx + 2, y1 - 6]], { w: 8 });   // glazing bars
+    stroke(ctx, [[x0 + 6, my], [x1 - 6, my + 3]], { w: 8 });
     panel(ctx, box(x0 - 24, y1, x1 + 24, y1 + 30, 4), day ? '#d6d6d6' : '#8c8c8c', 9);   // sill
   }
   function lamp(ctx, on) {
     const x = LAMP_X, base = STAND[1] - 4;
-    fill(ctx, [[x - 50, base], [x + 50, base], [x + 34, base - 26], [x - 34, base - 26]], INK, 0.6);
-    stroke(ctx, [[x, base - 20], [x + 2, base - 170]], { w: 10, taper0: 0, taper1: 0, minW: 1 });
-    const shade = [[x - 92, base - 160], [x + 92, base - 156], [x + 50, base - 290], [x - 50, base - 292]];
+    fill(ctx, [[x - 46, base], [x + 46, base], [x + 30, base - 24], [x - 30, base - 24]], INK, 0.6);
+    stroke(ctx, [[x, base - 20], [x + 2, base - 165]], { w: 10, taper0: 0, taper1: 0, minW: 1 });
+    const shade = [[x - 72, base - 158], [x + 70, base - 154], [x + 40, base - 280], [x - 40, base - 282]];
     panel(ctx, shade, on ? W : '#cfcfcf', 10);
-    stroke(ctx, [[x + 40, base - 160], [x + 44, base - 112]], { w: 4 });   // pull cord
-    blob(ctx, x + 44, base - 106, 7, 9, { fill: INK, w: 0, n: 6 });
-    if (on) for (let i = 0; i < 5; i++) {   // a few short ink rays: lit
-      const a = Math.PI * (0.62 + 0.19 * i);
-      stroke(ctx, [[x + Math.cos(a) * 140, base - 120 - Math.sin(a) * -60], [x + Math.cos(a) * (180 + 14 * hh(i + 4)), base - 120 - Math.sin(a) * -84]], { w: 6 });
-    }
+    stroke(ctx, [[x + 32, base - 158], [x + 35, base - 112]], { w: 4 });   // pull cord
+    blob(ctx, x + 35, base - 106, 7, 9, { fill: INK, w: 0, n: 6 });
   }
   function nightstand(ctx) {
     const [x0, y0, x1] = STAND;
@@ -102,61 +101,61 @@ Skits.morningself = (() => {
     outline(ctx, box(x0 + 34, y0 + 90, x1 - 30, y0 + 260, 4), { w: 7 });   // drawer
     blob(ctx, (x0 + x1) / 2, y0 + 175, 12, 10, { fill: INK, w: 0, n: 6 });
   }
-  // the phone lying on the nightstand: flat, seen from the side and a little above
+  // the phone lying on the nightstand, seen from a little above so the screen shows
   function phoneFlat(ctx, x, y, lit) {
-    const p = [[x - 84, y - 30], [x + 62, y - 36], [x + 88, y - 6], [x - 60, y]];
-    panel(ctx, p, '#3a3a3a', 7);
-    if (lit) { const q = [[x - 70, y - 26], [x + 58, y - 31], [x + 76, y - 9], [x - 52, y - 5]]; fill(ctx, q, W, 0.3); outline(ctx, q, { w: 4 }); }
-    panel(ctx, box(x - 60, y, x + 88, y + 12, 3), INK, 4);
+    panel(ctx, [[x - 92, y - 50], [x + 70, y - 56], [x + 98, y - 4], [x - 66, y + 2]], '#3a3a3a', 8);
+    const q = [[x - 76, y - 42], [x + 60, y - 47], [x + 82, y - 10], [x - 56, y - 6]];
+    fill(ctx, q, lit ? W : '#5a5a5a', 0.3); outline(ctx, q, { w: 4 });
+    if (lit) {   // the alarm on screen: a time and a big snooze button
+      stroke(ctx, [[x - 40, y - 34], [x + 18, y - 37]], { w: 9, taper0: 0, taper1: 0 });
+      panel(ctx, [[x - 30, y - 22], [x + 44, y - 25], [x + 50, y - 13], [x - 24, y - 11]], '#3a3a3a', 4);
+    }
+    panel(ctx, box(x - 66, y + 2, x + 98, y + 14, 3), INK, 4);
   }
-  // buzz marks: short ink arcs either side, a different pair each frame
+  // buzz marks: two arcs off each end of the phone, a different pair each frame
   function buzz(ctx, x, y, f) {
     for (const side of [-1, 1]) for (let k = 0; k < 2; k++) {
-      const r = 22 + k * 16 + 4 * hh(f * 3 + k + side), cx = x + side * (70 + k * 6), cy = y - 18 - 4 * hh(f + k), pts = [];
-      for (let i = 0; i <= 6; i++) { const a = (side > 0 ? 0 : Math.PI) + (i / 6 - 0.5) * 1.9; pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); }
+      const r = 26 + k * 20 + 4 * hh(f * 3 + k + side), cx = x + side * 62, cy = y - 40, mid = side > 0 ? -0.75 : -Math.PI + 0.75, pts = [];
+      for (let i = 0; i <= 6; i++) { const a = mid + (i / 6 - 0.5) * 1.3; pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); }
       stroke(ctx, pts, { w: 7 });
     }
   }
   function room(ctx, day) {
     ctx.fillStyle = day ? '#e9e9e9' : '#a3a3a3'; ctx.fillRect(-200, -200, 1500, 2400);
     windowPane(ctx, day);
-    // headboard behind the pillow
-    panel(ctx, box(160, 960, 730, BED_TOP + 40), day ? '#8f8f8f' : '#6d6d6d', 12);
-    stroke(ctx, [[200, 1010], [690, 1006]], { w: 6 });
+    panel(ctx, box(150, 960, 720, BED_TOP + 40), day ? '#8f8f8f' : '#6d6d6d', 12);   // headboard
+    stroke(ctx, [[190, 1010], [680, 1006]], { w: 6 });
     nightstand(ctx);
     lamp(ctx, !day);
   }
   function mattress(ctx) {
-    panel(ctx, box(-200, BED_TOP, 700, 2100), '#dcdcdc', 12);
-    stroke(ctx, [[-200, BED_TOP + 70], [680, BED_TOP + 64]], { w: 6 });
+    panel(ctx, box(-200, BED_TOP, 720, 2100), '#dcdcdc', 12);
+    stroke(ctx, [[-200, BED_TOP + 70], [700, BED_TOP + 64]], { w: 6 });
   }
 
   // He lies on his back, head on the pillow, the blanket drawn up over him.
-  // headY is his head centre: propped up at night, sunk into the pillow later.
-  const S = 1.5, HX = 470, ARM = 24 * S, SLEEVE = '#8a8a8a';
+  const S = 1.5, HX = 480, ARM = 24 * S, SLEEVE = '#8a8a8a';
   const UP = 1215, DOWN = 1290;          // head centre: propped up, snuggled down
   const feet = hy => hy + 438 * S;
-  const pose = (hy, p, top, before, after) => (ctx) => {
-    pillow(ctx, HX + 20, hy + 70, 270, 120);
+  const pose = (hy, p, top, before) => (ctx) => {
+    pillow(ctx, HX + 20, hy + 70, 250, 120);
     before?.();
     Hero.main(ctx, { x: HX, y: feet(hy), s: S, shadow: false, ...p });
     blanket(ctx, top);
-    after?.();
   };
-  // a point on screen in his pose space (for Arms targets)
+  // a point on screen in his pose space (for Arms targets), and back
   const local = (hy, [X, Y]) => [(X - HX) / S, (Y - feet(hy)) / S];
+  const screen = (hy, [x, y]) => [HX + x * S, feet(hy) + y * S];
   // the phone held up in his hand (pose space): back of the phone toward us
   const heldPhone = tilt => (ctx, x, y) => {
     ctx.save(); ctx.translate(x, y); ctx.rotate(tilt);
-    const p = [[-36, -116], [36, -118], [38, 14], [-38, 16]];
-    panel(ctx, p, '#3a3a3a', 7);
+    panel(ctx, [[-36, -116], [36, -118], [38, 14], [-38, 16]], '#3a3a3a', 7);
     blob(ctx, -16, -96, 8, 8, { fill: '#9a9a9a', w: 3, n: 6 });   // camera
     ctx.restore();
   };
-  // an arm out from under the blanket: sleeve from `from` (at the blanket's
-  // edge) to the hand, drawn over the blanket
+  // an arm out from under the blanket (drawn before the blanket, so the hem covers its root)
   function looseArm(ctx, from, hand, bend) {
-    Chars.tube(ctx, from, hand, bend, ARM, SLEEVE, true);
+    Chars.tube(ctx, from, hand, bend, ARM, SLEEVE, false);
     Chars.hand(ctx, hand[0], hand[1], null, S);
   }
 
@@ -177,58 +176,64 @@ Skits.morningself = (() => {
     }
     return { k, contact, since };
   }
+  // camera: (cx, cy) stays put on screen, everything scales about it
   const zoom = (ctx, cx, cy, z) => { ctx.translate(cx, cy); ctx.scale(z, z); ctx.translate(-cx, -cy); };
-  const TOP_UP = UP + 330, TOP_DOWN = DOWN + 200;   // blanket edge: at his chest, then up to his chin
-  const HOLD = [HX + 250, UP + 185];                 // phone held up beside his face (screen right)
-  const ON_STAND = [PHONE[0] - 6, PHONE[1] - 46];
+  const TOP_UP = UP + 345, TOP_DOWN = DOWN + 200;   // blanket edge: at his chest, then up to his chin
+  const HOLD = [175, -240];                           // phone in his right hand, below his chin (pose space)
+  const TAP_L = [140, -230];                          // left thumb on the phone's edge
+  const UNDER_L = [-60, -140], UNDER_R = [60, -140];  // hands under the blanket
+  const ON_STAND = [PHONE[0] - 24, PHONE[1] - 34];
+  const smug = { ...Emotions.smirk, lookX: 0.75, lookY: 0.7, tilt: 0.1 };
 
   const shots = [
     // night: propped on the pillow, phone up, tapping in alarms, very pleased
     [0, CUT1, (ctx, t) => {
-      ctx.save(); zoom(ctx, 470, 1250, lerp(1.15, 1.19, easeInOut(seg(t, 0, CUT1))));
+      ctx.save(); zoom(ctx, 1020, 1104, lerp(1.22, 1.25, easeInOut(seg(t, 0, CUT1))));
       room(ctx, false); mattress(ctx);
-      const held = local(UP, HOLD).map((v, i) => v + (i ? 5 * tap(t) : 0));   // the phone bobs as his thumb taps
-      pose(UP, { ...Emotions.smirk, lookX: 0.8, lookY: 0.45, tilt: 0.1,
-        ...Arms.arm(1, held, 'down', true, 100), holdR: heldPhone(-0.3 + 0.06 * tap(t)),
-        ...Arms.arm(-1, [-95, -228], 'down', true, 100) }, TOP_UP)(ctx);
+      const dip = 6 * tap(t);
+      pose(UP, { ...smug,
+        ...Arms.arm(1, [HOLD[0], HOLD[1] + dip * 0.4], 'down', true, 100), holdR: heldPhone(-0.3 + 0.04 * tap(t)),
+        ...Arms.arm(-1, [TAP_L[0], TAP_L[1] + dip], 'down', true, 110) }, TOP_UP)(ctx);
       ctx.restore();
     }],
     // the phone screen: a wall of alarms, all switched on
     [CUT1, CUT2, (ctx, t) => phoneScreen(ctx, t)],
     // puts the phone down, slides down under the blanket, out like a light
     [CUT2, CUT3, (ctx, t) => {
-      ctx.save(); zoom(ctx, 470, 1250, 1.19);
+      ctx.save(); zoom(ctx, 1020, 2544, 1.25);
       room(ctx, false); mattress(ctx);
-      const reach = seg(t, 1.99, 2.3), back = seg(t, 2.34, 2.56), sink = easeInOut(seg(t, 2.56, 3.0));
+      const reach = seg(t, 2.0, 2.3), back = seg(t, 2.34, 2.56), sink = easeInOut(seg(t, 2.56, 3.0));
       const hy = lerp(UP, DOWN, sink), top = lerp(TOP_UP, TOP_DOWN, sink);
-      const wind = Math.sin(Math.PI * seg(t, 1.94, 2.02)) * 12;   // a small wind-up first
+      const wind = Math.sin(Math.PI * seg(t, 1.94, 2.02)) * 10;   // a small wind-up first
       const holding = t < 2.3;
-      const handScr = holding ? Stage.mix(HOLD, ON_STAND, easeOutBack(reach)).map((v, i) => v - (i ? 0 : wind))
-                              : Stage.mix(ON_STAND, [HX + 120, top + 120], easeInOut(back));   // back under the blanket
-      const lid = t < 2.42 ? 0.45 * seg(t, 2.28, 2.42) : t < 2.48 ? 0.75 : 1;   // heavy, heavier, shut
-      const leftHand = [-95, -228];
-      pose(hy, { mouth: t < 2.5 ? 'smile' : 'flat', lid, brow: -0.15, lookX: 0.8, lookY: 0.4,
-        tilt: lerp(0.1, 0.16, sink),
-        ...Arms.arm(1, local(hy, handScr), 'down', false, 100), ...(holding ? { holdR: heldPhone(lerp(-0.3, -1.5, easeOut(reach))) } : {}),
-        ...Arms.arm(-1, leftHand, 'down', true, 100) }, top,
-        null, () => { if (!holding) phoneFlat(ctx, PHONE[0], PHONE[1], t < 2.66); })(ctx);
+      const holdScr = screen(UP, HOLD);
+      const rHand = holding ? local(hy, Stage.mix([holdScr[0] - wind, holdScr[1]], ON_STAND, easeOutBack(reach)))
+                            : Stage.mix(local(hy, ON_STAND), UNDER_R, easeInOut(back));
+      const lHand = Stage.mix(TAP_L, UNDER_L, easeInOut(seg(t, 1.97, 2.2)));
+      // the smirk carries over from shot 1, then lids heavy, heavier, shut
+      const lid = t < 2.28 ? smug.lid : t < 2.42 ? lerp(0.45, 0.7, seg(t, 2.28, 2.42)) : t < 2.48 ? 0.8 : 1;
+      const face = t < 2.3 ? { ...smug } : { mouth: t < 2.6 ? 'smile' : 'flat', brow: -0.15, lookX: 0.75, lookY: 0.4, lowLid: 0.2 };
+      pose(hy, { ...face, lid, tilt: lerp(0.1, 0.16, sink),
+        ...Arms.arm(1, rHand, 'down', false, 100), ...(holding ? { holdR: heldPhone(lerp(-0.3, -1.45, easeOut(reach))) } : {}),
+        ...Arms.arm(-1, lHand, 'down', true, 110) }, top,
+        () => { if (!holding) phoneFlat(ctx, PHONE[0], PHONE[1], t < 2.66); })(ctx);
       ctx.restore();
     }],
     // morning: asleep, the alarm buzzes, his arm slaps snooze again and again
     [CUT3, END + 1, (ctx, t) => {
       const f = Math.round(t * FPS);
-      ctx.save(); zoom(ctx, 500, 1300, lerp(1.19, 1.27, easeInOut(seg(t, CUT3, END))));
+      ctx.save(); zoom(ctx, 1020, 2450, lerp(1.25, 1.28, easeInOut(seg(t, CUT3, END))));
       room(ctx, true); mattress(ctx);
       const { k, contact, since } = slap(t);
       const jolt = since < 0.12 ? 0.06 * (1 - since / 0.12) : 0;   // his head nods into each slap
       const ringing = !contact && since > 0.06;
       const [jx, jy] = ringing ? [(hh(f) - 0.5) * 10, (hh(f + 40) - 0.5) * 5] : [0, 0];
-      const from = [HX + 150, TOP_DOWN + 34], rest = [HX + 215, TOP_DOWN + 4];   // the hand never quite makes it back under
-      const hand = Stage.mix(rest, [PHONE[0] - 10 + jx, PHONE[1] - 36], k);
-      pose(DOWN, { lid: 1, brow: 0.55, mouth: 'flat', tilt: 0.16 + jolt }, TOP_DOWN, null, () => {
+      const from = [HX + 175, TOP_DOWN + 60], rest = [HX + 240, TOP_DOWN - 8];   // the hand never makes it back under
+      const hand = Stage.mix(rest, [PHONE[0] - 14 + jx, PHONE[1] - 30], k);
+      pose(DOWN, { lid: 1, brow: 0.55, mouth: 'flat', tilt: 0.16 + jolt }, TOP_DOWN, () => {
         phoneFlat(ctx, PHONE[0] + jx, PHONE[1] + jy, ringing);
-        if (ringing) buzz(ctx, PHONE[0] + jx, PHONE[1] - 6, f);
-        looseArm(ctx, from, hand, -0.12 - 0.1 * (1 - k));
+        if (ringing) buzz(ctx, PHONE[0] + jx, PHONE[1], f);
+        looseArm(ctx, from, hand, -0.1 - 0.12 * (1 - k));
       })(ctx);
       ctx.restore();
     }],
@@ -241,23 +246,20 @@ Skits.morningself = (() => {
     // the blanket behind, a couple of folds
     shape(ctx, [[-100, 1500], [400, 1420], [800, 1480], [1200, 1400], [1200, 2100], [-100, 2100]], '#bdbdbd', 11);
     stroke(ctx, [[120, 1600], [260, 1760]], { w: 6 }); stroke(ctx, [[880, 1560], [790, 1700]], { w: 6 });
-    const z = lerp(1, 1.05, easeInOut(seg(t, CUT1, CUT2)));
-    ctx.save(); ctx.translate(540, 1300); ctx.scale(z, z); ctx.rotate(-0.025); ctx.translate(-540, -1300);
-    const [x0, y0, x1, y1] = [150, 600, 930, 2080];
+    const z = lerp(1.04, 1.1, easeInOut(seg(t, CUT1, CUT2)));
+    ctx.save(); ctx.translate(540, 900); ctx.scale(z, z); ctx.rotate(-0.025); ctx.translate(-540, -900);
+    const [x0, y0, x1, y1] = [150, 470, 930, 2080];
     panel(ctx, box(x0, y0, x1, y1, 8), '#3a3a3a', 13);                        // body
     const sx0 = x0 + 34, sy0 = y0 + 40, sx1 = x1 - 34, sy1 = y1;
     fill(ctx, box(sx0, sy0, sx1, sy1, 6), W, 0.3); outline(ctx, box(sx0, sy0, sx1, sy1, 6), { w: 6 });
     fill(ctx, [[490, sy0 + 12], [590, sy0 + 12], [586, sy0 + 40], [494, sy0 + 40]], INK, 0.5);   // notch
     ctx.save(); ctx.beginPath(); ctx.rect(sx0 + 4, sy0 + 4, sx1 - sx0 - 8, sy1 - sy0 - 8); ctx.clip();
-    Stage.text(ctx, 'Alarm', 540, sy0 + 96, 52, 'Patrick Hand');
-    Stage.text(ctx, '+', sx1 - 50, sy0 + 92, 72, 'Patrick Hand');
-    stroke(ctx, [[sx0 + 10, sy0 + 140], [sx1 - 10, sy0 + 142]], { w: 4 });
     // the list drifts, then a thumb flick sends it scrolling: there are more
     const scroll = 30 * seg(t, CUT1, 1.42) + 340 * easeOut(seg(t, 1.42, 1.8));
-    const rowH = 122, top = sy0 + 150 - scroll;
+    const rowH = 122, top = sy0 + 168 - scroll;
     TIMES.forEach((tm, i) => {
       const y = top + i * rowH;
-      if (y < sy0 + 100 || y > sy1) return;
+      if (y < sy0 + 30 || y > sy1) return;
       ctx.font = '96px "Patrick Hand"'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = INK;
       ctx.fillText(tm, sx0 + 34, y + rowH / 2);
       const w = ctx.measureText(tm).width;
@@ -269,19 +271,21 @@ Skits.morningself = (() => {
       blob(ctx, tx + 88, ty, 25, 25, { fill: W, w: 5, n: 10 });
       stroke(ctx, [[sx0 + 30, y + rowH], [sx1 - 10, y + rowH + 2]], { w: 3, color: '#9a9a9a' });
     });
+    // header over the list as it scrolls under
+    fill(ctx, box(sx0, sy0, sx1, sy0 + 150, 4), W, 0);
+    Stage.text(ctx, 'Alarm', 540, sy0 + 96, 52, 'Patrick Hand');
+    Stage.text(ctx, '+', sx1 - 50, sy0 + 92, 72, 'Patrick Hand');
+    stroke(ctx, [[sx0 + 10, sy0 + 148], [sx1 - 10, sy0 + 150]], { w: 4 });
     ctx.restore();
     ctx.restore();
-    // his hands gripping the sides, thumbs over the screen edge
-    const flick = Math.sin(Math.PI * seg(t, 1.38, 1.5));
+    // his hands gripping the sides from below, thumbs on the screen; the right thumb flicks
+    const flick = Math.sin(Math.PI * seg(t, 1.38, 1.5)), HS = 3.2;
     for (const side of [-1, 1]) {
-      const hx = 540 + side * 430, hy = 1700 + (side > 0 ? -60 * flick : 0);
-      Chars.tube(ctx, [540 + side * 640, 2200], [hx, hy + 60], side * 0.12, 64, '#8a8a8a');   // hoodie sleeve
-      blob(ctx, hx, hy, 82, 92, { fill: W, w: 10, n: 12 });
-      // thumb reaching onto the screen
-      const th = [[hx - side * 30, hy - 30], [hx - side * 120, hy - 120 - (side > 0 ? 30 * flick : 0)]];
-      stroke(ctx, th, { w: 62, taper0: 0, taper1: 0, minW: 1 });
-      stroke(ctx, th, { w: 44, taper0: 0, taper1: 0, minW: 1, color: W, jit: 0 });
-      blob(ctx, hx - side * 120, hy - 120 - (side > 0 ? 30 * flick : 0), 22, 22, { fill: W, w: 0, n: 8 });
+      const hx = 540 + side * 400, hy = 1760 - (side > 0 ? 50 * flick : 0);
+      Chars.tube(ctx, [540 + side * 600, 2240], [hx + side * 20, hy + 40], side * 0.1, 24 * HS, SLEEVE, false);   // hoodie sleeve
+      ctx.save(); ctx.translate(hx, hy); ctx.scale(-side, 1);   // mirror so each thumb points in, onto the screen
+      Chars.hand(ctx, 0, 0, null, HS);
+      ctx.restore();
     }
   }
 
