@@ -14,102 +14,92 @@ Skits.extinct = (() => {
   // references/yard-extinct-animals/words.json; the original's burned-in
   // captions lag the audio by 0.3-0.6 s). Each caption holds until the next.
   const LINES = [
-    [0.46, 1.44, NICK, 'Would you rather\nbring back'],   // trimmed: the clip starts after "Ludwig"
-    [1.44, 3.3, NICK, 'every single\nextinct animal'],
+    [0.46, 1.57, NICK, 'Would you rather\nbring back'],   // trimmed: the clip starts after "Ludwig"
+    [1.57, 3.3, NICK, 'every single\nextinct animal'],
     [3.44, 3.92, NICK, "but there's no-"],
     [3.92, 4.6, LUD, 'other option'],
-    [5.86, 6.48, NICK, 'what do you mean\nother option'],
-    [6.48, 7.24, LUD, 'give me the\nother option'],
-    [7.24, 8.22, NICK, "why you don't want\nthat?"],
-    [8.22, 9.26, LUD, "whatever the other\noption is I'll"],
-    [9.26, 9.7, LUD, 'take it'],
-    [9.92, 11.92, NICK, "you don't wanna\nengage with the\nhypothetical"],
-    [11.92, 12.95, LUD, 'What was the\nsecond one'],
-    [13.14, 13.75, NICK, 'the second one\nwas-'],
-    [13.82, 15.78, NICK, 'or get an equal amount\nof new animals'],
-    [15.78, 16.64, LUD, 'Gimme the\nnew ones'],
-    [16.64, 17.36, LUD, 'f*ck the\nold ones'],
-    [17.36, 17.62, NICK, 'Why?'],
-    [17.62, 18.68, LUD, 'they died for a\nreason'],
-    [18.68, 19.52, NICK, "you don't wanna see\na f*ckin'"],
-    [19.52, 20.5, NICK, 'Velociraptor'],
-    [20.5, 21.86, SLIME, "God didn't love\nvelociraptors"],
-    [21.86, 23.0, SLIME, 'thats why he sent\nthe meteor'],
+    [5.86, 6.52, NICK, 'what do you mean\nother option'],
+    [6.52, 7.44, LUD, 'give me the\nother option'],
+    [7.44, 8.30, NICK, "why you don't want\nthat?"],
+    [8.30, 9.20, LUD, "whatever the other\noption is I'll"],
+    [9.20, 9.7, LUD, 'take it'],
+    [10.42, 12.02, NICK, "you don't wanna\nengage with the\nhypothetical"],
+    [12.02, 13.0, LUD, 'What was the\nsecond one'],
+    [13.12, 13.81, NICK, 'the second one\nwas-'],
+    [13.81, 15.92, NICK, 'or get an equal amount\nof new animals'],
+    [15.92, 16.78, LUD, 'Gimme the\nnew ones'],
+    [16.78, 17.36, LUD, 'f*ck the\nold ones'],
+    [17.36, 17.94, NICK, 'Why?'],
+    [17.94, 18.71, LUD, 'they died for a\nreason'],
+    [18.71, 19.58, NICK, "you don't wanna see\na f*ckin'"],
+    [19.58, 20.55, NICK, 'Velociraptor'],
+    [20.55, 21.94, SLIME, "God didn't love\nvelociraptors"],
+    [21.94, 23.0, SLIME, 'thats why he sent\nthe meteor'],
   ];
-  // [start, end, word] per line, from the word timestamps (gaps whisper
-  // missed: "take it", "with the hypothetical", "what was the second one" and
-  // "the second one was" are placed from the loudness)
+  // [start, end, word] per line, from a forced alignment of the transcript
+  // (references/yard-extinct-animals/phones.json, checked against the
+  // loudness). The last entry is Ludwig's uncaptioned "that's a fact".
   const WORDS = [
-    [[0.46, 0.48, 'would'], [0.48, 0.62, 'you'], [0.62, 0.84, 'rather'], [0.84, 1.14, 'bring'], [1.14, 1.44, 'back']],
-    [[1.44, 1.82, 'every'], [1.82, 2.14, 'single'], [2.14, 2.5, 'extinct'], [2.5, 2.92, 'animal']],
-    [[3.44, 3.56, 'but'], [3.56, 3.78, "there's"], [3.78, 3.92, 'no']],
-    [[3.92, 4.12, 'other'], [4.12, 4.32, 'option']],
-    [[5.86, 5.93, 'what'], [5.93, 5.98, 'do'], [5.98, 6.04, 'you'], [6.04, 6.12, 'mean'], [6.12, 6.26, 'other'], [6.26, 6.48, 'option']],
-    [[6.48, 6.62, 'give'], [6.62, 6.76, 'me'], [6.76, 6.8, 'the'], [6.8, 6.96, 'other'], [6.96, 7.2, 'option']],
-    [[7.24, 7.6, 'why'], [7.6, 7.72, 'you'], [7.72, 7.8, "don't"], [7.8, 7.9, 'want'], [7.9, 8.22, 'that']],
-    [[8.22, 8.48, 'whatever'], [8.48, 8.66, 'the'], [8.66, 8.78, 'other'], [8.78, 9.02, 'option'], [9.02, 9.14, 'is'], [9.14, 9.26, "I'll"]],
-    [[9.26, 9.4, 'take'], [9.4, 9.48, 'it']],
-    [[9.92, 10.3, 'you'], [10.3, 10.68, "don't"], [10.68, 10.86, 'wanna'], [10.86, 11.2, 'engage'], [11.2, 11.32, 'with'], [11.32, 11.42, 'the'], [11.42, 11.9, 'hypothetical']],
-    [[11.92, 12.06, 'what'], [12.06, 12.22, 'was'], [12.3, 12.5, 'the'], [12.5, 12.7, 'second'], [12.7, 12.88, 'one']],
-    [[13.14, 13.22, 'the'], [13.22, 13.42, 'second'], [13.42, 13.5, 'one'], [13.5, 13.62, 'was']],
-    [[13.82, 14.06, 'or'], [14.06, 14.36, 'get'], [14.36, 14.48, 'an'], [14.48, 14.8, 'equal'], [14.8, 15.04, 'amount'], [15.04, 15.18, 'of'], [15.18, 15.34, 'new'], [15.34, 15.78, 'animals']],
-    [[15.78, 16.04, 'and'], [16.04, 16.24, 'gimme'], [16.24, 16.32, 'the'], [16.32, 16.4, 'new'], [16.4, 16.64, 'ones']],
-    [[16.64, 16.92, 'fuck'], [16.92, 17.04, 'the'], [17.04, 17.12, 'old'], [17.12, 17.36, 'ones']],
-    [[17.36, 17.62, 'why']],
-    [[17.62, 18.08, 'they'], [18.08, 18.26, 'died'], [18.26, 18.42, 'for'], [18.42, 18.5, 'a'], [18.5, 18.68, 'reason']],
-    [[18.68, 18.8, 'you'], [18.8, 18.92, "don't"], [18.92, 19.06, 'wanna'], [19.06, 19.18, 'see'], [19.18, 19.3, 'a'], [19.3, 19.52, 'fuckin']],
-    [[19.52, 20.48, 'velociraptor']],
-    [[20.5, 20.88, 'god'], [20.88, 21.28, "didn't"], [21.28, 21.42, 'love'], [21.42, 21.86, 'velociraptors']],
-    [[21.86, 22.1, 'thats'], [22.1, 22.22, 'why'], [22.22, 22.28, 'he'], [22.28, 22.42, 'sent'], [22.42, 22.56, 'the'], [22.56, 22.92, 'meteor']],
+    [[0.36, 0.50, 'would'], [0.50, 0.66, 'you'], [0.66, 0.91, 'rather'], [0.91, 1.21, 'bring'], [1.21, 1.57, 'back']],
+    [[1.57, 1.84, 'every'], [1.84, 2.20, 'single'], [2.20, 2.59, 'extinct'], [2.59, 3.01, 'animal']],
+    [[3.45, 3.58, 'but'], [3.58, 3.75, "there's"], [3.75, 3.92, 'no']],
+    [[3.92, 4.11, 'other'], [4.11, 4.37, 'option']],
+    [[5.70, 5.76, 'what'], [5.76, 5.83, 'do'], [5.83, 5.89, 'you'], [5.89, 5.98, 'mean'], [5.98, 6.20, 'other'], [6.20, 6.59, 'option']],
+    [[6.52, 6.69, 'give'], [6.69, 6.75, 'me'], [6.75, 6.81, 'the'], [6.81, 6.98, 'other'], [6.98, 7.26, 'option']],
+    [[7.44, 7.63, 'why'], [7.63, 7.69, 'you'], [7.69, 7.78, "don't"], [7.78, 7.93, 'want'], [7.93, 8.16, 'that']],
+    [[8.30, 8.58, 'whatever'], [8.58, 8.66, 'the'], [8.66, 8.83, 'other'], [8.83, 9.03, 'option'], [9.03, 9.14, 'is'], [9.14, 9.20, "i'll"]],
+    [[9.20, 9.37, 'take'], [9.37, 9.49, 'it']],
+    [[10.42, 10.51, 'you'], [10.51, 10.64, "don't"], [10.64, 10.83, 'wanna'], [10.83, 11.25, 'engage'], [11.25, 11.39, 'with'], [11.39, 11.51, 'the'], [11.51, 12.02, 'hypothetical']],
+    [[12.02, 12.13, 'what'], [12.13, 12.29, 'was'], [12.29, 12.35, 'the'], [12.35, 12.85, 'second'], [12.85, 12.94, 'one']],
+    [[13.12, 13.17, 'the'], [13.17, 13.34, 'second'], [13.34, 13.44, 'one'], [13.44, 13.81, 'was']],
+    [[13.81, 14.11, 'or'], [14.11, 14.36, 'get'], [14.36, 14.44, 'an'], [14.44, 14.87, 'equal'], [14.87, 15.09, 'amount'], [15.09, 15.18, 'of'], [15.18, 15.38, 'new'], [15.38, 15.92, 'animals']],
+    [[15.92, 16.04, 'and'], [16.04, 16.15, 'give'], [16.15, 16.21, 'me'], [16.21, 16.27, 'the'], [16.27, 16.42, 'new'], [16.42, 16.68, 'ones']],
+    [[16.78, 16.93, 'fuck'], [16.93, 17.02, 'the'], [17.02, 17.17, 'old'], [17.17, 17.36, 'ones']],
+    [[17.36, 17.78, 'why']],
+    [[17.94, 18.08, 'they'], [18.08, 18.29, 'died'], [18.29, 18.44, 'for'], [18.44, 18.47, 'a'], [18.47, 18.71, 'reason']],
+    [[18.71, 18.77, 'you'], [18.77, 18.87, "don't"], [18.87, 19.00, 'want'], [19.00, 19.06, 'to'], [19.06, 19.17, 'see'], [19.17, 19.22, 'a'], [19.22, 19.58, 'fucking']],
+    [[19.58, 20.42, 'velociraptor']],
+    [[20.55, 20.88, 'god'], [20.88, 21.10, "didn't"], [21.10, 21.32, 'love'], [21.32, 21.94, 'velociraptors']],
+    [[21.94, 22.09, "that's"], [22.09, 22.19, 'why'], [22.19, 22.25, 'he'], [22.25, 22.45, 'sent'], [22.45, 22.51, 'the'], [22.51, 22.99, 'meteor']],
+    [[24.15, 24.55, "that's"], [24.55, 24.62, 'a'], [24.62, 25.07, 'fact']],
   ];
   // Shots are written in "script time" (the old caption-led timeline). This
   // maps audio time to script time so each cut and in-shot beat lands on the
   // speech: [audio time, script time] anchors, piecewise linear.
-  const WARP = [[0, 0], [1.44, 1.75], [3.35, 3.35], [4.6, 4.7], [5.86, 6.0], [6.48, 7.0], [7.24, 7.72], [8.22, 8.5],
-    [9.26, 9.45], [9.92, 10.75], [11.92, 12.0], [13.14, 13.25], [13.82, 14.0], [15.78, 16.0], [16.64, 17.0],
-    [17.36, 17.5], [17.9, 18.18], [18.68, 18.75], [19.52, 19.75], [20.5, 20.7], [21.86, 21.55], [23.02, 23.02], [99, 99]];
+  const WARP = [[0, 0], [1.57, 1.75], [3.35, 3.35], [4.6, 4.7], [5.86, 6.0], [6.52, 7.0], [7.44, 7.72], [8.30, 8.5],
+    [9.20, 9.45], [10.42, 10.75], [12.02, 12.0], [13.12, 13.25], [13.81, 14.0], [15.92, 16.0], [16.78, 17.0],
+    [17.36, 17.5], [17.9, 18.18], [18.71, 18.75], [19.58, 19.75], [20.55, 20.7], [21.94, 21.55], [23.02, 23.02], [99, 99]];
   const pw = (pairs, x) => { for (let i = 1; i < pairs.length; i++) if (x <= pairs[i][0]) { const [a0, b0] = pairs[i - 1], [a1, b1] = pairs[i]; return b0 + (b1 - b0) * (x - a0) / (a1 - a0); } return x; };
   const warp = x => pw(WARP, x), unwarp = x => pw(WARP.map(([a, b]) => [b, a]), x);
   let REAL = 0, SHOT_T0 = 0;   // the audio time of the frame being drawn
   // lip sync for line i, driven by its word timings and the audio loudness:
   // each word's mouth shapes play inside that word, the mouth closes in the
   // gaps between words and wherever the audio drops out
-  // Lip sync for line i. The audio drives the timing: the mouth opens with
-  // each syllable's loudness and closes in the dips (so it keeps up with fast
-  // talk), and the word under it only picks which drawing (ee, oh, oo, f/v,
-  // m/b/p...). Drawings change on twos.
-  const VOWELS = new Set(['open', 'wide', 'half', 'oh', 'oo', 'ee']);
-  const lineLevel = [];   // per line: its loud level (90th percentile), so quiet and loud speakers both open fully
-  const level = i => {
-    if (lineLevel[i] === undefined) {
-      const ws = WORDS[i], v = [];
-      for (let t = ws[0][0]; t < ws[ws.length - 1][1]; t += 1 / 30) v.push(Stage.loud('extinct_fast', t));
-      v.sort((a, b) => a - b);
-      lineLevel[i] = Math.max(0.2, v[Math.floor(v.length * 0.9)] ?? 0.5);
-    }
-    return lineLevel[i];
+  // Lip sync for line i, from the forced-aligned phones (web/audio/extinct_phones.js):
+  // each phone maps to a mouth drawing. Drawings change on twos, a frame ahead
+  // of the sound (animators lead the mouth slightly). Each 2-frame beat shows
+  // the sound that fills most of it, and lips always close for an m/b/p.
+  // Silence and laughs between words close it.
+  const VIS = {
+    AA: 'open', AE: 'open', AH: 'half', AO: 'oh', AW: 'open', AY: 'open', EH: 'half', ER: 'half', EY: 'ee',
+    IH: 'half', IY: 'ee', OW: 'oh', OY: 'oh', UH: 'oo', UW: 'oo',
+    M: 'mbp', B: 'mbp', P: 'mbp', F: 'fv', V: 'fv', L: 'lth', TH: 'lth', DH: 'lth', W: 'oo', R: 'oo', Y: 'ee',
   };
+  const PH = Phones.extinct;
   const talkLine = (_t, i) => {
-    const ws = WORDS[i], t = REAL, t0 = ws[0][0];
-    if (t < t0 - 0.05 || t > ws[ws.length - 1][1] + 0.05) return {};
-    const STEP = 2 / 30, beat = Math.floor((t - t0) / STEP), tq = t0 + beat * STEP + STEP / 2;
-    const L = x => Stage.loud('extinct_fast', x);
-    const e = (L(tq - 1 / 60) + L(tq + 1 / 60)) / 2, abs = e / level(i);
-    let near = 0; for (let k = -3; k <= 3; k++) near = Math.max(near, L(tq + k / 30));
-    const r = e / Math.max(near, 1e-3);   // against the loudest moment nearby: syllable peaks ~1, the dips between them lower
-    const inWord = ws.some(([a, b]) => tq >= a + 0.03 && tq < b - 0.03);
-    const w = ws.find(([a, b]) => tq >= a && tq < b) ?? ws.reduce((m, x) => (Math.abs((x[0] + x[1]) / 2 - tq) < Math.abs((m[0] + m[1]) / 2 - tq) ? x : m));
-    const seq = LipSync.soundsOf(w[2].replace(/\*/g, 'u')), u = clamp((tq - w[0]) / (w[1] - w[0]));
-    const here = seq.find(x => u >= x.u0 && u <= x.u1) ?? seq[seq.length - 1];
-    // the word's vowel nearest this moment sets the open shape
-    const vs = seq.filter(x => VOWELS.has(x.kind) && x.kind !== 'oo' || x.kind === 'oo' && x.u1 - x.u0 > 0.15);
-    const vowel = vs.length ? vs.reduce((m, x) => (Math.abs((x.u0 + x.u1) / 2 - u) < Math.abs((m.u0 + m.u1) / 2 - u) ? x : m)).kind : 'half';
-    const cons = ['mbp', 'fv', 'ee', 'oo', 'teeth', 'lth'].includes(here.kind) ? here.kind : 'teeth';
-    let kind;
-    if (abs < 0.2) kind = here.kind === 'mbp' ? 'mbp' : 'rest';                           // silence: closed
-    else if (r < 0.8) kind = here.kind === 'mbp' ? 'mbp' : r < 0.65 && !inWord ? 'rest' : cons;   // dip: close down (fully only between words; inside a word, to a consonant)
-    else if (r < 0.93 || abs < 0.55) kind = VOWELS.has(here.kind) ? (vowel === 'open' || vowel === 'wide' ? 'half' : vowel) : cons;   // on the way in/out
-    else kind = vowel === 'half' && abs > 0.8 ? 'open' : vowel;                            // syllable peak
+    const ws = WORDS[i], t = REAL + 1 / 30, t0 = ws[0][0], t1 = ws[ws.length - 1][1];
+    if (t < t0 - 0.05 || t > t1 + 0.05) return {};
+    const STEP = 2 / 30, beat = Math.floor((t - t0) / STEP), a = t0 + beat * STEP, b = a + STEP;
+    let kind = 'rest', most = 0.015, lips = false;   // under ~half a frame of sound in the beat stays closed
+    for (const [p0, p1, ph] of PH) {
+      if (p1 <= a || p0 >= b || p0 < t0 - 0.01 || p1 > t1 + 0.01) continue;
+      const v = VIS[ph] ?? 'teeth', ov = Math.min(p1, b) - Math.max(p0, a);
+      if (v === 'mbp' && ov > 0.02) lips = true;
+      if (ov > most + 0.005 || (Math.abs(ov - most) <= 0.005 && LipSync.OPEN[v] > LipSync.OPEN[kind])) { kind = v; most = ov; }
+    }
+    if (lips) kind = 'mbp';
+    // a loud open vowel drops the jaw further
+    if (kind === 'open' && Stage.loud('extinct_fast', REAL) > 0.8) kind = 'wide';
     return { mouth: 'talk', viz: { kind, open: LipSync.OPEN[kind], intensity: 1, smile: 0, side: 1, var: (beat * 7919 % 5) / 4 } };
   };
   // a caption holds through gaps under 0.15 s so it doesn't blink off between lines
@@ -455,7 +445,7 @@ Skits.extinct = (() => {
       }
       lud(ctx, { t, ...E.smirk, ...Ar.both([90, -200], 'out'), lookX: 0.95, pupil: 10,
                  lid: t >= 9.9 ? 1 : 0.42, lowLid: t >= 9.9 ? 0 : 0.3, brow: t >= 9.9 ? 0.45 : 0.2,
-                 ...(REAL < 9.26 ? talkLine(t, 7) : talkLine(t, 8)), lean: 0.02 });
+                 ...(REAL < 9.20 ? talkLine(t, 7) : talkLine(t, 8)), lean: 0.02 });
       ctx.restore();
       heads.push(headSy - g.hair * sc);
     }],
@@ -500,7 +490,7 @@ Skits.extinct = (() => {
       // smug the whole time: eyes closed, arms folded, and he never opens his
       // eyes or changes expression, even for the kick
       lud(ctx, { t, x: 640, ...E.smirk, lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06, crossArms: true,
-                 ...talkLine(t, t < 16.985 ? 13 : 14),
+                 ...talkLine(t, t < 17.0 ? 13 : 14),
                  kick: kickAmt, lean: -0.1 * kick * (1 - fly) + 0.05 * wind, ...(t > 16.98 ? { weight: -0.6 } : {}) });
       // a small raptor wanders in on its own from the left (separate from the
       // new animals behind him), stops at his foot, and gets punted
@@ -578,7 +568,7 @@ Skits.extinct = (() => {
       // through Slime's arms), Slime in front and lower, chest-up
       const k = loud('extinct', REAL), back = 1290;
       ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040);
-      lud(ctx, { t, x: 790, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out') });
+      lud(ctx, { t, x: 790, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.35 * k, tilt: 0.12, ...Ar.arm(-1, [-112, -176], 'out'), ...talkLine(t, 21) });   // "that's a fact" (uncaptioned in the original)
       nick(ctx, { t, x: 295, y: back, s: 1.2, shadow: false, ...E.laughing, open: 0.3 + 0.4 * k, ...Ar.arm(-1, [-72, -176], 'out') });
       Cameos.slime(ctx, { t, x: 540, y: 1221 + 438 * 1.7, s: 1.7, ...E.laughing, open: 0.35 + 0.45 * k, bob: -8 * k });
     }],
