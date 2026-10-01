@@ -703,7 +703,7 @@ const Cameos = (() => {
     head: head({ hair: MID_SHORT_FRONT, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
   const nickMidPart = build({
-    shirt: INK, sleeve: '#222',
+    shirt: INK, sleeve: '#222', behind: midBack({ len: 0.86, wide: 1.1, waves: 3 }),   // back hair, the same length as the front
     body: { hipY: -140, neckY: -300, legW: 27, footX: 42, hipX: 30, torso: (n, h) => [[-54, n], [54, n], [74, n + 60], [76, h - 4], [-76, h - 4], [-74, n + 60]] },
     headScale: [1.04, 0.98],
     head: head({ hair: MID_FRONT, front: roundGlasses }),
