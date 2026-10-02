@@ -101,7 +101,7 @@ Skits.powernap = (() => {
     shape(ctx, [[150, 1040], [540, 1010], [930, 1040], [940, SEAT + 20], [140, SEAT + 20]], '#8a8a8a', 11);   // back cushions
     stroke(ctx, [[540, 1030], [540, SEAT]], { w: 6 });                                       // seam between the two back cushions
     shape(ctx, [[70, 1150], [140, 1110], [220, 1140], [230, FLOOR - 40], [80, FLOOR - 40]], '#7a7a7a', 11);   // left arm (his head ends up on it)
-    pillow(ctx, [205, 1185], 92, 52, -0.25);                                                 // a cushion propped on the arm
+    pillow(ctx, [270, 1230], 96, 58, -0.35);                                                 // a cushion in the corner against the arm
   }
   function couchFront(ctx) {
     shape(ctx, [[860, 1150], [940, 1110], [1010, 1150], [1000, FLOOR - 40], [850, FLOOR - 40]], '#7a7a7a', 11);   // right arm
@@ -111,7 +111,7 @@ Skits.powernap = (() => {
   }
 
   const tired = { lid: 0.45, lowLid: 0.25, brow: -0.3, pupil: 9 };
-  const slack = (open, k = 0) => ({ lid: 1, brow: -0.15, mouth: 'gape', open, mouthScale: 1.6, stretch: 0.45 + 0.4 * k });   // yawn/snore: tall round mouth, lids shut
+  const slack = (open, k = 0) => ({ lid: 1, brow: -0.15, mouth: 'gape', open: open * 0.75, mouthScale: 1.0, stretch: 0.3 + 0.3 * k });   // yawn/snore: tall round mouth, lids shut
   const CS = 1.1, HIP = 150 * CS;   // his hips sit on the seat; the legs hang behind the seat cushions
   const shots = [
     // on the couch: "Alrighty... just a 10 minute power nap" while he lies back
@@ -120,7 +120,7 @@ Skits.powernap = (() => {
       const down = easeInOut(seg(t, 1.25, 2.15)), ang = -1.32 * down;                    // tips over sideways onto the cushion
       const hx = lerp(560, 610, down), hy = SEAT - 8 - 70 * down;                         // the hip pivot rides up onto the seat as he lies
       const push = easeInOut(seg(t, 2.4, 3.45));
-      ctx.save(); cam(ctx, lerp(540, 450, push), lerp(1230, 1200, push), lerp(1.12, 1.45, push), 540, 1150);
+      ctx.save(); cam(ctx, lerp(540, 330, push), lerp(1230, 1200, push), lerp(1.12, 1.4, push), 540, 1150);
       couchBack(ctx);
       let pose;
       if (t > 2.2) {
@@ -132,28 +132,38 @@ Skits.powernap = (() => {
       Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.both([60, -150], 'down'), ...pose });   // hands on his stomach
       ctx.restore();
       couchFront(ctx);
+      if (down < 0.3) for (const sd of [-1, 1]) {   // sitting: knees forward over the seat, shins down the front, feet on the floor
+        const kx = hx + sd * 44, kfade = 1 - down / 0.3;
+        if (kfade <= 0) continue;
+        stroke(ctx, [[kx, SEAT + 4], [kx + sd * 4, FLOOR - 30]], { w: 34, taper0: 0, taper1: 0 });
+        blob(ctx, kx, SEAT + 6, 40, 30, { fill: '#2a2a2a', w: 9, n: 10 });
+        fill(ctx, Brush.ellipsePts(kx + sd * 16, FLOOR - 18, 38, 16, 10), INK, 0.8);
+      }
       ctx.restore();
     }],
     // FEW HOURS LATER: just the clock, its hands whipping round
     [3.45, 6.45, (ctx, t) => {
       ctx.fillStyle = BACKDROP; ctx.fillRect(0, 0, 1080, 1920);
-      clock(ctx, 540, 1180, 380, t);
+      clock(ctx, 540, 1200, 430, t);
     }],
     // the dramatic close-up: he heaves himself up into camera, bearded, half
     // asleep, "Where am I?", and holds the confused look
     [6.45, END, (ctx, t) => {
       ctx.fillStyle = BACKDROP; ctx.fillRect(0, 0, 1080, 1920);
-      const up = seg(t, 6.45, 6.95), e = easeOutBack(up);                                     // rises from below the frame, overshoots a touch, settles
-      const s = lerp(2.3, 2.75, easeOut(up)), fy = lerp(3300, 2420, e);   // ends with his hair just under the caption
+      const up = seg(t, 6.45, 7.0), e = easeOutBack(up);                                      // lurches up and toward the lens, overshoots, settles
+      const s = lerp(1.7, 2.75, easeOut(up)), fy = lerp(2600, 2420, e);   // grows as he comes at the camera; ends with his hair just under the caption
       const asking = t >= 8.1 && t < 8.75, after = t >= 8.75;
       const droopy = { lid: 0.62, lowLid: 0.3, flatLid: true, pupil: 7, brow: -0.25, lookX: -0.1 };
       const confused = { browL: -0.5, browLiftL: 6, browR: -0.2, browLiftR: 14 };
-      Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: 0.04,
-        ...Arms.arm(-1, [-190, -170], 'out'), ...Arms.arm(1, [190, -170], 'out'),            // arms braced as he pushes up
-        ...droopy,
+      const groggy = t > 7.0 ? lerp(0, 0.07, easeInOut(seg(t, 7.0, 8.0))) : 0;               // head lolls a little to one side, and holds
+      Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
+        ...Arms.arm(-1, [-210, -150], 'out'), ...Arms.arm(1, [210, -150], 'out'),            // arms braced on the cushion as he pushes up
+        ...droopy, lid: Math.max(droopy.lid, blink(t, 7.6, 0.4) ? 0.85 : 0),
         ...(asking ? { ...talk(t, 3), ...confused, mouthScale: 1.2 }
           : after ? { ...confused, mouth: 'o', open: 0.12, lookX: lerp(-0.1, 0.5, easeInOut(seg(t, 9.1, 9.4))) }
           : { mouth: 'flat' }) });
+      shape(ctx, [[-60, 1830], [240, 1790], [540, 1812], [840, 1786], [1140, 1826], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
+      stroke(ctx, [[540, 1820], [540, 1930]], { w: 6 });
     }],
   ];
 

@@ -843,19 +843,22 @@ const Cameos = (() => {
   // the chin (tufts poking out of the edge) and a moustache, on the spiky guy.
   // The beard goes under the mouth, so the mouth still reads when he talks.
   const scragglyBeard = ctx => {
-    const tufts = [];
-    for (let i = 0; i <= 14; i++) {   // ragged bottom edge, right to left
-      const a = Math.PI * (0.06 + 0.88 * i / 14), r = 1.14 + 0.16 * hh(i * 3 + 1) + (i % 2 ? 0.1 : 0);
-      tufts.push([Math.cos(a) * RX * (0.98 + 0.04 * (i % 2)), Math.sin(a) * RY * r]);
+    const out = [];
+    for (let i = 0; i <= 22; i++) {   // ragged outer edge, right sideburn round under the chin to the left one
+      const a = Math.PI * (-0.04 + 1.08 * i / 22), tuft = i % 2 ? 0.1 + 0.12 * hh(i * 7 + 3) : -0.02 * hh(i);
+      out.push([Math.cos(a) * RX * (1.0 + tuft * 0.5), Math.sin(a) * RY * (1.08 + tuft) + RY * 0.06]);
     }
-    const shape = [[RX * 0.94, -RY * 0.18], [RX * 1.03, RY * 0.12], ...tufts, [-RX * 1.03, RY * 0.12], [-RX * 0.94, -RY * 0.18],
-      [-RX * 0.8, RY * 0.02], [-RX * 0.62, RY * 0.22], [-RX * 0.4, RY * 0.34], [RX * 0.42, RY * 0.34], [RX * 0.64, RY * 0.22], [RX * 0.82, RY * 0.02]];
+    const top = [];                   // uneven top edge across the cheeks, left to right, about mid-cheek
+    for (let i = 0; i <= 10; i++) {
+      const x = -RX * 0.9 + RX * 1.8 * i / 10, sag = Math.abs(x) < RX * 0.45 ? 0.42 : 0.26 - 0.1 * Math.abs(x) / RX;
+      top.push([x, RY * (sag + (i % 2 ? 0.06 : -0.02) + 0.04 * hh(i + 20))]);
+    }
+    const shape = [...out, ...top];
     fill(ctx, shape, '#6e6e6e', 1.6);
     outline(ctx, shape, { w: 9 });
-    for (let i = 0; i < 9; i++) {   // stray hairs and texture
-      const a = Math.PI * (0.18 + 0.64 * hh(i + 40)), r = 0.72 + 0.3 * hh(i + 50);
-      const x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r + 10;
-      stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 18, y + 16]], { w: 4, color: '#9a9a9a' });
+    for (let i = 0; i < 14; i++) {   // strands inside, and wisps poking out past the edge
+      const a = Math.PI * (0.12 + 0.76 * hh(i + 40)), r = 0.66 + 0.5 * hh(i + 50), x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r + RY * 0.22;
+      stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 22, y + 18 + 10 * hh(i + 70)]], { w: i < 9 ? 4 : 6, color: i < 9 ? '#9a9a9a' : INK });
     }
   };
   const scragglyMoustache = (ctx, fx, rage) => {
