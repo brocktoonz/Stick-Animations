@@ -6,33 +6,28 @@
 Skits.morningself = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { seg, lerp, easeOut, easeInOut, easeOutBack, clamp } = Stage;
-  const W = '#fff', RED = '#d9261c', HEAD = 438, FPS = 30;
+  const W = '#fff', HEAD = 438, FPS = 30;
   const hh = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
   const CUT1 = 1.0, CUT2 = 1.933, CUT3 = 3.033, END = 6.333;
 
-  // [start, end, text]: the original's title cards, word for word. Its break
-  // after "morning" is kept; the extra breaks are wraps, since the lines are too
-  // wide for the safe zone at the house caption size.
+  // [start, end, text]: the original's captions, word for word with its line
+  // breaks, in its style: black sentence-case sans in a white rounded box
+  // (sized from the original: 70 px text, a 2-line box about 190 px tall).
   const LINES = [
-    [0, CUT1, 'Me setting\nmy morning\nself up for\nsuccess'],
+    [0, CUT1, 'Me setting my morning\nself up for success'],
     [CUT3, END + 1, 'My morning self'],
   ];
-  const CAP = 84, LEAD = CAP * 1.05;
-  const capBottom = t => { const l = LINES.find(([a, b]) => t >= a && t < b); return l ? Stage.SAFE.top + 20 + l[2].split('\n').length * LEAD : 0; };
+  const CAP = 70, LEAD = 80, PAD_X = 44, PAD_Y = 34, CAP_TOP = Stage.SAFE.top;
+  const capBottom = t => { const l = LINES.find(([a, b]) => t >= a && t < b); return l ? CAP_TOP + l[2].split('\n').length * LEAD + 2 * PAD_Y : 0; };
   function caption(ctx, t) {
     const l = LINES.find(([a, b]) => t >= a && t < b);
     if (!l) return;
-    const [a, , str] = l;
-    ctx.font = `${CAP}px "Luckiest Guy"`;
-    const pop = a > 0 ? easeOutBack(seg(t, a, a + 0.12)) : 1;
-    ctx.save(); ctx.translate(540, Stage.SAFE.top + 20); ctx.scale(0.85 + 0.15 * pop, 0.85 + 0.15 * pop);
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-    str.split('\n').forEach((r, i) => {
-      const y = CAP * 0.55 + i * LEAD;
-      ctx.lineWidth = CAP * 0.26; ctx.strokeStyle = INK; ctx.strokeText(r, 0, y);
-      ctx.fillStyle = RED; ctx.fillText(r, 0, y);
-    });
-    ctx.restore();
+    const rows = l[2].split('\n');
+    ctx.font = `500 ${CAP}px "TikTok Sans"`;
+    const w = Math.max(...rows.map(r => ctx.measureText(r).width)) + 2 * PAD_X, h = rows.length * LEAD + 2 * PAD_Y;
+    ctx.fillStyle = W; ctx.beginPath(); ctx.roundRect(540 - w / 2, CAP_TOP, w, h, 28); ctx.fill();
+    ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    rows.forEach((r, i) => ctx.fillText(r, 540, CAP_TOP + PAD_Y + LEAD * (i + 0.5) - 3));
   }
 
   const box = (x0, y0, x1, y1, n = 6) => {
@@ -44,8 +39,9 @@ Skits.morningself = (() => {
   const shape = (ctx, pts, col, w = 10) => { fill(ctx, Brush.spline(pts, true, 3), col, 0.5); outline(ctx, pts, { w }); };
 
   function pillow(ctx, cx, cy, w, h) {
-    const p = [[-w, -h * 0.7], [-w * 0.5, -h], [w * 0.5, -h * 1.04], [w, -h * 0.7], [w * 1.04, 0], [w, h * 0.7], [w * 0.5, h], [-w * 0.5, h], [-w, h * 0.7], [-w * 1.04, 0]];
-    shape(ctx, p.map(([x, y]) => [cx + x, cy + y]), W, 11);
+    // a soft rounded oblong in light grey, so its ends can't read as ears beside his face
+    const p = [[-w * 0.92, -h * 0.82], [-w * 0.4, -h], [w * 0.4, -h], [w * 0.92, -h * 0.82], [w, -h * 0.2], [w * 0.98, h * 0.5], [w * 0.88, h * 0.88], [w * 0.4, h], [-w * 0.4, h], [-w * 0.88, h * 0.88], [-w * 0.98, h * 0.5], [-w, -h * 0.2]];
+    shape(ctx, p.map(([x, y]) => [cx + x, cy + y]), '#d6d6d6', 11);
     stroke(ctx, [[cx - w * 0.84, cy - h * 0.5], [cx - w * 0.64, cy - h * 0.22]], { w: 5 });   // corner creases
     stroke(ctx, [[cx + w * 0.62, cy + h * 0.58], [cx + w * 0.86, cy + h * 0.36]], { w: 5 });
   }
@@ -60,7 +56,7 @@ Skits.morningself = (() => {
   }
   // ---------- the bedroom: one set for night and morning ----------
   const BED_TOP = 1330, STAND = [740, 1370, 1050], LAMP_X = 985, PHONE = [835, 1366];
-  const WIN = [700, 940, 890, 1120];   // low enough to stay clear of both captions
+  const WIN = [690, 1010, 880, 1190];   // low enough to stay clear of both caption boxes
   function windowPane(ctx, day) {
     const [x0, y0, x1, y1] = WIN, mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
     panel(ctx, box(x0, y0, x1, y1), day ? W : '#5f5f5f', 11);
@@ -138,7 +134,7 @@ Skits.morningself = (() => {
   const UP = 1215, DOWN = 1290;          // head centre: propped up, snuggled down
   const feet = hy => hy + 438 * S;
   const pose = (hy, p, top, before, after) => (ctx) => {
-    pillow(ctx, HX + 15, hy - 5, 290, 150);   // behind the head, showing either side and above the ears
+    pillow(ctx, HX + 15, hy + 95, 350, 115);   // behind his head and shoulders
     before?.();
     Hero.main(ctx, { x: HX, y: feet(hy), s: S, shadow: false, ...p });
     blanket(ctx, top);
@@ -188,7 +184,8 @@ Skits.morningself = (() => {
   const TAP_L = [-60, -140];                          // the other hand stays under the blanket
   const UNDER_L = [-60, -140], UNDER_R = [60, -140];  // hands under the blanket
   const ON_STAND = [PHONE[0] - 24, PHONE[1] - 34];
-  const smug = { ...Emotions.smirk, lookX: 0.9, lookY: 0.1, tilt: 0.1 };
+  // pleased with himself but sleepy: heavy lids, a small closed smile (no teeth)
+  const smug = { mouth: 'smile', mouthScale: 0.7, lid: 0.7, lowLid: 0.22, pupil: 11, brow: 0.1, browLiftL: 8, browLiftR: 8, lookX: 0.9, lookY: 0.1, tilt: 0.14 };
 
   const shots = [
     // night: propped on the pillow, phone up, tapping in alarms, very pleased
@@ -216,8 +213,8 @@ Skits.morningself = (() => {
       const rHand = holding ? local(hy, swing([holdScr[0] - wind, holdScr[1]], ON_STAND, easeOutBack(reach)))
                             : Stage.mix(local(hy, ON_STAND), UNDER_R, easeInOut(back));
       const lHand = UNDER_L;
-      // the smirk carries over from shot 1, then lids heavy, heavier, shut
-      const lid = t < 2.28 ? smug.lid : t < 2.42 ? lerp(0.45, 0.7, seg(t, 2.28, 2.42)) : t < 2.48 ? 0.8 : 1;
+      // the face carries over from shot 1, then lids heavy, heavier, shut
+      const lid = t < 2.28 ? smug.lid : t < 2.42 ? lerp(smug.lid, 0.72, seg(t, 2.28, 2.42)) : t < 2.48 ? 0.8 : 1;
       const face = t < 2.3 ? { ...smug } : { mouth: t < 2.6 ? 'smile' : 'flat', brow: -0.15, lookX: 0.75, lookY: 0.4, lowLid: 0.2 };
       pose(hy, { ...face, lid, tilt: lerp(0.1, 0.16, sink),
         ...Arms.arm(1, rHand, 'down', false, 100), ...(holding ? { holdR: heldPhone(lerp(-0.12, -1.45, easeOut(reach))) } : {}),
@@ -228,7 +225,7 @@ Skits.morningself = (() => {
     // morning: asleep, the alarm buzzes, his arm slaps snooze again and again
     [CUT3, END + 1, (ctx, t) => {
       const f = Math.round(t * FPS);
-      ctx.save(); zoom(ctx, 1000, 2900, lerp(1.2, 1.23, easeInOut(seg(t, CUT3, END))));
+      ctx.save(); zoom(ctx, 1000, 2900, lerp(1.2, 1.21, easeInOut(seg(t, CUT3, END))));   // stops short of the caption box
       room(ctx, true); mattress(ctx);
       const { k, contact, since } = slap(t);
       const jolt = since < 0.12 ? 0.06 * (1 - since / 0.12) : 0;   // his head nods into each slap
