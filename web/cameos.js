@@ -81,7 +81,7 @@ const Cameos = (() => {
       } else brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
       if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
       else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
-      o.front?.(ctx, fx, rage);
+      o.front?.(ctx, fx, rage, p);
       o.hat?.(ctx);
       if (p.sweat) { sweat(ctx, -126, -30); sweat(ctx, 150, -60, 0.8); }
       ctx.restore();
@@ -861,7 +861,14 @@ const Cameos = (() => {
       stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 18, y + 16]], { w: 4, color: '#6e6e6e' });
     }
   };
-  const scragglyMoustache = (ctx, fx, rage) => {
+  const scragglyMoustache = (ctx, fx, rage, p = {}) => {
+    if (p.bags) for (const sd of [-1, 1])   // bags under the eyes (just woken up)
+      stroke(ctx, [[fx + sd * 40 - 22, 14], [fx + sd * 40, 24], [fx + sd * 40 + 22, 14]], { w: 5, taper0: 0.3, taper1: 0.3, color: '#8a8a8a' });
+    if (p.drool) {   // a drip of drool from the corner of the slack mouth, down over the beard
+      const x = fx + 34, y0 = 70, y1 = y0 + 70 * p.drool;
+      const drip = [[x - 5, y0], [x + 5, y0], [x + 6, y1 - 8], [x + 10, y1 + 4], [x, y1 + 14], [x - 10, y1 + 4], [x - 6, y1 - 8]];
+      fill(ctx, drip, W, 0.4); outline(ctx, drip, { w: 4 });
+    }
     if (rage) ctx.translate(0, -12);
     const m = [[fx - 70, 60], [fx - 58, 38], [fx - 30, 28], [fx, 34], [fx + 30, 28], [fx + 58, 38], [fx + 70, 60],
                [fx + 50, 50], [fx + 40, 58], [fx + 24, 46], [fx, 50], [fx - 24, 46], [fx - 40, 58], [fx - 50, 50]];
