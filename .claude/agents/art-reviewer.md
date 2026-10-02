@@ -60,6 +60,9 @@ Acting
 - Continuity: a character's stance and legs don't jump between two similar shots (e.g. two two-shots of the same pair), and nothing moves unmotivated to make room for something else (e.g. animals backing away before a meteor).
 - Legs stay still within a shot unless the character is walking, kicking or reacting: flag a stance that swaps or shuffles mid-shot for no reason (the user caught Nick's legs shifting during "Velociraptor").
 - Lip sync: from frames at 0.1 s steps through each line, the mouth should be open on the spoken words, including short ones ("the", "new", "a"), and closed in pauses. Flag runs of closed mouths during speech (the user caught this through the whole second half).
+- Props behave like props: a pillow, cushion or blanket stays where it was put unless something moves it. Flag any prop that slides along with a character as if glued to them (the user caught a pillow following his head down as he lay back).
+- Arms read clearly in every pose, especially lying down: flag arms that dangle, stick up or loop awkwardly (the user caught awkward arms in a lie-down).
+- Brows sit on the forehead, above the eyes, clear of the hair: flag brows pushed down onto the eyelids (the user rejected this as a "tired" fix). For sleepy or groggy faces, match the user's references: eyes shut or nearly shut as drooping lines, bags under the eyes, mouth hanging open, drool.
 - The expression fits the beat and the character's attitude: flag faces that fight the line (e.g. excited on a deadpan reveal, or angry when the character is meant to stay smug and unbothered). Mouth size and shape match the emotion.
 Captions
 - The text is the exact words, with nothing dropped or added.
