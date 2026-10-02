@@ -66,7 +66,7 @@ const Cameos = (() => {
       const rage = p.mouth === 'rage';
       const open = p.mouth === 'yell' || rage ? (p.open ?? 0) : 0, jaw = (rage ? 60 : 46) * open;
       blob(ctx, 0, jaw * 0.5, RX - jaw * 0.1, RY + jaw * 0.5, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
-      if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx); ctx.restore(); }
+      if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx, jaw, p); ctx.restore(); }   // beards that stretch with the jaw undo the translate
       o.hair?.(ctx);
       if (p.gloom) {   // dread: shading lines down the forehead
         ctx.save();
@@ -1308,6 +1308,71 @@ const Cameos = (() => {
     outline(ctx, m, { w: 6 });
   };
 
+  // 2b. Full dark, revised: a short, dense, full beard in one dark-grey shape
+  // (not black, so it stays apart from the hair and the jacket) with the
+  // moustache part of it: a clean cheek line from the sideburn down to the
+  // moustache corners, the moustache on the upper lip, a rounded full chin.
+  // Ink only at the edges (short strokes along the cheek line and the bottom),
+  // a flat fill inside. It stretches with the jaw; the mouth cuts into it.
+  const FULLB = '#4d4d4d';
+  // on a shocked gape the eyes are huge, so the moustache and lip sit a little lower
+  const fullDrop = p => p?.mouth === 'gape' ? 20 * (p.open ?? 0) / RY : 0;
+  const fullParts = d => {
+    const outer = [];
+    for (let i = 0; i <= 24; i++) {   // jaw edge, from the top of one sideburn to the other, round and a little fuller at the chin
+      const a = Math.PI * (-0.07 + 1.14 * i / 24), dn = Math.max(0, Math.sin(a));
+      outer.push([Math.cos(a) * 0.99, Math.sin(a) * 0.99 + 0.15 * dn * dn * dn]);
+    }
+    // cheek lines: down the sideburn in front of the ear, then a clean slope to the moustache corner
+    const cheekL = [[-0.86, -0.18], [-0.84, 0.02], [-0.82, 0.26], [-0.7, 0.38], [-0.56, 0.43 + d], [-0.46, 0.46 + d]];
+    const stache = [[-0.4, 0.34], [-0.26, 0.24], [-0.06, 0.2], [0.11, 0.24], [0.28, 0.2], [0.48, 0.24], [0.62, 0.34]].map(([x, y]) => [x, y + d]);
+    const cheekR = [[0.68, 0.46 + d], [0.78, 0.43 + d], [0.88, 0.36], [0.88, 0.02], [0.88, -0.18]];
+    // the upper lip line, and the lower lip showing under it (the mouth draws over both)
+    const lipTop = [[-0.22, 0.47], [-0.02, 0.43], [0.11, 0.43], [0.26, 0.43], [0.46, 0.47]].map(([x, y]) => [x, y + d]);
+    const lip = [...lipTop, ...[[0.3, 0.53], [0.11, 0.55], [-0.08, 0.53]].map(([x, y]) => [x, y + d])];
+    return { outer, cheekL, stache, cheekR, lipTop, lip };
+  };
+  // the lower the point, the further it drops with the jaw
+  const fullStretch = jaw => pts => hu(pts).map(([x, y]) => [x, y + jaw * Math.min(1, Math.max(0, (y / RY - 0.4) / 0.6))]);
+  // short strokes along an edge, uneven in length, spacing and angle, leaning down and out the way the hair grows
+  const hairEdge = (ctx, pts, k0, { len = 13, out = 3 } = {}) => {
+    for (let i = 0; i < pts.length - 1; i++) {
+      const n = 1 + Math.floor(hh(k0 + i * 7) * 2.6);
+      for (let j = 0; j < n; j++) {
+        const k = k0 + i * 7 + j * 3, f = (j + 0.2 + 0.6 * hh(k + 1)) / n;
+        const x = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, y = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f;
+        const L = len * (0.55 + 0.8 * hh(k + 2)), lean = Math.sign(x || 1) * (0.15 + 0.35 * hh(k + 3)) + x / RX * 0.2;
+        const o = out * (0.4 + 1.2 * hh(k + 4));
+        stroke(ctx, [[x - lean * o, y - o], [x + lean * L, y + L - o]], { w: 3 + 1.2 * hh(k + 5), taper0: 0.3, taper1: 0.65, jit: 0.3 });
+      }
+    }
+  };
+  const beardFull2 = (ctx, jaw = 0, p) => {
+    ctx.translate(0, -jaw);   // stretch with the jaw instead of sliding down with it
+    const P = fullStretch(jaw), { outer, cheekL, stache, cheekR, lip } = fullParts(fullDrop(p));
+    fill(ctx, P([...outer, ...cheekL, ...stache, ...cheekR]), FULLB, 1);
+    const L = P(lip);
+    fill(ctx, L, SQ_SKIN, 0.6);
+    outline(ctx, L, { w: 4, jit: 0.4 });
+    const O = P(outer);
+    stroke(ctx, O, { w: 8, taper0: 0.3, taper1: 0.3 });   // the jaw edge
+    hairEdge(ctx, P(cheekL), 700);
+    hairEdge(ctx, P([...cheekR].reverse()), 740);
+    hairEdge(ctx, P(outer.slice(6, 19).map(([x, y]) => [x, y - 0.04])), 820, { len: 14, out: 0 });
+  };
+  // The moustache again on top of the mouth, so an open mouth opens downward from
+  // under it instead of eating it. Same fill, so it merges with the beard; ink on
+  // the lip edge and hair strokes along the top. Rage's huge mouth gets none.
+  const stacheFull2 = (ctx, fx, rage, p) => {
+    if (rage) return;
+    const jaw = p?.mouth === 'yell' ? 46 * (p.open ?? 0) : 0, P = fullStretch(jaw);
+    const { stache, lipTop } = fullParts(fullDrop(p));
+    const sh = [[-0.5, 0.46 + fullDrop(p)], ...stache, [0.72, 0.46 + fullDrop(p)], ...[...lipTop].reverse()];
+    fill(ctx, P(sh), FULLB, 1);
+    stroke(ctx, P(lipTop), { w: 5, taper0: 0.3, taper1: 0.3 });
+    hairEdge(ctx, P(stache), 780, { len: 11 });
+  };
+
   // C, with any beard and moustache: everything else is the chosen draft C
   const sqC = (beard, stache) => build({ skin: SQ_SKIN, shirt: '#3a3a3a', sleeve: '#3a3a3a', headScale: [1.04, 0.98],
     body: { legColor: '#8a8a8a',   // khakis, a mid grey so they don't read as bare legs, waist to ankle
@@ -1324,7 +1389,7 @@ const Cameos = (() => {
       head: head({ skin: SQ_SKIN, hair: sqHair(SQ_TUFT), beard: sqBeard(), front: sqStache, hat: headphones, browW: 9 }),
       detail: boxrTee }),
     overshirt: sqC(sqBeard({ full: 0.12, flecks: true }), sqStache),
-    beards: { trimmed: sqC(beardTrim, stacheTrim), full: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
+    beards: { trimmed: sqC(beardTrim, stacheTrim), full: sqC(beardFull2, stacheFull2), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
   };
 
   return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
