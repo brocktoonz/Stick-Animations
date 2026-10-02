@@ -684,12 +684,13 @@ Skits.haircut = (() => {
   // side window is on our left with the roadside streaming past, the door below
   // it, the pillar on our right. A small wheel in front that he just holds.
   const DRV_AT = [594, 1066], DRV_S = 1.72;   // his head centre (55% across, eyes at 55% down), the rig's scale
-  const V = { win: '#ffffff', scenery: '#8f8f8f', seat: '#606060', door: '#484848', fill: '#2e2e2e', pillar: '#121212', hoodie: '#8a8a8a' };
+  const V = { win: '#ffffff', scenery: '#8f8f8f', seat: '#606060', door: '#484848', fill: '#2e2e2e', pillar: '#121212', hoodie: '#8a8a8a', dash: '#565656', mirror: '#5c5c5c' };
   const DWIN = { x0: -50, x1: 440, y0: 480, y1: 1344 };           // left 40% (on out past the frame edge), 25% - 70% of the height
   const HORIZON = DWIN.y0 + 0.6 * (DWIN.y1 - DWIN.y0);
   const DSEAT = { x0: DRV_AT[0] - 352, x1: DRV_AT[0] + 352, y0: 672, r: 170 };   // 1.4x his head, 35% down to the bottom
   const SCROLL = 240;                                 // roadside speed (px/s)
-  const DWHEEL = { c: [DRV_AT[0], 1752], r: 130 };   // small, face-on, in front of him, all of it in frame
+  const DWHEEL = { c: [DRV_AT[0], 1745], r: 170 };   // face-on in front of him, its lower half behind the dashboard
+  const DASH_Y = 1770;                                // the dashboard's top edge (it rises a little behind the wheel's middle)
   const wheelAt = a => [DWHEEL.c[0] + Math.cos(a) * DWHEEL.r, DWHEEL.c[1] + Math.sin(a) * DWHEEL.r];
   const DHANDS = [wheelAt(Math.PI * 7 / 6), wheelAt(Math.PI * 11 / 6)];   // ten and two
   const rrect = (x0, y0, x1, y1, rad, n = 6) => {   // rounded rectangle, sides split so the brush fill keeps them straight
@@ -773,19 +774,27 @@ Skits.haircut = (() => {
     guy(ctx, { x: 0, y: 0, s: 1, ...sad, lookY: 0.05, lookX: 0, lid, tilt: 0 });
     ctx.restore();
     ctx.restore();
-    // the wheel in front of him, face-on, held still: rim, two spokes, hub, his hands on it
+    ctx.restore();
+    // in front of him, fixed to the car like the camera: the wheel, the dashboard
+    // over its lower half, and the edge of the rear-view mirror at the top left
     Brush.setWeight(w0 * 1.1);
     const rim = []; for (let i = 0; i <= 48; i++) rim.push(wheelAt(Math.PI * 2 * i / 48));
-    for (const a of [Math.PI, 0]) {
-      stroke(ctx, [DWHEEL.c, wheelAt(a)], { w: 34, taper0: 0, taper1: 0, minW: 1, pressure: 0 });
-      stroke(ctx, [DWHEEL.c, wheelAt(a)], { w: 20, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: V.pillar, jit: 0 });
-    }
-    blob(ctx, DWHEEL.c[0], DWHEEL.c[1], 42, 42, { fill: V.pillar, w: 9, n: 14 });
-    stroke(ctx, rim, { w: 44, taper0: 0, taper1: 0, minW: 1, pressure: 0, jit: 0 });
-    stroke(ctx, rim, { w: 28, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: V.pillar, jit: 0 });
+    // (its spokes and hub sit below the dashboard's edge)
+    stroke(ctx, rim, { w: 50, taper0: 0, taper1: 0, minW: 1, pressure: 0, jit: 0 });
+    stroke(ctx, rim, { w: 32, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: V.pillar, jit: 0 });
     Brush.setWeight(w0);
+    ctx.save(); ctx.translate(0, bob);
     for (const h of DHANDS) Chars.hand(ctx, h[0], h[1], null, DRV_S);
     ctx.restore();
+    Brush.setWeight(w0 * 1.1);
+    const c = DWHEEL.c[0], dash = [[-60, DASH_Y + 10], [c - 230, DASH_Y], [c - 120, DASH_Y - 26], [c, DASH_Y - 32], [c + 120, DASH_Y - 26], [c + 230, DASH_Y], [1140, DASH_Y + 10], [1140, 2100], [-60, 2100]];
+    fill(ctx, dash, V.dash, 0.5); outline(ctx, dash, { w: 10 });
+    // the rear-view mirror at the top left, on a short stem with a ball joint
+    stroke(ctx, [[170, -20], [170, 92]], { w: 18 });
+    blob(ctx, 170, 96, 16, 16, { fill: V.mirror, w: 8, n: 10 });
+    const mir = [[-80, 112], [120, 104], [275, 114], [262, 196], [210, 236], [40, 244], [-80, 240]];
+    fill(ctx, mir, V.mirror, 0.6); outline(ctx, mir, { w: 10 });
+    stroke(ctx, [[268, 132], [258, 192], [214, 226]], { w: 6, color: '#cfcfcf', taper0: 0.2, taper1: 0.2 });   // the glass's edge catching the light
     Brush.setWeight(w0);
     return { top: DRV_AT[1] - 1.42 * RY * DRV_S - 10 };
   }
