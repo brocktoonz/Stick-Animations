@@ -689,92 +689,94 @@ Skits.haircut = (() => {
   }
 
   // ---------- 4: driving home with it (7.5 - 11) ----------
-  // Facing him from the dashboard: the top half of him at the wheel. He's in
-  // the driver's seat, on the car's left (an American car), so from in front
-  // he sits right of centre: his door and window just beside him on our right,
-  // the empty passenger seat, the console and the rear-view mirror toward the
-  // middle and our left. The botched cut, eyes welling, looking straight ahead.
-  const DRV_AT = [662, 1170], DRV_S = 1.72;   // his head centre on screen, scale of the rig
-  const WHEEL = { c: [662, 1990], r: 440 };   // the steering wheel, in front of him: hub just below the frame
+  // Dead straight on from the dashboard, at his eye level, looking him in the
+  // face. Everything behind him is symmetric about the centre line, and each
+  // layer has its own value, so depth reads without perspective: the rear
+  // window lightest, the rear bench dark, his headrest and seat mid-grey, him
+  // white, the wheel and pillars darkest. Car lines are lighter than his.
+  const DRV_AT = [540, 1170], DRV_S = 1.72;   // his head centre on screen, scale of the rig
+  const C = 540;                              // the car's centre line
+  const V = { glass: '#dedede', bench: '#3e3e3e', seat: '#686868', dark: '#222222', hoodie: '#8a8a8a' };
+  const CAR_W = 8;                            // car line width, about 70% of his
+  const WHEEL = { c: [C, 1830], r: 345 };     // face-on; the rim's top at his collarbone
   const wheelAt = a => [WHEEL.c[0] + Math.cos(a) * WHEEL.r, WHEEL.c[1] + Math.sin(a) * WHEEL.r];
-  const HANDS = [wheelAt(Math.PI * 1.27), wheelAt(Math.PI * 1.73)];   // ten to two
-  // a straight-edged shape: each edge split up so the brush fill doesn't round it off
-  const poly = (pts, n = 5) => pts.flatMap((p, i) => { const q = pts[(i + 1) % pts.length]; return Array.from({ length: n }, (_, k) => [p[0] + (q[0] - p[0]) * k / n, p[1] + (q[1] - p[1]) * k / n]); });
+  const HANDS = [wheelAt(Math.PI * 7 / 6), wheelAt(Math.PI * 11 / 6)];   // ten and two
+  const SHOULDER_Y = 1490;
+  const rrect = (x0, y0, x1, y1, rad, n = 6) => {   // rounded rectangle, sides split so the brush fill keeps them straight
+    const pts = [], c = [[x1 - rad, y0 + rad, -Math.PI / 2], [x1 - rad, y1 - rad, 0], [x0 + rad, y1 - rad, Math.PI / 2], [x0 + rad, y0 + rad, Math.PI]];
+    c.forEach(([cx, cy, a0], i) => {
+      for (let k = 0; k <= 4; k++) { const a = a0 + k / 4 * Math.PI / 2; pts.push([cx + Math.cos(a) * rad, cy + Math.sin(a) * rad]); }
+      const [nx, ny, na] = c[(i + 1) % 4], e0 = [cx + Math.cos(a0 + Math.PI / 2) * rad, cy + Math.sin(a0 + Math.PI / 2) * rad], e1 = [nx + Math.cos(na) * rad, ny + Math.sin(na) * rad];
+      for (let k = 1; k < n; k++) pts.push([e0[0] + (e1[0] - e0[0]) * k / n, e0[1] + (e1[1] - e0[1]) * k / n]);
+    });
+    return pts;
+  };
   function shot4(ctx, t) {
     const r = t - CUT_4;
-    const bump = Math.floor(t * 30 / 4);   // the road: a small uneven jolt every few frames
-    const jy = (hh(bump * 3 + 1) - 0.5) * 6, jx = (hh(bump * 5 + 2) - 0.5) * 3;
-    // ---- the car around him
-    ctx.fillStyle = '#6e6e6e'; ctx.fillRect(0, 0, 1080, 1920);                                  // the back of the cabin
-    panel(ctx, poly([[150, 600], [860, 600], [900, 880], [110, 880]]), '#cfcfcf', 11);          // the back window, plain
-    panel(ctx, box(60, 880, 960, 1300, 5), '#5a5a5a', 11);                                      // the back seats
-    // his door (the car's left, our right): the window, the door panel, the pillar beside him with the belt's anchor
-    panel(ctx, poly([[975, 420], [1100, 400], [1100, 1060], [990, 1070]]), '#d6d6d6', 11);
-    panel(ctx, poly([[990, 1070], [1100, 1060], [1100, 1960], [1000, 1960]]), '#4a4a4a', 11);
-    panel(ctx, poly([[925, 410], [985, 416], [1010, 1310], [950, 1316]]), '#5a5a5a', 11);   // B-pillar
-    panel(ctx, box(950, 1214, 1004, 1260, 2), '#3a3a3a', 8);                                 // the belt's anchor, at his shoulder
-    // the passenger side, our left: the far window and pillar, and the empty passenger seat
-    panel(ctx, poly([[-20, 400], [70, 410], [50, 1060], [-20, 1050]]), '#9a9a9a', 11);
-    panel(ctx, poly([[40, 1180], [330, 1180], [350, 1960], [20, 1960]]), '#2e2e2e', 12);
-    stroke(ctx, [[130, 1120], [130, 1180]], { w: 13 }); stroke(ctx, [[240, 1120], [240, 1180]], { w: 13 });
-    panel(ctx, poly([[80, 1010], [290, 1010], [300, 1120], [70, 1120]]), '#2e2e2e', 11);      // its headrest, just above the seat back
-    // roof lining, the dome light in the middle of it
-    panel(ctx, poly([[-20, -20], [1100, -20], [1100, 400], [900, 412], [560, 420], [200, 412], [-20, 400]]), '#bdbdbd', 11);
-    panel(ctx, box(500, 150, 620, 194, 3), '#e8e8e8', 8);
-    // his seat behind him: the seat back, the headrest on two posts, clear of his head
-    ctx.save(); ctx.translate(jx, jy);
-    panel(ctx, poly([[DRV_AT[0] - 250, 1180], [DRV_AT[0] + 250, 1180], [DRV_AT[0] + 290, 1960], [DRV_AT[0] - 290, 1960]]), '#2e2e2e', 12);
-    stroke(ctx, [[DRV_AT[0] - 130, 840], [DRV_AT[0] - 130, 1180]], { w: 14 }); stroke(ctx, [[DRV_AT[0] + 130, 840], [DRV_AT[0] + 130, 1180]], { w: 14 });   // posts wide apart, clear of his hair
-    panel(ctx, poly([[DRV_AT[0] - 170, 720], [DRV_AT[0] + 170, 720], [DRV_AT[0] + 186, 850], [DRV_AT[0] - 186, 850]]), '#2e2e2e', 11);
-    // him
-    ctx.save(); ctx.translate(DRV_AT[0], DRV_AT[1]); ctx.scale(DRV_S, DRV_S); ctx.translate(0, -(-438));
-    const w0 = Brush.getWeight(); Brush.setWeight(w0 * WIDE * GS / DRV_S);
-    const toRig = ([x, y]) => [(x - DRV_AT[0]) / DRV_S, (y - DRV_AT[1]) / DRV_S - 438];
-    const upper = [toRig([977, 1237]), [150, -318]];   // from the pillar anchor, just beside his shoulder
-    stroke(ctx, upper, { w: 18, taper0: 0, taper1: 0, minW: 1 });
-    stroke(ctx, upper, { w: 10, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
+    const bump = Math.floor(t * 30 / 4);   // the road under the car: a small uneven bob, background only
+    const by = Math.round((hh(bump * 3 + 1) - 0.5) * 3);
+    const w0 = Brush.getWeight();
+    // ---- behind him: the back of the cabin
+    ctx.fillStyle = V.bench; ctx.fillRect(0, 0, 1080, 1920);
+    ctx.save(); ctx.translate(0, by);
+    Brush.setWeight(w0 * CAR_W / 10);
+    panel(ctx, rrect(170, 190, 910, 630, 60), V.glass, 10);                         // 1. the rear window
+    stroke(ctx, [[185, 380], [895, 380]], { w: 4, color: '#9a9a9a' });              // the road, far off
+    stroke(ctx, [[175, 580], [905, 580]], { w: 6 });                                 // the rear seat's top edge
+    panel(ctx, rrect(90, 640, 990, 2000, 40), V.bench, 10);                          // 2. the rear bench
+    for (const sd of [-1, 1]) panel(ctx, rrect(C + sd * 350 - 75, 560, C + sd * 350 + 75, 660, 34), V.bench, 10);   // its headrests, mirrored
+    ctx.restore();
+    // 5. the side pillars, straight up and down at the frame edges
+    for (const x0 of [-20, 1000]) panel(ctx, rrect(x0, -40, x0 + 100, 1960, 6), V.dark, 10);
+    // 3-4. his headrest on its posts, and the seat behind his shoulders
+    panel(ctx, rrect(C - 400, 1250, C + 400, 2000, 80), V.seat, 10);
+    for (const sd of [-1, 1]) stroke(ctx, [[C + sd * 120, 1150], [C + sd * 120, 1260]], { w: 16 });
+    panel(ctx, rrect(C - 285, 850, C + 285, 1170, 90), V.seat, 10);
+    Brush.setWeight(w0);
+    // ---- him
+    ctx.save(); ctx.translate(DRV_AT[0], DRV_AT[1]); ctx.scale(DRV_S, DRV_S); ctx.translate(0, 438);
+    Brush.setWeight(w0 * WIDE * GS / DRV_S);
     hairNow = botchedHair;
     const sad = { ...Emotions.sad, brow: -0.3 }, blinkL = r > 2.3 && r < 2.45 ? 1 : sad.lid;   // brows lowered a touch, under the fringe
-    guy(ctx, { x: 0, y: 0, s: 1, ...sad, lookY: 0.05, lookX: 0, lid: blinkL, tilt: 0.02 + 0.004 * Math.sin(t * 0.7),
-      ...Arms.arm(-1, [-40, -210], 'down'), ...Arms.arm(1, [40, -210], 'down') });   // the rig's arms tucked under the hoodie drawn below
-    // his hoodie seen close: shoulders as wide as his head (kept off his head)
+    guy(ctx, { x: 0, y: 0, s: 1, ...sad, lookY: 0.05, lookX: 0, lid: blinkL, tilt: 0,
+      ...Arms.arm(-1, [-40, -210], 'down'), ...Arms.arm(1, [40, -210], 'down') });   // the rig's own body is covered by the torso below
+    ctx.restore();
+    // his torso and shoulders behind the wheel, kept off his head
+    const lw = w0 * WIDE * GS;
+    Brush.setWeight(lw);
     ctx.save();
-    ctx.beginPath(); ctx.rect(-400, -700, 800, 900); ctx.ellipse(0, -438, RX + 6, RY + 6, 0, 0, 7, true); ctx.clip('evenodd');
-    const hood = [[-60, -318], [-128, -296], [-156, -236], [-162, -110], [162, -110], [156, -236], [128, -296], [60, -318]];
-    fill(ctx, hood, '#8a8a8a', 0.4); outline(ctx, hood, { w: 10 });
-    stroke(ctx, [[-56, -312], [-30, -284], [0, -276], [30, -284], [56, -312]], { w: 9 });   // collar
+    ctx.beginPath(); ctx.rect(0, 0, 1080, 1920); ctx.ellipse(DRV_AT[0], DRV_AT[1], RX * DRV_S + 4, RY * DRV_S + 4, 0, 0, 7, true); ctx.clip('evenodd');
+    // arms first, coming out from under his shoulders down to his hands on the wheel, elbows bowing out
+    HANDS.forEach((h, i) => { const sd = i ? 1 : -1; Chars.tube(ctx, [C + sd * 240, SHOULDER_Y + 10], h, sd * -0.35, 54, V.hoodie, false); });
+    const torso = [[C - 80, 1380], [C - 150, 1430], [C - 240, SHOULDER_Y - 14], [C - 275, SHOULDER_Y + 40], [C - 270, 1980], [C + 270, 1980], [C + 275, SHOULDER_Y + 40], [C + 240, SHOULDER_Y - 14], [C + 150, 1430], [C + 80, 1380]];
+    fill(ctx, torso, V.hoodie, 0.4); outline(ctx, torso, { w: 10 });
+    stroke(ctx, [[C - 110, 1410], [C - 60, 1450], [C, 1462], [C + 60, 1450], [C + 110, 1410]], { w: 9 });   // collar
     ctx.restore();
-    // the seat belt: from the anchor on the pillar, over his shoulder, across him
-    const belt = [[150, -306], [70, -250], [-10, -190], [-80, -120]];   // over his shoulder and across his chest
-    stroke(ctx, belt, { w: 18, taper0: 0, taper1: 0, minW: 1 });
-    stroke(ctx, belt, { w: 10, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
-    // arms: from the shoulders down and out to his hands on the wheel, elbows bowing out
-    HANDS.forEach((h, i) => { const sd = i ? 1 : -1, hr = toRig([h[0] + jx * 0, h[1]]); Chars.tube(ctx, [sd * 140, -282], hr, sd * -0.28, 32, '#8a8a8a', false); });
-    for (const sd of [-1, 1]) stroke(ctx, [[sd * 128, -290], [sd * 142, -268]], { w: 6 });   // the shoulder seams
-    Brush.setWeight(w0);
-    ctx.restore();
-    ctx.restore();
-    // ---- in front of him: the dash, and the wheel with its hub and spokes
-    panel(ctx, poly([[-20, 1800], [300, 1770], [780, 1770], [1100, 1800], [1100, 1960], [-20, 1960]]), '#2a2a2a', 12);
-    // the centre console between the seats, with the gear lever
-    panel(ctx, poly([[150, 1660], [290, 1660], [310, 1960], [120, 1960]]), '#3a3a3a', 11);   // well left of his hands
-    stroke(ctx, [[220, 1720], [216, 1630]], { w: 16 });
-    blob(ctx, 216, 1620, 30, 26, { fill: '#5a5a5a', w: 10, n: 12 });
-    const rim = []; for (let i = 0; i <= 36; i++) rim.push(wheelAt(Math.PI * (1.0 + i / 36)));
-    for (const a of [Math.PI * 1.06, Math.PI * 1.94]) {   // the spokes, out to the rim at about quarter past nine
+    // 8. the seat belt: from his upper-right shoulder (on screen) down across him to the lower-left hip
+    const belt = [[C + 250, SHOULDER_Y - 6], [C + 90, 1640], [C - 90, 1800], [C - 250, 1960]];
+    stroke(ctx, belt, { w: 30, taper0: 0, taper1: 0, minW: 1 });
+    stroke(ctx, belt, { w: 18, taper0: 0, taper1: 0, minW: 1, color: '#444444', jit: 0 });
+    // 7. the wheel, face-on: rim, spokes, hub
+    Brush.setWeight(w0 * CAR_W / 10);
+    const rim = []; for (let i = 0; i <= 48; i++) rim.push(wheelAt(Math.PI * 2 * i / 48));
+    for (const a of [Math.PI, 0, Math.PI / 2]) {
       const p = wheelAt(a);
-      stroke(ctx, [WHEEL.c, p], { w: 62, taper0: 0, taper1: 0, minW: 1 });
-      stroke(ctx, [WHEEL.c, p], { w: 40, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
+      stroke(ctx, [WHEEL.c, p], { w: 64, taper0: 0, taper1: 0, minW: 1 });
+      stroke(ctx, [WHEEL.c, p], { w: 46, taper0: 0, taper1: 0, minW: 1, color: V.dark, jit: 0 });
     }
-    blob(ctx, WHEEL.c[0], WHEEL.c[1] - 40, 150, 110, { fill: '#3a3a3a', w: 12, n: 16 });   // the hub
-    stroke(ctx, rim, { w: 74, taper0: 0, taper1: 0, minW: 1 });
-    stroke(ctx, rim, { w: 50, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
-    // the rear-view mirror, in the middle of the car (between the seats, so left of him)
-    stroke(ctx, [[400, 240], [400, 300]], { w: 18 });   // a short stalk
-    panel(ctx, poly([[250, 300], [550, 300], [540, 388], [260, 388]]), '#4a4a4a', 11);
+    blob(ctx, WHEEL.c[0], WHEEL.c[1], 110, 90, { fill: V.dark, w: 10, n: 16 });   // the hub
+    stroke(ctx, rim, { w: 80, taper0: 0, taper1: 0, minW: 1 });
+    stroke(ctx, rim, { w: 60, taper0: 0, taper1: 0, minW: 1, color: V.dark, jit: 0 });
+    // 6. the rear-view mirror at the top edge, swinging a little on its stem
+    const sw = (2.5 * Math.sin(t * 2.3) * 0.7 + 1.0 * Math.sin(t * 3.7 + 1)) * Math.PI / 180;
+    ctx.save(); ctx.translate(C, -10); ctx.rotate(sw);
+    stroke(ctx, [[0, 0], [0, 60]], { w: 18 });
+    panel(ctx, rrect(-130, 55, 130, 135, 24), V.dark, 10);
+    ctx.restore();
+    Brush.setWeight(w0);
     // his hands over the rim (the arms end in them)
-    for (const h of HANDS) Chars.hand(ctx, h[0] + jx, h[1] + jy, null, DRV_S);
-    return { top: DRV_AT[1] + jy - 1.42 * RY * DRV_S - 10 };
+    for (const h of HANDS) Chars.hand(ctx, h[0], h[1], null, DRV_S);
+    return { top: DRV_AT[1] - 1.42 * RY * DRV_S - 10 };
   }
 
   const shots = [[0, CUT_2, shot1], [CUT_2, CUT_3, shot2], [CUT_3, CUT_4, shot3], [CUT_4, END + 1, shot4]];
