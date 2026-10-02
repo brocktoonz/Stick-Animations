@@ -60,6 +60,9 @@ Acting
 - Continuity: a character's stance and legs don't jump between two similar shots (e.g. two two-shots of the same pair), and nothing moves unmotivated to make room for something else (e.g. animals backing away before a meteor).
 - Legs stay still within a shot unless the character is walking, kicking or reacting: flag a stance that swaps or shuffles mid-shot for no reason (the user caught Nick's legs shifting during "Velociraptor").
 - Lip sync: from frames at 0.1 s steps through each line, the mouth should be open on the spoken words, including short ones ("the", "new", "a"), and closed in pauses. Flag runs of closed mouths during speech (the user caught this through the whole second half).
+- Props make contact with what they act on. Scissors that are "cutting" must have their blades in the hair on the snip frames, not closing on air beside the head (the user caught a barber snipping air that two reviews passed). Check every snip frame; flag it as MAJOR. The same goes for hands on steering wheels, combs in hair, etc.
+- Hair reads as hair at phone size: flag any haircut that reads as a helmet, beanie, cap or hat (flat fill, smooth hard edges, evenly spaced stripes). A "bad haircut" must still look like hair, just badly cut.
+- Settings read as the place they're meant to be at a glance (a car interior needs car cues: wheel, seats and headrest, pillars, windows, mirror, roof), not a few abstract panels.
 - The expression fits the beat and the character's attitude: flag faces that fight the line (e.g. excited on a deadpan reveal, or angry when the character is meant to stay smug and unbothered). Mouth size and shape match the emotion.
 Captions
 - The text is the exact words, with nothing dropped or added.
