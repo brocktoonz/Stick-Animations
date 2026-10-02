@@ -60,7 +60,10 @@ const Cameos = (() => {
       const st = p.stretch ?? 0;
       ctx.save();
       stretchHead(ctx, st);
-      o.back?.(ctx);   // behind the head: hoods, long hair
+      // previews only: p.noEars drops a character's ears, p.withEars adds plain ones in its skin tone
+      const hasEars = o.back === ears || o.back === sqEars;
+      if (!(p.noEars && hasEars)) o.back?.(ctx);   // behind the head: hoods, long hair
+      if (p.withEars && !hasEars) previewEars(ctx, o.skin ?? W);
       // a yell drops the jaw: the head stretches down and the mouth rides up
       // a little, so even a wide-open mouth stays inside the chin
       const rage = p.mouth === 'rage';
@@ -716,6 +719,13 @@ const Cameos = (() => {
   const nick = build({ shirt: INK, sleeve: '#222', head: head({ hair: nickMop, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
+  const previewEars = (ctx, skin) => {
+    for (const side of [-1, 1]) {
+      const e = Brush.ellipsePts(side * RX * 1.0, 6, 26, 36, 10);
+      fill(ctx, e, skin, 0.4); outline(ctx, e, { w: 8 });
+      stroke(ctx, [[side * RX * 1.0, -12], [side * RX * 1.06, 6], [side * RX * 1.0, 22]], { w: 5 });
+    }
+  };
   // Slime: shaved head (light stubble), ears, short full beard + moustache, big grin.
   const ears = ctx => {
     for (const side of [-1, 1]) {
@@ -1452,15 +1462,5 @@ const Cameos = (() => {
     beards: { trimmed: sqC(beardTrim, stacheTrim), full: (draw => (ctx, p) => draw(ctx, sqFace(p)))(sqC(beardFull2, stacheFull2, { mouthDy: p => FULL_MOUTH_DY + (p.smallMouth ? 16 : 0) })), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
   };
 
-  // Drafts without ears (not used in any video yet): the main character, Slime
-  // and Squeex as they are now, minus the ears. Compare at ?skit=no_ears.
-  const noEars = {
-    main: (dr => (ctx, p) => dr(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p }))(build({ shirt: '#8a8a8a', sleeve: '#8a8a8a',
-      head: head({ hair: outlineHair(...SPIKES, ...SHADES.brown.slice(0, 1), { lineColor: SHADES.brown[1] }) }), detail: hoodieFront })),
-    slime: build({ shirt: INK, sleeve: '#222', head: head({ hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
-      detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) }),
-    squeex: (draw => (ctx, p) => draw(ctx, sqFace(p)))(sqC(beardFull2, stacheFull2, { mouthDy: p => FULL_MOUTH_DY + (p.smallMouth ? 16 : 0), back: null })),
-  };
-
-  return { noEars, squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
