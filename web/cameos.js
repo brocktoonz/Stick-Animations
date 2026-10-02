@@ -863,11 +863,12 @@ const Cameos = (() => {
   };
   const scragglyMoustache = (ctx, fx, rage, p = {}) => {
     if (p.bags) for (const sd of [-1, 1])   // bags under the eyes (just woken up)
-      stroke(ctx, [[fx + sd * 40 - 22, 14], [fx + sd * 40, 24], [fx + sd * 40 + 22, 14]], { w: 5, taper0: 0.3, taper1: 0.3, color: '#8a8a8a' });
+      stroke(ctx, [[fx + sd * 40 - 22, 14], [fx + sd * 40, 24], [fx + sd * 40 + 22, 14]], { w: 6, taper0: 0.3, taper1: 0.3, color: '#5a5a5a' });
     if (p.drool) {   // a drip of drool from the corner of the slack mouth, down over the beard
-      const x = fx + 34, y0 = 70, y1 = y0 + 70 * p.drool;
-      const drip = [[x - 5, y0], [x + 5, y0], [x + 6, y1 - 8], [x + 10, y1 + 4], [x, y1 + 14], [x - 10, y1 + 4], [x - 6, y1 - 8]];
-      fill(ctx, drip, W, 0.4); outline(ctx, drip, { w: 4 });
+      const x = fx + 40, y0 = 74, y1 = y0 + 60 * p.drool;   // a thin wet strand that swells into a round drop
+      stroke(ctx, [[x, y0], [x + 2, (y0 + y1) / 2], [x, y1]], { w: 8, taper0: 0, taper1: 0, color: INK });
+      stroke(ctx, [[x, y0], [x + 2, (y0 + y1) / 2], [x, y1]], { w: 4, taper0: 0, taper1: 0, color: '#d8e0e6' });
+      blob(ctx, x, y1 + 8, 9, 11, { fill: '#d8e0e6', w: 3, n: 10 });
     }
     if (rage) ctx.translate(0, -12);
     const m = [[fx - 70, 60], [fx - 58, 38], [fx - 30, 28], [fx, 34], [fx + 30, 28], [fx + 58, 38], [fx + 70, 60],

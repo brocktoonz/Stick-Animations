@@ -126,7 +126,6 @@ Skits.powernap = (() => {
     shape(ctx, [[150, 1040], [540, 1010], [930, 1040], [940, SEAT + 20], [140, SEAT + 20]], '#8a8a8a', 11);   // back cushions
     stroke(ctx, [[540, 1030], [540, SEAT]], { w: 6 });                                       // seam between the two back cushions
     shape(ctx, [[70, 1150], [140, 1110], [220, 1140], [230, FLOOR - 40], [80, FLOOR - 40]], '#7a7a7a', 11);   // left arm (his head ends up on it)
-    pillow(ctx, [270, 1230], 96, 58, -0.35);                                                 // a cushion in the corner against the arm
   }
   function couchFront(ctx) {
     shape(ctx, [[860, 1150], [940, 1110], [1010, 1150], [1000, FLOOR - 40], [850, FLOOR - 40]], '#7a7a7a', 11);   // right arm
@@ -162,7 +161,7 @@ Skits.powernap = (() => {
         : { lid: Math.max(heavy, blink(t, 2.7, 0.3)), lowLid: 0.2, brow: -0.25, pupil: 9, lookX: 0.3, lookY: -0.2, tilt: -0.08,
             ...(said ?? (t < 0.44 ? { mouth: 'smile' } : { mouth: 'flat' })) };            // content smile before he speaks
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
-      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.both([104, -150], 'out'), ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });   // near hand on his stomach; mouth bigger while his head is on its side
+      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.arm(1, [16, -205], 'out'), ...Arms.arm(-1, [-16, -205], 'out'), ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });   // hands resting together on his stomach; mouth bigger while his head is on its side
       ctx.restore();
       couchFront(ctx);
       ctx.restore();
@@ -188,8 +187,8 @@ Skits.powernap = (() => {
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
         ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'),            // arms spread wide, hands planted on the cushion
         ...droopy,
-        ...(asking ? { ...(talk(t, ...SAID.where, true) ?? { mouth: 'gape', open: 0.35 }), mouthScale: 1.25 }
-          : { mouth: 'gape', open: 0.35 + 0.05 * sag, mouthScale: 1.0 }) });                 // jaw hanging slack
+        ...(asking ? { ...(talk(t, ...SAID.where, true) ?? { mouth: 'gape', open: 0.5 }), mouthScale: 1.45 }
+          : { mouth: 'gape', open: 0.5 + 0.05 * sag, mouthScale: 1.45 }) });                 // jaw hanging slack
       shape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
       stroke(ctx, [[540, 1840], [540, 1940]], { w: 6 });
     }],
