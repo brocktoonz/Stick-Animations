@@ -872,8 +872,6 @@ const Cameos = (() => {
         stroke(ctx, [[x, y], [x + sd * 8, y + 7]], { w: 4, taper0: 0, taper1: 0.6 });
       }
     }
-    if (p.bags) for (const sd of [-1, 1])   // bags under the eyes (just woken up)
-      stroke(ctx, [[fx + sd * 40 - 22, 14], [fx + sd * 40, 24], [fx + sd * 40 + 22, 14]], { w: 6, taper0: 0.3, taper1: 0.3, color: '#5a5a5a' });
     if (p.slackMouth !== undefined) {   // a slack, lopsided mouth hanging open (wider than tall, one corner lower), lip-lined so it reads on the dark beard
       const op = p.slackMouth, cx = fx + 4, cy = 62, w = 48, h = 10 + 44 * op;
       if (op < 0.08) stroke(ctx, [[cx - w * 0.7, cy], [cx - w * 0.2, cy + 4], [cx + w * 0.3, cy - 1], [cx + w * 0.8, cy + 8]], { w: 7, color: W }),
@@ -897,6 +895,8 @@ const Cameos = (() => {
                [fx + 50, 50], [fx + 40, 58], [fx + 24, 46], [fx, 50], [fx - 24, 46], [fx - 40, 58], [fx - 50, 50]];
     fill(ctx, m, '#454545', 1.4);
     outline(ctx, m, { w: 7 });
+    if (p.bags) for (const sd of [-1, 1])   // tired shading just under each eye, open or shut, drawn over the moustache's top edge
+      stroke(ctx, [[fx + sd * 48 - 22, 36], [fx + sd * 48, 45], [fx + sd * 48 + 22, 36]], { w: 7, taper0: 0.3, taper1: 0.3, color: '#7a7a7a' });
   };
   const spikyBearded = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a',
     head: head({ hair: outlineHair(...SPIKES, ...SHADES.brown.slice(0, 1), { lineColor: SHADES.brown[1] }), beard: scragglyBeard, front: scragglyMoustache }),
