@@ -456,9 +456,6 @@ const Chars = (() => {
     }
     fill(ctx, head, W, 0.6);
     outline(ctx, head, { w: 13, jit: 2 });
-    for (const side of [-1, 1]) {            // ears
-      stroke(ctx, [[side * 178, -30], [side * 212, -40], [side * 218, 10], [side * 180, 30]], { w: 10 });
-    }
     fill(ctx, [[-170, -60], [-160, -130], [-90, -175], [20, -185], [120, -160], [175, -80],
                [130, -115], [60, -130], [-20, -120], [-110, -100]], INK, 1.5);   // hair swoop
     eyes(ctx, fx, -30, p, 0.9);

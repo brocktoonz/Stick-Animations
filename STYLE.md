@@ -86,6 +86,10 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
 
 ## Cast
 
+- **No ears, on anyone.** Every character's head is one clean outline with no
+  ears, whether the hair would cover them or not (user decision). Don't add
+  ears to new characters, including one-off characters inside a skit. The
+  `withEars` pose flag exists only for the `?skit=no_ears` comparison.
 - Faces come from the shared emotion set (`web/emotions.js`, `...Emotions.angry`).
   Don't hand-tune a face in a skit when an emotion covers it; add or adjust the
   emotion instead and re-render `characters/` so the references stay true.
@@ -98,7 +102,7 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
   and sad (skin-tone drooping lids, one tear, a frown). The other drafts and
   beard options are kept only for reference.
 - Cameos (`web/cameos.js`) are caricatures recognisable from hair silhouette
-  plus one or two signature items. Nick's ears are always hidden by his hair.
+  plus one or two signature items. 
 
 ## Camera and staging
 

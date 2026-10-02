@@ -1,7 +1,6 @@
-// Ears or no ears: every cast character in pairs, with ears (left of each pair)
-// and without (right). Characters that have no ears get plain preview ears in
-// their skin tone; the rest have theirs removed (pose flags withEars/noEars,
-// previews only). Not used in any video.
+// Ears or no ears: every cast character in pairs, with plain preview ears in
+// their skin tone (left of each pair, pose flag withEars) and as drawn, with no
+// ears (right). Nobody in the cast has ears (STYLE.md). Not used in any video.
 Skits.no_ears = (() => {
   const CAST = [['MAIN', Hero.main], ['SPEED', Cameos.speed], ['LUDWIG', Cameos.ludwig], ['MRBEAST', Cameos.beast],
                 ['NICK', Cameos.nick], ['SLIME', Cameos.slime], ['SQUEEX', Cameos.squeex.beards.full]];
@@ -17,7 +16,7 @@ Skits.no_ears = (() => {
         Stage.text(ctx, 'NO EARS', cx + 130, y + 34, 28, 'Luckiest Guy', '#e3261b', 6);
         Brush.stroke(ctx, [[cx - 255, y + 2], [cx + 255, y + 4]], { w: 5 });
         draw(ctx, { t, x: cx - 130, y, s: 0.5, ...pose, withEars: true });
-        draw(ctx, { t, x: cx + 130, y, s: 0.5, ...pose, noEars: true });
+        draw(ctx, { t, x: cx + 130, y, s: 0.5, ...pose });
       });
       ctx.fillStyle = '#000'; ctx.fillRect(538, 40, 4, 1840);
     },

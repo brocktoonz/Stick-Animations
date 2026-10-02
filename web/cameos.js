@@ -60,10 +60,8 @@ const Cameos = (() => {
       const st = p.stretch ?? 0;
       ctx.save();
       stretchHead(ctx, st);
-      // previews only: p.noEars drops a character's ears, p.withEars adds plain ones in its skin tone
-      const hasEars = o.back === ears || o.back === sqEars;
-      if (!(p.noEars && hasEars)) o.back?.(ctx);   // behind the head: hoods, long hair
-      if (p.withEars && !hasEars) previewEars(ctx, o.skin ?? W);
+      o.back?.(ctx);   // behind the head: hoods, long hair (no ears: nobody in the cast has them)
+      if (p.withEars) previewEars(ctx, o.skin ?? W);   // previews only (?skit=no_ears)
       // a yell drops the jaw: the head stretches down and the mouth rides up
       // a little, so even a wide-open mouth stays inside the chin
       const rage = p.mouth === 'rage';
@@ -726,14 +724,7 @@ const Cameos = (() => {
       stroke(ctx, [[side * RX * 1.0, -12], [side * RX * 1.06, 6], [side * RX * 1.0, 22]], { w: 5 });
     }
   };
-  // Slime: shaved head (light stubble), ears, short full beard + moustache, big grin.
-  const ears = ctx => {
-    for (const side of [-1, 1]) {
-      const e = Brush.ellipsePts(side * RX * 1.0, 6, 26, 36, 10);
-      fill(ctx, e, W, 0.4); outline(ctx, e, { w: 8 });
-      stroke(ctx, [[side * RX * 1.0, -12], [side * RX * 1.06, 6], [side * RX * 1.0, 22]], { w: 5 });
-    }
-  };
+  // Slime: shaved head (light stubble), short full beard + moustache, big grin.
   // clean shaven head: just a couple of shine marks
   const shaved = ctx => {
     stroke(ctx, [[-RX * 0.42, -RY * 0.8], [-RX * 0.1, -RY * 0.92], [RX * 0.2, -RY * 0.9]], { w: 6, color: '#bbb' });
@@ -781,7 +772,7 @@ const Cameos = (() => {
     }
     ctx.restore();
   };
-  const slime = build({ shirt: INK, sleeve: '#222', head: head({ back: ears, hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
+  const slime = build({ shirt: INK, sleeve: '#222', head: head({ hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
   // parts: the shared build/head builders, for other adult characters (hero.js)
@@ -848,7 +839,7 @@ const Cameos = (() => {
   const SHADES = { blond: [W, INK], light: ['#d4d4d4', INK], brown: ['#8f8f8f', '#e0e0e0'],
                    dark: ['#555555', '#bdbdbd'], black: [INK, '#8a8a8a'] };
   const spikyShades = Object.fromEntries(Object.entries(SHADES).map(([k, [fillC, lineC]]) => [k,
-    build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: outlineHair(...SPIKES, fillC, { lineColor: lineC }) }), detail: hoodieFront })]));
+    build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: outlineHair(...SPIKES, fillC, { lineColor: lineC }) }), detail: hoodieFront })]));
 
   // Signature accent colour: hair stays a natural colour, the one unnatural
   // colour lives on the clothes. Everything else stays black/white/grey, and
@@ -875,20 +866,20 @@ const Cameos = (() => {
   const ACCENT = { teal: '#16a79c', purple: '#7a4fd0', yellow: '#f2c418', green: '#5cc23a', pink: '#e8439a' };
   const spikyAccents = {
     // whole garment in the accent
-    tealHoodie: build({ shirt: ACCENT.teal, sleeve: ACCENT.teal, head: head({ back: ears, hair: spikyHair('brown') }), detail: hoodieFront }),
-    purpleHoodie: build({ shirt: ACCENT.purple, sleeve: ACCENT.purple, head: head({ back: ears, hair: spikyHair('black') }), detail: hoodieFront }),
-    yellowHoodie: build({ shirt: ACCENT.yellow, sleeve: ACCENT.yellow, head: head({ back: ears, hair: spikyHair('darkBrown') }), detail: hoodieFront }),
+    tealHoodie: build({ shirt: ACCENT.teal, sleeve: ACCENT.teal, head: head({ hair: spikyHair('brown') }), detail: hoodieFront }),
+    purpleHoodie: build({ shirt: ACCENT.purple, sleeve: ACCENT.purple, head: head({ hair: spikyHair('black') }), detail: hoodieFront }),
+    yellowHoodie: build({ shirt: ACCENT.yellow, sleeve: ACCENT.yellow, head: head({ hair: spikyHair('darkBrown') }), detail: hoodieFront }),
     // grey or black hoodie, accent only on the trim
-    greenTrim: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: spikyHair('darkBrown') }), detail: hoodieTrim(ACCENT.green) }),
-    pinkTrim: build({ shirt: '#2a2a2a', sleeve: '#2a2a2a', head: head({ back: ears, hair: spikyHair('dirtyBlond') }), detail: hoodieTrim(ACCENT.pink, { pocket: true }) }),
+    greenTrim: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: spikyHair('darkBrown') }), detail: hoodieTrim(ACCENT.green) }),
+    pinkTrim: build({ shirt: '#2a2a2a', sleeve: '#2a2a2a', head: head({ hair: spikyHair('dirtyBlond') }), detail: hoodieTrim(ACCENT.pink, { pocket: true }) }),
     // grayscale hoodie, natural hair colour only, for comparison
-    plain: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: spikyHair('brown') }), detail: hoodieFront }),
+    plain: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: spikyHair('brown') }), detail: hoodieFront }),
   };
 
   const originals = {
-    curly: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ears, hair: curlyTop }), detail: stripes }),
+    curly: build({ shirt: W, sleeveHem: 0.42, head: head({ hair: curlyTop }), detail: stripes }),
     bun: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', head: head({ back: bunBack, hair: bunFront, lashes: true }), detail: cardigan }),
-    spiky: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: spikes }), detail: hoodieFront }),
+    spiky: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: spikes }), detail: hoodieFront }),
     wavy: build({ shirt: INK, sleeve: '#222', behind: hairSilhouette({ len: 1.12, wide: 1.28, flick: 0.1, waves: 5 }),
       head: head({ hair: outlineHair(...BANGS, W, { seamless: true }), lashes: true }), detail: (ctx, n) => collarTee(ctx, n, W) }),
   };
@@ -957,11 +948,11 @@ const Cameos = (() => {
      [[-1.08, 0.34], [-0.98, 0.42]], [[1.08, 0.34], [0.98, 0.42]]]);
 
   const originals2 = {
-    swoop: build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: head({ back: ears, hair: swoopCut }), detail: zipJacket }),
-    crew: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ears, hair: crewSpikes }), detail: pocketTee }),
-    fringe: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', sleeveHem: 0.42, head: head({ back: ears, hair: pointedFringe }), detail: polo }),
+    swoop: build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: head({ hair: swoopCut }), detail: zipJacket }),
+    crew: build({ shirt: W, sleeveHem: 0.42, head: head({ hair: crewSpikes }), detail: pocketTee }),
+    fringe: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', sleeveHem: 0.42, head: head({ hair: pointedFringe }), detail: polo }),
     bob: build({ shirt: INK, sleeve: '#222', head: head({ hair: bob, lashes: true }), detail: (ctx, n) => collarTee(ctx, n, W) }),
-    pony: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ctx => { ears(ctx); ponytail(ctx); }, hair: ponyFront, lashes: true }), detail: stripes }),
+    pony: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ponytail, hair: ponyFront, lashes: true }), detail: stripes }),
     curls: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: bigCurls }), detail: hoodieFront }),
   };
 
@@ -1054,11 +1045,11 @@ const Cameos = (() => {
     [[[0.04, -1.1], [0.5, -0.96], [0.96, -0.4]], [[-0.04, -1.1], [-0.5, -0.96], [-0.96, -0.4]]]);
 
   const men = {
-    curly: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ears, hair: curlyMop }), detail: pocketTee }),
-    quiff: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', head: head({ back: ears, hair: quiff }), detail: flannel }),
-    spikes: build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: head({ back: ears, hair: messySpikes, beard: chinStubble }), detail: hoodieFront }),
-    beanie: build({ shirt: INK, sleeve: '#222', head: head({ back: ears, hair: beanie }), detail: jacket }),
-    glasses: build({ shirt: W, head: head({ back: ears, hair: neatPart, front: roundGlasses }), detail: collarShirt }),
+    curly: build({ shirt: W, sleeveHem: 0.42, head: head({ hair: curlyMop }), detail: pocketTee }),
+    quiff: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', head: head({ hair: quiff }), detail: flannel }),
+    spikes: build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: head({ hair: messySpikes, beard: chinStubble }), detail: hoodieFront }),
+    beanie: build({ shirt: INK, sleeve: '#222', head: head({ hair: beanie }), detail: jacket }),
+    glasses: build({ shirt: W, head: head({ hair: neatPart, front: roundGlasses }), detail: collarShirt }),
     beard: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', sleeveHem: 0.42, head: head({ hair: shaggy, beard: fullBeard }), detail: collarTee }),
   };
 
@@ -1142,13 +1133,6 @@ const Cameos = (() => {
      [-0.48, -0.86], [-0.6, -0.76], [-0.74, -0.62], [-0.84, -0.46], [-0.92, -0.34], [-0.93, -0.24]],
     [[[-0.5, -1.0], [-0.4, -1.12]], [[-0.06, -0.96], [0.06, -1.16]], [[0.42, -1.0], [0.5, -1.2]]]];
   const sqHair = h => outlineHair(...h, SQ_HAIR, { lineColor: SQ_LINE });
-  const sqEars = ctx => {
-    for (const side of [-1, 1]) {
-      const e = Brush.ellipsePts(side * RX * 1.0, 6, 26, 36, 10);
-      fill(ctx, e, SQ_SKIN, 0.4); outline(ctx, e, { w: 8 });
-      stroke(ctx, [[side * RX * 1.0, -12], [side * RX * 1.06, 6], [side * RX * 1.0, 22]], { w: 5 });
-    }
-  };
   // B: big over-ear headphones: band over the hair, cream cups on the ears.
   const headphones = ctx => {
     const band = [];
@@ -1448,12 +1432,12 @@ const Cameos = (() => {
     body: { legColor: '#8a8a8a',   // khakis, a mid grey so they don't read as bare legs, waist to ankle
       bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
         fill(ctx, b, '#8a8a8a', 1.2); outline(ctx, b, { w: 9 }); } },
-    head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_UP), beard, front: stache, browW: 9, ...headOpts }),
+    head: head({ skin: SQ_SKIN, hair: sqHair(SQ_UP), beard, front: stache, browW: 9, ...headOpts }),
     detail: overshirt });
 
   const squeex = {
     glasses: build({ skin: SQ_SKIN, shirt: INK, sleeve: '#3a3a3a', headScale: [1.02, 1.0],
-      head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_CROP), beard: sqBeard(), front: (ctx, fx, rage) => { sqStache(ctx, fx, rage); rectGlasses(ctx, fx); }, browW: 9 }),
+      head: head({ skin: SQ_SKIN, hair: sqHair(SQ_CROP), beard: sqBeard(), front: (ctx, fx, rage) => { sqStache(ctx, fx, rage); rectGlasses(ctx, fx); }, browW: 9 }),
       detail: jacketHoodie }),
     headset: build({ skin: SQ_SKIN, shirt: W, sleeveHem: 0.24, sleeveFill: W,
       head: head({ skin: SQ_SKIN, hair: sqHair(SQ_TUFT), beard: sqBeard(), front: sqStache, hat: headphones, browW: 9 }),
