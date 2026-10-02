@@ -48,6 +48,30 @@ disagree, the rule wins.
 - Natural hair colours only (greys in the house style, or real hair colours).
   Never orange, blue, pink or other unnatural colours on hair.
 
+## Beards
+
+A full beard reads as one dense, short beard, never as stubble (hatching over
+skin) or as scraggly hair (long, uneven strokes). Squeex's beard
+(`beardFull2` in `web/cameos.js`, `?skit=squeex_beard2`) is the model.
+
+- Fill: one solid fill for the whole beard, sideburns and upper cheeks
+  included, a grey that stays apart from both the hair and the clothes. No
+  area is hatching alone over skin. The sideburns run up under the hair (drawn
+  over the beard), so there's no gap between them.
+- Boundary: the cheek line is one smooth, clean curve from the sideburn down
+  to the moustache corner, low enough to leave bare cheek under the eyes. The
+  bottom edge follows the head outline as a rounded curve with small, regular
+  scallops, never spikes. The edge round the mouth stays clean: nothing
+  intrudes into the mouth opening.
+- Moustache: a band over the upper lip, set apart from the beard by a slightly
+  darker tone, joining the beard at the mouth corners. Mouths open beneath it.
+- Texture: a few short strokes along the outer bottom edge only, never inside
+  the fill. All the same length, all pointing straight down, and few enough to
+  suggest hair rather than outline the shape.
+- Every expression: the same beard in every emotion. In open-mouth poses the
+  beard stretches down with the jaw and wraps under the mouth, so a band of
+  beard always shows below it.
+
 ## Colour
 
 - Base is black, white and grey.
