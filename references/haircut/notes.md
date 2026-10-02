@@ -22,12 +22,15 @@ nose line, smirk; its pink blush is not used).
 (frontal phone-camera framing, a bad bowl cut, upset).
 
 Beats (four shots, hard cuts only):
-- 0.00–3.50 1, wide. The barber starts beside the chair, arms down (0–0.5),
-            lifts the scissors to his chest (0.5–0.85), steps round behind him
-            (0.9–1.6) and snips with the blades in the top of his hair (6 snips,
-            hand-timed: 1.78, 2.02, 2.36, 2.60, 2.95, 3.22); nothing visibly comes
-            off. 2.25–2.85 his eyes fall shut; 2.2–3.5 the camera pushes in on
-            his face. Caption: "Me before getting my haircut"
+- 0.00–3.50 1, wide. The barber starts beside the chair, arms down, the
+            scissors loose at his thigh (0–0.5); lifts them to his chest
+            (0.5–0.85), steps round behind him (0.9–1.45), raises them behind
+            his head (1.45–1.6) and brings his forearm over the top (1.6–1.74).
+            He snips with the blades angled across the crown, closing on a lock
+            lifted into them (6 snips, hand-timed: 1.78, 2.02, 2.36, 2.60, 2.95,
+            3.22); nothing visibly comes off. 2.25–2.85 his eyes fall shut;
+            2.2–3.5 the camera pushes in on his face.
+            Caption: "Me before getting my haircut"
 - 3.50–5.00 2, extreme close-up from the eyes down (the haircut stays out of
             frame). His eyes open: half at 3.85–4.2, a stall, then open at
             4.45–4.7. No caption.
@@ -38,7 +41,8 @@ Beats (four shots, hard cuts only):
 - 7.50–11.0 4, the truth: driving home, seen from the dashboard. A car you
             can read: roof lining and dome light, rear-view mirror, side window
             and door, pillars with the belt anchor, seat and headrest, wheel with
-            hub and spokes, the dash. The botched cut (short, a fringe hacked off
-            at a slant with a chunk missing, a cowlick), eyes welling
+            hub and spokes, the dash. The botched cut (a lumpy hacked top, a fringe
+            chopped at a slant with a gouge, one side cut up above the ear, a
+            curled cowlick), eyes welling
             (`Emotions.sad`), looking straight ahead, hands on the wheel, the car
             jolting a little, one blink at 9.8. Caption: "Me after getting my haircut"

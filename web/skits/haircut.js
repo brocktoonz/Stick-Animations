@@ -155,28 +155,29 @@ Skits.haircut = (() => {
   })();
   const NEAT_LINES = [[[-0.6, -1.02], [-0.64, -0.66]], [[-0.2, -1.12], [-0.22, -0.66]], [[0.22, -1.1], [0.24, -0.66]], [[0.62, -1.0], [0.66, -0.66]]];
   const neatHair = ctx => hairShapes(ctx, [NEAT], GREY, NEAT_LINES, '#6a6a6a');
-  // The botched cut he drives home with: chopped short and crooked, a fringe
-  // hacked off at a slant with a chunk missing, the sides cut short over the
-  // ears, a cowlick sticking up. Reads as bad hair, not a hat.
+  // The botched cut he drives home with: a lumpy, hacked-at top with short
+  // spikes poking out, a fringe chopped at a slant in uneven lengths with a big
+  // gouge where the forehead shows, one side cut right up above the ear, a
+  // curled cowlick. Bad hair, not a hat.
   const BOTCHED = (() => {
-    const pts = [];
-    // the sides, cut short and ragged over the tops of the ears
-    pts.push([-0.94, -0.12], [-1.0, -0.2], [-0.95, -0.27], [-1.04, -0.36], [-1.0, -0.44]);
-    for (let i = 0; i <= 18; i++) { const a = Math.PI + 0.36 + (Math.PI - 0.72) * i / 18; pts.push([Math.cos(a) * 1.1, Math.sin(a) * 1.12]); }   // the dome
-    pts.push([1.0, -0.44], [1.05, -0.36], [0.97, -0.28], [1.02, -0.2], [0.95, -0.12], [0.88, -0.3]);
-    // the fringe, right to left: hacked off at a slant (high on the right, low on the
-    // left) in small separate strand tips, with a chunk missing
-    for (let i = 0; i <= 18; i++) {
-      const x = 0.84 - i * 0.094, base = lerp(-0.74, -0.58, i / 18) - (i >= 5 && i <= 7 ? 0.1 : 0);
-      pts.push([x, base + (i % 2 ? 0 : 0.055)]);
+    const pts = [[-0.94, -0.06], [-1.02, -0.18], [-0.96, -0.3], [-1.05, -0.42]];   // the left side: left long
+    const lumps = [0, 0.08, -0.03, 0.05, 0.16, 0.02, -0.02, 0.07, 0, 0.13, 0.03, -0.04, 0.06, 0.01, 0.1, -0.02];
+    for (let i = 0; i <= 15; i++) {   // the top: lumpy, with short spikes where it was hacked at
+      const a = Math.PI + 0.4 + (Math.PI - 0.95) * i / 15, r = 1.06 + lumps[i];
+      pts.push([Math.cos(a) * r, Math.sin(a) * r]);
     }
-    pts.push([-0.88, -0.3]);
-    return pts;
+    pts.push([0.9, -0.62], [0.84, -0.7]);   // the right side: hacked right up, the skin above the ear showing
+    // the fringe, right to left: short and high, then the gouge (forehead showing up
+    // to near the hairline), then long and ragged down the left
+    const fr = [[0.78, -0.8], [0.7, -0.74], [0.62, -0.82], [0.54, -0.76], [0.46, -0.84],
+                [0.4, -0.96], [0.3, -1.0], [0.16, -0.99], [0.04, -0.95],                 // the gouge
+                [-0.02, -0.7], [-0.1, -0.62], [-0.18, -0.68], [-0.26, -0.58], [-0.34, -0.66], [-0.44, -0.57], [-0.52, -0.63],
+                [-0.62, -0.55], [-0.7, -0.6], [-0.8, -0.5], [-0.86, -0.32]];
+    return [...pts, ...fr];
   })();
-  const BOTCHED_TUFTS = [lock([0.04, -1.06], [0.12, -1.34], 0.07, 0.04), lock([0.12, -1.06], [0.3, -1.3], 0.07, -0.03), lock([-0.04, -1.06], [-0.1, -1.28], 0.06, -0.04)];   // the cowlick: three stray strands
-  const BOTCHED_LINES = [[-0.7, -0.62], [-0.42, -0.66], [-0.14, -0.7], [0.14, -0.76], [0.44, -0.76], [0.7, -0.76]]
-    .map(([x, y]) => [[0.05 + (x - 0.05) * 0.25, -1.02], [0.05 + (x - 0.05) * 0.7, (y - 1.02) / 2 - 0.02], [x, y - 0.04]]);   // strands from the crown out to the fringe
-  BOTCHED_LINES.push([[-0.92, -0.42], [-0.9, -0.22]], [[0.92, -0.42], [0.9, -0.22]]);
+  const BOTCHED_TUFTS = [lock([0.02, -1.06], [0.3, -1.36], 0.16, 0.14)];   // the cowlick: one curled lock
+  const BOTCHED_LINES = [[[-0.5, -0.86], [-0.46, -0.66]], [[-0.22, -0.86], [-0.2, -0.7]], [[0.6, -0.96], [0.62, -0.84]],
+                         [[-0.9, -0.44], [-0.88, -0.24]]];
   const botchedHair = ctx => hairShapes(ctx, [BOTCHED, ...BOTCHED_TUFTS], GREY, BOTCHED_LINES, '#5a5a5a');
 
   let hairNow = mopHair;
@@ -410,11 +411,16 @@ Skits.haircut = (() => {
   // The barber starts beside the chair, arms down. He lifts the scissors, steps
   // round behind him and snips with the blades in the top of his hair; nothing
   // visibly comes off yet. He lets his eyes fall shut and we push in on his face.
-  const B1 = { x0: 860, x1: 600, feet: 1660, s: 1.15 };
-  const LIFT = [0.5, 0.85], WALK = [0.9, 1.6];
+  const B1 = { x0: 860, x1: 680, feet: 1660, s: 1.15 };   // behind him, off his right shoulder, so the forearm over the head stays clear of the barber's own face
+  const LIFT = [0.5, 0.85], WALK = [0.9, 1.45], RISE = [1.45, 1.6], OVER = [1.6, 1.74];
   const SNIPS1 = [1.78, 2.02, 2.36, 2.6, 2.95, 3.22];        // hand-timed, uneven
-  const CUT_SPOTS = [[440, 762], [376, 770], [500, 772]];    // his hand a little over the top of the hair, the blades going down into it
+  // his scissor hand over the top of the head: the forearm comes over from behind
+  // the right side of it (EMERGE), the blades angled down across the crown and
+  // closing on a lock lifted into them
+  const EMERGE = [585, 900];
+  const CUT_SPOTS = [[495, 772], [470, 762], [515, 780]];
   const SPOT_AT = [0, 1, 0, 2, 1, 0];
+  const CUT_ROT = -2.18;   // the blades pointing down and left, about 35 degrees below level
   const CLOSE = [2.25, 2.85], PUSH1 = [2.2, CUT_2];
   const b1Local = ([X, Y], lean, bx) => { const x = (X - bx) / B1.s, y = (Y - B1.feet) / B1.s; const c = Math.cos(-lean), sn = Math.sin(-lean); return [x * c - y * sn, x * sn + y * c]; };
   const b1HeadTop = B1.feet - 678 * B1.s - RY * 0.9 * B1.s;
@@ -438,30 +444,34 @@ Skits.haircut = (() => {
     const bx = lerp(B1.x0, B1.x1, walk);
     const step = t > WALK[0] && t < WALK[1] ? 0.7 * Math.sin(Math.PI * 2 * (t - WALK[0]) / 0.35) * (1 - Math.abs(2 * walk - 1) ** 3) : 0;
     const lean = lerp(-0.03, 0.08, walk) - 0.008 * Math.sin(t * 0.9);   // behind him, he leans out a little to see over
-    // the scissor hand (his pose space): down at his side, lifted to his chest,
-    // then onto the top of the hair
-    const atSide = [-100, -140 + BDY], atChest = [-10, -235 + BDY];   // lifted to his chest, the blades out to the side, clear of his face and the customer's hair
-    let hand, rot, front, onTop = null;   // onTop: hand and scissors drawn over the crown, in world space
-    if (t < WALK[1]) {
+    // the scissor hand. Pose space while it's on his side of things: hanging at
+    // his side, lifted to his chest, rising behind the customer's head. Then,
+    // over the top of the head, it is drawn in world space after the customer:
+    // forearm over the hair, hand, a lock lifted into the blades.
+    const rest = [-104, -284], atChest = [-10, -235 + BDY];
+    let armL = {}, holdL = null, over = null;
+    if (t < LIFT[0]) {
+      holdL = scissors(Math.PI, 0);   // arms down, the scissors held loosely at his thigh
+    } else if (t < RISE[0]) {
       const lift = easeOutBack(seg(t, LIFT[0], LIFT[1]));
-      hand = Stage.mix(atSide, atChest, lift); rot = lerp(Math.PI, 1.15, lift); front = true;
+      armL = Arms.arm(-1, (([x, y]) => [x, y - BDY])(Stage.mix(rest, atChest, lift)), 'out', true, 142);
+      holdL = scissors(lerp(Math.PI, 1.15, lift), 0);
+    } else if (t < OVER[0]) {   // rising behind the right side of his head
+      const k = easeInOut(seg(t, RISE[0], RISE[1]));
+      armL = Arms.arm(-1, (([x, y]) => [x, y - BDY])(Stage.mix(atChest, b1Local(EMERGE, lean, bx), k)), 'down', false, 142);
+      holdL = scissors(lerp(1.15, 0, k) - lean, 0);
     } else {
+      armL = Arms.arm(-1, (([x, y]) => [x, y - BDY])(b1Local(EMERGE, lean, bx)), 'down', false, 142);
       const spotNow = CUT_SPOTS[SPOT_AT[Math.min(n, SPOT_AT.length - 1)]], spotWas = n > 0 ? CUT_SPOTS[SPOT_AT[n - 1]] : spotNow;
       const prevAt = n > 0 ? SNIPS1[n - 1] : 0, nextAt = SNIPS1[Math.min(n, SNIPS1.length - 1)];
       const move = n === 0 || n >= SNIPS1.length ? (n === 0 ? 1 : 0) : easeInOut(seg(t, prevAt + 0.12, Math.max(prevAt + 0.13, nextAt - 0.08)));
+      const bob = since < 0.18 ? 6 * Math.sin(Math.PI * since / 0.18) : 0;   // a small dip on each snip
+      const k = easeOut(seg(t, OVER[0], OVER[1]));   // up over the top of the head
       const spot = Stage.mix(spotWas, spotNow, move);
-      const bob = since < 0.18 ? 8 * Math.sin(Math.PI * since / 0.18) : 0;   // a small dip into the hair on each snip
-      const onHair = b1Local([spot[0], spot[1] + bob], lean, bx);
-      const into = n === 0 ? easeInOut(seg(t, WALK[1], SNIPS1[0] - 0.08)) : 1;   // from his chest up onto the hair
-      hand = Stage.mix(atChest, onHair, into);
-      rot = lerp(1.15, Math.PI - 0.25, into) - lean; front = into < 0.5;
-      // over the top of his head the blades are in front of the hair, so the
-      // hand and scissors are drawn after him, cutting into the crown
-      if (into >= 1) onTop = { at: [spot[0], spot[1] + bob], rot: rot + lean };
+      over = { at: Stage.mix(EMERGE, [spot[0], spot[1] + bob], k), rot: lerp(0, CUT_ROT, k), open: k < 1 ? 1 : open, lock: k >= 1 };
     }
     barberRig(ctx, { x: bx, y: B1.feet, s: B1.s, lean, step, weight: walk > 0 && walk < 1 ? 0 : 0.5, ...fussy, lookX: lerp(-0.4, -0.75, walk), lookY: lerp(0.2, 0.55, walk),
-      ...Arms.arm(-1, [hand[0], hand[1] - BDY], 'down', front, 142), holdL: onTop ? null : scissors(rot, t < WALK[1] ? 0 : open),
-      ...Arms.arm(1, [96, -196 - BDY], 'out', false, B_ARM), holdR: comb });
+      ...armL, holdL, ...Arms.arm(1, [96, -196 - BDY], 'out', false, B_ARM), holdR: comb });
     chairBack(ctx);
     const nod = since < 0.2 ? 0.015 * (1 - since / 0.2) : 0;
     const shut = easeInOut(seg(t, CLOSE[0], CLOSE[1]));   // a slow, relaxed close
@@ -471,9 +481,15 @@ Skits.haircut = (() => {
     ctx.restore();
     cape(ctx);
     chairFront(ctx);
-    if (onTop) {   // the barber's hand on his crown, the blades in the hair, snipping
-      ctx.save(); ctx.translate(onTop.at[0], onTop.at[1]); ctx.scale(B1.s, B1.s);
-      scissors(onTop.rot, open)(ctx, 0, 0); Chars.hand(ctx, 0, 0, null, 1);
+    if (over) {   // the barber's forearm over the top of his head, a lock lifted into the blades
+      Chars.tube(ctx, EMERGE, over.at, 0.12, 24 * B1.s, W, false);
+      const dir = [Math.sin(over.rot), -Math.cos(over.rot)], X = [over.at[0] + dir[0] * 108, over.at[1] + dir[1] * 108];
+      if (over.lock) {   // the lock, pulled up from the crown into the blades
+        const L = lock([0, 0.3], [0.02, -0.12], 0.2, 0.04).map(([u, v]) => [X[0] + u * RX * GS * 0.5, X[1] + v * RY * GS * 0.5]);
+        outline(ctx, L, { w: 9 }); fill(ctx, L, GREY, 0.3);
+      }
+      ctx.save(); ctx.translate(over.at[0], over.at[1]); ctx.scale(B1.s, B1.s);
+      scissors(over.rot, over.open)(ctx, 0, 0); Chars.hand(ctx, 0, 0, null, 1);
       ctx.restore();
     }
     ctx.restore();
@@ -690,14 +706,13 @@ Skits.haircut = (() => {
     panel(ctx, poly([[860, 1080], [1100, 1060], [1100, 1960], [880, 1960]]), '#4a4a4a', 11);
     stroke(ctx, [[880, 1120], [1100, 1104]], { w: 8 });                                        // the window sill
     panel(ctx, poly([[760, 400], [830, 410], [870, 1300], [800, 1310]]), '#5a5a5a', 11);             // B-pillar
-    panel(ctx, box(790, 640, 850, 690, 2), '#3a3a3a', 8);                                      // the belt's anchor on it
+    panel(ctx, box(808, 1210, 866, 1258, 2), '#3a3a3a', 8);                                    // the belt's anchor on it, at shoulder height
     // the passenger side, our left: the other pillar and a dark side window
     panel(ctx, poly([[-20, 380], [250, 420], [210, 1080], [-20, 1060]]), '#9a9a9a', 11);
-    panel(ctx, poly([[180, 400], [250, 410], [210, 1300], [140, 1310]]), '#5a5a5a', 11);
+    panel(ctx, poly([[180, 400], [250, 410], [214, 1080], [146, 1074]]), '#5a5a5a', 11);   // ends at the window's bottom edge
     // roof lining with the dome light, curving down at the edges
     panel(ctx, poly([[-20, -20], [1100, -20], [1100, 380], [780, 410], [540, 420], [300, 410], [-20, 380]]), '#bdbdbd', 11);
-    panel(ctx, box(470, 120, 610, 170, 3), '#e8e8e8', 8);
-    stroke(ctx, [[1040, 330], [990, 360], [930, 360]], { w: 12 });                              // grab handle
+    panel(ctx, box(250, 150, 380, 196, 3), '#e8e8e8', 8);   // the dome light, off to one side
     // the seat behind him: a seat back wider than him, and the headrest on two posts, clear of his head
     ctx.save(); ctx.translate(jx, jy);
     panel(ctx, poly([[270, 1180], [810, 1180], [850, 1960], [230, 1960]]), '#2e2e2e', 12);
@@ -706,8 +721,12 @@ Skits.haircut = (() => {
     // him
     ctx.save(); ctx.translate(DRV_AT[0], DRV_AT[1]); ctx.scale(DRV_S, DRV_S); ctx.translate(0, -(-438));
     const w0 = Brush.getWeight(); Brush.setWeight(w0 * WIDE * GS / DRV_S);
+    const toRig = ([x, y]) => [(x - DRV_AT[0]) / DRV_S, (y - DRV_AT[1]) / DRV_S - 438];
+    const upper = [toRig([836, 1236]), [150, -318]];   // from the pillar anchor, just beside his shoulder
+    stroke(ctx, upper, { w: 18, taper0: 0, taper1: 0, minW: 1 });
+    stroke(ctx, upper, { w: 10, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
     hairNow = botchedHair;
-    const sad = { ...Emotions.sad, brow: -0.4 }, blinkL = r > 2.3 && r < 2.45 ? 1 : sad.lid;   // brows lowered a touch, under the fringe
+    const sad = { ...Emotions.sad, brow: -0.3 }, blinkL = r > 2.3 && r < 2.45 ? 1 : sad.lid;   // brows lowered a touch, under the fringe
     guy(ctx, { x: 0, y: 0, s: 1, ...sad, lookY: 0.05, lookX: 0, lid: blinkL, tilt: 0.02 + 0.004 * Math.sin(t * 0.7),
       ...Arms.arm(-1, [-40, -210], 'down'), ...Arms.arm(1, [40, -210], 'down') });   // the rig's arms tucked under the hoodie drawn below
     // his hoodie seen close: shoulders as wide as his head (kept off his head)
@@ -718,8 +737,7 @@ Skits.haircut = (() => {
     stroke(ctx, [[-56, -312], [-30, -284], [0, -276], [30, -284], [56, -312]], { w: 9 });   // collar
     ctx.restore();
     // the seat belt: from the anchor on the pillar, over his shoulder, across him
-    const toRig = ([x, y]) => [(x - DRV_AT[0]) / DRV_S, (y - DRV_AT[1]) / DRV_S - 438];
-    const belt = [toRig([820, 665]), [120, -300], [10, -230], [-80, -120]];
+    const belt = [[150, -306], [70, -250], [-10, -190], [-80, -120]];   // over his shoulder and across his chest
     stroke(ctx, belt, { w: 18, taper0: 0, taper1: 0, minW: 1 });
     stroke(ctx, belt, { w: 10, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
     // arms: from the shoulders down and out to his hands on the wheel, elbows bowing out
@@ -740,7 +758,7 @@ Skits.haircut = (() => {
     stroke(ctx, rim, { w: 74, taper0: 0, taper1: 0, minW: 1 });
     stroke(ctx, rim, { w: 50, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
     // the rear-view mirror, hanging in front of him at the top
-    stroke(ctx, [[540, -20], [540, 300]], { w: 18 });
+    stroke(ctx, [[540, 240], [540, 300]], { w: 18 });   // a short stalk
     panel(ctx, poly([[380, 300], [700, 300], [690, 390], [390, 390]]), '#4a4a4a', 11);
     // his hands over the rim (the arms end in them)
     for (const h of HANDS) Chars.hand(ctx, h[0] + jx, h[1] + jy, null, DRV_S);
