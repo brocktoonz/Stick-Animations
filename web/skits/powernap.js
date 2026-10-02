@@ -174,7 +174,8 @@ Skits.powernap = (() => {
         const knee = [lerp(sitK[0], lieK[0], swing), lerp(sitK[1], lieK[1], swing) - arc];
         const foot = [lerp(sitF[0], lieF[0], swing), lerp(sitF[1], lieF[1], swing) - arc * 1.4];
         const leg = [hip, knee, foot];
-        stroke(ctx, leg, { w: 36, taper0: 0, taper1: 0, color: '#6a6a6a' });   // a thin couch-grey edge round both legs (on the upper leg it also keeps the two legs apart)
+        const edge = [[lerp(hip[0], knee[0], 0.45), lerp(hip[1], knee[1], 0.45)], knee, foot];   // the edge starts below the shorts, so the hip end never shows a grey ring
+        stroke(ctx, edge, { w: 36, taper0: 0, taper1: 0, color: '#6a6a6a' });   // a thin couch-grey edge round both legs (on the upper leg it also keeps the two legs apart)
         stroke(ctx, leg, { w: 28, taper0: 0, taper1: 0 });                                   // black legs, as in his design (the same ink as his shorts)   // ...dark trousers inside, so the legs read apart
         fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 42, 21, 10), '#6a6a6a', 0.8);
         fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 38, 17, 10), INK, 0.8);   // shoe, tucked onto the end of the shin
