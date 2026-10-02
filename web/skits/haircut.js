@@ -1,13 +1,13 @@
 // "Me before / during / after getting my haircut" (12 s), starring the main character.
 // Based on the three-panel haircut meme; beats in references/haircut/notes.md.
 // No audio track yet: the timing follows the brief (0-3 before, 3-8 the mirror
-// moment, 8-12 after) so a sound can be laid over it, peak at ~5 s.
+// moment, 8-12 after); the sound is laid over it separately.
 Skits.haircut = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { seg, lerp, easeOut, easeInOut, easeOutBack, clamp } = Stage;
   const { build, head, hh, RX, RY } = Cameos.parts;
   const W = '#fff', RED = '#d9261c';
-  const CUT_MIRROR = 4.1, CUT_AFTER = 8.0, END = 12.0;
+  const CUT_MIRROR = 4.5, CUT_AFTER = 8.0, END = 12.0;
 
   // ---------- captions: the meme's three panels, word for word ----------
   // [start, end, text]. The meme's own line breaks are kept; extra breaks are
@@ -149,6 +149,18 @@ Skits.haircut = (() => {
   const SWEPT_LINES = [[[-0.5, -0.92], [-0.36, -1.4], [-0.16, -1.7]], [[0.0, -0.98], [0.3, -1.46], [0.56, -1.74]],
                        [[0.5, -1.0], [0.9, -1.3], [1.12, -1.5]]];
   const sweptHair = ctx => hairShapes(ctx, SWEPT, AUBURN, SWEPT_LINES, AUBURN_LINE);
+  // The swell in the mirror, k 0..1: the half-cut mop sinks back to the scalp
+  // while the swept shape grows out of it. Every part scales about a point on
+  // the scalp; the colour turns over halfway, in one frame (no fades).
+  const SCALP = [0.05, -0.82];
+  const toward = (pts, f) => pts.map(([x, y]) => [SCALP[0] + (x - SCALP[0]) * f, SCALP[1] + (y - SCALP[1]) * f]);
+  const swellHair = k => ctx => {
+    const out = clamp(1 - k * 2), grow = Math.max(0, k);
+    const mop = out > 0 ? [MOP_CAP, ...LOCKS.filter((_, i) => i >= cutCount).flatMap(l => l.shapes)].map(p => toward(p, 0.75 + 0.25 * out)) : [];
+    const swept = SWEPT.map((p, i) => i === 0 ? p : toward(p, grow));
+    if (k < 0.5) hairShapes(ctx, [...mop, ...swept], GREY, [], GREY_LINE);
+    else hairShapes(ctx, swept, AUBURN, k > 0.85 ? SWEPT_LINES : [], AUBURN_LINE);
+  };
 
   // AFTER: neat and boxy. Flat top, rounded corners, sides tapering into the
   // temples, a side part combed over.
@@ -160,22 +172,23 @@ Skits.haircut = (() => {
 
   // the jawline: an angular jaw, its two edges outside the round head outline
   const JAW = [[-0.97, 0.1], [-0.76, 0.94], [-0.24, 1.1], [0.24, 1.1], [0.76, 0.94], [0.97, 0.1]];
-  const jaw = ctx => {
-    const p = hu(JAW);
+  const jaw = (ctx, k = 1) => {
+    // k 0..1: from the round chin out to the angular jaw
+    const p = hu(JAW.map(([x, y]) => { const a = Math.atan2(y, x); return [lerp(Math.cos(a), x, k), lerp(Math.sin(a), y, k)]; }));
     ctx.save();
     ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); for (const q of p) ctx.lineTo(q[0], q[1]); ctx.closePath();
     ctx.ellipse(0, 0, RX - 9, RY - 9, 0, 0, Math.PI * 2, true);
     ctx.clip('evenodd');
     ctx.fillStyle = W; ctx.fillRect(-RX * 1.2, 0, RX * 2.4, RY * 1.3);   // the jaw fills out, covering the round chin line
     ctx.restore();
-    for (const s of [-1, 1]) stroke(ctx, hu([[s * 0.97, 0.1], [s * 0.76, 0.94], [s * 0.2, 1.1]]), { w: 13, taper0: 0.1, taper1: 0.4 });
+    for (const s of [-1, 1]) stroke(ctx, [p[s < 0 ? 0 : 5], p[s < 0 ? 1 : 4], [lerp(p[2][0], p[3][0], s < 0 ? 0.1 : 0.9), p[2][1]]], { w: 13, taper0: 0.1, taper1: 0.4 });
   };
 
-  let hairNow = mopHair, jawNow = false;
+  let hairNow = mopHair, jawNow = 0;   // jawNow: how far the jaw has grown, 0..1
   const hoodieFront = (ctx, n) => stroke(ctx, [[-50, n + 2], [-30, n + 30], [0, n + 38], [30, n + 30], [50, n + 2]], { w: 9 });
   // Hero.main's build (Cameos.spikyShades.brown) with a swappable haircut
   const guyRig = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', detail: hoodieFront,
-    head: head({ back: ears, hair: ctx => hairNow(ctx), front: ctx => { if (jawNow) jaw(ctx); } }) });
+    head: head({ back: ears, hair: ctx => hairNow(ctx), front: ctx => { if (jawNow > 0.01) jaw(ctx, jawNow); } }) });
   const guy = (ctx, p) => guyRig(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
 
   // ---------- the barber: tall and lanky, bald with a grey horseshoe, handlebar moustache ----------
@@ -336,13 +349,15 @@ Skits.haircut = (() => {
       fill(ctx, Brush.ellipsePts(GX + s * 56 + s * 18, REST + 6, 44, 20, 10), INK, 0.8);
     }
   }
-  function cape(ctx, after) {
+  function cape(ctx, after, drop = 0) {
+    ctx.save(); ctx.translate(0, drop);   // his shoulders sinking
     const c = [[GX - 60, gNeck + 6], [GX + 60, gNeck + 6], [GX + 150, gNeck + 60], [GX + 250, gNeck + 150], [GX + 300, CAPE_BOT - 30],
                [GX + 210, CAPE_BOT + 4], [GX + 60, CAPE_BOT - 14], [GX - 80, CAPE_BOT + 6], [GX - 230, CAPE_BOT - 8], [GX - 300, CAPE_BOT - 34],
                [GX - 250, gNeck + 150], [GX - 150, gNeck + 60]];
     fill(ctx, c, '#ececec', 0.6); outline(ctx, c, { w: 11 });
     stroke(ctx, [[GX - 70, gNeck + 30], [GX, gNeck + 46], [GX + 70, gNeck + 30]], { w: 9 });   // neck band
     for (const [x0, x1] of [[-150, -190], [40, 60], [170, 220]]) stroke(ctx, [[GX + x0, gNeck + 120], [GX + x1, CAPE_BOT - 30]], { w: 6 });
+    ctx.restore();
     after?.(ctx);
   }
   // a cut-off tuft: a little pointed clump of his hair
@@ -396,45 +411,80 @@ Skits.haircut = (() => {
   const WIDE = 0.9, wide = ctx => zoom(ctx, 540, 1920, WIDE);
   const wideY = y => 1920 - (1920 - y) * WIDE;
 
-  // ---------- shot 1: in the chair, getting snipped, then the glance (0 - 4.1) ----------
+  // ---------- shot 1: in the chair, getting snipped; the barber tilts the chair,
+  // he glances at the mirror, and we push in on him (0 - 4.5) ----------
+  const TILT_AT = 3.1, GLANCE = [3.56, 3.83], PUSH = [3.86, CUT_MIRROR];   // the glance is 8 frames
+  const PIVOT = [GX, 1800];                       // the chair turns about its base
+  const CHAIR_CORNER = [GX + 220, 1330];          // where the barber takes hold of the chair back (its edge, below his head)
+  const chairTilt = t => t < TILT_AT ? 0
+    : t < 3.26 ? 0.045 * easeOut(seg(t, TILT_AT, 3.26))
+    : t < 3.48 ? lerp(0.045, -0.008, easeInOut(seg(t, 3.26, 3.48)))
+    : lerp(-0.008, 0, easeInOut(seg(t, 3.48, 3.6)));
+  const rotAbout = ([x, y], [cx, cy], a) => [cx + (x - cx) * Math.cos(a) - (y - cy) * Math.sin(a), cy + (x - cx) * Math.sin(a) + (y - cy) * Math.cos(a)];
+  // the camera: scale S with his head centre at screen point A
+  const wideCam = z => ({ S: WIDE * z, A: [470 + z * (540 + WIDE * (GX - 540) - 470), 1300 + z * (1920 + WIDE * (GY - 1920) - 1300)] });
+  const PUSH_TO = { S: 1.3, A: [540, 1320] };     // matches the mirror shot's first frame
   function shotChair(ctx, t) {
-    const z = lerp(1.0, 1.05, easeInOut(seg(t, 0, CUT_MIRROR)));
-    ctx.save(); zoom(ctx, 470, 1300, z); wide(ctx);
+    const z = lerp(1.0, 1.05, easeInOut(seg(t, 0, 4.1)));   // the slow drift of the first draft, kept
+    const p = easeInOut(seg(t, PUSH[0], PUSH[1]));
+    const c0 = wideCam(z), S = lerp(c0.S, PUSH_TO.S, p), A = Stage.mix(c0.A, PUSH_TO.A, p);
+    ctx.save(); ctx.translate(A[0], A[1]); ctx.scale(S, S); ctx.translate(-GX, -GY);
     wall(ctx); floor(ctx);
     const sn = snipState(t);
-    cutCount = sn.n; hairNow = mopHair; jawNow = false;
+    cutCount = sn.n; hairNow = mopHair; jawNow = 0;
     const nod = sn.since < 0.2 ? 0.02 * (1 - sn.since / 0.2) : 0;   // a little nod with each snip
-    const glance = easeOutBack(seg(t, 3.25, 3.5));                    // the glance up into the mirror
+    // the glance: eyes dart to the mirror first, the head turns after them
+    const dart = easeOut(seg(t, GLANCE[0], GLANCE[0] + 0.1)), turn = easeOutBack(seg(t, GLANCE[0] + 0.04, GLANCE[1]));
+    const tilt = chairTilt(t);
+    ctx.save(); ctx.translate(PIVOT[0], PIVOT[1]); ctx.rotate(tilt); ctx.translate(-PIVOT[0], -PIVOT[1]);
     chairBack(ctx);
     ctx.save(); ctx.beginPath(); ctx.rect(-600, -600, 2300, gNeck + 600 + 40); ctx.clip();
-    guy(ctx, { x: GX, y: gFeet, s: GS, ...dead, lookY: lerp(0.6, -0.05, glance), lookX: lerp(-0.45, 0, glance),
-      pupil: lerp(9, 12, glance), lid: lerp(0.62, 0.46, glance), tilt: lerp(0.08, 0.04, glance) + nod + 0.01 * Math.sin(t * 1.3) });
+    guy(ctx, { x: GX, y: gFeet, s: GS, ...dead, lookY: lerp(0.6, -0.05, dart), lookX: lerp(-0.45, 0, dart),
+      pupil: lerp(9, 12, dart), lid: lerp(0.62, 0.46, dart), face: lerp(12, 2, turn),   // the head turns to face the mirror square on
+      tilt: lerp(0.08, 0.03, turn) - tilt * 0.6 + nod + 0.01 * Math.sin(t * 1.3) });   // his head lags the chair a little
     ctx.restore();
     cape(ctx, () => falling(ctx, t, LOCKS.length));
     chairFront(ctx);
-    // the barber: scissors move from lock to lock, then wait at the glance
+    ctx.restore();
+    // the barber: scissors move from lock to lock; after the last snip his hand
+    // goes to the chair back and gives it a turn toward the mirror
     const i = Math.min(sn.n, SNIPS.length - 1), prev = Math.max(0, sn.n - 1);
     const prevAt = sn.n > 0 ? SNIPS[sn.n - 1] : 0;
     const move = sn.n === 0 ? 1 : easeInOut(seg(t, prevAt + 0.12, Math.max(prevAt + 0.13, SNIPS[i] - 0.08)));
     const a = snipHand(prev), b = snipHand(i), done = sn.n >= SNIPS.length;
-    const hand = done ? a.hand : Stage.mix(a.hand, b.hand, move);
-    const rot = done ? a.rot : lerp(a.rot, b.rot, move);
-    const front = done ? a.front : (move < 0.5 ? a.front : b.front);
+    let hand = done ? a.hand : Stage.mix(a.hand, b.hand, move);
+    let rot = done ? a.rot : lerp(a.rot, b.rot, move);
+    let front = done ? a.front : (move < 0.5 ? a.front : b.front);
     const lean = LEAN - 0.012 * Math.sin(t * 0.9);
+    if (done) {   // to the chair back (2.95-3.1), then it moves with the chair
+      const k = easeInOut(seg(t, 2.95, TILT_AT));
+      hand = Stage.mix(a.hand, rotAbout(CHAIR_CORNER, PIVOT, tilt), k);
+      rot = lerp(a.rot, 2.7, k); front = k > 0.5 || a.front;   // scissors closed, pointing down and away
+    }
     barber(ctx, { x: BX, y: BFEET, s: BS, lean, weight: -0.6, ...fussy,
-      ...barberArm(-1, bLocal(hand, lean), 'down', front), holdL: scissors(rot, sn.open),
+      ...barberArm(-1, bLocal(hand, lean), 'down', front), holdL: scissors(rot, done ? 0 : sn.open),
       ...barberArm(1, [96, -196], 'out', false), holdR: comb });
     ctx.restore();
-    const top = Math.min(GY - 1.66 * RY * GS, bHeadY(LEAN)[1] - RY * 0.9 * BS);
-    return { top: (wideY(top) - 1300) * z + 1300 };
+    // what has to stay under the caption: his hair, and the barber's head while it's
+    // across the caption's width
+    const toScreen = y => A[1] + (y - GY) * S;
+    const bh = bHeadY(LEAN), bLeft = A[0] + (bh[0] - GX - RX * 0.9 * BS) * S;
+    const tops = [toScreen(GY - 1.66 * RY * GS)];
+    if (bLeft < 880) tops.push(toScreen(bh[1] - RY * 0.9 * BS));
+    return { top: Math.min(...tops) };
   }
 
-  // ---------- shot 2: the mirror (4.1 - 8.0) ----------
-  // The reflection is shot 1's view, flipped and closer. Push in on his face and hold.
+  // ---------- shot 2: the mirror (4.5 - 8.0) ----------
+  // The reflection is shot 1's view, flipped, at the scale the push-in ended on.
+  // His hair swells into the styled shape, the sparkles pop one by one as it
+  // settles, the brow cocks, and the smirk lands last. Then hold, 2.5 s.
+  const SWELL = [4.66, 5.03];                       // 11 frames
+  const SPARKS = [4.93, 5.1, 5.27];                 // one at a time as it settles
+  const COCK = [5.12, 5.36], SMIRK = 5.5;
   const MIRROR = [80, 170, 1000, 2100];   // frame: x0, top, x1, bottom (arched top)
   function shotMirror(ctx, t) {
     const k = easeInOut(seg(t, CUT_MIRROR, CUT_AFTER));
-    const z = lerp(1.0, 1.12, k);
+    const z = lerp(1.0, 1.1, k);   // the push-in carries on, slower
     const FX = 540, FY = 1320;   // his face stays here on screen as we push in
     ctx.save(); zoom(ctx, FX, FY, z);
     ctx.fillStyle = '#e8e8e8'; ctx.fillRect(-400, -400, 1900, 2800);   // the shop wall the mirror hangs on
@@ -450,20 +500,24 @@ Skits.haircut = (() => {
     ctx.translate(FX, FY); ctx.scale(-RS, RS); ctx.translate(-GX, -GY);
     wall(ctx); floor(ctx);
     chairBack(ctx);
-    hairNow = sweptHair; jawNow = true;
-    const peak = 5.0;                                    // the look lands: brow cocks, head settles
-    const cock = easeOutBack(seg(t, peak - 0.05, peak + 0.22));
-    const sm = Emotions.smolder;
+    cutCount = SNIPS.length;
+    const eob = easeOutBack(seg(t, SWELL[0], SWELL[1])), swell = eob <= 1 ? eob : 1 + (eob - 1) * 0.45;   // swells a touch past, then settles
+    hairNow = t >= SWELL[1] ? sweptHair : swellHair(swell); jawNow = clamp(swell);
+    const cock = easeOutBack(seg(t, COCK[0], COCK[1]));
+    const sm = Emotions.smolder, g = { ...dead, lookY: -0.05, pupil: 12, lid: 0.46 };   // he arrives with the glance face
     ctx.save(); ctx.beginPath(); ctx.rect(-600, -600, 2300, gNeck + 600 + 40); ctx.clip();
-    guy(ctx, { x: GX, y: gFeet, s: GS, ...sm, browLiftR: lerp(-6, sm.browLiftR, cock), browR: lerp(0, sm.browR, cock),
-      lid: lerp(0.38, sm.lid, cock), tilt: lerp(0.02, sm.tilt, cock) + 0.006 * Math.sin(t * 1.1) });
+    guy(ctx, { x: GX, y: gFeet, s: GS, ...(cock > 0 ? sm : g), face: 2,
+      lid: lerp(g.lid, sm.lid, clamp(cock)), lowLid: cock > 0 ? lerp(0.05, sm.lowLid, clamp(cock)) : 0, pupil: lerp(12, sm.pupil, clamp(cock)),
+      browL: lerp(0, sm.browL, cock), browR: lerp(0, sm.browR, cock), browLiftR: lerp(0, sm.browLiftR, cock),
+      mouth: t >= SMIRK ? sm.mouth : 'flat', tilt: lerp(0.03, sm.tilt, clamp(seg(t, SWELL[0], SMIRK))) + 0.006 * Math.sin(t * 1.1) });
     ctx.restore();
-    cape(ctx, () => falling(ctx, CUT_MIRROR, 7));
+    cape(ctx, () => falling(ctx, CUT_MIRROR, LOCKS.length));
     chairFront(ctx);
-    // the barber in the glass: just his arm, in from the edge, scissors frozen open
-    const mh = [GX + 330, GY - 20], from = [BX - 20, 1300];
-    Chars.tube(ctx, from, mh, 0.12, 24 * BS, W, false);
-    scissors(-1.35, 1)(ctx, mh[0], mh[1]);   // blades toward the hair
+    // the barber in the glass: his arm in from the edge, hand on the chair back
+    // where he left it, scissors closed
+    const mh = CHAIR_CORNER, from = [BX - 20, 1320];
+    Chars.tube(ctx, from, mh, -0.12, 24 * BS, W, false);
+    scissors(2.7 + LEAN, 0)(ctx, mh[0], mh[1]);
     Chars.hand(ctx, mh[0], mh[1], null, BS);
     ctx.restore();
     // glass sheen: hard white streaks in the upper right corner of the glass
@@ -471,16 +525,16 @@ Skits.haircut = (() => {
     stroke(ctx, [[x1 - 60, 980], [x1 - 10, 900]], { w: 9, color: W, taper0: 0.3, taper1: 0.3 });
     ctx.restore();
     outline(ctx, framePts, { w: 12 });   // the frame's inner edge over the glass
-    // sparkles on the hair at the peak: hard-edged four-point stars
-    const sp = [[FX - 110, FY - 410, 0, 40], [FX + 100, FY - 450, 0.12, 28], [FX + 210, FY - 320, 0.22, 22]];
-    for (const [sx, sy, d, r] of sp) {
-      const k2 = easeOutBack(seg(t, peak + d, peak + d + 0.18));
+    // sparkles on the hair: hard-edged four-point stars, popping in one at a time
+    const sp = [[FX - 110, FY - 410, SPARKS[0], 40], [FX + 100, FY - 450, SPARKS[1], 28], [FX + 210, FY - 320, SPARKS[2], 22]];
+    for (const [sx, sy, at, r] of sp) {
+      const k2 = easeOutBack(seg(t, at, at + 0.15));
       if (k2 <= 0) continue;
-      const tw = 1 - 0.15 * Math.abs(Math.sin((t - peak) * 2.3 + d * 9));   // a slight twinkle, uneven
+      const tw = 1 - 0.15 * Math.abs(Math.sin((t - at) * 2.3 + at * 9));   // a slight twinkle, uneven
       star(ctx, sx, sy, r * k2 * tw);
     }
     ctx.restore();
-    return { top: FY + (-1.92 * RY * GS * RS) * z };
+    return { top: FY + (-Math.max(1.66, -SCALP[1] + (1.98 + SCALP[1]) * swell) * RY * GS * RS - 12) * z };   // the tallest lock's tip, plus its outline
   }
   function star(ctx, x, y, r) {
     const pts = [];
@@ -497,12 +551,16 @@ Skits.haircut = (() => {
     wall(ctx); floor(ctx);
     for (let i = 0; i < 9; i++) tuft(ctx, GX + 220 + 30 * i + 20 * hh(i), 1790 + 18 * hh(i + 3), GS * 0.8, -0.6 + hh(i + 5) * 1.2);   // swept-up heap
     chairBack(ctx);
-    hairNow = neatHair; jawNow = false;
+    hairNow = neatHair; jawNow = 0;
+    // deflated, not bored: and as the hand mirror comes up, his head and
+    // shoulders sink over 10 frames. Oh. It's over.
     const blinkLid = t > 10.9 && t < 11.04 ? 1 : 0;   // one blink, late. that's it.
+    const sink = easeInOut(seg(t, 8.95, 9.28));
+    const df = Emotions.deflated;
     ctx.save(); ctx.beginPath(); ctx.rect(-600, -600, 2300, gNeck + 600 + 40); ctx.clip();
-    guy(ctx, { x: GX, y: gFeet, s: GS, ...dead, lid: blinkLid || 0.5, tilt: 0.006 * Math.sin(t * 0.8) });
+    guy(ctx, { x: GX, y: gFeet, s: GS, ...df, lid: blinkLid || df.lid, bob: 14 * sink, tilt: 0.035 * sink + 0.006 * Math.sin(t * 0.8) });
     ctx.restore();
-    cape(ctx);
+    cape(ctx, null, 12 * sink);
     chairFront(ctx);
     // the barber: scissors just closed on the last snip, then he swaps them for
     // the hand mirror and holds it up behind his head, pleased with himself

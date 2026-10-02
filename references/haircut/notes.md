@@ -21,14 +21,22 @@ Beats:
             hand-timed (0.42, 0.74, 1.06, 1.30, 1.66, 1.88, 2.30, 2.52, 2.86),
             each takes a clump off screen right and the top; clumps fall onto the cape.
             Caption: "Me before getting my haircut"
-- 3.00–4.10 Half done and tousled. Caption: "Me that one random moment during
-            my haircut". He glances up into the mirror (3.25–3.5).
-- 4.10–8.00 Cut to the mirror (arched frame, flipped reflection). Same guy, but:
-            swept-up hair with volume in a natural auburn (the one colour
-            accent), a jawline (two strokes), `Emotions.smolder`. Slow push-in.
-            5.00 the peak: brow cocks, head settles, three hard-edged sparkles
-            pop. Hold.
-- 8.00–12.0 Snip, hard cut. Neat grey rectangle, dead-eyed again, looking
-            straight ahead. Barber swaps scissors for a hand mirror (8.55) and
-            holds it up behind his head (8.75–9.25), pleased. He stares. Push in
-            from 9.9. One blink at 10.9. Nothing.
+- 3.00–4.50 Half done and tousled. Caption: "Me that one random moment during
+            my haircut". 2.95–3.10 the barber's hand goes to the chair back;
+            3.10–3.60 he turns the chair a little toward the mirror and it
+            settles. 3.56–3.83 (8 frames) he glances at the mirror: eyes dart
+            first, the head turns after them. 3.86–4.50 push in on his face,
+            ending at the mirror shot's framing.
+- 4.50–8.00 The mirror (arched frame, flipped reflection): at first the same
+            half-cut grey mop. 4.66–5.03 (11 frames) the hair swells up into the
+            swept auburn shape, overshooting a touch and settling, the jaw
+            squaring as it goes. Sparkles pop one at a time at 4.93, 5.10, 5.27.
+            5.12–5.36 lids narrow and the brow cocks (`Emotions.smolder`); the
+            smirk lands last, at 5.50. Hold the smug face 5.5–8.0 (2.5 s), slow
+            push-in.
+- 8.00–12.0 Snip, hard cut. Neat grey box. Deflated (`Emotions.deflated`):
+            lids up a little from "before", brows sagging, mouth flat with the
+            corners down. Barber swaps scissors for a hand mirror (8.55) and
+            holds it up behind his head (8.75–9.25), pleased; as it comes up his
+            head and shoulders sink (8.95–9.28, 10 frames). Push in from 9.9.
+            One blink at 10.9.
