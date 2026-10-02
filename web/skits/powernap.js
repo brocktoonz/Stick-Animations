@@ -18,7 +18,7 @@ Skits.powernap = (() => {
     [3.45, 4.95, RED, 'FEW HOURS LATER'],
     [8.1, END, W, 'WHERE AM I?'],         // held to the end so the joke lands
   ];
-  const SPOKEN = [[0.33, 1.17], [1.17, 2.15], null, [8.1, 8.75]];   // when each line is said (captions can stay up longer)
+  const SPOKEN = [[0.33, 1.17], [1.17, 2.15], null, [8.1, 8.86]];   // "Where am I?" stays open through the "I"   // when each line is said (captions can stay up longer)
   const talk = (t, i) => say(t, SPOKEN[i][0], SPOKEN[i][1], LINES[i][3].replace(/\n/g, ' ').replace('10', 'ten').toLowerCase());
   const CAP = 84;
   function caption(ctx, t) {
@@ -80,14 +80,14 @@ Skits.powernap = (() => {
   function clock(ctx, x, y, r, t) {
     const k = Math.floor(Math.max(0, t - 3.55) / 0.2);
     const face = Brush.ellipsePts(x, y, r, r, 28);
-    fill(ctx, face, W, 0.4); outline(ctx, face, { w: 16 });
+    fill(ctx, face, W, 0.4); outline(ctx, face, { w: 12 });
     for (let i = 0; i < 12; i++) {
       const a = i * Math.PI / 6, l = i % 3 ? 0.86 : 0.78;
       stroke(ctx, [[x + Math.sin(a) * r * l, y - Math.cos(a) * r * l], [x + Math.sin(a) * r * 0.92, y - Math.cos(a) * r * 0.92]], { w: i % 3 ? 7 : 12 });
     }
     const hand = (a, l, w) => stroke(ctx, [[x, y], [x + Math.sin(a) * l, y - Math.cos(a) * l]], { w, taper0: 0, taper1: 0.3 });
-    hand(-0.3 + k * 1.1, r * 0.76, 14);            // minute hand whipping round
-    hand(Math.PI * 0.95 + k * 0.1, r * 0.5, 22);   // hour hand creeping on
+    hand(-0.3 + k * 1.1, r * 0.84, 10);            // minute hand whipping round: long and thin
+    hand(Math.PI * 0.95 + k * 0.1, r * 0.46, 22);  // hour hand creeping on: short and fat
     blob(ctx, x, y, 16, 16, { fill: INK, w: 0, n: 8 });
   }
 
@@ -129,15 +129,15 @@ Skits.powernap = (() => {
       } else pose = { ...tired, lid: Math.max(tired.lid, blink(t, 2.7, 0.3)), lookX: 0.3, lookY: -0.2, tilt: -0.08,
                       ...(t < 0.33 ? { mouth: 'smile', lid: 0.55 } : talk(t, t < 1.17 ? 0 : 1)) };   // content, about to settle in
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
-      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.both([60, -150], 'down'), ...pose });   // hands on his stomach
+      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.both([125, -170], 'out'), ...pose, ...(t > 1.55 && t < 2.2 ? { mouthScale: 0.65 } : {}) });   // hands resting at his sides; mouth small mid-tilt so it stays clear of the eyes
       ctx.restore();
       couchFront(ctx);
-      if (down < 0.3) for (const sd of [-1, 1]) {   // sitting: knees forward over the seat, shins down the front, feet on the floor
-        const kx = hx + sd * 44, kfade = 1 - down / 0.3;
-        if (kfade <= 0) continue;
-        stroke(ctx, [[kx, SEAT + 4], [kx + sd * 4, FLOOR - 30]], { w: 34, taper0: 0, taper1: 0 });
-        blob(ctx, kx, SEAT + 6, 40, 30, { fill: '#2a2a2a', w: 9, n: 10 });
-        fill(ctx, Brush.ellipsePts(kx + sd * 16, FLOOR - 18, 38, 16, 10), INK, 0.8);
+      if (down < 0.92) for (const sd of [-1, 1]) {   // sitting: knees over the seat, shins down the front; as he lies back they swing up onto the seat
+        const kx = lerp(hx + sd * 44, hx + 70 + sd * 14, down), ky = lerp(SEAT + 6, SEAT - 40, down);
+        const ex = lerp(kx + sd * 4, hx + 250 + sd * 20, down), ey = lerp(FLOOR - 30, SEAT - 46, down);
+        stroke(ctx, [[kx, ky], [ex, ey]], { w: 34, taper0: 0, taper1: 0 });
+        blob(ctx, kx, ky, 40, 30, { fill: '#2a2a2a', w: 9, n: 10 });
+        fill(ctx, Brush.ellipsePts(ex + 16, ey + 10, 38, 16, 10), INK, 0.8);
       }
       ctx.restore();
     }],
@@ -151,19 +151,20 @@ Skits.powernap = (() => {
     [6.45, END, (ctx, t) => {
       ctx.fillStyle = BACKDROP; ctx.fillRect(0, 0, 1080, 1920);
       const up = seg(t, 6.45, 7.0), e = easeOutBack(up);                                      // lurches up and toward the lens, overshoots, settles
-      const s = lerp(1.7, 2.75, easeOut(up)), fy = lerp(2600, 2420, e);   // grows as he comes at the camera; ends with his hair just under the caption
+      const s = lerp(1.6, 2.35, easeOut(up)), fy = lerp(2420, 2150, e);   // grows as he comes at the camera; chest and shoulders above the cushion
       const asking = t >= 8.1 && t < 8.75, after = t >= 8.75;
       const droopy = { lid: 0.62, lowLid: 0.3, flatLid: true, pupil: 7, brow: -0.25, lookX: -0.1 };
       const confused = { browL: -0.5, browLiftL: 6, browR: -0.2, browLiftR: 14 };
       const groggy = t > 7.0 ? lerp(0, 0.07, easeInOut(seg(t, 7.0, 8.0))) : 0;               // head lolls a little to one side, and holds
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
-        ...Arms.arm(-1, [-210, -150], 'out'), ...Arms.arm(1, [210, -150], 'out'),            // arms braced on the cushion as he pushes up
+        ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'),            // arms spread wide, hands planted on the cushion
         ...droopy, lid: Math.max(droopy.lid, blink(t, 7.6, 0.4) ? 0.85 : 0),
-        ...(asking ? { ...talk(t, 3), ...confused, mouthScale: 1.2 }
-          : after ? { ...confused, mouth: 'o', open: 0.12, lookX: lerp(-0.1, 0.5, easeInOut(seg(t, 9.1, 9.4))) }
-          : { mouth: 'flat' }) });
-      shape(ctx, [[-60, 1830], [240, 1790], [540, 1812], [840, 1786], [1140, 1826], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
-      stroke(ctx, [[540, 1820], [540, 1930]], { w: 6 });
+        ...(asking ? { ...talk(t, 3), ...confused, mouthScale: 0.85 }
+          : after ? { ...confused, browL: 0.5, browLiftL: 0, browR: -0.5, browLiftR: 26, mouth: 'o', open: 0.3, mouthScale: 1.25,
+                      lookX: lerp(-0.1, 0.5, easeInOut(seg(t, 9.1, 9.4))) }   // one brow knit, the other way up: properly confused
+          : { mouth: 'tiny' }) });
+      shape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
+      stroke(ctx, [[540, 1840], [540, 1940]], { w: 6 });
     }],
   ];
 

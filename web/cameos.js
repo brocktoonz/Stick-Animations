@@ -850,22 +850,22 @@ const Cameos = (() => {
     }
     const top = [];                   // uneven top edge across the cheeks, left to right, about mid-cheek
     for (let i = 0; i <= 10; i++) {
-      const x = -RX * 0.9 + RX * 1.8 * i / 10, sag = Math.abs(x) < RX * 0.45 ? 0.42 : 0.26 - 0.1 * Math.abs(x) / RX;
+      const x = -RX * 0.9 + RX * 1.8 * i / 10, sag = Math.abs(x) < RX * 0.45 ? 0.46 : 0.4 - 0.06 * Math.abs(x) / RX;   // low on the cheeks: skin shows under the eyes
       top.push([x, RY * (sag + (i % 2 ? 0.06 : -0.02) + 0.04 * hh(i + 20))]);
     }
     const shape = [...out, ...top];
-    fill(ctx, shape, '#6e6e6e', 1.6);
+    fill(ctx, shape, '#454545', 1.6);   // darker than his hair, so it reads as its own beard
     outline(ctx, shape, { w: 9 });
-    for (let i = 0; i < 14; i++) {   // strands inside, and wisps poking out past the edge
-      const a = Math.PI * (0.12 + 0.76 * hh(i + 40)), r = 0.66 + 0.5 * hh(i + 50), x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r + RY * 0.22;
-      stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 22, y + 18 + 10 * hh(i + 70)]], { w: i < 9 ? 4 : 6, color: i < 9 ? '#9a9a9a' : INK });
+    for (let i = 0; i < 10; i++) {   // strands, all inside the beard
+      const a = Math.PI * (0.18 + 0.64 * hh(i + 40)), r = 0.6 + 0.3 * hh(i + 50), x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r + RY * 0.24;
+      stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 18, y + 16]], { w: 4, color: '#6e6e6e' });
     }
   };
   const scragglyMoustache = (ctx, fx, rage) => {
     if (rage) ctx.translate(0, -12);
     const m = [[fx - 70, 60], [fx - 58, 38], [fx - 30, 28], [fx, 34], [fx + 30, 28], [fx + 58, 38], [fx + 70, 60],
                [fx + 50, 50], [fx + 40, 58], [fx + 24, 46], [fx, 50], [fx - 24, 46], [fx - 40, 58], [fx - 50, 50]];
-    fill(ctx, m, '#6e6e6e', 1.4);
+    fill(ctx, m, '#454545', 1.4);
     outline(ctx, m, { w: 7 });
   };
   const spikyBearded = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a',
