@@ -10,7 +10,7 @@ Skits.powernap = (() => {
   const W = '#fff', RED = '#d9261c', BACKDROP = '#eeeeee', HEAD = 438;
   const hh = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
-  const END = 10.4;   // the clip's audio ends at 9.21; the last ~1.2 s holds his confused face in silence
+  const END = 10.4;   // the clip's audio ends at 9.21; the last ~1.2 s holds his groggy face in silence
   // [start, end, colour, text]: the original's captions, word for word
   const LINES = [
     [0, 1.14, W, 'ALRIGHTY'],             // on screen from the first frame (the hook)
@@ -140,14 +140,19 @@ Skits.powernap = (() => {
     // drops off
     [0, 3.45, (ctx, t) => {
       const sink = easeInOut(seg(t, 1.3, 2.7)), ang = lerp(-0.72, -1.3, sink);              // slides down from propped up to flat
-      const hx = lerp(600, 640, sink), hy = SEAT - 62;                                     // hips on the seat
+      const hx = 620, hy = SEAT - 62;                                                       // hips stay put on the seat
       const push = easeInOut(seg(t, 2.6, 3.45));
-      ctx.save(); cam(ctx, lerp(540, 380, push), lerp(1230, 1210, push), lerp(1.12, 1.4, push), 540, 1150);
+      ctx.save(); cam(ctx, lerp(540, 380, push), lerp(1250, 1210, push), lerp(1.25, 1.45, push), 540, 1150);
       couchBack(ctx);
+      // his pillow stays tucked under his head and slides down with him
+      const hd = HEAD * CS - HIP, [phx, phy] = [hx + Math.sin(ang) * hd, hy - Math.cos(ang) * hd];
+      pillow(ctx, [phx - 40 - 30 * sink, phy + 120 + 20 * sink], 110, 52, -0.15 + 0.2 * sink);
       // legs stretched out along the seat the whole time, one knee up a little
-      for (const [kx, ky, ex, ey] of [[hx + 150, SEAT - 92, hx + 300, SEAT - 52], [hx + 160, SEAT - 66, hx + 320, SEAT - 40]]) {
-        stroke(ctx, [[hx + 10, hy + 6], [kx, ky], [ex, ey]], { w: 30, taper0: 0, taper1: 0 });
-        fill(ctx, Brush.ellipsePts(ex + 22, ey + 6, 36, 15, 10), INK, 0.8);
+      for (const [kx, ky, ex, ey] of [[hx + 150, SEAT - 118, hx + 290, SEAT - 50], [hx + 170, SEAT - 66, hx + 330, SEAT - 44]]) {   // far knee bent up, near leg out straight
+        const leg = [[hx + 10, hy + 6], [kx, ky], [ex, ey]];
+        stroke(ctx, leg, { w: 40, taper0: 0, taper1: 0 });                                  // ink edge...
+        stroke(ctx, leg, { w: 26, taper0: 0, taper1: 0, color: '#3a3a3a' });               // ...dark trousers inside, so the two legs read apart
+        fill(ctx, Brush.ellipsePts(ex + 24, ey + 4, 38, 17, 10), INK, 0.8);                 // shoe
       }
       const heavy = lerp(0.42, 0.78, easeInOut(seg(t, 1.6, 3.0)));                         // lids getting heavier as he goes
       const said = talk(t, ...SAID.alrighty) ?? talk(t, ...SAID.nap) ?? talk(t, ...SAID.huh);
@@ -155,7 +160,7 @@ Skits.powernap = (() => {
         : { lid: Math.max(heavy, blink(t, 2.7, 0.3)), lowLid: 0.2, brow: -0.25, pupil: 9, lookX: 0.3, lookY: -0.2, tilt: -0.08,
             ...(said ?? (t < 0.44 ? { mouth: 'smile' } : { mouth: 'flat' })) };            // content smile before he speaks
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
-      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.arm(1, [24, -205], 'down'), ...Arms.arm(-1, [-90, -150], 'down'), ...pose });   // near hand resting on his stomach
+      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.arm(1, [70, -190], 'down'), ...Arms.arm(-1, [-90, -150], 'down'), ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });   // near hand on his stomach; mouth bigger while his head is on its side
       ctx.restore();
       couchFront(ctx);
       ctx.restore();
@@ -166,23 +171,23 @@ Skits.powernap = (() => {
       clock(ctx, 540, 1200, 430, t);
     }],
     // the dramatic close-up: he heaves himself up into camera, bearded, half
-    // asleep, "Where am I?", and holds the confused look
+    // asleep, "Where am I?", and holds the groggy look
     [6.45, END, (ctx, t) => {
       ctx.fillStyle = BACKDROP; ctx.fillRect(0, 0, 1080, 1920);
       const up = seg(t, 6.45, 7.0), e = easeOutBack(up);                                      // lurches up and toward the lens, overshoots, settles
       const s = lerp(1.6, 2.35, easeOut(up)), fy = lerp(2420, 2150, e);   // grows as he comes at the camera; chest and shoulders above the cushion
       const asking = t >= 8.17 && t < 8.8, after = t >= 8.8;
       // groggy: one eye nearly shut, the other half open, brows sagging, jaw hanging slack
-      const droopy = { lidL: 0.86, lidR: 0.64, lowLid: 0.32, flatLid: true, pupil: 6, brow: -0.45, lookX: -0.1, lookY: 0.3 };
-      const confused = { browL: -0.5, browLiftL: 6, browR: -0.2, browLiftR: 14 };
-      const groggy = t > 7.0 ? lerp(0, 0.14, easeInOut(seg(t, 7.0, 8.0))) : 0;               // head lolls over to one side, and holds
+      const sag = Math.sin(Math.PI * seg(t, 9.55, 9.95));                                   // the lids sag nearly shut and catch once in the hold
+      const droopy = { lidL: Math.min(1, 0.9 + 0.08 * sag), lidR: 0.76 + 0.18 * sag, lowLid: 0.3, flatLid: true, pupil: 6, lookX: -0.1, lookY: 0.85,
+                       browL: 0.08, browR: -0.05, browLiftL: -12, browLiftR: -8 };          // both brows low and slack, right down on the lids
+      const groggy = t > 7.0 ? lerp(0, 0.22, easeInOut(seg(t, 7.0, 8.0))) : 0;               // head lolls well over to one side, and holds
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
         ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'),            // arms spread wide, hands planted on the cushion
-        ...droopy, ...(blink(t, 7.6, 0.4) ? { lidR: 0.9 } : {}),                              // a slow heavy blink
-        ...(asking ? { ...(talk(t, ...SAID.where) ?? { mouth: 'o', open: 0.2 }), ...confused, mouthScale: 1.2 }
-          : after ? { ...confused, browL: 0.5, browLiftL: 0, browR: -0.5, browLiftR: 26, mouth: 'gape', open: 0.35, mouthScale: 1.1,
-                      lookX: lerp(-0.1, 0.4, easeInOut(seg(t, 9.1, 9.5))) }   // one brow knit, the other way up, jaw hanging
-          : { mouth: 'gape', open: 0.28, mouthScale: 1.0 }) });                               // jaw hanging slack, half asleep
+        ...droopy, ...(blink(t, 7.6, 0.4) ? { lidR: 0.95 } : {}),                             // a slow heavy blink
+        ...(asking ? { ...(talk(t, ...SAID.where) ?? { mouth: 'o', open: 0.1 }), mouthScale: 1.2 }
+          : after ? { mouth: 'o', open: 0.1, mouthScale: 0.9, lookX: lerp(-0.1, 0.3, easeInOut(seg(t, 9.1, 9.5))) }   // mouth just parted, eyes drift
+          : { mouth: 'o', open: 0.08, mouthScale: 0.9 }) });                                  // lips just parted in the silence, so the line opens from rest
       shape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
       stroke(ctx, [[540, 1840], [540, 1940]], { w: 6 });
     }],
