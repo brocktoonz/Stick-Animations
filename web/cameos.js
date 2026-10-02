@@ -66,7 +66,7 @@ const Cameos = (() => {
       const rage = p.mouth === 'rage';
       const open = p.mouth === 'yell' || rage ? (p.open ?? 0) : 0, jaw = (rage ? 60 : 46) * open;
       blob(ctx, 0, jaw * 0.5, RX - jaw * 0.1, RY + jaw * 0.5, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
-      if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx); ctx.restore(); }
+      if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx, p); ctx.restore(); }
       o.hair?.(ctx);
       if (p.gloom) {   // dread: shading lines down the forehead
         ctx.save();
@@ -842,7 +842,7 @@ const Cameos = (() => {
   // A few months' growth: a full scraggly beard from the sideburns down past
   // the chin (tufts poking out of the edge) and a moustache, on the spiky guy.
   // The beard goes under the mouth, so the mouth still reads when he talks.
-  const scragglyBeard = ctx => {
+  const scragglyBeard = (ctx, p = {}) => {
     const out = [];
     for (let i = 0; i <= 22; i++) {   // ragged outer edge, right sideburn round under the chin to the left one
       const a = Math.PI * (-0.04 + 1.08 * i / 22), tuft = i % 2 ? 0.1 + 0.12 * hh(i * 7 + 3) : -0.02 * hh(i);
@@ -856,7 +856,8 @@ const Cameos = (() => {
     const shape = [...out, ...top];
     fill(ctx, shape, '#454545', 1.6);   // darker than his hair, so it reads as its own beard
     outline(ctx, shape, { w: 9 });
-    blob(ctx, 16, 76, 60, 46, { fill: W, w: 6, n: 14, jit: 1.2 });   // bare skin round the mouth, so an open mouth reads against the dark beard
+    const op = p.mouth === 'talk' ? (p.viz?.open ?? 0) : p.mouth === 'gape' || p.mouth === 'o' ? (p.open ?? 0) : 0, ms = p.mouthScale ?? 1;
+    if (op > 0.05) blob(ctx, 18, 70, (22 + 44 * op) * ms, (16 + 34 * op) * ms, { fill: W, w: 5, n: 12, jit: 1 });   // bare lips round an open mouth, sized to it, so it reads against the dark beard
     for (let i = 0; i < 10; i++) {   // strands, all inside the beard
       const a = Math.PI * (0.18 + 0.64 * hh(i + 40)), r = 0.6 + 0.3 * hh(i + 50), x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r + RY * 0.24;
       stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 18, y + 16]], { w: 4, color: '#6e6e6e' });
@@ -864,12 +865,12 @@ const Cameos = (() => {
   };
   const scragglyMoustache = (ctx, fx, rage, p = {}) => {
     if (p.sleepy) for (const sd of [-1, 1]) {   // fast asleep: heavy closed lids drooping at the outer ends, lashes, dark shading under them
-      const ex = fx + sd * 42, lid = [[ex - sd * 28, -8], [ex + sd * 2, 4], [ex + sd * 32, 14]];
-      fill(ctx, [[ex - sd * 26, -2], [ex + sd * 2, 10], [ex + sd * 30, 20], [ex + sd * 26, 34], [ex, 30], [ex - sd * 22, 16]], '#9a9a9a', 0.6);
-      stroke(ctx, lid, { w: 11, taper0: 0.2, taper1: 0.4 });
-      for (const k of [0.45, 0.7, 0.92]) {      // lashes hanging off the outer half
-        const x = lid[0][0] + (lid[2][0] - lid[0][0]) * k, y = lid[0][1] + (lid[2][1] - lid[0][1]) * k + 2 + 6 * Math.sin(Math.PI * k);
-        stroke(ctx, [[x, y], [x + sd * 6, y + 12]], { w: 4, taper0: 0, taper1: 0.6 });
+      const ex = fx + sd * 42, lid = [[ex - sd * 28, -10], [ex + sd * 2, 0], [ex + sd * 30, -6]];   // closed lid: a gentle downward curve, near level
+      fill(ctx, [[ex - sd * 24, -4], [ex + sd * 2, 6], [ex + sd * 28, 0], [ex + sd * 24, 18], [ex, 22], [ex - sd * 20, 12]], '#a6a6a6', 0.6);   // tired shading under it
+      stroke(ctx, lid, { w: 10, taper0: 0.2, taper1: 0.3 });
+      for (const k of [0.78, 0.95]) {           // two short lashes at the outer end
+        const x = lid[0][0] + (lid[2][0] - lid[0][0]) * k, y = lid[0][1] + (lid[2][1] - lid[0][1]) * k + 4 * Math.sin(Math.PI * k);
+        stroke(ctx, [[x, y], [x + sd * 8, y + 7]], { w: 4, taper0: 0, taper1: 0.6 });
       }
     }
     if (p.bags) for (const sd of [-1, 1])   // bags under the eyes (just woken up)
@@ -877,8 +878,8 @@ const Cameos = (() => {
     if (p.drool) {   // a drip of drool from the corner of the slack mouth, down over the beard
       const x = fx + 40, y0 = 74, y1 = y0 + 60 * p.drool;   // a thin wet strand that swells into a round drop
       stroke(ctx, [[x, y0], [x + 2, (y0 + y1) / 2], [x, y1]], { w: 8, taper0: 0, taper1: 0, color: INK });
-      stroke(ctx, [[x, y0], [x + 2, (y0 + y1) / 2], [x, y1]], { w: 4, taper0: 0, taper1: 0, color: '#d8e0e6' });
-      blob(ctx, x, y1 + 8, 9, 11, { fill: '#d8e0e6', w: 3, n: 10 });
+      stroke(ctx, [[x, y0], [x + 2, (y0 + y1) / 2], [x, y1]], { w: 4, taper0: 0, taper1: 0, color: '#e2e2e2' });
+      blob(ctx, x, y1 + 8, 9, 11, { fill: '#e2e2e2', w: 3, n: 10 });
     }
     if (rage) ctx.translate(0, -12);
     const m = [[fx - 70, 60], [fx - 58, 38], [fx - 30, 28], [fx, 34], [fx + 30, 28], [fx + 58, 38], [fx + 70, 60],
