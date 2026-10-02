@@ -140,26 +140,28 @@ Skits.haircut = (() => {
   // Kept close to his own silhouette: same guy, a swoop and a colour, not a redraw.
   const SWEPT = [
     choppyCap(1.08, 0.0, [[0.92, -0.5], [0.62, -0.82], [0.2, -0.86], [-0.3, -0.76], [-0.7, -0.62], [-0.92, -0.42]]),   // high on the cocked-brow side
-    puff(0.12, -1.06, 0.94, 0.4, -0.16),               // a bit of volume on top
+    puff(0.12, -1.18, 0.94, 0.36, -0.16),              // a bit of volume on top, its underside clear of the brows
     lock([-0.6, -0.9], [0.3, -1.62], 0.7, -0.24),      // the swoop up off the forehead
-    lock([0.55, -0.9], [1.28, -1.08], 0.46, -0.12),    // flicking out over the right
-    lock([0.02, -0.82], [0.12, -0.38], 0.16, 0.1),     // the loose strand on the forehead
+    lock([0.62, -1.0], [1.28, -1.1], 0.42, -0.12),     // flicking out over the right
+    lock([0.02, -0.84], [0.1, -0.5], 0.16, 0.08),      // the loose strand on the forehead
   ];
   const SWEPT_TOP = 1.62;
   const SWEPT_LINES = [[[-0.36, -0.96], [0.0, -1.3], [0.42, -1.38]]];
   const sweptHair = ctx => hairShapes(ctx, SWEPT, AUBURN, SWEPT_LINES, AUBURN_LINE);
-  // The swell in the mirror, k 0..1: the half-cut mop sinks back to the scalp
-  // while the swept shape grows out of it. Every part scales about a point on
-  // the scalp; the colour turns over early (15% grown), in one frame (no fades),
-  // so what you watch growing is the auburn hair.
+  // The swell in the mirror, k 0..1 (a touch over 1 at the overshoot): the
+  // swept shape grows out from inside the half-cut mop while the mop's locks
+  // draw in under it. The fill steps from his grey to auburn across the same
+  // frames: a solid colour each frame, never a fade.
   const SCALP = [0.05, -0.82];
   const toward = (pts, f) => pts.map(([x, y]) => [SCALP[0] + (x - SCALP[0]) * f, SCALP[1] + (y - SCALP[1]) * f]);
+  const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const mixCol = (a, b, k) => '#' + hex(a).map((v, i) => Math.round(lerp(v, hex(b)[i], k)).toString(16).padStart(2, '0')).join('');
   const swellHair = k => ctx => {
-    const out = clamp(1 - k / 0.15), grow = Math.max(0, k);
-    const mop = out > 0 ? [MOP_CAP, ...LOCKS.filter((_, i) => i >= cutCount).flatMap(l => l.shapes)].map(p => toward(p, 0.75 + 0.25 * out)) : [];
-    const swept = SWEPT.map((p, i) => i === 0 ? p : toward(p, grow));
-    if (k < 0.15) hairShapes(ctx, [...mop, ...swept], GREY, [], GREY_LINE);
-    else hairShapes(ctx, swept, AUBURN, k > 0.85 ? SWEPT_LINES : [], AUBURN_LINE);
+    const live = LOCKS.filter((_, i) => i >= cutCount).flatMap(l => l.shapes);
+    const mop = k < 0.8 ? [MOP_CAP, ...live.map(p => toward(p, lerp(1, 0.6, clamp(k / 0.8))))] : [];
+    const swept = SWEPT.map((p, i) => i === 0 ? p : toward(p, lerp(0.35, 1, k)));
+    const col = mixCol(GREY, AUBURN, clamp(k / 0.7));
+    hairShapes(ctx, [...mop, ...swept], col, k > 0.9 ? SWEPT_LINES : [], AUBURN_LINE);
   };
 
   // AFTER: neat and boxy. Flat top, rounded corners, sides tapering into the
@@ -171,17 +173,17 @@ Skits.haircut = (() => {
   const neatHair = ctx => hairShapes(ctx, [NEAT], GREY, NEAT_LINES, GREY_LINE);
 
   // the jawline: an angular jaw, its two edges outside the round head outline
-  const JAW = [[-0.97, 0.1], [-0.76, 0.94], [-0.24, 1.1], [0.24, 1.1], [0.76, 0.94], [0.97, 0.1]];
+  // the jawline: two short angled strokes at the jaw corners; the head stays round.
+  // k 0..1 draws them in from the cheek down.
+  const JAW = [[0.84, 0.24], [0.64, 0.74], [0.32, 0.86]];   // a hard corner, not a curve
   const jaw = (ctx, k = 1) => {
-    // k 0..1: from the round chin out to the angular jaw
-    const p = hu(JAW.map(([x, y]) => { const a = Math.atan2(y, x); return [lerp(Math.cos(a), x, k), lerp(Math.sin(a), y, k)]; }));
-    ctx.save();
-    ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); for (const q of p) ctx.lineTo(q[0], q[1]); ctx.closePath();
-    ctx.ellipse(0, 0, RX - 9, RY - 9, 0, 0, Math.PI * 2, true);
-    ctx.clip('evenodd');
-    ctx.fillStyle = W; ctx.fillRect(-RX * 1.2, 0, RX * 2.4, RY * 1.3);   // the jaw fills out, covering the round chin line
-    ctx.restore();
-    for (const s of [-1, 1]) stroke(ctx, [p[s < 0 ? 0 : 5], p[s < 0 ? 1 : 4], [lerp(p[2][0], p[3][0], s < 0 ? 0.1 : 0.9), p[2][1]]], { w: 11, taper0: 0.1, taper1: 0.4 });   // the cast's outline weight
+    if (k <= 0) return;
+    for (const s of [-1, 1]) {
+      const pts = hu(JAW.map(([x, y]) => [s * x, y]));
+      const n = 1 + (pts.length - 1) * clamp(k), cut = [...pts.slice(0, Math.floor(n))];
+      if (n % 1 > 0.01 && cut.length < pts.length) cut.push(Stage.mix(pts[cut.length - 1], pts[cut.length], n % 1));
+      if (cut.length > 1) stroke(ctx, cut, { w: 11, taper0: 0.2, taper1: 0.3 });   // the cast's outline weight
+    }
   };
 
   let hairNow = mopHair, jawNow = 0;   // jawNow: how far the jaw has grown, 0..1
@@ -423,7 +425,8 @@ Skits.haircut = (() => {
   const rotAbout = ([x, y], [cx, cy], a) => [cx + (x - cx) * Math.cos(a) - (y - cy) * Math.sin(a), cy + (x - cx) * Math.sin(a) + (y - cy) * Math.cos(a)];
   // the camera: scale S with his head centre at screen point A
   const wideCam = z => ({ S: WIDE * z, A: [470 + z * (540 + WIDE * (GX - 540) - 470), 1300 + z * (1920 + WIDE * (GY - 1920) - 1300)] });
-  const PUSH_TO = { S: 1.22, A: [520, 1340] };    // a push in on his look, still speeding up at the cut
+  const MIRROR_Z0 = 0.94;                          // the mirror shot opens at this zoom
+  const PUSH_TO = { S: 1.3 * MIRROR_Z0, A: [540, 1320] };   // so the push lands on the mirror shot's first frame exactly
   function shotChair(ctx, t) {
     const z = lerp(1.0, 1.05, easeInOut(seg(t, 0, 4.1)));   // the slow drift of the first draft, kept
     const p = seg(t, PUSH[0], PUSH[1]) ** 2;   // eases in and cuts on the move
@@ -479,14 +482,15 @@ Skits.haircut = (() => {
   // His hair swells into the styled shape, the sparkles pop one by one as it
   // settles, the brow cocks, and the smirk lands last. Then hold, 2.5 s.
   const MIRROR_IN = 4.42;
-  const SWELL = [4.36, 4.73];                       // 11 frames
-  const SPARKS = [4.66, 4.8, 4.94];                 // one at a time as it settles
-  const COCK = [4.8, 5.0], SMIRK = 5.12;
+  const SWELL = [4.3, 4.67];                        // 11 frames
+  const SPARKS = [4.62, 4.76, 4.9];                 // one at a time as it settles
+  const COCK = [4.76, 4.96], SMIRK = 5.08;
   const MIRROR = [80, 170, 1000, 2100];   // frame: x0, top, x1, bottom (arched top)
   function shotMirror(ctx, t) {
-    // opens on the whole mirror on the wall and carries the push on into the
-    // glass (fast at first, as the wide shot's push was at the cut), then drifts
-    const z = t < MIRROR_IN ? lerp(0.62, 1.0, easeOut(seg(t, CUT_MIRROR, MIRROR_IN)))
+    // opens on exactly the framing the wide shot's push ended on, the mirror's
+    // frame now showing round the edges, and carries the push on into the
+    // glass (fast at first, as it was at the cut), then drifts
+    const z = t < MIRROR_IN ? lerp(MIRROR_Z0, 1.0, easeOut(seg(t, CUT_MIRROR, MIRROR_IN)))
                             : lerp(1.0, 1.07, easeInOut(seg(t, MIRROR_IN, CUT_AFTER)));
     const FX = 540, FY = 1320;   // his face stays here on screen as we push in
     ctx.save(); zoom(ctx, FX, FY, z);
@@ -499,13 +503,13 @@ Skits.haircut = (() => {
     ctx.save();
     ctx.beginPath(); ctx.moveTo(x0, bot); for (const [x, y] of arch) ctx.lineTo(x, y); ctx.lineTo(x1, bot); ctx.closePath(); ctx.clip();
     ctx.save();
-    const RS = 1.3;   // shot-1 world, his head at (FX, FY), flipped left-right
-    ctx.translate(FX, FY); ctx.scale(-RS, RS); ctx.translate(-GX, -GY);
+    const RS = 1.3;   // shot-1 world, his head at (FX, FY)
+    ctx.translate(FX, FY); ctx.scale(RS, RS); ctx.translate(-GX, -GY);   // not flipped: the picture carries straight on from the wide shot
     wall(ctx); floor(ctx);
     chairBack(ctx);
     cutCount = SNIPS.length;
     // grows steadily over the first 8 frames to a touch past full size, then settles
-    const sg = seg(t, SWELL[0], SWELL[1]), swell = sg < 0.75 ? 1.05 * easeInOut(sg / 0.75) : lerp(1.05, 1, easeInOut((sg - 0.75) / 0.25));
+    const sg = seg(t, SWELL[0], SWELL[1]), swell = sg < 0.75 ? 1.05 * easeOut(sg / 0.75) : lerp(1.05, 1, easeInOut((sg - 0.75) / 0.25));
     hairNow = t >= SWELL[1] ? sweptHair : swellHair(swell); jawNow = clamp(swell);
     const cock = easeOutBack(seg(t, COCK[0], COCK[1]));
     const sm = Emotions.smolder, g = { ...dead, lookY: -0.05, pupil: 12, lid: 0.46 };   // he arrives with the glance face
@@ -513,13 +517,14 @@ Skits.haircut = (() => {
     guy(ctx, { x: GX, y: gFeet, s: GS, ...(cock > 0 ? sm : g), face: 2,
       lid: lerp(g.lid, sm.lid, clamp(cock)), lowLid: cock > 0 ? lerp(0.05, sm.lowLid, clamp(cock)) : 0, pupil: lerp(12, sm.pupil, clamp(cock)),
       browL: lerp(0, sm.browL, cock), browR: lerp(0, sm.browR, cock), browLiftR: lerp(0, sm.browLiftR, cock),
-      mouth: t >= SMIRK ? sm.mouth : 'flat', tilt: lerp(0.03, sm.tilt, clamp(seg(t, SWELL[0], SMIRK))) + 0.006 * Math.sin(t * 1.1) });
+      mouth: t >= SMIRK ? sm.mouth : 'flat', tilt: lerp(0.03, sm.tilt, clamp(seg(t, SWELL[0], SMIRK))) + 0.01 * Math.sin(t * 1.3) });   // same sway as the wide shot, so the cut matches
     ctx.restore();
     cape(ctx, () => falling(ctx, CUT_MIRROR, LOCKS.length));
     chairFront(ctx);
     // the barber in the glass, as he was: hand on the chair back, scissors closed
-    barber(ctx, { x: BX, y: BFEET, s: BS, lean: LEAN, weight: -0.6, ...fussy,
-      ...barberArm(-1, bLocal(CHAIR_CORNER, LEAN), 'down', true), holdL: scissors(2.7, 0),
+    const bl = LEAN - 0.012 * Math.sin(t * 0.9);   // as in the wide shot
+    barber(ctx, { x: BX, y: BFEET, s: BS, lean: bl, weight: -0.6, ...fussy,
+      ...barberArm(-1, bLocal(CHAIR_CORNER, bl), 'down', true), holdL: scissors(2.7, 0),
       ...barberArm(1, [96, -196], 'out', false), holdR: comb });
     ctx.restore();
     // glass sheen: hard white streaks in the upper right corner of the glass
@@ -527,9 +532,13 @@ Skits.haircut = (() => {
     stroke(ctx, [[x1 - 60, 980], [x1 - 10, 900]], { w: 9, color: W, taper0: 0.3, taper1: 0.3 });
     ctx.restore();
     outline(ctx, framePts, { w: 12 });   // the frame's inner edge over the glass
+    // the lamps hang in the room, in front of the mirror: same place as in the wide shot
+    ctx.save(); ctx.translate(FX, FY); ctx.scale(RS, RS); ctx.translate(-GX, -GY);
+    lampHang(ctx, 260, 250); lampHang(ctx, 820, 210);
+    ctx.restore();
     // sparkles: hard-edged four-point stars, popping in one at a time
     // just outside the hair, on the wall behind it
-    const sp = [[FX - 255, FY - 330, SPARKS[0], 44], [FX - 40, FY - 435, SPARKS[1], 38], [FX + 200, FY - 400, SPARKS[2], 40]];
+    const sp = [[FX - 230, FY - 360, SPARKS[0], 44], [FX - 40, FY - 435, SPARKS[1], 38], [FX + 200, FY - 400, SPARKS[2], 40]];
     for (const [sx, sy, at, r] of sp) {
       const k2 = easeOutBack(seg(t, at, at + 0.15));
       if (k2 <= 0) continue;

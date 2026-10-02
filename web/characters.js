@@ -301,8 +301,8 @@ const Chars = (() => {
       stroke(ctx, [[x - 34 * s, y - 8 * s], [x, y + 14 * s], [x + 34 * s, y - 8 * s]], { w: 7 * s, color });
     } else if (k === 'frown') {
       stroke(ctx, [[x - 30 * s, y + 10 * s], [x, y - 6 * s], [x + 30 * s, y + 10 * s]], { w: 7 * s, color });
-    } else if (k === 'flatdown') {   // deflated: a flat line, the corners just turned down
-      stroke(ctx, [[x - 28 * s, y + 7 * s], [x - 17 * s, y + 1 * s], [x + 17 * s, y], [x + 28 * s, y + 6 * s]], { w: 7 * s, color });
+    } else if (k === 'flatdown') {   // deflated: a flat line, only the corners tipping down
+      stroke(ctx, [[x - 27 * s, y + 4 * s], [x - 19 * s, y + 1 * s], [x + 19 * s, y], [x + 27 * s, y + 3.5 * s]], { w: 7 * s, color });
     } else if (k === 'smirk') {
       stroke(ctx, [[x - 26 * s, y + 4 * s], [x + 6 * s, y + 6 * s], [x + 32 * s, y - 10 * s]], { w: 7 * s, color });
     } else if (k === 'wobbly') {

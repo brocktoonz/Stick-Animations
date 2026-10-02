@@ -26,18 +26,17 @@ Beats:
             top corner (8 frames, overshooting into the grab); 3.14–3.50 he
             turns the chair about 6 degrees toward the mirror and it settles.
             3.47–3.74 (8 frames) he glances at the mirror: eyes dart first, the
-            head turns after them. 3.72–4.00 push in on him, speeding up, and
-            cut on the move.
-- 4.00–7.50 The mirror on the wall, whole arch in view (flipped reflection,
-            barber at its edge), the push carrying on into the glass until
-            4.42, then a slow drift. At first the same half-cut grey mop.
-            4.36–4.73 (11 frames) the hair grows steadily into a modest auburn
-            swoop (colour turns at 15% grown; flat fill, one inner stroke),
-            a touch past full size and settling; the jaw squares as it goes (two
-            strokes). Sparkles pop one at a time, just outside the hair, at
-            4.66, 4.80, 4.94. 4.80–5.00 lids narrow and the brow cocks
-            (`Emotions.smolder`); the smirk lands last, at 5.12. Hold the smug
-            face 5.12–7.5 (2.4 s).
+            head turns after them. 3.72–4.00 push in on him, speeding up.
+- 4.00–7.50 Cut to the mirror on exactly the framing the push ended on, its
+            frame now round the edges (the reflection isn't flipped, so nothing
+            jumps sides at the cut); the push carries on into the glass until
+            4.42, then drifts. 4.30–4.67 (11 frames) the auburn swoop grows out
+            of the half-cut grey mop, the fill stepping grey to auburn through
+            solid in-between colours, a touch past full size and settling; the
+            jaw draws in as two short angled strokes at the jaw corners.
+            Sparkles pop one at a time, just outside the hair, at 4.62, 4.76,
+            4.90. 4.76–4.96 lids narrow and the brow cocks (`Emotions.smolder`);
+            the smirk lands last, at 5.08. Hold the smug face 5.08–7.5 (2.4 s).
 - 7.50–11.0 Smash cut. Neat grey box. Deflated (`Emotions.deflated`): lids a
             touch higher than "before", brows low and flat, mouth flat with the corners
             down. Barber swaps scissors for a hand mirror (7.9) and holds it up
