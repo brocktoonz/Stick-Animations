@@ -27,7 +27,7 @@ Skits.powernap = (() => {
     IH: 'half', IY: 'ee', OW: 'oh', OY: 'oh', UH: 'oo', UW: 'oo',
     M: 'mbp', B: 'mbp', P: 'mbp', F: 'fv', V: 'fv', L: 'lth', TH: 'lth', DH: 'lth', W: 'oo', R: 'oo', Y: 'ee',
   };
-  const talk = (t, t0, t1) => {
+  const talk = (t, t0, t1, groggy = false) => {
     const tt = t + 1 / 30;
     if (tt < t0 - 0.03 || tt > t1 + 0.05) return null;
     const STEP = 2 / 30, beat = Math.floor((tt - t0) / STEP), a = t0 + beat * STEP, b = a + STEP;
@@ -39,6 +39,8 @@ Skits.powernap = (() => {
       if (ov > most + 0.005 || (Math.abs(ov - most) <= 0.005 && LipSync.OPEN[v] > LipSync.OPEN[kind])) { kind = v; most = ov; }
     }
     if (lips) kind = 'mbp';
+    if (groggy && (kind === 'open' || kind === 'wide')) kind = 'oh';   // slack tall oval, not a grinning D
+    if (groggy && kind === 'oo') kind = 'oh';                             // the rounded W reads at this size
     return { mouth: 'talk', viz: { kind, open: LipSync.OPEN[kind], intensity: 1, smile: 0, side: 1, var: (beat * 7919 % 5) / 4 } };
   };
   const SAID = { alrighty: [0.44, 1.14], nap: [1.14, 2.65], huh: [2.65, 3.34], where: [8.17, 8.74] };   // from references/power-nap/phones.json
@@ -146,9 +148,9 @@ Skits.powernap = (() => {
       couchBack(ctx);
       // his pillow stays tucked under his head and slides down with him
       const hd = HEAD * CS - HIP, [phx, phy] = [hx + Math.sin(ang) * hd, hy - Math.cos(ang) * hd];
-      pillow(ctx, [phx - 40 - 30 * sink, phy + 120 + 20 * sink], 110, 52, -0.15 + 0.2 * sink);
+      pillow(ctx, [phx - 30 - 20 * sink, phy + 125 + 45 * sink], 118, 54, -0.15 + 0.25 * sink);
       // legs stretched out along the seat the whole time, one knee up a little
-      for (const [kx, ky, ex, ey] of [[hx + 150, SEAT - 118, hx + 290, SEAT - 50], [hx + 170, SEAT - 66, hx + 330, SEAT - 44]]) {   // far knee bent up, near leg out straight
+      for (const [kx, ky, ex, ey] of [[hx + 110, SEAT - 100, hx + 205, SEAT - 52], [hx + 120, SEAT - 66, hx + 225, SEAT - 44]]) {   // far knee bent up, near leg out straight; feet clear of the arm
         const leg = [[hx + 10, hy + 6], [kx, ky], [ex, ey]];
         stroke(ctx, leg, { w: 40, taper0: 0, taper1: 0 });                                  // ink edge...
         stroke(ctx, leg, { w: 26, taper0: 0, taper1: 0, color: '#3a3a3a' });               // ...dark trousers inside, so the two legs read apart
@@ -160,7 +162,7 @@ Skits.powernap = (() => {
         : { lid: Math.max(heavy, blink(t, 2.7, 0.3)), lowLid: 0.2, brow: -0.25, pupil: 9, lookX: 0.3, lookY: -0.2, tilt: -0.08,
             ...(said ?? (t < 0.44 ? { mouth: 'smile' } : { mouth: 'flat' })) };            // content smile before he speaks
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
-      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.arm(1, [70, -190], 'down'), ...Arms.arm(-1, [-90, -150], 'down'), ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });   // near hand on his stomach; mouth bigger while his head is on its side
+      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.arm(1, [70, -190], 'down'), ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });   // near hand on his stomach; mouth bigger while his head is on its side
       ctx.restore();
       couchFront(ctx);
       ctx.restore();
@@ -179,13 +181,13 @@ Skits.powernap = (() => {
       const asking = t >= 8.17 && t < 8.8, after = t >= 8.8;
       // groggy: one eye nearly shut, the other half open, brows sagging, jaw hanging slack
       const sag = Math.sin(Math.PI * seg(t, 9.55, 9.95));                                   // the lids sag nearly shut and catch once in the hold
-      const droopy = { lidL: Math.min(1, 0.9 + 0.08 * sag), lidR: 0.76 + 0.18 * sag, lowLid: 0.3, flatLid: true, pupil: 6, lookX: -0.1, lookY: 0.85,
-                       browL: 0.08, browR: -0.05, browLiftL: -12, browLiftR: -8 };          // both brows low and slack, right down on the lids
+      const droopy = { lidL: Math.min(1, 0.84 + 0.12 * sag), lidR: 0.72 + 0.2 * sag, flatLid: true, pupil: 8, lookX: -0.25, lookY: 0.75,   // pupils peek out under heavy lids
+                       browL: -0.3, browR: -0.25, browLiftL: 40, browLiftR: 33 };           // brows sunk right down on the lids, outer ends sagging
       const groggy = t > 7.0 ? lerp(0, 0.22, easeInOut(seg(t, 7.0, 8.0))) : 0;               // head lolls well over to one side, and holds
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
         ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'),            // arms spread wide, hands planted on the cushion
         ...droopy, ...(blink(t, 7.6, 0.4) ? { lidR: 0.95 } : {}),                             // a slow heavy blink
-        ...(asking ? { ...(talk(t, ...SAID.where) ?? { mouth: 'o', open: 0.1 }), mouthScale: 1.2 }
+        ...(asking ? { ...(talk(t, ...SAID.where, true) ?? { mouth: 'o', open: 0.1 }), mouthScale: 1.25 }
           : after ? { mouth: 'o', open: 0.1, mouthScale: 0.9, lookX: lerp(-0.1, 0.3, easeInOut(seg(t, 9.1, 9.5))) }   // mouth just parted, eyes drift
           : { mouth: 'o', open: 0.08, mouthScale: 0.9 }) });                                  // lips just parted in the silence, so the line opens from rest
       shape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
