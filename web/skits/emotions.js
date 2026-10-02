@@ -9,6 +9,7 @@
     beast: (ctx, p) => Cameos.beast(ctx, p),
     nick: (ctx, p) => Cameos.nick(ctx, p),
     slime: (ctx, p) => Cameos.slime(ctx, p),
+    squeex: (ctx, p) => Cameos.squeex.beards.full(ctx, p),
   };
   const KEYS = Object.keys(Emotions);
   globalThis.EmotionCast = Object.keys(CAST);

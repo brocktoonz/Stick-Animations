@@ -65,9 +65,15 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
   intrudes into the mouth opening.
 - Moustache: a band over the upper lip, set apart from the beard by a slightly
   darker tone, joining the beard at the mouth corners. Mouths open beneath it.
-- Texture: a few short strokes along the outer bottom edge only, never inside
-  the fill. All the same length, all pointing straight down, and few enough to
-  suggest hair rather than outline the shape.
+- Sideburns start narrow at the temples, under the hair, and widen gradually
+  toward the jaw. A sideburn the same thickness all the way down frames the
+  face like a hood.
+- Texture: the small scallops on the bottom edge are enough. Nothing hangs
+  below the edge onto the neck (strokes there read as drips), and nothing is
+  drawn inside the fill. Any extra strokes go along the outer edge only, all the
+  same length and direction, and few enough to suggest hair rather than
+  outline the shape.
+- The chin may push slightly past the head outline for fullness.
 - Every expression: the same beard in every emotion. In open-mouth poses the
   beard stretches down with the jaw and wraps under the mouth, so a band of
   beard always shows below it.
@@ -86,6 +92,11 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
 - Main character: `Hero.main`, the spiky-haired guy with mid-grey hair and a
   grey hoodie (`Cameos.spikyShades.brown`). The previous design is kept as
   `Hero.mainOld`.
+- Squeex: the approved design is draft C with the full dark beard,
+  `Cameos.squeex.beards.full` (see `?skit=squeex_beard2` and
+  `characters/squeex/beards/`). It has his own angry (squared clenched teeth)
+  and sad (skin-tone drooping lids, one tear, a frown). The other drafts and
+  beard options are kept only for reference.
 - Cameos (`web/cameos.js`) are caricatures recognisable from hair silhouette
   plus one or two signature items. Nick's ears are always hidden by his hair.
 
