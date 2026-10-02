@@ -680,15 +680,18 @@ Skits.haircut = (() => {
   }
 
   // ---------- 4: driving home with it (7.5 - 11) ----------
-  // Eye level, straight on: him in the driver's seat, the side window on our
-  // right with the roadside streaming past, the door below it, the pillar on
-  // our left. Four flat shapes and him; the window is the only thing moving.
-  const DRV_AT = [486, 1066], DRV_S = 1.72;   // his head centre (45% across, eyes at 55% down), the rig's scale
+  // Eye level, straight on: him in the driver's seat of an American car, so his
+  // side window is on our left with the roadside streaming past, the door below
+  // it, the pillar on our right. A small wheel in front that he just holds.
+  const DRV_AT = [594, 1066], DRV_S = 1.72;   // his head centre (55% across, eyes at 55% down), the rig's scale
   const V = { win: '#ffffff', scenery: '#8f8f8f', seat: '#606060', door: '#484848', fill: '#2e2e2e', pillar: '#121212', hoodie: '#8a8a8a' };
-  const DWIN = { x0: 640, x1: 1130, y0: 480, y1: 1344 };          // right 40% (on out past the frame edge), 25% - 70% of the height
+  const DWIN = { x0: -50, x1: 440, y0: 480, y1: 1344 };           // left 40% (on out past the frame edge), 25% - 70% of the height
   const HORIZON = DWIN.y0 + 0.6 * (DWIN.y1 - DWIN.y0);
   const DSEAT = { x0: DRV_AT[0] - 352, x1: DRV_AT[0] + 352, y0: 672, r: 170 };   // 1.4x his head, 35% down to the bottom
-  const SCROLL = 240;                                 // roadside speed (px/s) and spacing
+  const SCROLL = 240;                                 // roadside speed (px/s)
+  const DWHEEL = { c: [DRV_AT[0], 1752], r: 130 };   // small, face-on, in front of him, all of it in frame
+  const wheelAt = a => [DWHEEL.c[0] + Math.cos(a) * DWHEEL.r, DWHEEL.c[1] + Math.sin(a) * DWHEEL.r];
+  const DHANDS = [wheelAt(Math.PI * 7 / 6), wheelAt(Math.PI * 11 / 6)];   // ten and two
   const rrect = (x0, y0, x1, y1, rad, n = 6) => {   // rounded rectangle, sides split so the brush fill keeps them straight
     const pts = [], c = [[x1 - rad, y0 + rad, -Math.PI / 2], [x1 - rad, y1 - rad, 0], [x0 + rad, y1 - rad, Math.PI / 2], [x0 + rad, y0 + rad, Math.PI]];
     c.forEach(([cx, cy, a0], i) => {
@@ -698,7 +701,6 @@ Skits.haircut = (() => {
     });
     return pts;
   };
-  // one roadside thing, standing on the horizon at x: a tree (trunk and a round top) or a pole with a crossbar
   // one roadside thing standing on the horizon at x: a pole, or a small tree (tapered trunk, round top)
   function roadside(ctx, x, i) {
     const k = hh(i * 13 + 5), base = HORIZON - 3;
@@ -710,12 +712,12 @@ Skits.haircut = (() => {
       blob(ctx, x, base - h - ry * 0.7, rx, ry, { fill: V.scenery, w: 0, n: 14 });
     }
   }
-  // the roadside, spaced unevenly, scrolled right to left (pre-rolled so the window starts full)
+  // the roadside, spaced unevenly, scrolled left to right (pre-rolled so the window starts full)
   function scenery(ctx, r) {
     const sc = r * SCROLL + 700;
     for (let i = 0, p = 0; p < sc + 600; i++, p += 70 + hh(i * 7 + 11) * 40) {
-      const x = 1100 + p - sc;
-      if (x > DWIN.x0 - 60 && x < 1140) roadside(ctx, x, i);
+      const x = -20 - p + sc;
+      if (x > -60 && x < DWIN.x1 + 60) roadside(ctx, x, i);
     }
   }
   function shot4(ctx, t) {
@@ -725,9 +727,9 @@ Skits.haircut = (() => {
     ctx.fillStyle = V.fill; ctx.fillRect(0, 0, 1080, 1920);
     Brush.setWeight(w0 * 1.1);
     // 2. the door below the window, one armrest line
-    fill(ctx, rrect(DWIN.x0, DWIN.y1 - 40, 1130, 1980, 20), V.door, 0.4);
-    stroke(ctx, [[DWIN.x0 + 10, 1520], [1080, 1520]], { w: 8 });
-    // 1. the side window, the roadside streaming right to left through it
+    fill(ctx, rrect(-50, DWIN.y1 - 40, DWIN.x1, 1980, 20), V.door, 0.4);
+    stroke(ctx, [[0, 1520], [DWIN.x1 - 10, 1520]], { w: 8 });
+    // 1. the side window, the roadside streaming left to right through it
     const win = rrect(DWIN.x0, DWIN.y0, DWIN.x1, DWIN.y1, 60);
     fill(ctx, win, V.win, 0.4);
     ctx.save(); ctx.beginPath(); ctx.moveTo(...win[0]); for (const q of win) ctx.lineTo(...q); ctx.closePath(); ctx.clip();
@@ -735,9 +737,9 @@ Skits.haircut = (() => {
     scenery(ctx, r);
     ctx.restore();
     outline(ctx, win, { w: 10 });
-    stroke(ctx, [[DWIN.x0 - 4, DWIN.y1 + 2], [DWIN.x0 - 4, 1980]], { w: 10 });   // the door's front edge
-    // 4. the pillar on our left
-    panel(ctx, rrect(-20, -40, 86, 1960, 6), V.pillar, 10);
+    stroke(ctx, [[DWIN.x1 + 4, DWIN.y1 + 2], [DWIN.x1 + 4, 1980]], { w: 10 });   // the door's front edge
+    // 4. the pillar on our right
+    panel(ctx, rrect(994, -40, 1100, 1960, 6), V.pillar, 10);
     // 3. his seat: one shape, the headrest its rounded top
     ctx.save(); ctx.translate(0, bob);
     panel(ctx, rrect(DSEAT.x0, DSEAT.y0, DSEAT.x1, 2300, DSEAT.r), V.seat, 10);   // runs straight off the bottom
@@ -747,24 +749,42 @@ Skits.haircut = (() => {
     Brush.setWeight(w0 * WIDE * GS / DRV_S);
     hairNow = botchedHair;
     const sad = { ...Emotions.sad, brow: -0.3 }, lid = r > 2.3 && r < 2.45 ? 1 : sad.lid;   // one blink
-    // his body from the chest up, the barbershop build without the cape: the torso
-    // and arms run on down out of frame
+    // his body from the chest up, the barbershop build without the cape; his arms
+    // come down to his hands on the wheel
     const torso = [[-48, -324], [-96, -306], [-128, -274], [-140, -220], [-128, 140], [128, 140], [140, -220], [128, -274], [96, -306], [48, -324]];
-    fill(ctx, torso, V.hoodie, 0.4);
-        for (const sd of [-1, 1]) stroke(ctx, [[sd * 118, -240], [sd * 112, -50], [sd * 106, 140]], { w: 8 });   // where each arm hangs beside him
+    fill(ctx, torso, V.hoodie, 0.4); outline(ctx, torso, { w: 10 });
+    const toRig = ([x, y]) => [(x - DRV_AT[0]) / DRV_S, (y - DRV_AT[1]) / DRV_S - 438];
+    DHANDS.forEach((h, i) => {   // sleeves from the shoulders down to the hands
+      const sd = i ? 1 : -1, arm = [[sd * 126, -246], [sd * 142, -150], toRig(h)];   // elbows out, forearms in to the wheel
+      stroke(ctx, arm, { w: 58, taper0: 0, taper1: 0, minW: 1, pressure: 0 });
+      stroke(ctx, arm, { w: 40, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: V.hoodie, jit: 0 });
+    });
     hoodieFront(ctx, -322);
-    // the seat belt, one band from his left shoulder (ours) down across him
-    const belt = [[-110, -330], [100, 140]], bn = [0.92, -0.4].map(v => v * 11), side = k => belt.map(([x, y]) => [x + bn[0] * k, y + bn[1] * k]);
-    ctx.save(); ctx.beginPath(); ctx.moveTo(...torso[0]); for (const q of torso) ctx.lineTo(...q); ctx.closePath(); ctx.clip();   // it goes over his shoulder, out of sight
+    // the seat belt, one band from off the frame at our upper right, over his shoulder and across his chest
+    const belt = [[330, -440], [80, -306], [-150, 210]];
+    const side = k => belt.map((q, i) => {   // the band's edges, offset along each point's normal
+      const a = belt[Math.max(i - 1, 0)], b = belt[Math.min(i + 1, belt.length - 1)], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      return [q[0] - (b[1] - a[1]) / d * 11 * k, q[1] + (b[0] - a[0]) / d * 11 * k];
+    });
     fill(ctx, [...side(-1), ...side(1).reverse()], V.door, 0);
     stroke(ctx, side(-1), { w: 6, taper0: 0, taper1: 0, minW: 1 }); stroke(ctx, side(1), { w: 6, taper0: 0, taper1: 0, minW: 1 });
-    ctx.restore();
-    outline(ctx, torso, { w: 10 });
     // his head over it (the rig, cut off above the neck)
     ctx.save(); ctx.beginPath(); ctx.rect(-600, -1200, 1200, 1200 - 330); ctx.ellipse(0, -438, RX + 3, RY + 3, 0, 0, 7); ctx.clip();
     guy(ctx, { x: 0, y: 0, s: 1, ...sad, lookY: 0.05, lookX: 0, lid, tilt: 0 });
     ctx.restore();
     ctx.restore();
+    // the wheel in front of him, face-on, held still: rim, two spokes, hub, his hands on it
+    Brush.setWeight(w0 * 1.1);
+    const rim = []; for (let i = 0; i <= 48; i++) rim.push(wheelAt(Math.PI * 2 * i / 48));
+    for (const a of [Math.PI, 0]) {
+      stroke(ctx, [DWHEEL.c, wheelAt(a)], { w: 34, taper0: 0, taper1: 0, minW: 1, pressure: 0 });
+      stroke(ctx, [DWHEEL.c, wheelAt(a)], { w: 20, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: V.pillar, jit: 0 });
+    }
+    blob(ctx, DWHEEL.c[0], DWHEEL.c[1], 42, 42, { fill: V.pillar, w: 9, n: 14 });
+    stroke(ctx, rim, { w: 44, taper0: 0, taper1: 0, minW: 1, pressure: 0, jit: 0 });
+    stroke(ctx, rim, { w: 28, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: V.pillar, jit: 0 });
+    Brush.setWeight(w0);
+    for (const h of DHANDS) Chars.hand(ctx, h[0], h[1], null, DRV_S);
     ctx.restore();
     Brush.setWeight(w0);
     return { top: DRV_AT[1] - 1.42 * RY * DRV_S - 10 };
