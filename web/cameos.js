@@ -1332,12 +1332,13 @@ const Cameos = (() => {
     for (let i = 0; i <= 48; i++) {
       const a = Math.PI * (-0.2 + 1.4 * i / 48), dn = Math.max(0, Math.sin(a));
       const r = 0.99 + (i % 2 && dn > 0.55 ? 0.03 : 0);
-      outer.push([Math.cos(a) * r, Math.sin(a) * r]);
+      outer.push([Math.cos(a) * r, Math.sin(a) * r + 0.07 * dn ** 4]);   // the chin pushes a little past the head outline
     }
     // cheek lines: one smooth curve from the sideburn down to the moustache corner,
     // leaving bare cheek under the eyes
-    const cheekL = [[-0.8, -0.62], [-0.8, 0.04], [-0.77, 0.3], [-0.68, 0.5], [-0.5, 0.5 + d]];
-    const cheekR = [[0.72, 0.5 + d], [0.75, 0.5], [0.78, 0.38], [0.8, 0.2], [0.8, 0.04], [0.8, -0.62]];   // the sideburn mirrors the left one
+    // the sideburns start narrow at the temples (under the hair) and widen toward the jaw
+    const cheekL = [[-0.86, -0.5], [-0.9, -0.2], [-0.89, 0.04], [-0.84, 0.26], [-0.72, 0.44], [-0.5, 0.5 + d]];
+    const cheekR = [[0.72, 0.5 + d], [0.8, 0.46], [0.86, 0.28], [0.89, 0.04], [0.9, -0.2], [0.86, -0.5]];   // mirrors the left one
     // the moustache band: hair-edged top, arched lip edge, ends tucked into the beard at the corners
     const stacheTop = [[-0.5, 0.5], [-0.4, 0.36], [-0.22, 0.29], [-0.04, 0.27], [0.11, 0.3], [0.26, 0.27], [0.44, 0.29], [0.62, 0.36], [0.72, 0.5]].map(([x, y]) => [x, y + d]);
     const lip = [[0.62, 0.48], [0.46, 0.44], [0.28, 0.41], [0.11, 0.4], [-0.06, 0.41], [-0.24, 0.44], [-0.4, 0.48]].map(([x, y]) => [x, y + d]);
@@ -1345,23 +1346,13 @@ const Cameos = (() => {
   };
   // the lower the point, the further it drops with the jaw
   const fullStretch = jaw => pts => hu(pts).map(([x, y]) => [x, y + jaw * Math.min(1, Math.max(0, (y / RY - 0.4) / 0.6))]);
-  // A few short strokes along the bottom edge only: all the same length, all pointing
-  // straight down, straddling the edge so none sit inside the fill. They hint at hair;
-  // the fill and the outline carry the shape.
-  const beardTicks = (ctx, pts, every = 4, len = 20) => {
-    for (let i = 2; i < pts.length - 2; i += every) {
-      const [x, y] = pts[i];
-      stroke(ctx, [[x, y - 3], [x, y + len - 3]], { w: 3.5, taper0: 0.2, taper1: 0.6, jit: 0.2, wob: 0 });
-    }
-  };
   const beardFull2 = (ctx, jaw = 0, p) => {
     ctx.translate(0, -jaw);   // stretch with the jaw instead of sliding down with it
     const P = fullStretch(jaw), parts = fullParts(fullDrop(p)), { outer, cheekL, cheekR, stacheTop } = parts;
     fill(ctx, P([...outer, ...cheekL, ...stacheTop.slice(1, -1), ...cheekR]), FULLB, 1);   // one solid fill, sideburns included
     if (STACHE_UNDER.has(p?.mouth)) drawStache(ctx, P, parts);   // under a wide grin, so the whole grin shows
     const O = P(outer);
-    stroke(ctx, O, { w: 8, taper0: 0.3, taper1: 0.3 });   // the jaw edge
-    beardTicks(ctx, O.filter((_, i) => { const a = Math.PI * (-0.2 + 1.4 * i / 48); return Math.sin(a) > 0.62; }));
+    stroke(ctx, O, { w: 8, taper0: 0.3, taper1: 0.3 });   // the jaw edge; its scallops are the texture, nothing hangs below it
   };
   // The moustache, on top of the mouth: a darker band over the upper lip whose
   // ends join the beard at the mouth corners, so mouths open beneath it.
