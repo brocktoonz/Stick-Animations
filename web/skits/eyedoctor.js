@@ -200,6 +200,7 @@ Skits.eyedoctor = (() => {
 
   return {
     title: 'That one machine\nat the eye doctor:', subtitle: '', duration: 5.67,
+    fade: true,   // keeps the bottom fade this video was made with (it became opt-in later)
     titleBottom: 385,   // last line just above the eye chart (its top is ~397 at the end of the push-in)
     draw(ctx, t) {
       if (t < 1.5) shotSetup(ctx, t);          // "Alright, go ahead and put your chin up there for me, please."
