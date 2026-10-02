@@ -1357,7 +1357,8 @@ const Cameos = (() => {
   // The moustache, on top of the mouth: a darker band over the upper lip whose
   // ends join the beard at the mouth corners, so mouths open beneath it.
   const stacheFull2 = (ctx, fx, rage, p) => {
-    if (p?.sadTear) { sadLids(ctx, fx, p.lid ?? 0); tearStreak(ctx, fx); }
+    if (p?.skinLid) skinLids(ctx, fx, p.lid ?? 0, p);
+    if (p?.sadTear) tearStreak(ctx, fx);
     if (p?.clenchTeeth) clenchedTeeth(ctx, fx + 4, 62 + FULL_MOUTH_DY + 18);   // under the moustache, which is drawn next
     if (rage || STACHE_UNDER.has(p?.mouth)) return;
     const jaw = p?.mouth === 'yell' ? 46 * (p.open ?? 0) : 0, P = fullStretch(jaw);
@@ -1380,17 +1381,23 @@ const Cameos = (() => {
     fill(ctx, d, W, 0.3); outline(ctx, d, { w: 4 });
     stroke(ctx, [[x - 6, 42], [x - 4, 38]], { w: 3, color: '#9a9a9a' });   // a glint, so it reads as water
   };
-  // drooping upper lids in his skin tone (the shared lid fill is white, which shows on grey skin)
-  const sadLids = (ctx, fx, lid) => {
+  // lowered upper lids in his skin tone (the shared lid fill is white, which shows as a
+  // white cap on grey skin). Angry lids tilt down toward the nose; unimpressed stays flat.
+  const skinLids = (ctx, fx, lid, p) => {
     const y = -6, rx = 30, ry = 40, ly = y - ry + lid * ry * 1.2;
+    const tilt = p.brow > 0.8 ? 9 : 0;
     for (const side of [-1, 1]) {
-      const ex = fx + side * 40;
-      // skin over the whole top of the eye, outline included, so the lid line becomes the eye's top edge
+      const ex = fx + side * 40, inner = ly + tilt, outer = ly - tilt;   // inner end toward the nose
+      const a = [ex - side * (rx + 8), inner], b = [ex + side * (rx + 8), outer];
+      // skin over the top of the eye, outline included, so the lid line becomes the eye's top edge
       ctx.save(); ctx.beginPath(); ctx.ellipse(ex, y, rx + 6, ry + 6, 0, 0, 7); ctx.clip();
-      ctx.fillStyle = SQ_SKIN; ctx.fillRect(ex - rx - 8, y - ry - 8, rx * 2 + 16, ly - (y - ry) + 8);
+      ctx.fillStyle = SQ_SKIN; ctx.beginPath();
+      ctx.moveTo(a[0], y - ry - 10); ctx.lineTo(b[0], y - ry - 10); ctx.lineTo(b[0], b[1]); ctx.lineTo(a[0], a[1]); ctx.closePath(); ctx.fill();
       ctx.restore();
-      const hw = rx * Math.sqrt(Math.max(0, 1 - ((ly - y) / ry) ** 2));   // eye half-width at the lid
-      stroke(ctx, [[ex - hw - 2, ly + 3], [ex, ly - 2], [ex + hw + 2, ly + 3]], { w: 8, taper0: 0.05, taper1: 0.05 });
+      const hw = rx * Math.sqrt(Math.max(0, 1 - ((ly - y) / ry) ** 2)) + 2;   // eye half-width at the lid
+      const ix = ex - side * hw, ox = ex + side * hw, at = x => ly + tilt * (side * (ex - x)) / hw;
+      stroke(ctx, p.flatLid || tilt ? [[ix, at(ix)], [ox, at(ox)]] : [[ex - hw, ly + 3], [ex, ly - 2], [ex + hw, ly + 3]],
+        { w: 8, taper0: 0.05, taper1: 0.05 });
     }
   };
   // angry: two rows of squared teeth clenched together, the same flat-tooth style as his laugh
@@ -1411,11 +1418,15 @@ const Cameos = (() => {
   // the rage yell becomes big squared teeth clenched inside the beard (the head
   // keeps its shape), and sad gets plain drooping eyes, one tear and a frown.
   const SMALL_MOUTHS = new Set(['wobbly', 'tiny', 'o']);
-  const sqFace = p => {
+  const sqFace = q => {
+    // any half-lowered lid is drawn in his skin tone
+    const p = (q.lid ?? 0) > 0.02 && (q.lid ?? 0) < 1 && !q.happy ? { ...q, skinLid: true } : q;
+    if (p.tears) return { ...p, tears: false, lid: 0.45, mouth: 'frown', sadTear: true, skinLid: true };
     if (p.mouth === 'rage' || p.mouth === 'clench') return { ...p, mouth: 'none', open: 0, clenchTeeth: true, stretch: 0 };
     // small closed mouths drop clear of the moustache and grow a size, so they read on the beard
-    if (SMALL_MOUTHS.has(p.mouth)) return { ...p, mouthScale: (p.mouthScale ?? 1) * 1.3, smallMouth: true };
-    if (p.tears) return { ...p, tears: false, lid: 0.45, mouth: 'frown', sadTear: true };
+    // (with both hands up in front of the face, as in scared, the hands cover it instead)
+    if (SMALL_MOUTHS.has(p.mouth))
+      return p.armLFront && p.armRFront ? { ...p, mouth: 'none' } : { ...p, mouthScale: (p.mouthScale ?? 1) * (p.mouth === 'wobbly' ? 1.5 : 1.3), smallMouth: true };
     // open mouths a size smaller for him, so the stretched beard wraps under them with a band to spare
     if (p.mouth === 'yell') return { ...p, mouthScale: (p.mouthScale ?? 1) * 0.68 };
     if (p.mouth === 'gape') return { ...p, mouthScale: (p.mouthScale ?? 1) * 0.72, stress: false };   // the stress lines under the eyes would land in the beard
