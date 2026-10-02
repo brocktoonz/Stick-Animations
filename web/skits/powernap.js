@@ -169,19 +169,14 @@ Skits.powernap = (() => {
       for (const side of [-1, 1]) {
         const hip = [hx + Math.cos(ang) * side * 28 - Math.sin(ang) * 33, hy + Math.sin(ang) * side * 28 + Math.cos(ang) * 33];
         const sitK = side < 0 ? [hx - 52, SEAT + 14] : [hx + 40, SEAT + 14], sitF = side < 0 ? [hx - 78, FLOOR - 22] : [hx + 46, FLOOR - 22];   // one knee angled out
-        const lieK = side > 0 ? [hx + 95, SEAT - 110] : [hx + 105, SEAT - 46], lieF = side > 0 ? [hx + 150, SEAT - 24] : [hx + 205, SEAT - 20];   // two feet side by side on the seat   // feet resting on the seat, short of the right armrest   // upper leg's knee up, lower leg straight
+        const lieK = side > 0 ? [hx + 90, SEAT - 118] : [hx + 125, SEAT - 40], lieF = side > 0 ? [hx + 150, SEAT - 24] : [hx + 215, SEAT - 20];   // upper knee up, lower leg straight; two feet apart on the seat   // feet resting on the seat, short of the right armrest   // upper leg's knee up, lower leg straight
         const arc = Math.sin(Math.PI * swing) * 60;                                         // lifted up and over the seat edge on the way
         const knee = [lerp(sitK[0], lieK[0], swing), lerp(sitK[1], lieK[1], swing) - arc];
         const foot = [lerp(sitF[0], lieF[0], swing), lerp(sitF[1], lieF[1], swing) - arc * 1.4];
         const leg = [hip, knee, foot];
-        stroke(ctx, leg, { w: 40, taper0: 0, taper1: 0 });                                   // ink edge...
-        stroke(ctx, leg, { w: 26, taper0: 0, taper1: 0, color: '#4f4f4f' });                // both trouser legs the same colour   // ...dark trousers inside, so the legs read apart
+        stroke(ctx, leg, { w: 28, taper0: 0, taper1: 0 });                                   // black legs, as in his design (the same ink as his shorts)   // ...dark trousers inside, so the legs read apart
         fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 38, 17, 10), INK, 0.8);   // shoe, tucked onto the end of the shin
       }
-      // the bottom of his shorts over the tops of both legs, so they grow out of the shorts
-      ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
-      fill(ctx, [[-68, -132], [68, -132], [72, -96], [8, -90], [0, -112], [-8, -90], [-72, -96]].map(([x, y]) => [x * CS, HIP + y * CS]), INK, 1.2);
-      ctx.restore();
       ctx.restore();
     }],
     // FEW HOURS LATER: just the clock, its hands whipping round
@@ -202,19 +197,19 @@ Skits.powernap = (() => {
       // them, mouth hanging open with a drip of drool, brows relaxed in their usual place
       // like the references: head lolled right over, eyes shut under heavy drooping
       // lids with lashes and dark shading, mouth hanging open, drool, sleep bubbles
-      // eyes start shut, then he blinks them open trying to wake up, but they never
-      // get past half open: the lid line cuts his centred pupils in half
-      const tries = [[7.1, 7.55, 0.94], [7.65, 8.05, 0.88], [8.1, 99, 0.85]];   // each try opens a little more, never past half   // [open, close again, how far open (lid)]
-      let lid = 1;
-      for (const [a, b, l] of tries) if (t >= a && t < b) lid = lerp(1, l, easeInOut(seg(t, a, a + 0.3))) + (b < 99 ? lerp(0, 1 - l, (seg(t, b - 0.1, b)) ** 2) : 0);   // lids drag up slowly, drop back fast
-      if (t > 9.3 && t < 9.65) lid = lerp(0.85, 1, Math.sin(Math.PI * seg(t, 9.3, 9.65)));   // a slow heavy blink
+      // eyes start shut, then he drags them open trying to wake up, sinking shut in
+      // between; they never get past half open, and the lid cuts his pupils in half
+      const tries = [[7.1, 7.55, 0.22], [7.65, 8.05, 0.36], [8.1, 99, 0.46]];   // [open, close again, how far open (0..0.5)]
+      let open = 0;
+      for (const [a, b, o] of tries) if (t >= a && t < b) open = lerp(0, o, easeInOut(seg(t, a, a + 0.3))) * (b < 99 ? 1 - seg(t, b - 0.1, b) ** 2 : 1);   // drag up slowly, drop back fast
+      if (t > 9.3 && t < 9.65) open = 0.46 * (1 - Math.sin(Math.PI * seg(t, 9.3, 9.65)));   // a slow heavy blink
       // "Where am I?" from the aligned phones: each sound gets its own opening (lips
-      // shut on the m of "am", rounded for the w, wide on the vowels); in the
-      // silences before and after, his lips just hang slightly parted
+      // shut on the m of "am", rounded for the w, wide on the vowels); shut (a slack
+      // wavy line) in the silences before and after the line
       const SIZE = { rest: 0.06, mbp: 0, fv: 0.1, teeth: 0.14, ee: 0.22, lth: 0.3, oo: 0.26, half: 0.38, oh: 0.48, open: 0.62, wide: 0.7 };
       const said = talk(t, ...SAID.where);
-      const mouthOpen = said ? SIZE[said.viz.kind] ?? 0.3 : 0.05;   // shut (a slack wavy line) in the silences before and after the line   // shut (a slack wavy line) before he speaks
-      const droopy = { lid, flatLid: true, pupil: 12, lookX: 0, lookY: lid < 1 ? 40 * (1.2 * lid - 1) / 22 : 0, bags: true, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };   // pupil centre rides the lid line, so half of it always shows
+      const mouthOpen = said ? SIZE[said.viz.kind] ?? 0.3 : 0.05;
+      const droopy = { noEyes: true, halfOpen: open, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };
       const groggy = t > 7.0 ? lerp(0, 0.3, easeInOut(seg(t, 7.0, 8.0))) : 0;                // head lolls right over to one side, and holds
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
         ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'),            // arms spread wide, hands planted on the cushion

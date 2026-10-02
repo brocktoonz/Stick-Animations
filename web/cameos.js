@@ -863,6 +863,17 @@ const Cameos = (() => {
     }
   };
   const scragglyMoustache = (ctx, fx, rage, p = {}) => {
+    if (p.halfOpen !== undefined) for (const sd of [-1, 1]) {   // tired eyes: a heavy lid with only the lower part of the eye under it, pupil cut in half by the lid
+      const ex = fx + sd * 42, ey = -26, rx = 30, ry = 38, op = p.halfOpen;
+      if (op <= 0.02) { stroke(ctx, [[ex - 28, ey + 2], [ex, ey + 12], [ex + 28, ey + 2]], { w: 9, taper0: 0.2, taper1: 0.2 }); continue; }   // shut: a sagging arc
+      const ly = ey + ry - 2 * ry * op;
+      ctx.save(); ctx.beginPath(); ctx.rect(ex - rx - 20, ly, 2 * rx + 40, 2 * ry + 20); ctx.clip();
+      blob(ctx, ex, ey, rx, ry, { fill: W, w: 8, n: 12, jit: 0.4 });                    // the part of the eye below the lid, at full line weight
+      blob(ctx, ex, ly, 12, 12, { fill: INK, w: 0, n: 10 });                             // pupil centred on the lid line: half of it shows
+      ctx.restore();
+      const half = Math.sqrt(Math.max(0, 1 - ((ly - ey) / ry) ** 2)) * rx;           // the eye's width at the lid line
+      stroke(ctx, [[ex - half - 3, ly + 2], [ex, ly - 3], [ex + half + 3, ly + 2]], { w: 10, taper0: 0.15, taper1: 0.15 });   // the heavy lid
+    }
     if (p.sleepy) for (const sd of [-1, 1]) {   // fast asleep: heavy closed lids drooping at the outer ends, lashes, dark shading under them
       const ex = fx + sd * 42, lid = [[ex - sd * 28, -10], [ex + sd * 2, 0], [ex + sd * 30, -6]];   // closed lid: a gentle downward curve, near level
       fill(ctx, [[ex - sd * 20, 8], [ex + sd * 2, 15], [ex + sd * 24, 10], [ex + sd * 20, 24], [ex, 28], [ex - sd * 16, 20]], '#b4b4b4', 0.6);   // tired shading, a little below the lid
