@@ -169,12 +169,14 @@ Skits.powernap = (() => {
       for (const side of [-1, 1]) {
         const hip = [hx + Math.cos(ang) * side * 28 - Math.sin(ang) * 33, hy + Math.sin(ang) * side * 28 + Math.cos(ang) * 33];
         const sitK = side < 0 ? [hx - 52, SEAT + 14] : [hx + 40, SEAT + 14], sitF = side < 0 ? [hx - 78, FLOOR - 22] : [hx + 46, FLOOR - 22];   // one knee angled out
-        const lieK = side > 0 ? [hx + 90, SEAT - 118] : [hx + 125, SEAT - 40], lieF = side > 0 ? [hx + 150, SEAT - 24] : [hx + 215, SEAT - 20];   // upper knee up, lower leg straight; two feet apart on the seat   // feet resting on the seat, short of the right armrest   // upper leg's knee up, lower leg straight
+        const lieK = side > 0 ? [hx + 90, SEAT - 118] : [hx + 120, SEAT - 40], lieF = side > 0 ? [hx + 140, SEAT - 26] : [hx + 190, SEAT - 20];   // upper knee up, lower leg straight; two feet apart on the seat   // feet resting on the seat, short of the right armrest   // upper leg's knee up, lower leg straight
         const arc = Math.sin(Math.PI * swing) * 60;                                         // lifted up and over the seat edge on the way
         const knee = [lerp(sitK[0], lieK[0], swing), lerp(sitK[1], lieK[1], swing) - arc];
         const foot = [lerp(sitF[0], lieF[0], swing), lerp(sitF[1], lieF[1], swing) - arc * 1.4];
         const leg = [hip, knee, foot];
+        if (side > 0) stroke(ctx, leg, { w: 36, taper0: 0, taper1: 0, color: '#6a6a6a' });   // a thin gap round the upper leg so the two legs read apart
         stroke(ctx, leg, { w: 28, taper0: 0, taper1: 0 });                                   // black legs, as in his design (the same ink as his shorts)   // ...dark trousers inside, so the legs read apart
+        if (side > 0) fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 42, 21, 10), '#6a6a6a', 0.8);
         fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 38, 17, 10), INK, 0.8);   // shoe, tucked onto the end of the shin
       }
       ctx.restore();
@@ -209,7 +211,7 @@ Skits.powernap = (() => {
       const SIZE = { rest: 0.06, mbp: 0, fv: 0.1, teeth: 0.14, ee: 0.22, lth: 0.3, oo: 0.26, half: 0.38, oh: 0.48, open: 0.62, wide: 0.7 };
       const said = talk(t, ...SAID.where);
       const mouthOpen = said ? SIZE[said.viz.kind] ?? 0.3 : 0.05;
-      const droopy = { noEyes: true, halfOpen: open, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };
+      const droopy = { noEyes: true, halfOpen: open, slackKind: said?.viz.kind, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };
       const groggy = t > 7.0 ? lerp(0, 0.3, easeInOut(seg(t, 7.0, 8.0))) : 0;                // head lolls right over to one side, and holds
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
         ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'),            // arms spread wide, hands planted on the cushion

@@ -865,14 +865,16 @@ const Cameos = (() => {
   const scragglyMoustache = (ctx, fx, rage, p = {}) => {
     if (p.halfOpen !== undefined) for (const sd of [-1, 1]) {   // tired eyes: a heavy lid with only the lower part of the eye under it, pupil cut in half by the lid
       const ex = fx + sd * 42, ey = -26, rx = 30, ry = 38, op = p.halfOpen;
-      if (op <= 0.02) { stroke(ctx, [[ex - 28, ey + 2], [ex, ey + 12], [ex + 28, ey + 2]], { w: 9, taper0: 0.2, taper1: 0.2 }); continue; }   // shut: a sagging arc
+      if (op <= 0.02) { stroke(ctx, [[ex - sd * 28, ey + 8], [ex, ey + 14], [ex + sd * 28, ey + 14]], { w: 9, taper0: 0.2, taper1: 0.2 }); continue; }   // shut: a sagging line, lower at the outer corner
       const ly = ey + ry - 2 * ry * op;
-      ctx.save(); ctx.beginPath(); ctx.rect(ex - rx - 20, ly, 2 * rx + 40, 2 * ry + 20); ctx.clip();
-      blob(ctx, ex, ey, rx, ry, { fill: W, w: 8, n: 12, jit: 0.4 });                    // the part of the eye below the lid, at full line weight
-      blob(ctx, ex, ly, 12, 12, { fill: INK, w: 0, n: 10 });                             // pupil centred on the lid line: half of it shows
-      ctx.restore();
       const half = Math.sqrt(Math.max(0, 1 - ((ly - ey) / ry) ** 2)) * rx;           // the eye's width at the lid line
-      stroke(ctx, [[ex - half - 3, ly + 2], [ex, ly - 3], [ex + half + 3, ly + 2]], { w: 10, taper0: 0.15, taper1: 0.15 });   // the heavy lid
+      if (op >= 0.12) {   // enough opening to show white: the lower part of the eye (outline thinning as it narrows) and a half pupil
+        ctx.save(); ctx.beginPath(); ctx.rect(ex - rx - 20, ly, 2 * rx + 40, 2 * ry + 20); ctx.clip();
+        blob(ctx, ex, ey, rx, ry, { fill: W, w: Math.min(8, 3 + 20 * op), n: 12, jit: 0.4 });
+        blob(ctx, ex, ly, 12 * Math.min(1, op * 3), 12 * Math.min(1, op * 3), { fill: INK, w: 0, n: 10 });   // pupil centred on the lid line: half of it shows
+        ctx.restore();
+      }
+      stroke(ctx, [[ex - sd * (half + 3), ly - 2], [ex, ly - 2], [ex + sd * (half + 3), ly + 6]], { w: 10, taper0: 0.15, taper1: 0.15 });   // the heavy lid, drooping at the outer corner
     }
     if (p.sleepy) for (const sd of [-1, 1]) {   // fast asleep: heavy closed lids drooping at the outer ends, lashes, dark shading under them
       const ex = fx + sd * 42, lid = [[ex - sd * 28, -10], [ex + sd * 2, 0], [ex + sd * 30, -6]];   // closed lid: a gentle downward curve, near level
@@ -885,8 +887,11 @@ const Cameos = (() => {
     }
     if (p.slackMouth !== undefined) {   // a slack, lopsided mouth hanging open (wider than tall, one corner lower), lip-lined so it reads on the dark beard
       const op = p.slackMouth, cx = fx + 4, cy = 62, w = 48, h = 10 + 44 * op;
-      if (op < 0.08) stroke(ctx, [[cx - w * 0.7, cy], [cx - w * 0.2, cy + 4], [cx + w * 0.3, cy - 1], [cx + w * 0.8, cy + 8]], { w: 7, color: W }),
-        stroke(ctx, [[cx - w * 0.7, cy], [cx - w * 0.2, cy + 4], [cx + w * 0.3, cy - 1], [cx + w * 0.8, cy + 8]], { w: 4 });   // nearly closed: a wavy line
+      if (op <= 0.01) stroke(ctx, [[cx - w * 0.6, cy + 2], [cx, cy + 4], [cx + w * 0.6, cy + 4]], { w: 6 });   // lips pressed shut (m, b, p): one tight line
+      else if (p.slackKind === 'oo') {   // rounded pucker (w, oo)
+        const o = Brush.ellipsePts(cx + 6, cy + 10, 16, 14, 10); fill(ctx, o, '#1c1c1c', 0.3); outline(ctx, o, { w: 6 });
+      } else if (op < 0.08) stroke(ctx, [[cx - w * 0.7, cy], [cx - w * 0.2, cy + 4], [cx + w * 0.3, cy - 1], [cx + w * 0.8, cy + 8]], { w: 7, color: W }),
+        stroke(ctx, [[cx - w * 0.7, cy], [cx - w * 0.2, cy + 4], [cx + w * 0.3, cy - 1], [cx + w * 0.8, cy + 8]], { w: 4 });   // slack, nearly closed: a wavy line
       else {
         const m = [[cx - w, cy - 2], [cx - w * 0.3, cy - 6], [cx + w * 0.5, cy - 2], [cx + w * 1.05, cy + 10], [cx + w * 0.7, cy + h * 0.85 + 8],
                    [cx, cy + h], [cx - w * 0.7, cy + h * 0.6]];
