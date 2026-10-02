@@ -51,7 +51,7 @@ const Cameos = (() => {
   }
 
   // ---------- head ----------
-  // o: skin back hair beard browW front(ctx, fx) hat eyeLop
+  // o: skin back hair beard browW front(ctx, fx) hat eyeLop mouthDy (moves the mouth down, e.g. under a moustache)
   function head(o) {
     return (ctx, p) => {
       const fx = p.face ?? 12;
@@ -79,8 +79,9 @@ const Cameos = (() => {
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
       } else brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
-      if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
-      else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
+      const mdy = (o.mouthDy ?? 0) * (1 - open);   // eases off as a yell opens, so a big mouth stays inside the chin
+      if (rage) mouth(ctx, fx + 4, 34 + mdy + jaw * 0.2, p, 0.95);   // fills the lower half of the face
+      else mouth(ctx, fx + 4, 62 + mdy - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
       o.front?.(ctx, fx, rage, p);
       o.hat?.(ctx);
       if (p.sweat) { sweat(ctx, -126, -30); sweat(ctx, 150, -60, 0.8); }
@@ -1314,23 +1315,30 @@ const Cameos = (() => {
   // moustache corners, the moustache on the upper lip, a rounded full chin.
   // Ink only at the edges (short strokes along the cheek line and the bottom),
   // a flat fill inside. It stretches with the jaw; the mouth cuts into it.
-  const FULLB = '#575757';
-  // on a shocked gape the eyes are huge, so the moustache and lip sit a little lower
-  const fullDrop = p => p?.mouth === 'gape' ? 20 * (p.open ?? 0) / RY : 0;
+  const FULLB = '#575757', STACHE = '#3d3d3d';
+  // mouths the moustache goes under rather than over: his wide grin should show whole
+  const STACHE_UNDER = new Set(['grinwide']);
+  const drawStache = (ctx, P, { stacheTop, lip }) => {
+    fill(ctx, P([...stacheTop, ...lip]), STACHE, 1);   // set apart from the beard by tone; the mouth itself is the lip line
+    hairEdge(ctx, P(stacheTop.slice(1, -1)), 780, { len: 11 });
+  };
+  // on a shocked gape the eyes are huge, so the moustache sits a little lower
+  const FULL_MOUTH_DY = 14;   // his mouth sits a little lower, under the moustache, leaving bare cheek under the eyes
+  const fullDrop = () => 0.12;
   const fullParts = d => {
     const outer = [];
-    for (let i = 0; i <= 24; i++) {   // jaw edge, from the top of one sideburn to the other, round and a little fuller at the chin
-      const a = Math.PI * (-0.07 + 1.14 * i / 24), dn = Math.max(0, Math.sin(a));
-      outer.push([Math.cos(a) * 0.99, Math.sin(a) * 0.99 + 0.2 * dn * dn * dn]);
+    for (let i = 0; i <= 24; i++) {   // jaw edge on the head outline, from the top of one sideburn to the other
+      const a = Math.PI * (-0.07 + 1.14 * i / 24);
+      outer.push([Math.cos(a) * 0.99, Math.sin(a) * 0.99]);
     }
-    // cheek lines: down the sideburn in front of the ear, then a clean slope to the moustache corner
-    const cheekL = [[-0.86, -0.18], [-0.84, 0.02], [-0.82, 0.26], [-0.7, 0.38], [-0.56, 0.43 + d], [-0.46, 0.46 + d]];
-    const stache = [[-0.44, 0.4], [-0.3, 0.32], [-0.08, 0.28], [0.11, 0.31], [0.3, 0.28], [0.52, 0.32], [0.64, 0.4]].map(([x, y]) => [x, y + d]);
-    const cheekR = [[0.68, 0.46 + d], [0.78, 0.43 + d], [0.88, 0.36], [0.88, 0.02], [0.88, -0.18]];
-    // the upper lip line, and the lower lip showing under it (the mouth draws over both)
-    const lipTop = [[-0.22, 0.5], [-0.1, 0.45], [0.11, 0.43], [0.32, 0.45], [0.46, 0.5]].map(([x, y]) => [x, y + d]);   // rounded corners
-    const lip = [...lipTop, ...[[0.3, 0.53], [0.11, 0.55], [-0.08, 0.53]].map(([x, y]) => [x, y + d])];
-    return { outer, cheekL, stache, cheekR, lipTop, lip };
+    // cheek lines: down the sideburn in front of the ear, then low across the cheek
+    // to the moustache corner, leaving bare cheek under the eyes
+    const cheekL = [[-0.86, -0.18], [-0.86, 0.12], [-0.84, 0.4], [-0.74, 0.54], [-0.58, 0.53 + d], [-0.5, 0.54 + d]];
+    const cheekR = [[0.72, 0.54 + d], [0.8, 0.53 + d], [0.92, 0.52], [0.9, 0.12], [0.88, -0.18]];
+    // the moustache band: hair-edged top, arched lip edge, ends tucked into the beard at the corners
+    const stacheTop = [[-0.5, 0.52], [-0.4, 0.36], [-0.22, 0.29], [-0.04, 0.27], [0.11, 0.3], [0.26, 0.27], [0.44, 0.29], [0.62, 0.36], [0.72, 0.52]].map(([x, y]) => [x, y + d]);
+    const lip = [[0.62, 0.48], [0.46, 0.44], [0.28, 0.41], [0.11, 0.4], [-0.06, 0.41], [-0.24, 0.44], [-0.4, 0.48]].map(([x, y]) => [x, y + d]);
+    return { outer, cheekL, cheekR, stacheTop, lip };
   };
   // the lower the point, the further it drops with the jaw
   const fullStretch = jaw => pts => hu(pts).map(([x, y]) => [x, y + jaw * Math.min(1, Math.max(0, (y / RY - 0.4) / 0.6))]);
@@ -1349,44 +1357,82 @@ const Cameos = (() => {
   };
   const beardFull2 = (ctx, jaw = 0, p) => {
     ctx.translate(0, -jaw);   // stretch with the jaw instead of sliding down with it
-    const P = fullStretch(jaw), { outer, cheekL, stache, cheekR, lip } = fullParts(fullDrop(p));
-    fill(ctx, P([...outer, ...cheekL, ...stache, ...cheekR]), FULLB, 1);
-    const L = P(lip);
-    fill(ctx, L, SQ_SKIN, 0.6);
-    outline(ctx, L, { w: 4, jit: 0.4 });
-    const O = P(outer);
-    stroke(ctx, O, { w: 8, taper0: 0.3, taper1: 0.3 });   // the jaw edge
+    const P = fullStretch(jaw), { outer, cheekL, cheekR, stacheTop } = fullParts(fullDrop(p));
+    fill(ctx, P([...outer, ...cheekL, ...stacheTop.slice(1, -1), ...cheekR]), FULLB, 1);
+    if (STACHE_UNDER.has(p?.mouth)) drawStache(ctx, P, fullParts(fullDrop(p)));   // under a wide grin, so the whole grin shows
+    stroke(ctx, P(outer), { w: 8, taper0: 0.3, taper1: 0.3 });   // the jaw edge
     hairEdge(ctx, P(cheekL), 700);
     hairEdge(ctx, P([...cheekR].reverse()), 740);
     hairEdge(ctx, P(outer.slice(4, 21)), 820, { len: 13, out: 6 });   // across the jaw edge, all along the bottom
   };
-  // The moustache again on top of the mouth, so an open mouth opens downward from
-  // under it instead of eating it. Same fill, so it merges with the beard; ink on
-  // the lip edge and hair strokes along the top. Rage's huge mouth gets none.
+  // The moustache, on top of the mouth: a darker band over the upper lip whose
+  // ends join the beard at the mouth corners, so mouths open beneath it.
   const stacheFull2 = (ctx, fx, rage, p) => {
-    if (rage) return;
+    if (p?.sadTear) { sadLids(ctx, fx, p.lid ?? 0); tearStreak(ctx, fx); }
+    if (rage || STACHE_UNDER.has(p?.mouth)) return;
     const jaw = p?.mouth === 'yell' ? 46 * (p.open ?? 0) : 0, P = fullStretch(jaw);
-    const { stache, lipTop } = fullParts(fullDrop(p));
+    const { stacheTop, lip } = fullParts(fullDrop(p));
     if (p?.mouth === 'gape') {   // the gape starts high; hide what rises above the moustache (only inside the mouth, so the eyes are untouched)
-      const o = p.open ?? 0, sc = p.mouthScale ?? 1, w2 = (22 + 14 * o) * sc, h = (26 + 44 * o) * sc, cx = fx + 4, cy = 62 + h * 0.18;
+      const o = p.open ?? 0, sc = p.mouthScale ?? 1, w2 = (22 + 14 * o) * sc, h = (26 + 44 * o) * sc, cx = fx + 4, cy = 62 + FULL_MOUTH_DY + h * 0.18;
       ctx.save();
       ctx.beginPath(); ctx.ellipse(cx, cy, w2 + 6, h * 0.52 + 6, 0, 0, 7); ctx.clip();
-      const top = P(stache);
+      const top = P(stacheTop);
       fill(ctx, [[top[0][0], -RY], [top[top.length - 1][0], -RY], ...[...top].reverse()], SQ_SKIN, 0);
       ctx.restore();
     }
-    const sh = [[-0.5, 0.46 + fullDrop(p)], ...stache, [0.72, 0.46 + fullDrop(p)], ...[...lipTop].reverse()];
-    fill(ctx, P(sh), FULLB, 1);
-    stroke(ctx, P(lipTop), { w: 5, taper0: 0.3, taper1: 0.3 });
-    hairEdge(ctx, P(stache), 780, { len: 11 });
+    drawStache(ctx, P, { stacheTop, lip });
+    if (p?.clenchTeeth) clenchedTeeth(ctx, fx + 4, 62 + FULL_MOUTH_DY + 6);   // in front, so both rows show under the moustache
+  };
+  // one tear: a thin streak from the outer corner of the screen-left eye, ending in a drop on the bare cheek
+  const tearStreak = (ctx, fx) => {
+    const x = fx - 40 - 30;   // the eye's outer edge (eyes sit 40 either side of the face line, 30 wide)
+    stroke(ctx, [[x + 4, 22], [x - 2, 40], [x - 4, 54]], { w: 7, color: '#6a6a6a', taper0: 0.2, taper1: 0.2 });
+    const d = [[x - 4, 50], [x + 5, 64], [x - 4, 73], [x - 13, 64]];
+    fill(ctx, d, W, 0.3); outline(ctx, d, { w: 4 });
+    stroke(ctx, [[x - 8, 62], [x - 6, 58]], { w: 3, color: '#9a9a9a' });   // a glint, so it reads as water
+  };
+  // drooping upper lids in his skin tone (the shared lid fill is white, which shows on grey skin)
+  const sadLids = (ctx, fx, lid) => {
+    const y = -6, rx = 30, ry = 40, ly = y - ry + lid * ry * 1.2;
+    for (const side of [-1, 1]) {
+      const ex = fx + side * 40;
+      // skin over the whole top of the eye, outline included, so the lid line becomes the eye's top edge
+      ctx.save(); ctx.beginPath(); ctx.ellipse(ex, y, rx + 6, ry + 6, 0, 0, 7); ctx.clip();
+      ctx.fillStyle = SQ_SKIN; ctx.fillRect(ex - rx - 8, y - ry - 8, rx * 2 + 16, ly - (y - ry) + 8);
+      ctx.restore();
+      const hw = rx * Math.sqrt(Math.max(0, 1 - ((ly - y) / ry) ** 2));   // eye half-width at the lid
+      stroke(ctx, [[ex - hw - 2, ly + 3], [ex, ly - 2], [ex + hw + 2, ly + 3]], { w: 8, taper0: 0.05, taper1: 0.05 });
+    }
+  };
+  // angry: two rows of squared teeth clenched together, the same flat-tooth style as his laugh
+  const clenchedTeeth = (ctx, x, y) => {
+    const w2 = 56, h = 18;
+    const box = [[x - w2, y - h + 4], [x - w2 * 0.5, y - h], [x + w2 * 0.5, y - h], [x + w2, y - h + 4],
+                 [x + w2, y + h - 4], [x + w2 * 0.5, y + h], [x - w2 * 0.5, y + h], [x - w2, y + h - 4]];
+    fill(ctx, box, W, 0.3);
+    for (let i = 1; i < 6; i++) {
+      const tx = x - w2 + i * w2 / 3;
+      stroke(ctx, [[tx, y - h + 1], [tx, y - 1]], { w: 3.5, taper0: 0, taper1: 0, minW: 1 });
+      stroke(ctx, [[tx + w2 / 6, y + 1], [tx + w2 / 6, y + h - 1]], { w: 3.5, taper0: 0, taper1: 0, minW: 1 });
+    }
+    stroke(ctx, [[x - w2, y], [x + w2, y]], { w: 4, taper0: 0, taper1: 0, minW: 1 });   // where the rows meet
+    outline(ctx, box, { w: 7 });
+  };
+  // Squeex's own takes on two of the shared emotions, so the face stays his:
+  // the rage yell becomes big squared teeth clenched inside the beard (the head
+  // keeps its shape), and sad gets plain drooping eyes, one tear and a frown.
+  const sqFace = p => {
+    if (p.mouth === 'rage') return { ...p, mouth: 'none', open: 0, clenchTeeth: true };
+    if (p.tears) return { ...p, tears: false, lid: 0.45, mouth: 'frown', sadTear: true };
+    return p;
   };
 
   // C, with any beard and moustache: everything else is the chosen draft C
-  const sqC = (beard, stache) => build({ skin: SQ_SKIN, shirt: '#3a3a3a', sleeve: '#3a3a3a', headScale: [1.04, 0.98],
+  const sqC = (beard, stache, headOpts = {}) => build({ skin: SQ_SKIN, shirt: '#3a3a3a', sleeve: '#3a3a3a', headScale: [1.04, 0.98],
     body: { legColor: '#8a8a8a',   // khakis, a mid grey so they don't read as bare legs, waist to ankle
       bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
         fill(ctx, b, '#8a8a8a', 1.2); outline(ctx, b, { w: 9 }); } },
-    head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_UP), beard, front: stache, browW: 9 }),
+    head: head({ skin: SQ_SKIN, back: sqEars, hair: sqHair(SQ_UP), beard, front: stache, browW: 9, ...headOpts }),
     detail: overshirt });
 
   const squeex = {
@@ -1397,7 +1443,7 @@ const Cameos = (() => {
       head: head({ skin: SQ_SKIN, hair: sqHair(SQ_TUFT), beard: sqBeard(), front: sqStache, hat: headphones, browW: 9 }),
       detail: boxrTee }),
     overshirt: sqC(sqBeard({ full: 0.12, flecks: true }), sqStache),
-    beards: { trimmed: sqC(beardTrim, stacheTrim), full: sqC(beardFull2, stacheFull2), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
+    beards: { trimmed: sqC(beardTrim, stacheTrim), full: (draw => (ctx, p) => draw(ctx, sqFace(p)))(sqC(beardFull2, stacheFull2, { mouthDy: FULL_MOUTH_DY })), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
   };
 
   return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
