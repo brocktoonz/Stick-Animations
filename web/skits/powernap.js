@@ -158,8 +158,8 @@ Skits.powernap = (() => {
             ...(said ?? (t < 0.44 ? { mouth: 'smile' } : { mouth: 'flat' })) };            // content smile before he speaks
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
       Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, legs: false,
-        ...Arms.arm(1, [lerp(40, 80, lie), lerp(-150, -140, lie)], lie > 0.5 ? 'down' : 'out'),   // top arm: hand on his knee, then lying along his side to his hip
-        ...Arms.arm(-1, [lerp(-40, 10, lie), lerp(-150, -180, lie)], 'out'),                 // bottom arm: hand on his knee, then resting on his stomach
+        ...Arms.arm(1, [lerp(40, 58, lie), lerp(-150, -150, lie)], lie > 0.5 ? 'down' : 'out'),   // top arm: hand on his knee, then lying along his side, hand on his hip
+        ...Arms.arm(-1, [lerp(-40, -60, lie), lerp(-150, -330, lie)], lie > 0.5 ? 'down' : 'out'),   // bottom arm: hand on his knee, then tucked under his head
         ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });                                 // mouth bigger while his head is on its side
       ctx.restore();
       couchFront(ctx);
@@ -169,13 +169,13 @@ Skits.powernap = (() => {
       for (const side of [-1, 1]) {
         const hip = [hx + Math.cos(ang) * side * 28 - Math.sin(ang) * 33, hy + Math.sin(ang) * side * 28 + Math.cos(ang) * 33];
         const sitK = side < 0 ? [hx - 52, SEAT + 14] : [hx + 40, SEAT + 14], sitF = side < 0 ? [hx - 78, FLOOR - 22] : [hx + 46, FLOOR - 22];   // one knee angled out
-        const lieK = side > 0 ? [hx + 115, SEAT - 125] : [hx + 130, SEAT - 66], lieF = side > 0 ? [hx + 215, SEAT - 58] : [hx + 240, SEAT - 44];   // upper leg's knee up, lower leg straight
+        const lieK = side > 0 ? [hx + 95, SEAT - 120] : [hx + 105, SEAT - 64], lieF = side > 0 ? [hx + 165, SEAT - 56] : [hx + 180, SEAT - 42];   // feet stop short of the right armrest   // upper leg's knee up, lower leg straight
         const arc = Math.sin(Math.PI * swing) * 60;                                         // lifted up and over the seat edge on the way
         const knee = [lerp(sitK[0], lieK[0], swing), lerp(sitK[1], lieK[1], swing) - arc];
         const foot = [lerp(sitF[0], lieF[0], swing), lerp(sitF[1], lieF[1], swing) - arc * 1.4];
         const leg = [hip, knee, foot];
         stroke(ctx, leg, { w: 40, taper0: 0, taper1: 0 });                                   // ink edge...
-        stroke(ctx, leg, { w: 26, taper0: 0, taper1: 0, color: side < 0 ? '#2e2e2e' : '#3a3a3a' });   // ...dark trousers inside, so the legs read apart
+        stroke(ctx, leg, { w: 26, taper0: 0, taper1: 0, color: side < 0 ? '#4a4a4a' : '#585858' });   // ...dark trousers inside, so the legs read apart
         fill(ctx, Brush.ellipsePts(foot[0] + 24 * swing, foot[1] + 6, 38, 17, 10), INK, 0.8);   // shoe
       }
       ctx.restore();
@@ -198,17 +198,16 @@ Skits.powernap = (() => {
       // them, mouth hanging open with a drip of drool, brows relaxed in their usual place
       // like the references: head lolled right over, eyes shut under heavy drooping
       // lids with lashes and dark shading, mouth hanging open, drool, sleep bubbles
-      const droopy = { noEyes: true, sleepy: true, noBrows: true, drool: lerp(0.4, 1, seg(t, 7.0, 10.4)) + 0.15 * sag };
+      const droopy = { noEyes: true, sleepy: true, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };
       const groggy = t > 7.0 ? lerp(0, 0.3, easeInOut(seg(t, 7.0, 8.0))) : 0;                // head lolls right over to one side, and holds
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
         ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'),            // arms spread wide, hands planted on the cushion
         ...droopy,
-        ...(asking ? { ...(talk(t, ...SAID.where, true) ?? { mouth: 'gape', open: 0.4 }), mouthScale: 0.95 }
-          : { mouth: 'gape', open: 0.4 + 0.05 * sag, mouthScale: 0.9 }) });                 // jaw hanging slack
+        slackMouth: asking ? (talk(t, ...SAID.where, true)?.viz.open ?? 0.4) * 0.9 + 0.05 : 0.42 + 0.06 * sag });   // the words open and close it; otherwise it hangs open                 // jaw hanging slack
       for (let i = 0; i < 3; i++) {   // sleep bubbles drifting up off him, each popping and starting again
         const ph = ((t - 7.0) / 2.2 + i / 3) % 1;
         if (t < 7.0) break;
-        const bx = 250 - 40 * i + 30 * Math.sin((t + i) * 2), by = 820 - 260 * ph, br = 18 + 26 * ph * (1 - 0.3 * i);
+        const bx = 120 - 25 * i + 20 * Math.sin((t + i) * 2), by = 760 - 240 * ph, br = 18 + 26 * ph * (1 - 0.3 * i);
         blob(ctx, bx, by, br, br, { fill: '#e6edf2', w: 6, n: 14, jit: 0.4 });
         stroke(ctx, [[bx - br * 0.5, by - br * 0.1], [bx - br * 0.3, by - br * 0.5]], { w: 5, color: W, taper0: 0.2, taper1: 0.2 });
       }

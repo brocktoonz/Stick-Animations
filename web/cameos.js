@@ -79,7 +79,8 @@ const Cameos = (() => {
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
       } else if (!p.noBrows) brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
-      if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
+      if (p.noMouth) { /* a front() hook draws the mouth */ }
+      else if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
       else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
       o.front?.(ctx, fx, rage, p);
       o.hat?.(ctx);
@@ -856,8 +857,6 @@ const Cameos = (() => {
     const shape = [...out, ...top];
     fill(ctx, shape, '#454545', 1.6);   // darker than his hair, so it reads as its own beard
     outline(ctx, shape, { w: 9 });
-    const op = p.mouth === 'talk' ? (p.viz?.open ?? 0) : p.mouth === 'gape' || p.mouth === 'o' ? (p.open ?? 0) : 0, ms = p.mouthScale ?? 1;
-    if (op > 0.05) blob(ctx, 18, 70, (22 + 44 * op) * ms, (16 + 34 * op) * ms, { fill: W, w: 5, n: 12, jit: 1 });   // bare lips round an open mouth, sized to it, so it reads against the dark beard
     for (let i = 0; i < 10; i++) {   // strands, all inside the beard
       const a = Math.PI * (0.18 + 0.64 * hh(i + 40)), r = 0.6 + 0.3 * hh(i + 50), x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r + RY * 0.24;
       stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 18, y + 16]], { w: 4, color: '#6e6e6e' });
@@ -866,7 +865,7 @@ const Cameos = (() => {
   const scragglyMoustache = (ctx, fx, rage, p = {}) => {
     if (p.sleepy) for (const sd of [-1, 1]) {   // fast asleep: heavy closed lids drooping at the outer ends, lashes, dark shading under them
       const ex = fx + sd * 42, lid = [[ex - sd * 28, -10], [ex + sd * 2, 0], [ex + sd * 30, -6]];   // closed lid: a gentle downward curve, near level
-      fill(ctx, [[ex - sd * 24, -4], [ex + sd * 2, 6], [ex + sd * 28, 0], [ex + sd * 24, 18], [ex, 22], [ex - sd * 20, 12]], '#a6a6a6', 0.6);   // tired shading under it
+      fill(ctx, [[ex - sd * 20, 8], [ex + sd * 2, 15], [ex + sd * 24, 10], [ex + sd * 20, 24], [ex, 28], [ex - sd * 16, 20]], '#b4b4b4', 0.6);   // tired shading, a little below the lid
       stroke(ctx, lid, { w: 10, taper0: 0.2, taper1: 0.3 });
       for (const k of [0.78, 0.95]) {           // two short lashes at the outer end
         const x = lid[0][0] + (lid[2][0] - lid[0][0]) * k, y = lid[0][1] + (lid[2][1] - lid[0][1]) * k + 4 * Math.sin(Math.PI * k);
@@ -875,11 +874,23 @@ const Cameos = (() => {
     }
     if (p.bags) for (const sd of [-1, 1])   // bags under the eyes (just woken up)
       stroke(ctx, [[fx + sd * 40 - 22, 14], [fx + sd * 40, 24], [fx + sd * 40 + 22, 14]], { w: 6, taper0: 0.3, taper1: 0.3, color: '#5a5a5a' });
-    if (p.drool) {   // a drip of drool from the corner of the slack mouth, down over the beard
-      const x = fx + 40, y0 = 74, y1 = y0 + 60 * p.drool;   // a thin wet strand that swells into a round drop
-      stroke(ctx, [[x, y0], [x + 2, (y0 + y1) / 2], [x, y1]], { w: 8, taper0: 0, taper1: 0, color: INK });
-      stroke(ctx, [[x, y0], [x + 2, (y0 + y1) / 2], [x, y1]], { w: 4, taper0: 0, taper1: 0, color: '#e2e2e2' });
-      blob(ctx, x, y1 + 8, 9, 11, { fill: '#e2e2e2', w: 3, n: 10 });
+    if (p.slackMouth !== undefined) {   // a slack, lopsided mouth hanging open (wider than tall, one corner lower), lip-lined so it reads on the dark beard
+      const op = p.slackMouth, cx = fx + 4, cy = 62, w = 48, h = 10 + 44 * op;
+      if (op < 0.08) stroke(ctx, [[cx - w * 0.7, cy], [cx - w * 0.2, cy + 4], [cx + w * 0.3, cy - 1], [cx + w * 0.8, cy + 8]], { w: 7, color: W }),
+        stroke(ctx, [[cx - w * 0.7, cy], [cx - w * 0.2, cy + 4], [cx + w * 0.3, cy - 1], [cx + w * 0.8, cy + 8]], { w: 4 });   // nearly closed: a wavy line
+      else {
+        const m = [[cx - w, cy - 2], [cx - w * 0.3, cy - 6], [cx + w * 0.5, cy - 2], [cx + w * 1.05, cy + 10], [cx + w * 0.7, cy + h * 0.85 + 8],
+                   [cx, cy + h], [cx - w * 0.7, cy + h * 0.6]];
+        fill(ctx, m, '#1c1c1c', 0.4);
+        fill(ctx, Brush.ellipsePts(cx + 4, cy + h * 0.78, w * 0.55, h * 0.22 + 3, 10), '#8a8a8a', 0.4);   // tongue
+        outline(ctx, m, { w: 6 });
+      }
+      if (p.drool) {   // a glossy drip clinging to the low corner of the mouth, slowly stretching
+        const x = cx + w * 0.95, y0 = cy + 14, y1 = y0 + 18 + 26 * p.drool;
+        const drip = [[x - 4, y0], [x + 4, y0], [x + 3, y1 - 14], [x + 11, y1 - 2], [x + 6, y1 + 9], [x - 6, y1 + 9], [x - 11, y1 - 2], [x - 3, y1 - 14]];
+        fill(ctx, drip, W, 0.3); outline(ctx, drip, { w: 4 });
+        stroke(ctx, [[x - 4, y1 - 3], [x - 2, y1 + 3]], { w: 3, color: '#c8c8c8' });   // highlight
+      }
     }
     if (rage) ctx.translate(0, -12);
     const m = [[fx - 70, 60], [fx - 58, 38], [fx - 30, 28], [fx, 34], [fx + 30, 28], [fx + 58, 38], [fx + 70, 60],
