@@ -740,7 +740,7 @@ Skits.haircut = (() => {
     panel(ctx, rrect(-20, -40, 86, 1960, 6), V.pillar, 10);
     // 3. his seat: one shape, the headrest its rounded top
     ctx.save(); ctx.translate(0, bob);
-    panel(ctx, rrect(DSEAT.x0, DSEAT.y0, DSEAT.x1, 2000, DSEAT.r), V.seat, 10);
+    panel(ctx, rrect(DSEAT.x0, DSEAT.y0, DSEAT.x1, 2300, DSEAT.r), V.seat, 10);   // runs straight off the bottom
     Brush.setWeight(w0);
     // him
     ctx.save(); ctx.translate(DRV_AT[0], DRV_AT[1]); ctx.scale(DRV_S, DRV_S); ctx.translate(0, 438);
@@ -750,7 +750,7 @@ Skits.haircut = (() => {
     // his body from the chest up, the barbershop build without the cape: the torso
     // and arms run on down out of frame
     const torso = [[-48, -324], [-96, -306], [-128, -274], [-140, -220], [-128, 140], [128, 140], [140, -220], [128, -274], [96, -306], [48, -324]];
-    fill(ctx, torso, V.hoodie, 0.4); outline(ctx, torso, { w: 10 });
+    fill(ctx, torso, V.hoodie, 0.4);
         for (const sd of [-1, 1]) stroke(ctx, [[sd * 118, -240], [sd * 112, -50], [sd * 106, 140]], { w: 8 });   // where each arm hangs beside him
     hoodieFront(ctx, -322);
     // the seat belt, one band from his left shoulder (ours) down across him
