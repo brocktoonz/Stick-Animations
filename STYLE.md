@@ -92,6 +92,11 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
 - Main character: `Hero.main`, the spiky-haired guy with mid-grey hair and a
   grey hoodie (`Cameos.spikyShades.brown`). The previous design is kept as
   `Hero.mainOld`.
+- Squeex: the approved design is draft C with the full dark beard,
+  `Cameos.squeex.beards.full` (see `?skit=squeex_beard2` and
+  `characters/squeex/beards/`). It has his own angry (squared clenched teeth)
+  and sad (skin-tone drooping lids, one tear, a frown). The other drafts and
+  beard options are kept only for reference.
 - Cameos (`web/cameos.js`) are caricatures recognisable from hair silhouette
   plus one or two signature items. Nick's ears are always hidden by his hair.
 
