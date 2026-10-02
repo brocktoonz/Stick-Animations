@@ -45,7 +45,7 @@ const Chars = (() => {
     // character design); drawn by shifting and scaling that eye about its centre
     const one = side => {
       const ex = fx + side * gap;
-      const lid = p.lid ?? 0;
+      const lid = (side < 0 ? p.lidL : p.lidR) ?? p.lid ?? 0;   // lidL/lidR: one eye heavier than the other
       if (p.blank) {   // stunned: small, perfectly round, thick rim, no pupil
         const r = rx * 0.72;
         blob(ctx, ex, y, r, r, { fill: W, w: 10 * size, n: 12, jit: 0.6 });
