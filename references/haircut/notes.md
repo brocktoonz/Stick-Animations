@@ -18,25 +18,23 @@ mirror look, now 5.0 s).
 close-up (jaw and cheekbone shading, heavy angled brow, narrowed eyes, long
 nose line, smirk; its pink blush is not used).
 
-Beats (a cutaway edit, hard cuts only):
-- 0.00–3.00 A, wide, from the mirror's point of view. Slumped in the barber
-            chair under a cape, an overgrown shaggy mop, dead-eyed. The barber
-            snips: 9 snips, hand-timed (0.42, 0.74, 1.06, 1.30, 1.66, 1.88,
-            2.30, 2.52, 2.86); clumps fall onto the cape.
+`after_ref1.png`, `after_ref2.png`: the user's references for the last shot
+(frontal phone-camera framing, a bad bowl cut, upset).
+
+Beats (four shots, hard cuts only):
+- 0.00–3.50 1, wide. The barber stands a step behind him, snipping over the top
+            (9 snips, hand-timed: 0.45, 0.78, 1.12, 1.37, 1.76, 2.04, 2.46,
+            2.71, 3.08); nothing visibly comes off. 2.25–2.85 his eyes fall
+            shut; 2.2–3.5 the camera pushes in on his face.
             Caption: "Me before getting my haircut"
-- 3.00–5.50 B, hard cut to a full-frame close-up on a flat backdrop: the same
-            head and ears drawn seriously (cel shading, jaw corners, heavy
-            furrowed brow, narrowed eyes, long nose line, smirk), a big auburn
-            swoop. Almost still: 3% scale-in, sparkles at 3.45, 3.75, 4.05, the
-            right brow lifts at 4.25–4.45.
+- 3.50–5.00 2, extreme close-up from the eyes down (the haircut stays out of
+            frame). His eyes open: half at 3.85–4.2, a stall, then open at
+            4.45–4.7. No caption.
+- 5.00–7.50 3, his reflection: the glow-up face in the mirror (frame edges, a
+            sheen), auburn swept hair; sparkles at 5.25, 5.55, 5.85, the brow
+            lifts at 5.75–5.95, a 3% scale-in.
             Caption: "Me that one random moment during my haircut"
-- 5.50–6.50 C, wide (A's framing). The last snip closes on the hair's upper
-            right (5.78): the mop is now the bowl, the last clumps drop onto the
-            cape. His hand goes round to the cape's shoulder, the scissors passing
-            to his other hand (5.90–6.12), and he slides the cape off to the right
-            (6.16–6.33, 5 frames).
-- 6.50–9.50 D, the close-up again, same framing as B: his plain face, bowl
-            cut, deflated (`Emotions.deflated`). A few-pixel droop as it lands,
-            one slow blink at 7.95–8.45. Caption: "Me after getting my haircut"
-- 9.50–11.0 E, wide. The barber holds up the hand mirror, pleased. He stares;
-            his eyes drift from the mirror to us (10.05–10.45).
+- 7.50–11.0 4, the truth: driving home, seen from the dashboard. The bowl cut,
+            eyes welling (`Emotions.sad`), looking straight ahead, hands on the
+            wheel, the car jolting a little, street lights going past in the
+            back window, one blink at 9.8. Caption: "Me after getting my haircut"
