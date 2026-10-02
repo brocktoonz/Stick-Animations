@@ -65,13 +65,6 @@ Skits.haircut = (() => {
   };
   const panel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); outline(ctx, pts, { w }); };
   const zoom = (ctx, cx, cy, z) => { ctx.translate(cx, cy); ctx.scale(z, z); ctx.translate(-cx, -cy); };
-  const ears = ctx => {
-    for (const side of [-1, 1]) {
-      const e = Brush.ellipsePts(side * RX * 1.0, 6, 26, 36, 10);
-      fill(ctx, e, W, 0.4); outline(ctx, e, { w: 8 });
-      stroke(ctx, [[side * RX * 1.0, -12], [side * RX * 1.06, 6], [side * RX * 1.0, 22]], { w: 5 });
-    }
-  };
 
   // ---------- hair: one silhouette from a cap plus pointed locks ----------
   // A lock is a tapered clump from a root to a pointed tip (head units), bowed
@@ -184,7 +177,7 @@ Skits.haircut = (() => {
   const hoodieFront = (ctx, n) => stroke(ctx, [[-50, n + 2], [-30, n + 30], [0, n + 38], [30, n + 30], [50, n + 2]], { w: 9 });
   // Hero.main's build (Cameos.spikyShades.brown) with a swappable haircut
   const guyRig = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', detail: hoodieFront,
-    head: head({ back: ears, hair: ctx => hairNow(ctx) }) });
+    head: head({ hair: ctx => hairNow(ctx) }) });
   const guy = (ctx, p) => guyRig(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
 
   // ---------- the barber: tall and lanky, bald with a grey horseshoe, handlebar moustache ----------
@@ -214,7 +207,7 @@ Skits.haircut = (() => {
   };
   const BARBER_BODY = { hipY: -300, neckY: -560 };
   const barberRig = build({ shirt: W, sleeve: W, detail: smock, body: BARBER_BODY, headScale: [0.9, 0.9],
-    head: head({ back: ears, hair: horseshoe, front: handlebar, mouthDy: 22, browW: 11 }) });
+    head: head({ hair: horseshoe, front: handlebar, mouthDy: 22, browW: 11 }) });
   // Arms.* targets are for the standard build; build() shifts them by the taller neck
   const BDY = BARBER_BODY.neckY + 320, B_ARM = 150;   // long arms to go with the long legs
   const barberArm = (side, hand, elbow, front) => Arms.arm(side, [hand[0], hand[1] - BDY], elbow, front, B_ARM);
@@ -259,7 +252,6 @@ Skits.haircut = (() => {
     fill(ctx, Brush.ellipsePts(0, -150, 52, 70, 16), '#eeeeee', 0.3);
     ctx.save(); ctx.beginPath(); ctx.ellipse(0, -150, 50, 68, 0, 0, 7); ctx.clip();
     panel(ctx, box(-12, -110, 12, -70, 2), W, 5);                              // neck
-    for (const s of [-1, 1]) blob(ctx, s * 40, -132, 9, 13, { fill: W, w: 4, n: 8 });   // ears
     blob(ctx, 0, -134, 40, 38, { fill: W, w: 5, n: 12 });
     const bx = [[-41, -132], [-43, -170], [-32, -184], [32, -184], [43, -170], [41, -132], [0, -124]];   // hair all the way round the back
     fill(ctx, bx, GREY, 0.2); outline(ctx, bx, { w: 5 });
@@ -563,7 +555,6 @@ Skits.haircut = (() => {
   };
   function glowHead(ctx, p) {
     const raise = p.raise ?? 0;   // the eyebrow micro-raise, 0..1
-    ears(ctx);
     blob(ctx, 0, 0, RX, RY, { fill: W, w: 11, n: 18, jit: 1.8 });
     // cel shading, clipped to the face
     ctx.save(); ctx.beginPath(); ctx.ellipse(0, 0, RX - 5, RY - 5, 0, 0, 7); ctx.clip();
@@ -672,7 +663,7 @@ Skits.haircut = (() => {
     }
   };
   const eyeRig = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', detail: hoodieFront,
-    head: head({ back: ears, hair: ctx => hairNow(ctx), front: eyesClean }) });
+    head: head({ hair: ctx => hairNow(ctx), front: eyesClean }) });
   function shot2(ctx, t) {
     const r = t - CUT_2;
     const lid = r < 0.35 ? 1 : r < 0.7 ? lerp(1, 0.55, easeInOut(seg(r, 0.35, 0.7))) : r < 0.95 ? 0.55 : lerp(0.55, 0.12, easeOutBack(seg(r, 0.95, 1.2)));

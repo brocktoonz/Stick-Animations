@@ -63,8 +63,9 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
   bottom edge follows the head outline as a rounded curve with small, regular
   scallops, never spikes. The edge round the mouth stays clean: nothing
   intrudes into the mouth opening.
-- Moustache: a band over the upper lip, set apart from the beard by a slightly
-  darker tone, joining the beard at the mouth corners. Mouths open beneath it.
+- Moustache: a band over the upper lip in the same grey as the beard, so the
+  two read as one beard; its shape shows in the beard's top edge, and it
+  joins the beard at the mouth corners. Mouths open beneath it.
 - Sideburns start narrow at the temples, under the hair, and widen gradually
   toward the jaw. A sideburn the same thickness all the way down frames the
   face like a hood.
@@ -86,6 +87,10 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
 
 ## Cast
 
+- **No ears, on anyone.** Every character's head is one clean outline with no
+  ears, whether the hair would cover them or not (user decision). Don't add
+  ears to new characters, including one-off characters inside a skit. The
+  `withEars` pose flag exists only for the `?skit=no_ears` comparison.
 - Faces come from the shared emotion set (`web/emotions.js`, `...Emotions.angry`).
   Don't hand-tune a face in a skit when an emotion covers it; add or adjust the
   emotion instead and re-render `characters/` so the references stay true.
@@ -98,7 +103,7 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
   and sad (skin-tone drooping lids, one tear, a frown). The other drafts and
   beard options are kept only for reference.
 - Cameos (`web/cameos.js`) are caricatures recognisable from hair silhouette
-  plus one or two signature items. Nick's ears are always hidden by his hair.
+  plus one or two signature items. 
 
 ## Camera and staging
 
