@@ -16,10 +16,10 @@ mirror look, now 5.0 s).
 
 Beats:
 - 0.00–3.00 Wide, from the mirror's point of view. Slumped in the barber chair
-            under a cape, hair a messy scribble cloud of puffs, dead-eyed
+            under a cape, hair an overgrown shaggy mop (puffs on top, ragged locks over the brows and ears), dead-eyed
             (`Emotions.unimpressed`), eyes down. The barber snips: 9 snips,
             hand-timed (0.42, 0.74, 1.06, 1.30, 1.66, 1.88, 2.30, 2.52, 2.86),
-            each takes a puff off his right side and top; clumps fall onto the cape.
+            each takes a clump off screen right and the top; clumps fall onto the cape.
             Caption: "Me before getting my haircut"
 - 3.00–4.10 Half done and tousled. Caption: "Me that one random moment during
             my haircut". He glances up into the mirror (3.25–3.5).

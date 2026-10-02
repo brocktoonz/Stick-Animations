@@ -104,36 +104,41 @@ Skits.haircut = (() => {
   // BEFORE: an overgrown, shaggy mop. Locks hang over the ears and down to just
   // above the brows. The snips take them off one at a time, screen right and the
   // top first (where the barber stands), leaving the short choppy cap.
-  const MOP_CAP = choppyCap(1.1, 0.05, [[0.9, -0.42], [0.62, -0.66], [0, -0.74], [-0.62, -0.66], [-0.9, -0.42]]);
+  const MOP_CAP = choppyCap(1.08, 0.1, [[0.9, -0.42], [0.62, -0.66], [0, -0.74], [-0.62, -0.66], [-0.9, -0.42]]);
+  const puff = (cx, cy, rx, ry, rot = 0) => Brush.ellipsePts(cx, cy, rx, ry, 18, rot);
+  // each piece: its shape(s) (head units) and the point where it gets cut
+  const LOCK = (r, t, w, b) => ({ shapes: [lock(r, t, w, b)], at: [lerp(r[0], t[0], 0.66), lerp(r[1], t[1], 0.66)] });
+  // a ragged clump: two or three locks of different lengths from one root area
+  const CLUMP = (r, tips, w) => ({ shapes: tips.map(([tx, ty], k) => lock([r[0] + k * 0.06 * Math.sign(tx - r[0] || 1), r[1]], [tx, ty], w, (k % 2 ? 0.05 : -0.05))),
+                                   at: [lerp(r[0], tips[0][0], 0.6), lerp(r[1], tips[0][1], 0.6)] });
+  const PUFF = (cx, cy, rx, ry, rot, stray) => ({ shapes: [puff(cx, cy, rx, ry, rot), ...(stray ? [lock(...stray)] : [])], at: [cx + rx * 0.3, cy - ry * 0.6] });
   const LOCKS = [
-    // ordered as they get cut: [root, tip, width, bend]
-    [[0.98, -0.5], [1.24, 0.34], 0.42, -0.08],    // right side, over the ear
-    [[0.96, -0.9], [1.4, -0.22], 0.44, -0.1],     // right side, upper
-    [[0.62, -1.06], [1.08, -1.5], 0.46, 0.06],    // top right, sticking out
-    [[0.56, -0.86], [0.66, -0.58], 0.38, 0.04],   // fringe, right
-    [[0.24, -1.16], [0.36, -1.66], 0.44, -0.08],  // top
-    [[0.24, -0.88], [0.32, -0.56], 0.36, -0.04],  // fringe
-    [[-0.18, -1.18], [-0.3, -1.64], 0.44, 0.08],  // top
-    [[-0.08, -0.88], [-0.02, -0.56], 0.36, 0.05], // fringe, middle
-    [[-0.56, -1.06], [-0.98, -1.48], 0.46, -0.06],// top left
+    // in the order they get cut: screen right and the top first
+    CLUMP([0.96, -0.6], [[1.22, 0.46], [1.12, 0.2], [1.3, 0.0]], 0.3),     // right side, ragged over the ear
+    CLUMP([0.9, -0.98], [[1.4, -0.06], [1.42, -0.42]], 0.34),             // right side, upper
+    PUFF(0.52, -1.08, 0.5, 0.36, 0.3, [[0.6, -1.3], [0.92, -1.6], 0.14, 0.06]),   // shaggy volume on top, a stray strand
+    CLUMP([0.62, -0.92], [[0.76, -0.5], [0.56, -0.6]], 0.24),             // fringe hanging to the brows, uneven
+    PUFF(0.02, -1.22, 0.56, 0.36, 0, [[-0.06, -1.5], [0.06, -1.76], 0.14, -0.06]),
+    CLUMP([0.28, -0.96], [[0.38, -0.52], [0.2, -0.62]], 0.24),
+    CLUMP([-0.04, -0.96], [[0.04, -0.56], [-0.12, -0.5]], 0.24),
+    CLUMP([-0.36, -0.94], [[-0.44, -0.52], [-0.28, -0.62]], 0.24),
+    PUFF(-0.5, -1.08, 0.5, 0.36, -0.3, [[-0.62, -1.3], [-0.96, -1.56], 0.14, -0.06]),
     // left untouched until the hard cut
-    [[-0.4, -0.86], [-0.42, -0.56], 0.38, -0.04],
-    [[-0.72, -0.8], [-0.86, -0.5], 0.34, 0.04],
-    [[-0.96, -0.9], [-1.4, -0.24], 0.44, 0.1],
-    [[-0.98, -0.5], [-1.22, 0.34], 0.42, 0.08],
+    CLUMP([-0.68, -0.9], [[-0.82, -0.52], [-0.64, -0.6]], 0.24),
+    CLUMP([-0.9, -0.98], [[-1.4, -0.06], [-1.42, -0.42]], 0.34),
+    CLUMP([-0.96, -0.6], [[-1.22, 0.46], [-1.12, 0.2], [-1.3, 0.0]], 0.3),
   ];
-  const MOP_LINES = [[[-0.62, -1.16], [-0.98, -0.8], [-1.12, -0.2]], [[-0.1, -1.24], [-0.22, -1.0], [-0.24, -0.72]]];
-  let cutCount = 0;   // set per frame: how many locks are gone
+  const MOP_LINES = [[[-0.7, -1.12], [-0.98, -0.8], [-1.14, -0.2]], [[-0.3, -1.3], [-0.06, -1.36], [0.2, -1.3]]];
+  let cutCount = 0;   // set per frame: how many pieces are gone
   const mopHair = ctx => {
-    const live = LOCKS.filter((_, i) => i >= cutCount).map(([r, t, w, b]) => lock(r, t, w, b));
-    hairShapes(ctx, [MOP_CAP, ...live], GREY, cutCount < 7 ? MOP_LINES : MOP_LINES.slice(0, 1), GREY_LINE);
+    const live = LOCKS.filter((_, i) => i >= cutCount).flatMap(l => l.shapes);
+    hairShapes(ctx, [MOP_CAP, ...live], GREY, cutCount < 5 ? MOP_LINES : MOP_LINES.slice(0, 1), GREY_LINE);
   };
 
   // MIRROR: swept up and back with real volume, more on one side, a loose
   // strand down the forehead in the silhouette, auburn.
-  const puff = (cx, cy, rx, ry, rot) => Brush.ellipsePts(cx, cy, rx, ry, 18, rot);
   const SWEPT = [
-    choppyCap(1.08, 0.0, [[0.92, -0.44], [0.62, -0.7], [0.2, -0.8], [-0.3, -0.76], [-0.7, -0.62], [-0.92, -0.42]]),
+    choppyCap(1.08, 0.0, [[0.92, -0.5], [0.62, -0.82], [0.2, -0.86], [-0.3, -0.76], [-0.7, -0.62], [-0.92, -0.42]]),   // high on the cocked-brow side
     puff(0.18, -1.2, 1.0, 0.52, -0.22),                // the volume, piled up and leaning back
     lock([-0.7, -0.9], [0.2, -1.98], 0.9, -0.34),      // the big wave up off the forehead, curling back
     lock([0.0, -1.1], [1.08, -1.8], 0.8, -0.28),
@@ -147,13 +152,14 @@ Skits.haircut = (() => {
 
   // AFTER: neat and boxy. Flat top, rounded corners, sides tapering into the
   // temples, a side part combed over.
-  const NEAT = [[-0.98, -0.3], [-1.04, -0.84], [-0.94, -1.14], [-0.64, -1.24], [0.64, -1.24], [0.94, -1.14], [1.04, -0.84], [0.98, -0.3],
-                [0.9, -0.44], [0.84, -0.62], [0.4, -0.68], [-0.4, -0.68], [-0.84, -0.62], [-0.9, -0.44]];
-  const NEAT_LINES = [[[-0.42, -0.72], [-0.44, -1.16]], [[-0.3, -1.12], [0.3, -1.08], [0.7, -0.98]], [[-0.2, -0.86], [0.4, -0.84]]];
+  const NEAT = [[-0.97, -0.04], [-1.04, -0.84], [-0.94, -1.14], [-0.64, -1.24], [0.64, -1.24], [0.94, -1.14], [1.04, -0.84], [0.97, -0.04],
+                [0.88, -0.06], [0.87, -0.48], [0.7, -0.66], [0.2, -0.7], [-0.3, -0.68], [-0.38, -0.78], [-0.46, -0.66],
+                [-0.82, -0.62], [-0.88, -0.48], [-0.89, -0.06]];   // sideburns, and a notch at the part
+  const NEAT_LINES = [[[-0.42, -0.8], [-0.44, -1.16]], ...[-0.72, -0.12, 0.36, 0.74].map(x => [[x, -0.76], [x * 0.92, -1.0], [x * 0.84, -1.14]])];
   const neatHair = ctx => hairShapes(ctx, [NEAT], GREY, NEAT_LINES, GREY_LINE);
 
   // the jawline: an angular jaw, its two edges outside the round head outline
-  const JAW = [[-0.97, 0.12], [-0.7, 0.86], [-0.24, 1.07], [0.24, 1.07], [0.7, 0.86], [0.97, 0.12]];
+  const JAW = [[-0.97, 0.1], [-0.76, 0.94], [-0.24, 1.1], [0.24, 1.1], [0.76, 0.94], [0.97, 0.1]];
   const jaw = ctx => {
     const p = hu(JAW);
     ctx.save();
@@ -162,7 +168,7 @@ Skits.haircut = (() => {
     ctx.clip('evenodd');
     ctx.fillStyle = W; ctx.fillRect(-RX * 1.2, 0, RX * 2.4, RY * 1.3);   // the jaw fills out, covering the round chin line
     ctx.restore();
-    for (const s of [-1, 1]) stroke(ctx, hu([[s * 0.97, 0.12], [s * 0.7, 0.86], [s * 0.2, 1.07]]), { w: 11, taper0: 0.1, taper1: 0.5 });
+    for (const s of [-1, 1]) stroke(ctx, hu([[s * 0.97, 0.1], [s * 0.76, 0.94], [s * 0.2, 1.1]]), { w: 13, taper0: 0.1, taper1: 0.4 });
   };
 
   let hairNow = mopHair, jawNow = false;
@@ -244,9 +250,9 @@ Skits.haircut = (() => {
     fill(ctx, Brush.ellipsePts(0, -150, 52, 70, 16), '#eeeeee', 0.3);
     ctx.save(); ctx.beginPath(); ctx.ellipse(0, -150, 50, 68, 0, 0, 7); ctx.clip();
     panel(ctx, box(-12, -110, 12, -70, 2), W, 5);                              // neck
-    for (const s of [-1, 1]) blob(ctx, s * 34, -136, 7, 10, { fill: W, w: 4, n: 8 });   // ears
-    blob(ctx, 0, -138, 34, 32, { fill: W, w: 5, n: 12 });
-    const bx = [[-36, -132], [-38, -166], [-28, -178], [28, -178], [38, -166], [36, -132], [0, -126]];   // hair all the way round the back
+    for (const s of [-1, 1]) blob(ctx, s * 40, -132, 9, 13, { fill: W, w: 4, n: 8 });   // ears
+    blob(ctx, 0, -134, 40, 38, { fill: W, w: 5, n: 12 });
+    const bx = [[-41, -132], [-43, -170], [-32, -184], [32, -184], [43, -170], [41, -132], [0, -124]];   // hair all the way round the back
     fill(ctx, bx, GREY, 0.2); outline(ctx, bx, { w: 5 });
     stroke(ctx, [[-36, -210], [-18, -228]], { w: 5, color: W });   // glint
     ctx.restore();
@@ -360,8 +366,8 @@ Skits.haircut = (() => {
     }
     return { open, n, since };
   };
-  // where a lock gets cut: two thirds of the way out to its tip (shot-1 layout)
-  const lockScreen = i => { const [[rx, ry], [tx, ty]] = LOCKS[i]; return [GX + lerp(rx, tx, 0.66) * RX * GS, GY + lerp(ry, ty, 0.66) * RY * GS]; };
+  // where a piece gets cut (shot-1 layout)
+  const lockScreen = i => { const [x, y] = LOCKS[i].at; return [GX + x * RX * GS, GY + y * RY * GS]; };
   // The scissor hand for lock i: out past the cut, on the line from his head
   // centre; when that would put it behind the barber's own head, from below
   // instead, with the arm in front.
@@ -402,7 +408,7 @@ Skits.haircut = (() => {
     chairBack(ctx);
     ctx.save(); ctx.beginPath(); ctx.rect(-600, -600, 2300, gNeck + 600 + 40); ctx.clip();
     guy(ctx, { x: GX, y: gFeet, s: GS, ...dead, lookY: lerp(0.6, -0.05, glance), lookX: lerp(-0.45, 0, glance),
-      pupil: lerp(9, 12, glance), lid: lerp(0.62, 0.46, glance), tilt: lerp(-0.05, 0.05, glance) + nod + 0.01 * Math.sin(t * 1.3) });
+      pupil: lerp(9, 12, glance), lid: lerp(0.62, 0.46, glance), tilt: lerp(0.08, 0.04, glance) + nod + 0.01 * Math.sin(t * 1.3) });
     ctx.restore();
     cape(ctx, () => falling(ctx, t, LOCKS.length));
     chairFront(ctx);
@@ -425,13 +431,13 @@ Skits.haircut = (() => {
 
   // ---------- shot 2: the mirror (4.1 - 8.0) ----------
   // The reflection is shot 1's view, flipped and closer. Push in on his face and hold.
-  const MIRROR = [80, 300, 1000, 2100];   // frame: x0, top, x1, bottom (arched top)
+  const MIRROR = [80, 170, 1000, 2100];   // frame: x0, top, x1, bottom (arched top)
   function shotMirror(ctx, t) {
     const k = easeInOut(seg(t, CUT_MIRROR, CUT_AFTER));
-    const z = lerp(1.0, 1.16, k);
+    const z = lerp(1.0, 1.12, k);
     const FX = 540, FY = 1320;   // his face stays here on screen as we push in
     ctx.save(); zoom(ctx, FX, FY, z);
-    ctx.fillStyle = '#bdbdbd'; ctx.fillRect(-400, -400, 1900, 2800);   // the wall the mirror hangs on
+    ctx.fillStyle = '#e8e8e8'; ctx.fillRect(-400, -400, 1900, 2800);   // the shop wall the mirror hangs on
     const [x0, top, x1, bot] = MIRROR, mx = (x0 + x1) / 2, R = (x1 - x0) / 2;
     const archPts = (r, dy = 0) => { const p = []; for (let i = 0; i <= 18; i++) { const a = Math.PI + Math.PI * i / 18; p.push([mx + Math.cos(a) * r, top + R + Math.sin(a) * R * 0.5 + dy]); } return p; };
     const arch = archPts(R);
@@ -454,11 +460,11 @@ Skits.haircut = (() => {
     ctx.restore();
     cape(ctx, () => falling(ctx, CUT_MIRROR, 7));
     chairFront(ctx);
-    // the barber in the glass, frozen mid-snip, mostly off the edge
-    const h = snipHand(1);   // his scissors off to the side, clear of the hair
-    barber(ctx, { x: BX, y: BFEET, s: BS, lean: LEAN, weight: -0.6, ...fussy,
-      ...barberArm(-1, bLocal(h.hand, LEAN), 'down', h.front), holdL: scissors(h.rot, 1),
-      ...barberArm(1, [96, -196], 'out', false), holdR: comb });
+    // the barber in the glass: just his arm, in from the edge, scissors frozen open
+    const mh = [GX + 330, GY - 20], from = [BX - 20, 1300];
+    Chars.tube(ctx, from, mh, 0.12, 24 * BS, W, false);
+    scissors(-1.35, 1)(ctx, mh[0], mh[1]);   // blades toward the hair
+    Chars.hand(ctx, mh[0], mh[1], null, BS);
     ctx.restore();
     // glass sheen: hard white streaks in the upper right corner of the glass
     stroke(ctx, [[x1 - 90, 900], [x1 - 20, 790]], { w: 20, color: W, taper0: 0.3, taper1: 0.3 });
