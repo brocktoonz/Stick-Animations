@@ -447,7 +447,7 @@ Skits.haircut = (() => {
     const lean = lerp(-0.03, 0.08, walk) - 0.008 * Math.sin(t * 0.9);   // behind him, he leans out a little to see over
     // the scissor arm, in his pose space: hanging at his side, lifted to his chest,
     // raised up and over the customer's head, then snipping on the crown
-    const rest = [-104, -284], atChest = [-60, -235 + BDY];   // chest, toward the customer's side
+    const rest = [-104, -284], atChest = [-118, -190 + BDY];   // held out in front of his chest, scissors in view
     let hl, rot, open1 = 0, lockAt = null;
     if (t < LIFT[0]) { hl = rest; rot = Math.PI; }
     else if (t < RISE[0]) { const lift = easeOutBack(seg(t, LIFT[0], LIFT[1])); hl = Stage.mix(rest, atChest, lift); rot = lerp(Math.PI, 1.15, lift); }
@@ -464,7 +464,11 @@ Skits.haircut = (() => {
       if (k >= 1) lockAt = spot;
     }
     const armL = Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, 160);   // a long reach over the chair
-    armL.bendL = ELBOW_SIGN * Math.abs(armL.bendL);   // elbow out toward the customer, so the arm never crosses the barber's own face
+    // the elbow: outward while the arm hangs and holds the scissors at his chest,
+    // swinging smoothly over (through a straight arm) toward the customer as the
+    // hand goes up, so the arm never crosses the barber's own face
+    const elbowK = t < RISE[0] ? 0 : easeInOut(seg(t, RISE[0], RISE[1]));
+    armL.bendL = lerp(-ELBOW_SIGN, ELBOW_SIGN, elbowK) * Math.abs(armL.bendL);
     const holdL = scissors(rot, open1);
     barberRig(ctx, { x: bx, y: B1.feet, s: B1.s, lean, step, weight: walk > 0 && walk < 1 ? 0 : 0.5, ...fussy, lookX: lerp(-0.4, -0.75, walk), lookY: lerp(0.2, 0.55, walk),
       ...armL, holdL, ...Arms.arm(1, [96, -196 - BDY], 'out', false, B_ARM), holdR: comb });
@@ -487,8 +491,8 @@ Skits.haircut = (() => {
     }
     // in front only once the hand is up over his head: below that it's the
     // barber's own arm, behind the customer (and in view beside him)
-    const handY = B1.feet + (hl[0] * Math.sin(lean) + hl[1] * Math.cos(lean)) * B1.s;
-    if (handY < GY - 1.25 * RY * GS) {
+    // in front of the customer from the start of the raise on: never behind his head
+    if (t >= RISE[0]) {
     ctx.save(); ctx.translate(bx, B1.feet); ctx.scale(B1.s, B1.s); ctx.rotate(lean);
     const sh = [-56, -526], hnd = [armL.armL[0], armL.armL[1] + BDY];
     Chars.tube(ctx, sh, hnd, armL.bendL, 24, W, false);
