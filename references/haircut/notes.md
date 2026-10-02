@@ -40,14 +40,13 @@ Beats (four shots, hard cuts only):
             sheen), auburn swept hair; sparkles at 5.25, 5.55, 5.85, the brow
             lifts at 5.75–5.95, a 3% scale-in.
             Caption: "Me that one random moment during my haircut"
-- 7.50–11.0 4, the truth: driving home, seen from the dashboard. He sits in
-            the driver's seat on the car's left (American), so right of centre on
-            screen, his door beside him; the empty passenger seat, the console and
-            gear lever, and the rear-view mirror toward the middle. A car you
-            can read: roof lining and dome light, rear-view mirror, side window
-            and door, pillars with the belt anchor, seat and headrest, wheel with
-            hub and spokes, the dash. The botched cut (a lumpy hacked top, a fringe
-            chopped at a slant with a gouge, one side cut up above the ear, a
-            curled cowlick), eyes welling
-            (`Emotions.sad`), looking straight ahead, hands on the wheel, the car
-            jolting a little, one blink at 9.8. Caption: "Me after getting my haircut"
+- 7.50–11.0 4, the truth: driving home, eye level and straight on from the
+            dashboard. He sits right of centre (an American driver). Four flat
+            shapes behind him: the side window on our left (roadside trees and
+            poles scrolling through it), the door below it with one armrest line,
+            his one-piece seat, the dark pillar on our right. The belt comes in
+            from off frame at the right and crosses his chest; a small wheel he
+            just holds, its lower half behind the dashboard; the edge of the
+            rear-view mirror at the top left. The botched cut, eyes welling
+            (`Emotions.sad`), looking into the lens; a 1 px road bob, one blink at
+            9.8 (the tears stay). Caption: "Me after getting my haircut"

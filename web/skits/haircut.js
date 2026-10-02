@@ -772,6 +772,10 @@ Skits.haircut = (() => {
     // his head over it (the rig, cut off above the neck)
     ctx.save(); ctx.beginPath(); ctx.rect(-600, -1200, 1200, 1200 - 330); ctx.ellipse(0, -438, RX + 3, RY + 3, 0, 0, 7); ctx.clip();
     guy(ctx, { x: 0, y: 0, s: 1, ...sad, lookY: 0.05, lookX: 0, lid, tilt: 0 });
+    if (lid >= 1) for (const sd of [-1, 1]) {   // the rig's shut eye drops the tears; keep them on his cheeks through the blink
+      const dx = sd * 62.5, dy = -438 - 6 + 38, drop = [[dx, dy - 10], [dx + 8, dy + 6], [dx, dy + 12], [dx - 8, dy + 6]];
+      fill(ctx, drop, '#d9d9d9', 0.3); outline(ctx, drop, { w: 4 });
+    }
     ctx.restore();
     ctx.restore();
     ctx.restore();
