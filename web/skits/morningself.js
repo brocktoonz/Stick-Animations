@@ -185,7 +185,7 @@ Skits.morningself = (() => {
   const UNDER_L = [-60, -140], UNDER_R = [60, -140];  // hands under the blanket
   const ON_STAND = [PHONE[0] - 24, PHONE[1] - 34];
   // pleased with himself but sleepy: heavy lids, a small closed smile (no teeth)
-  const smug = { mouth: 'smile', mouthScale: 0.7, lid: 0.7, lowLid: 0.22, pupil: 11, brow: 0.1, browLiftL: 8, browLiftR: 8, lookX: 0.9, lookY: 0.1, tilt: 0.14 };
+  const smug = { mouth: 'smile', mouthScale: 0.7, lid: 0.62, heavyLid: true, lowLid: 0.12, pupil: 12, brow: 0, browLiftL: 18, browLiftR: 18, lookX: 0.55, lookY: 0.2, tilt: 0.14 };
 
   const shots = [
     // night: propped on the pillow, phone up, tapping in alarms, very pleased
@@ -215,7 +215,7 @@ Skits.morningself = (() => {
       const lHand = UNDER_L;
       // the face carries over from shot 1, then lids heavy, heavier, shut
       const lid = t < 2.28 ? smug.lid : t < 2.42 ? lerp(smug.lid, 0.72, seg(t, 2.28, 2.42)) : t < 2.48 ? 0.8 : 1;
-      const face = t < 2.3 ? { ...smug } : { mouth: t < 2.6 ? 'smile' : 'flat', brow: -0.15, lookX: 0.75, lookY: 0.4, lowLid: 0.2 };
+      const face = t < 2.3 ? { ...smug } : { mouth: t < 2.6 ? 'smile' : 'flat', brow: 0, browLiftL: 18, browLiftR: 18, lookX: 0.55, lookY: 0.3, lowLid: 0.2, heavyLid: true };
       pose(hy, { ...face, lid, tilt: lerp(0.1, 0.16, sink),
         ...Arms.arm(1, rHand, 'down', false, 100), ...(holding ? { holdR: heldPhone(lerp(-0.12, -1.45, easeOut(reach))) } : {}),
         ...Arms.arm(-1, lHand, 'down') }, top,
