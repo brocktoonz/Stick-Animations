@@ -44,7 +44,7 @@ Skits.haircut = (() => {
     const [a, , str] = l;
     const rows = wrap(ctx, str);
     ctx.font = `${CAP}px "Luckiest Guy"`;
-    const pop = a > 0 ? easeOutBack(seg(t, a, a + 0.12)) : 1;
+    const pop = 1;   // captions land full size on the cut: hard cuts only, nothing eases in
     ctx.save(); ctx.translate(540, Stage.SAFE.top + 20); ctx.scale(0.85 + 0.15 * pop, 0.85 + 0.15 * pop);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     rows.forEach((r, i) => {
@@ -407,7 +407,7 @@ Skits.haircut = (() => {
   // His head centre lands at CU_AT, CU_S times the size it is in the wide shots'
   // world. A flat backdrop, nothing of the shop. Lines are thinned by the zoom so
   // they come out the same weight as in the wide shots.
-  const CU_AT = [540, 1490], CU_S = 1.7, CU_BG = '#dcdcdc';
+  const CU_AT = [540, 1530], CU_S = 1.78, CU_BG = '#dcdcdc';
   const CU_WEIGHT = WIDE / CU_S;
   const CU_CAPE = 46;   // the cape sits a little lower in the close-ups, so it doesn't cut off his chin and jaw
   const cuHeadY = (yHead, z) => CU_AT[1] + yHead * GS * CU_S * z;   // a head-space y on screen
@@ -429,15 +429,28 @@ Skits.haircut = (() => {
   // with lid creases, a long nose line, a small smirk. Hair: a big auburn swoop.
   const SHADE = '#d4d4d4';
   const P = pts => hu(pts);
-  const GLOW_HAIR = [
-    choppyCap(1.08, 0.0, [[0.92, -0.5], [0.62, -0.84], [0.2, -0.88], [-0.3, -0.8], [-0.7, -0.66], [-0.92, -0.44]]),
-    puff(0.16, -1.26, 1.0, 0.46, -0.22),               // the volume, piled up and leaning back
-    lock([-0.72, -0.94], [0.16, -1.96], 0.86, -0.34),  // the big wave up off the forehead, curling back
-    lock([-0.02, -1.12], [1.06, -1.8], 0.8, -0.28),
-    lock([0.62, -1.0], [1.42, -1.14], 0.5, -0.14),     // flicking out over the right
+  // the hair: separate pointed locks swept up and back off a side part, the
+  // right flick splitting into several tips, a few locks falling over the forehead
+  const GLOW_LOCKS = [
+    [[-0.78, -0.92], [-0.3, -1.88], 0.5, -0.2],
+    [[-0.42, -1.02], [0.24, -1.96], 0.52, -0.22],
+    [[-0.04, -1.08], [0.76, -1.86], 0.5, -0.2],
+    [[0.34, -1.04], [1.14, -1.62], 0.46, -0.16],
+    [[0.66, -0.96], [1.46, -1.26], 0.36, -0.1],        // the flick, three tips
+    [[0.74, -0.86], [1.44, -0.98], 0.3, -0.06],
+    [[0.8, -0.76], [1.28, -0.68], 0.26, 0.04],
+    [[-0.92, -0.72], [-1.12, -1.08], 0.3, 0.06],       // the short side
+    [[-0.5, -0.9], [-0.4, -0.62], 0.2, 0.06],          // falling over the forehead
+    [[-0.06, -0.92], [0.04, -0.52], 0.18, -0.06],
+    [[-0.74, -0.8], [-0.82, -0.56], 0.18, -0.04],
   ];
-  const GLOW_LINES = [[[-0.5, -0.98], [-0.32, -1.44], [-0.04, -1.74]], [[-0.04, -1.04], [0.32, -1.46], [0.66, -1.66]],
-                      [[0.46, -1.02], [0.9, -1.24], [1.18, -1.2]], [[-0.8, -0.8], [-0.72, -1.1], [-0.5, -1.3]]];
+  const GLOW_HAIR = [
+    choppyCap(1.08, 0.0, [[0.92, -0.5], [0.62, -0.84], [0.2, -0.88], [-0.3, -0.84], [-0.7, -0.72], [-0.92, -0.44]]),
+    puff(0.14, -1.24, 0.82, 0.38, -0.24),              // body under the locks
+    ...GLOW_LOCKS.map(([r, t, w, b]) => lock(r, t, w, b)),
+  ];
+  // strand lines along the sweep, from near the part out toward the tips
+  const GLOW_LINES = GLOW_LOCKS.slice(0, 5).map(([[rx, ry], [tx, ty]]) => [[lerp(rx, tx, 0.15), lerp(ry, ty, 0.15)], [lerp(rx, tx, 0.5) - 0.04, lerp(ry, ty, 0.5)], [lerp(rx, tx, 0.78), lerp(ry, ty, 0.78)]]);
   const almond = (cx, cy, w, h, tilt) => {   // an eye shape, outer corner tipped by tilt
     const pts = [];
     for (let i = 0; i < 14; i++) {
@@ -453,9 +466,15 @@ Skits.haircut = (() => {
     // cel shading, clipped to the face
     ctx.save(); ctx.beginPath(); ctx.ellipse(0, 0, RX - 5, RY - 5, 0, 0, 7); ctx.clip();
     fill(ctx, P([[1.1, -0.5], [0.74, -0.36], [0.6, -0.02], [0.68, 0.3], [0.52, 0.62], [0.22, 0.86], [0.3, 1.2], [1.2, 1.2]]), SHADE, 0.4);   // down his right side
-    fill(ctx, P([[-0.9, 0.14], [-0.66, 0.24], [-0.46, 0.42], [-0.6, 0.4], [-0.86, 0.3]]), SHADE, 0.3);   // a thin wedge under the left cheekbone
+    fill(ctx, P([[-0.72, 0.02], [-0.58, 0.12], [-0.44, 0.3], [-0.34, 0.5], [-0.4, 0.52], [-0.54, 0.32], [-0.7, 0.14]]), SHADE, 0.2);   // the cheekbone: from under the outer eye, in toward the mouth
     fill(ctx, P([[0.12, -0.22], [0.2, 0.12], [0.22, 0.3], [0.1, 0.32], [0.08, 0.0]]), SHADE, 0.3);           // the nose's shadow side
-    fill(ctx, P([[-0.3, 0.8], [0.3, 0.8], [0.4, 1.2], [-0.4, 1.2]]), SHADE, 0.3);                               // under the lip, the chin
+    fill(ctx, P([[-0.12, 0.74], [0.14, 0.74], [0.08, 0.8], [-0.08, 0.8]]), SHADE, 0.2);                       // a small shadow under the lower lip
+    {   // a thin band inside the lower outline, shadow side only: the jaw
+      const band = [];
+      for (let i = 0; i <= 10; i++) { const a = 0.15 + 1.45 * i / 10; band.push([Math.cos(a), Math.sin(a)]); }
+      for (let i = 10; i >= 0; i--) { const a = 0.15 + 1.45 * i / 10; band.push([Math.cos(a) * 0.86, Math.sin(a) * 0.88]); }
+      fill(ctx, P(band), SHADE, 0.2);
+    }
         ctx.restore();
     // the jaw: two hard corners on the outline
     for (const s of [-1, 1]) stroke(ctx, P([[s * 0.97, 0.22], [s * 0.66, 0.8], [s * 0.22, 0.99]]), { w: 11, taper0: 0.1, taper1: 0.4 });
@@ -507,18 +526,22 @@ Skits.haircut = (() => {
       cape(ctx, null, CU_CAPE);
     });
     // sparkles off the hair, on the backdrop
-    const sp = [[250, 1020, 46], [800, 930, 40], [470, 860, 36]];
+    const sp = [[175, 1150, 46], [930, 1020, 40], [520, CU_AT[1] - 660, 36]];
     sp.forEach(([x, y, r], i) => {
       const k = easeOutBack(seg(t, B_SPARKS[i], B_SPARKS[i] + 0.15));
       if (k > 0) star(ctx, CU_AT[0] + (x - CU_AT[0]) * z, CU_AT[1] + (y - CU_AT[1]) * z, r * k * (1 - 0.12 * Math.abs(Math.sin((t - B_SPARKS[i]) * 2.1 + i))));
     });
-    return { top: Math.min(cuHeadY(-1.98 * RY, z) - 10, 860 - 36) };
+    return { top: Math.min(cuHeadY(-1.98 * RY, z) - 10, CU_AT[1] - 660 - 40) };
   }
 
   // ---------- C: wide, the last snip and the cape (5.5 - 6.5) ----------
   const C_SNIP = 5.78, C_GRAB = [5.92, 6.12], C_TUG = [6.16, 6.34];
+  // the wide shots after A use A's framing at its last frame
+  const A_END_Z = lerp(1.0, 1.05, easeInOut(seg(CUT_B, 0, 4.1)));
+  const wideCut = ctx => { zoom(ctx, 470, 1300, A_END_Z); wide(ctx); };
+  const wideCutY = y => (wideY(y) - 1300) * A_END_Z + 1300;
   function shotC(ctx, t) {
-    ctx.save(); wide(ctx);
+    ctx.save(); wideCut(ctx);
     wall(ctx); floor(ctx);
     cutCount = SNIPS.length; hairNow = t < C_SNIP ? mopHair : neatHair;
     chairBack(ctx);
@@ -534,19 +557,23 @@ Skits.haircut = (() => {
         const x0 = GX + x * RX * GS, y0 = GY + y * RY * GS, land = gNeck + 110 + 40 * i;
         tuft(ctx, lerp(x0, GX - 170 - 30 * i, Math.sqrt(k)), y0 + (land - y0) * k * k, GS * 0.9, k * 2.2 + i);
       });
-    }, 6 * tug, 10 * tug);
+    }, 10 * tug, 24 * tug);
     chairFront(ctx);
     // the barber: one last snip over the top, then a tug on the cape
-    const top = snipHand(4), lean = LEAN - 0.012 * Math.sin(t * 0.9);
-    const capeAt = [GX + 250 + 10 * tug, gNeck + 150 + 6 * tug];
+    // the snip: blades down over the crown, closing on the hair as it changes
+    const lean = LEAN - 0.012 * Math.sin(t * 0.9);
+    const crown = [GX + 30, GY - 1.12 * RY * GS], above = [crown[0] + 70, crown[1] - 150];
+    const top = { hand: above, rot: Math.atan2(-(crown[0] - above[0]), crown[1] - above[1]) - lean, front: false };
+    const capeAt = [GX + 250 + 22 * tug, gNeck + 150 + 10 * tug];
     const grab = easeInOut(seg(t, C_GRAB[0], C_GRAB[1]));
-    const hand = Stage.mix(top.hand, capeAt, grab);
+    const via = [GX + 430, GY - 60];   // round the outside of his head, not across it
+    const hand = [0, 1].map(i => (1 - grab) ** 2 * top.hand[i] + 2 * grab * (1 - grab) * via[i] + grab * grab * capeAt[i]);
     const open = t < C_SNIP - 0.08 ? 1 : t < C_SNIP ? 1 - easeInOut(seg(t, C_SNIP - 0.08, C_SNIP)) : 0;
     barber(ctx, { x: BX, y: BFEET, s: BS, lean, weight: -0.6, ...fussy,
       ...barberArm(-1, bLocal(hand, lean), 'down', grab > 0.5 || top.front), holdL: scissors(lerp(top.rot, 2.7, grab), open),
       ...barberArm(1, [96, -196], 'out', false), holdR: comb });
     ctx.restore();
-    return { top: wideY(Math.min(GY - 1.66 * RY * GS, bHeadY(LEAN)[1] - RY * 0.9 * BS)) };
+    return { top: wideCutY(Math.min(GY - 1.66 * RY * GS, bHeadY(LEAN)[1] - RY * 0.9 * BS)) };
   }
 
   // ---------- D: close-up, "looks bad" (6.5 - 9.5) ----------
@@ -570,7 +597,7 @@ Skits.haircut = (() => {
   // the mirror to us.
   function shotE(ctx, t) {
     const r = t - CUT_E;
-    ctx.save(); wide(ctx);
+    ctx.save(); wideCut(ctx);
     wall(ctx); floor(ctx);
     for (let i = 0; i < 9; i++) tuft(ctx, GX + 220 + 30 * i + 20 * hh(i), 1790 + 18 * hh(i + 3), GS * 0.8, -0.6 + hh(i + 5) * 1.2);   // swept-up heap
     chairBack(ctx);
@@ -588,7 +615,7 @@ Skits.haircut = (() => {
       ...barberArm(-1, bLocal([mirrorAt[0] + 10, mirrorAt[1] + 160], lean), 'down', false), holdL: handMirror,
       ...barberArm(1, [96, -196], 'out', false), holdR: scissors(0.3, 0) });
     ctx.restore();
-    return { top: wideY(Math.min(GY - 1.24 * RY * GS, mirrorAt[1] + 10 - 86 * BS - 20)) };
+    return { top: wideCutY(Math.min(GY - 1.24 * RY * GS, mirrorAt[1] + 10 - 86 * BS - 20)) };
   }
 
   const shots = [[0, CUT_B, shotA], [CUT_B, CUT_C, shotB], [CUT_C, CUT_D, shotC], [CUT_D, CUT_E, shotD], [CUT_E, END + 1, shotE]];

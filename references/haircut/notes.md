@@ -31,7 +31,7 @@ Beats (a cutaway edit, hard cuts only):
             right brow lifts at 4.25–4.45.
             Caption: "Me that one random moment during my haircut"
 - 5.50–6.50 C, wide. The last snip over the top (5.78): the mop is now the
-            bowl, the last clumps drop. The barber tugs the cape (5.92–6.34).
+            bowl, the last clumps drop. The barber tugs the cape (5.92–6.34, the arm going round his head).
 - 6.50–9.50 D, the close-up again, same framing as B: his plain face, bowl
             cut, deflated (`Emotions.deflated`). A few-pixel droop as it lands,
             one slow blink at 7.95–8.45. Caption: "Me after getting my haircut"
