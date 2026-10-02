@@ -63,8 +63,9 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
   bottom edge follows the head outline as a rounded curve with small, regular
   scallops, never spikes. The edge round the mouth stays clean: nothing
   intrudes into the mouth opening.
-- Moustache: a band over the upper lip, set apart from the beard by a slightly
-  darker tone, joining the beard at the mouth corners. Mouths open beneath it.
+- Moustache: a band over the upper lip in the same grey as the beard, so the
+  two read as one beard; its shape shows in the beard's top edge, and it
+  joins the beard at the mouth corners. Mouths open beneath it.
 - Sideburns start narrow at the temples, under the hair, and widen gradually
   toward the jaw. A sideburn the same thickness all the way down frames the
   face like a hood.

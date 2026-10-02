@@ -1309,11 +1309,11 @@ const Cameos = (() => {
   // moustache corners, the moustache on the upper lip, a rounded full chin.
   // Ink only at the edges (short strokes along the cheek line and the bottom),
   // a flat fill inside. It stretches with the jaw; the mouth cuts into it.
-  const FULLB = '#575757', STACHE = '#3d3d3d';
+  const FULLB = '#575757', STACHE = FULLB;   // the moustache is the beard's own grey (user decision); its shape still shows in the beard's top edge
   // mouths the moustache goes under rather than over: his wide grin should show whole
   const STACHE_UNDER = new Set(['grinwide']);
   const drawStache = (ctx, P, { stacheTop, lip }) => {
-    fill(ctx, P([...stacheTop, ...lip]), STACHE, 1);   // set apart from the beard by tone only; the mouth itself is the lip line
+    fill(ctx, P([...stacheTop, ...lip]), STACHE, 1);   // the mouth itself is the lip line
   };
   // on a shocked gape the eyes are huge, so the moustache sits a little lower
   const FULL_MOUTH_DY = 14;   // his mouth sits a little lower, under the moustache, leaving bare cheek under the eyes
