@@ -24,8 +24,10 @@ nose line, smirk; its pink blush is not used).
 Beats (four shots, hard cuts only):
 - 0.00–3.50 1, wide. The barber starts beside the chair, arms down, the
             scissors loose at his thigh (0–0.5); lifts them to his chest
-            (0.5–0.85), steps round behind him (0.9–1.45), raises them behind
-            his head (1.45–1.6) and brings his forearm over the top (1.6–1.74).
+            (0.5–0.85), steps round behind him (0.9–1.45), raises them straight up
+            beside the customer's head and over the top (1.45–1.74); the scissor
+            arm is drawn in front of the customer once it's above his head, so
+            the scissors never disappear behind it.
             He snips with the blades angled across the crown, closing on a lock
             lifted into them (6 snips, hand-timed: 1.78, 2.02, 2.36, 2.60, 2.95,
             3.22); nothing visibly comes off. 2.25–2.85 his eyes fall shut;
@@ -38,7 +40,10 @@ Beats (four shots, hard cuts only):
             sheen), auburn swept hair; sparkles at 5.25, 5.55, 5.85, the brow
             lifts at 5.75–5.95, a 3% scale-in.
             Caption: "Me that one random moment during my haircut"
-- 7.50–11.0 4, the truth: driving home, seen from the dashboard. A car you
+- 7.50–11.0 4, the truth: driving home, seen from the dashboard. He sits in
+            the driver's seat on the car's left (American), so right of centre on
+            screen, his door beside him; the empty passenger seat, the console and
+            gear lever, and the rear-view mirror toward the middle. A car you
             can read: roof lining and dome light, rear-view mirror, side window
             and door, pillars with the belt anchor, seat and headrest, wheel with
             hub and spokes, the dash. The botched cut (a lumpy hacked top, a fringe

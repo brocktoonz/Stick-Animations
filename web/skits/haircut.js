@@ -411,16 +411,17 @@ Skits.haircut = (() => {
   // The barber starts beside the chair, arms down. He lifts the scissors, steps
   // round behind him and snips with the blades in the top of his hair; nothing
   // visibly comes off yet. He lets his eyes fall shut and we push in on his face.
-  const B1 = { x0: 860, x1: 680, feet: 1660, s: 1.15 };   // behind him, off his right shoulder, so the forearm over the head stays clear of the barber's own face
-  const LIFT = [0.5, 0.85], WALK = [0.9, 1.45], RISE = [1.45, 1.6], OVER = [1.6, 1.74];
+  const B1 = { x0: 860, x1: 640, feet: 1660, s: 1.15 };   // ends up behind him, the chair and his head hiding part of the barber
+  const LIFT = [0.5, 0.85], WALK = [0.9, 1.45], RISE = [1.45, 1.74];
   const SNIPS1 = [1.78, 2.02, 2.36, 2.6, 2.95, 3.22];        // hand-timed, uneven
-  // his scissor hand over the top of the head: the forearm comes over from behind
-  // the right side of it (EMERGE), the blades angled down across the crown and
-  // closing on a lock lifted into them
-  const EMERGE = [585, 900];
-  const CUT_SPOTS = [[495, 772], [470, 762], [515, 780]];
+  // his scissor hand over the top of the head (world space), the blades angled
+  // down across the crown, closing on a lock lifted into them. The whole arm is
+  // drawn in front of the customer, so it never goes behind his head.
+  const UP = [705, 770];   // the raise goes straight up beside his head to here, clear of the hair, then over the top
+  const CUT_SPOTS = [[455, 772], [430, 762], [475, 780]];
   const SPOT_AT = [0, 1, 0, 2, 1, 0];
-  const CUT_ROT = -2.18;   // the blades pointing down and left, about 35 degrees below level
+  const CUT_ROT = -2.18;
+  const ELBOW_SIGN = 1;   // the blades pointing down and left, about 35 degrees below level
   const CLOSE = [2.25, 2.85], PUSH1 = [2.2, CUT_2];
   const b1Local = ([X, Y], lean, bx) => { const x = (X - bx) / B1.s, y = (Y - B1.feet) / B1.s; const c = Math.cos(-lean), sn = Math.sin(-lean); return [x * c - y * sn, x * sn + y * c]; };
   const b1HeadTop = B1.feet - 678 * B1.s - RY * 0.9 * B1.s;
@@ -444,34 +445,30 @@ Skits.haircut = (() => {
     const bx = lerp(B1.x0, B1.x1, walk);
     const step = t > WALK[0] && t < WALK[1] ? 0.7 * Math.sin(Math.PI * 2 * (t - WALK[0]) / 0.35) * (1 - Math.abs(2 * walk - 1) ** 3) : 0;
     const lean = lerp(-0.03, 0.08, walk) - 0.008 * Math.sin(t * 0.9);   // behind him, he leans out a little to see over
-    // the scissor hand. Pose space while it's on his side of things: hanging at
-    // his side, lifted to his chest, rising behind the customer's head. Then,
-    // over the top of the head, it is drawn in world space after the customer:
-    // forearm over the hair, hand, a lock lifted into the blades.
+    // the scissor arm, in his pose space: hanging at his side, lifted to his chest,
+    // raised up and over the customer's head, then snipping on the crown
     const rest = [-104, -284], atChest = [-10, -235 + BDY];
-    let armL = {}, holdL = null, over = null;
-    if (t < LIFT[0]) {
-      holdL = scissors(Math.PI, 0);   // arms down, the scissors held loosely at his thigh
-    } else if (t < RISE[0]) {
-      const lift = easeOutBack(seg(t, LIFT[0], LIFT[1]));
-      armL = Arms.arm(-1, (([x, y]) => [x, y - BDY])(Stage.mix(rest, atChest, lift)), 'out', true, 142);
-      holdL = scissors(lerp(Math.PI, 1.15, lift), 0);
-    } else if (t < OVER[0]) {   // rising behind the right side of his head
-      const k = easeInOut(seg(t, RISE[0], RISE[1]));
-      armL = Arms.arm(-1, (([x, y]) => [x, y - BDY])(Stage.mix(atChest, b1Local(EMERGE, lean, bx), k)), 'down', false, 142);
-      holdL = scissors(lerp(1.15, 0, k) - lean, 0);
-    } else {
-      armL = Arms.arm(-1, (([x, y]) => [x, y - BDY])(b1Local(EMERGE, lean, bx)), 'down', false, 142);
+    let hl, rot, open1 = 0, lockAt = null;
+    if (t < LIFT[0]) { hl = rest; rot = Math.PI; }
+    else if (t < RISE[0]) { const lift = easeOutBack(seg(t, LIFT[0], LIFT[1])); hl = Stage.mix(rest, atChest, lift); rot = lerp(Math.PI, 1.15, lift); }
+    else {
       const spotNow = CUT_SPOTS[SPOT_AT[Math.min(n, SPOT_AT.length - 1)]], spotWas = n > 0 ? CUT_SPOTS[SPOT_AT[n - 1]] : spotNow;
       const prevAt = n > 0 ? SNIPS1[n - 1] : 0, nextAt = SNIPS1[Math.min(n, SNIPS1.length - 1)];
       const move = n === 0 || n >= SNIPS1.length ? (n === 0 ? 1 : 0) : easeInOut(seg(t, prevAt + 0.12, Math.max(prevAt + 0.13, nextAt - 0.08)));
       const bob = since < 0.18 ? 6 * Math.sin(Math.PI * since / 0.18) : 0;   // a small dip on each snip
-      const k = easeOut(seg(t, OVER[0], OVER[1]));   // up over the top of the head
-      const spot = Stage.mix(spotWas, spotNow, move);
-      over = { at: Stage.mix(EMERGE, [spot[0], spot[1] + bob], k), rot: lerp(0, CUT_ROT, k), open: k < 1 ? 1 : open, lock: k >= 1 };
+      const spot = Stage.mix(spotWas, spotNow, move), onHair = b1Local([spot[0], spot[1] + bob], lean, bx);
+      const k = easeInOut(seg(t, RISE[0], RISE[1]));   // up beside his head, then over the crown
+      const up = b1Local(UP, lean, bx);
+      hl = k < 0.5 ? Stage.mix(atChest, up, easeOut(k / 0.5)) : Stage.mix(up, onHair, easeInOut((k - 0.5) / 0.5));
+      rot = lerp(1.15, CUT_ROT - lean, k); open1 = k < 1 ? 1 : open;
+      if (k >= 1) lockAt = spot;
     }
+    const armL = Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, B_ARM);
+    armL.bendL = ELBOW_SIGN * Math.abs(armL.bendL);   // elbow kept on his own side, out of the customer's face
+    const holdL = scissors(rot, open1);
     barberRig(ctx, { x: bx, y: B1.feet, s: B1.s, lean, step, weight: walk > 0 && walk < 1 ? 0 : 0.5, ...fussy, lookX: lerp(-0.4, -0.75, walk), lookY: lerp(0.2, 0.55, walk),
       ...armL, holdL, ...Arms.arm(1, [96, -196 - BDY], 'out', false, B_ARM), holdR: comb });
+    // (his scissor arm is drawn again after the customer, below, so it's in front)
     chairBack(ctx);
     const nod = since < 0.2 ? 0.015 * (1 - since / 0.2) : 0;
     const shut = easeInOut(seg(t, CLOSE[0], CLOSE[1]));   // a slow, relaxed close
@@ -481,16 +478,22 @@ Skits.haircut = (() => {
     ctx.restore();
     cape(ctx);
     chairFront(ctx);
-    if (over) {   // the barber's forearm over the top of his head, a lock lifted into the blades
-      Chars.tube(ctx, EMERGE, over.at, 0.12, 24 * B1.s, W, false);
-      const dir = [Math.sin(over.rot), -Math.cos(over.rot)], X = [over.at[0] + dir[0] * 108, over.at[1] + dir[1] * 108];
-      if (over.lock) {   // the lock, pulled up from the crown into the blades
-        const L = lock([0, 0.3], [0.02, -0.12], 0.2, 0.04).map(([u, v]) => [X[0] + u * RX * GS * 0.5, X[1] + v * RY * GS * 0.5]);
-        outline(ctx, L, { w: 9 }); fill(ctx, L, GREY, 0.3);
-      }
-      ctx.save(); ctx.translate(over.at[0], over.at[1]); ctx.scale(B1.s, B1.s);
-      scissors(over.rot, over.open)(ctx, 0, 0); Chars.hand(ctx, 0, 0, null, 1);
-      ctx.restore();
+    // the barber's scissor arm again, in front of the customer: the same tube,
+    // scissors and hand the rig drew, so it never disappears behind his head
+    if (lockAt) {   // the lock, pulled up from the crown into the blades
+      const dir = [Math.sin(rot + lean), -Math.cos(rot + lean)], X = [lockAt[0] + dir[0] * 108, lockAt[1] + dir[1] * 108];
+      const L = lock([0, 0.3], [0.02, -0.12], 0.2, 0.04).map(([u, v]) => [X[0] + u * RX * GS * 0.5, X[1] + v * RY * GS * 0.5]);
+      outline(ctx, L, { w: 9 }); fill(ctx, L, GREY, 0.3);
+    }
+    // in front only once the hand is up over his head: below that it's the
+    // barber's own arm, behind the customer (and in view beside him)
+    const handY = B1.feet + (hl[0] * Math.sin(lean) + hl[1] * Math.cos(lean)) * B1.s;
+    if (handY < GY - 1.25 * RY * GS) {
+    ctx.save(); ctx.translate(bx, B1.feet); ctx.scale(B1.s, B1.s); ctx.rotate(lean);
+    const sh = [-56, -526], hnd = [armL.armL[0], armL.armL[1] + BDY];
+    Chars.tube(ctx, sh, hnd, armL.bendL, 24, W, false);
+    holdL(ctx, hnd[0], hnd[1]); Chars.hand(ctx, hnd[0], hnd[1], null, 1, W);
+    ctx.restore();
     }
     ctx.restore();
     // what has to stay under the caption: his hair, and the barber's head while it's across the caption
@@ -682,13 +685,13 @@ Skits.haircut = (() => {
   }
 
   // ---------- 4: driving home with it (7.5 - 11) ----------
-  // Facing him from the dashboard: the top half of him at the wheel. The car
-  // reads from its parts: roof lining and dome light, the rear-view mirror, the
-  // driver's side window and door, the pillar with the seat-belt anchor, his
-  // seat and headrest, the wheel and dash. The botched cut, eyes welling,
-  // looking straight ahead.
-  const DRV_AT = [540, 1170], DRV_S = 1.85;   // his head centre on screen, scale of the rig
-  const WHEEL = { c: [540, 1980], r: 470 };   // the steering wheel: hub just below the frame
+  // Facing him from the dashboard: the top half of him at the wheel. He's in
+  // the driver's seat, on the car's left (an American car), so from in front
+  // he sits right of centre: his door and window just beside him on our right,
+  // the empty passenger seat, the console and the rear-view mirror toward the
+  // middle and our left. The botched cut, eyes welling, looking straight ahead.
+  const DRV_AT = [662, 1170], DRV_S = 1.72;   // his head centre on screen, scale of the rig
+  const WHEEL = { c: [662, 1990], r: 440 };   // the steering wheel, in front of him: hub just below the frame
   const wheelAt = a => [WHEEL.c[0] + Math.cos(a) * WHEEL.r, WHEEL.c[1] + Math.sin(a) * WHEEL.r];
   const HANDS = [wheelAt(Math.PI * 1.27), wheelAt(Math.PI * 1.73)];   // ten to two
   // a straight-edged shape: each edge split up so the brush fill doesn't round it off
@@ -699,30 +702,31 @@ Skits.haircut = (() => {
     const jy = (hh(bump * 3 + 1) - 0.5) * 6, jx = (hh(bump * 5 + 2) - 0.5) * 3;
     // ---- the car around him
     ctx.fillStyle = '#6e6e6e'; ctx.fillRect(0, 0, 1080, 1920);                                  // the back of the cabin
-    panel(ctx, poly([[300, 620], [780, 620], [830, 900], [250, 900]]), '#cfcfcf', 11);               // the back window, plain
-    panel(ctx, box(200, 900, 880, 1300, 4), '#5a5a5a', 11);                                     // the back seats
-    // driver's side window and door (his left, our right), the pillar between
-    panel(ctx, poly([[820, 420], [1100, 380], [1100, 1060], [860, 1080]]), '#d6d6d6', 11);
-    panel(ctx, poly([[860, 1080], [1100, 1060], [1100, 1960], [880, 1960]]), '#4a4a4a', 11);
-    stroke(ctx, [[880, 1120], [1100, 1104]], { w: 8 });                                        // the window sill
-    panel(ctx, poly([[760, 400], [830, 410], [870, 1300], [800, 1310]]), '#5a5a5a', 11);             // B-pillar
-    panel(ctx, box(808, 1210, 866, 1258, 2), '#3a3a3a', 8);                                    // the belt's anchor on it, at shoulder height
-    // the passenger side, our left: the other pillar and a dark side window
-    panel(ctx, poly([[-20, 380], [250, 420], [210, 1080], [-20, 1060]]), '#9a9a9a', 11);
-    panel(ctx, poly([[180, 400], [250, 410], [214, 1080], [146, 1074]]), '#5a5a5a', 11);   // ends at the window's bottom edge
-    // roof lining with the dome light, curving down at the edges
-    panel(ctx, poly([[-20, -20], [1100, -20], [1100, 380], [780, 410], [540, 420], [300, 410], [-20, 380]]), '#bdbdbd', 11);
-    panel(ctx, box(250, 150, 380, 196, 3), '#e8e8e8', 8);   // the dome light, off to one side
-    // the seat behind him: a seat back wider than him, and the headrest on two posts, clear of his head
+    panel(ctx, poly([[150, 600], [860, 600], [900, 880], [110, 880]]), '#cfcfcf', 11);          // the back window, plain
+    panel(ctx, box(60, 880, 960, 1300, 5), '#5a5a5a', 11);                                      // the back seats
+    // his door (the car's left, our right): the window, the door panel, the pillar beside him with the belt's anchor
+    panel(ctx, poly([[975, 420], [1100, 400], [1100, 1060], [990, 1070]]), '#d6d6d6', 11);
+    panel(ctx, poly([[990, 1070], [1100, 1060], [1100, 1960], [1000, 1960]]), '#4a4a4a', 11);
+    panel(ctx, poly([[925, 410], [985, 416], [1010, 1310], [950, 1316]]), '#5a5a5a', 11);   // B-pillar
+    panel(ctx, box(950, 1214, 1004, 1260, 2), '#3a3a3a', 8);                                 // the belt's anchor, at his shoulder
+    // the passenger side, our left: the far window and pillar, and the empty passenger seat
+    panel(ctx, poly([[-20, 400], [70, 410], [50, 1060], [-20, 1050]]), '#9a9a9a', 11);
+    panel(ctx, poly([[40, 1180], [330, 1180], [350, 1960], [20, 1960]]), '#2e2e2e', 12);
+    stroke(ctx, [[130, 860], [130, 1180]], { w: 13 }); stroke(ctx, [[240, 860], [240, 1180]], { w: 13 });
+    panel(ctx, poly([[80, 760], [290, 760], [300, 870], [70, 870]]), '#2e2e2e', 11);          // its headrest
+    // roof lining, the dome light in the middle of it
+    panel(ctx, poly([[-20, -20], [1100, -20], [1100, 400], [900, 412], [560, 420], [200, 412], [-20, 400]]), '#bdbdbd', 11);
+    panel(ctx, box(500, 150, 620, 194, 3), '#e8e8e8', 8);
+    // his seat behind him: the seat back, the headrest on two posts, clear of his head
     ctx.save(); ctx.translate(jx, jy);
-    panel(ctx, poly([[270, 1180], [810, 1180], [850, 1960], [230, 1960]]), '#2e2e2e', 12);
-    stroke(ctx, [[470, 820], [470, 1180]], { w: 14 }); stroke(ctx, [[610, 820], [610, 1180]], { w: 14 });
-    panel(ctx, poly([[360, 700], [720, 700], [740, 830], [340, 830]]), '#2e2e2e', 11);
+    panel(ctx, poly([[DRV_AT[0] - 250, 1180], [DRV_AT[0] + 250, 1180], [DRV_AT[0] + 290, 1960], [DRV_AT[0] - 290, 1960]]), '#2e2e2e', 12);
+    stroke(ctx, [[DRV_AT[0] - 66, 840], [DRV_AT[0] - 66, 1180]], { w: 14 }); stroke(ctx, [[DRV_AT[0] + 66, 840], [DRV_AT[0] + 66, 1180]], { w: 14 });
+    panel(ctx, poly([[DRV_AT[0] - 170, 720], [DRV_AT[0] + 170, 720], [DRV_AT[0] + 186, 850], [DRV_AT[0] - 186, 850]]), '#2e2e2e', 11);
     // him
     ctx.save(); ctx.translate(DRV_AT[0], DRV_AT[1]); ctx.scale(DRV_S, DRV_S); ctx.translate(0, -(-438));
     const w0 = Brush.getWeight(); Brush.setWeight(w0 * WIDE * GS / DRV_S);
     const toRig = ([x, y]) => [(x - DRV_AT[0]) / DRV_S, (y - DRV_AT[1]) / DRV_S - 438];
-    const upper = [toRig([836, 1236]), [150, -318]];   // from the pillar anchor, just beside his shoulder
+    const upper = [toRig([977, 1237]), [150, -318]];   // from the pillar anchor, just beside his shoulder
     stroke(ctx, upper, { w: 18, taper0: 0, taper1: 0, minW: 1 });
     stroke(ctx, upper, { w: 10, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
     hairNow = botchedHair;
@@ -748,6 +752,10 @@ Skits.haircut = (() => {
     ctx.restore();
     // ---- in front of him: the dash, and the wheel with its hub and spokes
     panel(ctx, poly([[-20, 1800], [300, 1770], [780, 1770], [1100, 1800], [1100, 1960], [-20, 1960]]), '#2a2a2a', 12);
+    // the centre console between the seats, with the gear lever
+    panel(ctx, poly([[300, 1640], [440, 1640], [470, 1960], [270, 1960]]), '#3a3a3a', 11);
+    stroke(ctx, [[370, 1700], [366, 1600]], { w: 16 });
+    blob(ctx, 366, 1590, 30, 26, { fill: '#5a5a5a', w: 10, n: 12 });
     const rim = []; for (let i = 0; i <= 36; i++) rim.push(wheelAt(Math.PI * (1.0 + i / 36)));
     for (const a of [Math.PI * 1.06, Math.PI * 1.94]) {   // the spokes, out to the rim at about quarter past nine
       const p = wheelAt(a);
@@ -757,9 +765,9 @@ Skits.haircut = (() => {
     blob(ctx, WHEEL.c[0], WHEEL.c[1] - 40, 150, 110, { fill: '#3a3a3a', w: 12, n: 16 });   // the hub
     stroke(ctx, rim, { w: 74, taper0: 0, taper1: 0, minW: 1 });
     stroke(ctx, rim, { w: 50, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
-    // the rear-view mirror, hanging in front of him at the top
-    stroke(ctx, [[540, 240], [540, 300]], { w: 18 });   // a short stalk
-    panel(ctx, poly([[380, 300], [700, 300], [690, 390], [390, 390]]), '#4a4a4a', 11);
+    // the rear-view mirror, in the middle of the car (between the seats, so left of him)
+    stroke(ctx, [[400, 240], [400, 300]], { w: 18 });   // a short stalk
+    panel(ctx, poly([[250, 300], [550, 300], [540, 388], [260, 388]]), '#4a4a4a', 11);
     // his hands over the rim (the arms end in them)
     for (const h of HANDS) Chars.hand(ctx, h[0] + jx, h[1] + jy, null, DRV_S);
     return { top: DRV_AT[1] + jy - 1.42 * RY * DRV_S - 10 };
