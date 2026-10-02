@@ -204,12 +204,18 @@ Skits.powernap = (() => {
       let lid = 1;
       for (const [a, b, l] of tries) if (t >= a && t < b) lid = lerp(1, l, easeOut(seg(t, a, a + 0.12))) + (b < 99 ? lerp(0, 1 - l, easeInOut(seg(t, b - 0.12, b))) : 0);
       if (t > 9.3 && t < 9.65) lid = lerp(0.83, 1, Math.sin(Math.PI * seg(t, 9.3, 9.65)));   // a slow heavy blink
+      // "Where am I?" from the aligned phones: each sound gets its own opening (lips
+      // shut on the m of "am", rounded for the w, wide on the vowels); in the
+      // silences before and after, his lips just hang slightly parted
+      const SIZE = { rest: 0.06, mbp: 0, fv: 0.1, teeth: 0.14, ee: 0.22, lth: 0.3, oo: 0.26, half: 0.38, oh: 0.48, open: 0.62, wide: 0.7 };
+      const said = talk(t, ...SAID.where);
+      const mouthOpen = said ? SIZE[said.viz.kind] ?? 0.3 : t < SAID.where[0] ? 0.05 : 0.14 + 0.04 * sag;   // shut (a slack wavy line) before he speaks
       const droopy = { lid, flatLid: true, pupil: 12, lookX: 0, lookY: 0, bags: true, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };
       const groggy = t > 7.0 ? lerp(0, 0.3, easeInOut(seg(t, 7.0, 8.0))) : 0;                // head lolls right over to one side, and holds
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
         ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'),            // arms spread wide, hands planted on the cushion
         ...droopy,
-        slackMouth: asking ? (talk(t, ...SAID.where, true)?.viz.open ?? 0.4) * 0.9 + 0.05 : 0.42 + 0.06 * sag });   // the words open and close it; otherwise it hangs open                 // jaw hanging slack
+        slackMouth: mouthOpen });                 // jaw hanging slack
       for (let i = 0; i < 3; i++) {   // sleep bubbles drifting up off him, each popping and starting again
         const ph = ((t - 7.0) / 2.2 + i / 3) % 1;
         if (t < 7.0) break;
