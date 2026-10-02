@@ -5,6 +5,7 @@
 // Pose fields shared by all full-body characters:
 //   x y        ground position of the feet (world px)      s    scale
 //   dir        1 faces right, -1 faces left                 lean body tilt (rad)
+//   legs       false: don't draw the legs (the skit draws its own, e.g. lying on a couch)
 //   kick       front leg swung straight from the hip: 1 = kicked out forward, negative = wound back
 //   step       -1..1 walk cycle (feet swap)                 bob  body offset (neg = up)
 //   tilt       head tilt (rad)                              face horizontal face offset
@@ -527,7 +528,7 @@ const Chars = (() => {
     // p.weight (-1..1): weight on one leg (-1 left, 1 right). The hips shift
     // over it; the free leg bends at the knee and steps out a little.
     const wt = p.weight ?? 0;
-    for (const side of [-1, 1]) {
+    for (const side of (p.legs === false ? [] : [-1, 1])) {   // legs: false = the skit draws the legs itself
       const ph = side * step;
       const free = wt && Math.sign(wt) !== side ? Math.abs(wt) : 0;
       // free leg: foot stepped out to its own side and resting on its toe, knee

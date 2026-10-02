@@ -75,10 +75,10 @@ const Cameos = (() => {
           stroke(ctx, [[fx + x, -RY * 0.62], [fx + x + 2, -36 + Math.abs(x) * 0.1]], { w: 3.5, taper0: 0.1, taper1: 0.8, seed: 300 + x });
         ctx.restore();
       }
-      eyes(ctx, fx, p.squint ? -22 : -6, o.eyeLop ? { eyeLop: o.eyeLop, ...p } : p, 1, !!o.lashes);   // rage eyes sit higher, clear of the teeth
+      if (!p.noEyes) eyes(ctx, fx, p.squint ? -22 : -6, o.eyeLop ? { eyeLop: o.eyeLop, ...p } : p, 1, !!o.lashes);   // noEyes: a front() hook draws its own   // rage eyes sit higher, clear of the teeth
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
-      } else brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
+      } else if (!p.noBrows) brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
       if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
       else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
       o.front?.(ctx, fx, rage, p);
@@ -856,12 +856,22 @@ const Cameos = (() => {
     const shape = [...out, ...top];
     fill(ctx, shape, '#454545', 1.6);   // darker than his hair, so it reads as its own beard
     outline(ctx, shape, { w: 9 });
+    blob(ctx, 16, 76, 60, 46, { fill: W, w: 6, n: 14, jit: 1.2 });   // bare skin round the mouth, so an open mouth reads against the dark beard
     for (let i = 0; i < 10; i++) {   // strands, all inside the beard
       const a = Math.PI * (0.18 + 0.64 * hh(i + 40)), r = 0.6 + 0.3 * hh(i + 50), x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r + RY * 0.24;
       stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 18, y + 16]], { w: 4, color: '#6e6e6e' });
     }
   };
   const scragglyMoustache = (ctx, fx, rage, p = {}) => {
+    if (p.sleepy) for (const sd of [-1, 1]) {   // fast asleep: heavy closed lids drooping at the outer ends, lashes, dark shading under them
+      const ex = fx + sd * 42, lid = [[ex - sd * 28, -8], [ex + sd * 2, 4], [ex + sd * 32, 14]];
+      fill(ctx, [[ex - sd * 26, -2], [ex + sd * 2, 10], [ex + sd * 30, 20], [ex + sd * 26, 34], [ex, 30], [ex - sd * 22, 16]], '#9a9a9a', 0.6);
+      stroke(ctx, lid, { w: 11, taper0: 0.2, taper1: 0.4 });
+      for (const k of [0.45, 0.7, 0.92]) {      // lashes hanging off the outer half
+        const x = lid[0][0] + (lid[2][0] - lid[0][0]) * k, y = lid[0][1] + (lid[2][1] - lid[0][1]) * k + 2 + 6 * Math.sin(Math.PI * k);
+        stroke(ctx, [[x, y], [x + sd * 6, y + 12]], { w: 4, taper0: 0, taper1: 0.6 });
+      }
+    }
     if (p.bags) for (const sd of [-1, 1])   // bags under the eyes (just woken up)
       stroke(ctx, [[fx + sd * 40 - 22, 14], [fx + sd * 40, 24], [fx + sd * 40 + 22, 14]], { w: 6, taper0: 0.3, taper1: 0.3, color: '#5a5a5a' });
     if (p.drool) {   // a drip of drool from the corner of the slack mouth, down over the beard
