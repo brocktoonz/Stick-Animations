@@ -1314,21 +1314,21 @@ const Cameos = (() => {
   // moustache corners, the moustache on the upper lip, a rounded full chin.
   // Ink only at the edges (short strokes along the cheek line and the bottom),
   // a flat fill inside. It stretches with the jaw; the mouth cuts into it.
-  const FULLB = '#4d4d4d';
+  const FULLB = '#575757';
   // on a shocked gape the eyes are huge, so the moustache and lip sit a little lower
   const fullDrop = p => p?.mouth === 'gape' ? 20 * (p.open ?? 0) / RY : 0;
   const fullParts = d => {
     const outer = [];
     for (let i = 0; i <= 24; i++) {   // jaw edge, from the top of one sideburn to the other, round and a little fuller at the chin
       const a = Math.PI * (-0.07 + 1.14 * i / 24), dn = Math.max(0, Math.sin(a));
-      outer.push([Math.cos(a) * 0.99, Math.sin(a) * 0.99 + 0.15 * dn * dn * dn]);
+      outer.push([Math.cos(a) * 0.99, Math.sin(a) * 0.99 + 0.2 * dn * dn * dn]);
     }
     // cheek lines: down the sideburn in front of the ear, then a clean slope to the moustache corner
     const cheekL = [[-0.86, -0.18], [-0.84, 0.02], [-0.82, 0.26], [-0.7, 0.38], [-0.56, 0.43 + d], [-0.46, 0.46 + d]];
-    const stache = [[-0.4, 0.34], [-0.26, 0.24], [-0.06, 0.2], [0.11, 0.24], [0.28, 0.2], [0.48, 0.24], [0.62, 0.34]].map(([x, y]) => [x, y + d]);
+    const stache = [[-0.44, 0.4], [-0.3, 0.32], [-0.08, 0.28], [0.11, 0.31], [0.3, 0.28], [0.52, 0.32], [0.64, 0.4]].map(([x, y]) => [x, y + d]);
     const cheekR = [[0.68, 0.46 + d], [0.78, 0.43 + d], [0.88, 0.36], [0.88, 0.02], [0.88, -0.18]];
     // the upper lip line, and the lower lip showing under it (the mouth draws over both)
-    const lipTop = [[-0.22, 0.47], [-0.02, 0.43], [0.11, 0.43], [0.26, 0.43], [0.46, 0.47]].map(([x, y]) => [x, y + d]);
+    const lipTop = [[-0.22, 0.5], [-0.1, 0.45], [0.11, 0.43], [0.32, 0.45], [0.46, 0.5]].map(([x, y]) => [x, y + d]);   // rounded corners
     const lip = [...lipTop, ...[[0.3, 0.53], [0.11, 0.55], [-0.08, 0.53]].map(([x, y]) => [x, y + d])];
     return { outer, cheekL, stache, cheekR, lipTop, lip };
   };
@@ -1358,7 +1358,7 @@ const Cameos = (() => {
     stroke(ctx, O, { w: 8, taper0: 0.3, taper1: 0.3 });   // the jaw edge
     hairEdge(ctx, P(cheekL), 700);
     hairEdge(ctx, P([...cheekR].reverse()), 740);
-    hairEdge(ctx, P(outer.slice(6, 19).map(([x, y]) => [x, y - 0.04])), 820, { len: 14, out: 0 });
+    hairEdge(ctx, P(outer.slice(4, 21)), 820, { len: 13, out: 6 });   // across the jaw edge, all along the bottom
   };
   // The moustache again on top of the mouth, so an open mouth opens downward from
   // under it instead of eating it. Same fill, so it merges with the beard; ink on
@@ -1367,6 +1367,14 @@ const Cameos = (() => {
     if (rage) return;
     const jaw = p?.mouth === 'yell' ? 46 * (p.open ?? 0) : 0, P = fullStretch(jaw);
     const { stache, lipTop } = fullParts(fullDrop(p));
+    if (p?.mouth === 'gape') {   // the gape starts high; hide what rises above the moustache (only inside the mouth, so the eyes are untouched)
+      const o = p.open ?? 0, sc = p.mouthScale ?? 1, w2 = (22 + 14 * o) * sc, h = (26 + 44 * o) * sc, cx = fx + 4, cy = 62 + h * 0.18;
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(cx, cy, w2 + 6, h * 0.52 + 6, 0, 0, 7); ctx.clip();
+      const top = P(stache);
+      fill(ctx, [[top[0][0], -RY], [top[top.length - 1][0], -RY], ...[...top].reverse()], SQ_SKIN, 0);
+      ctx.restore();
+    }
     const sh = [[-0.5, 0.46 + fullDrop(p)], ...stache, [0.72, 0.46 + fullDrop(p)], ...[...lipTop].reverse()];
     fill(ctx, P(sh), FULLB, 1);
     stroke(ctx, P(lipTop), { w: 5, taper0: 0.3, taper1: 0.3 });
