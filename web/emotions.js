@@ -52,7 +52,7 @@ const Emotions = (() => {
                  ...arm(1, [26, -306], 'down', true), ...arm(-1, [-2, -210], 'down', true) },   // hand on chin, other arm across holding the elbow
     unimpressed: { mouth: 'flat', lid: 0.5, flatLid: true, pupil: 8, lookX: -0.9 },   // vacant: flat lids, side-eye
     sleepy:    { lid: 1, mouth: 'o', open: 0.1, tilt: 0.1, brow: -0.3 },
-    deflated:  { mouth: 'flatdown', lid: 0.3, pupil: 11, brow: -0.35, lookY: 0.1 },   // "oh. it's over": lids up a little, brows sagging, mouth flat with the corners down
+    deflated:  { mouth: 'flatdown', lid: 0.46, pupil: 11, brow: -0.1, browLiftL: 8, browLiftR: 8, lookY: 0.1 },   // "oh. it's over": lids a touch higher than bored, brows low and flat, mouth flat with the corners down
     smolder:   { mouth: 'smirk', lid: 0.4, lowLid: 0.32, pupil: 14, browL: 0.45, browR: -0.5, browLiftR: -18, tilt: -0.07 },   // too cool: eyes narrowed to a squint, one brow cocked, closed half smile
   };
   return E;
