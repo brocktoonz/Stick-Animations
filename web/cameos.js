@@ -1319,56 +1319,55 @@ const Cameos = (() => {
   // mouths the moustache goes under rather than over: his wide grin should show whole
   const STACHE_UNDER = new Set(['grinwide']);
   const drawStache = (ctx, P, { stacheTop, lip }) => {
-    fill(ctx, P([...stacheTop, ...lip]), STACHE, 1);   // set apart from the beard by tone; the mouth itself is the lip line
-    hairEdge(ctx, P(stacheTop.slice(1, -1)), 780, { len: 11 });
+    fill(ctx, P([...stacheTop, ...lip]), STACHE, 1);   // set apart from the beard by tone only; the mouth itself is the lip line
   };
   // on a shocked gape the eyes are huge, so the moustache sits a little lower
   const FULL_MOUTH_DY = 14;   // his mouth sits a little lower, under the moustache, leaving bare cheek under the eyes
   const fullDrop = () => 0.12;
   const fullParts = d => {
+    // outer edge: the head outline from the top of one sideburn (run well up behind
+    // the hair, which is drawn over the beard, so they join with no gap) round the jaw
+    // to the other; small regular scallops along the bottom, smooth up the sides
     const outer = [];
-    for (let i = 0; i <= 24; i++) {   // jaw edge on the head outline, from the top of one sideburn to the other
-      const a = Math.PI * (-0.07 + 1.14 * i / 24);
-      outer.push([Math.cos(a) * 0.99, Math.sin(a) * 0.99]);
+    for (let i = 0; i <= 48; i++) {
+      const a = Math.PI * (-0.2 + 1.4 * i / 48), dn = Math.max(0, Math.sin(a));
+      const r = 0.99 + (i % 2 && dn > 0.55 ? 0.03 : 0);
+      outer.push([Math.cos(a) * r, Math.sin(a) * r]);
     }
-    // cheek lines: down the sideburn in front of the ear, then low across the cheek
-    // to the moustache corner, leaving bare cheek under the eyes
-    const cheekL = [[-0.86, -0.18], [-0.86, 0.12], [-0.84, 0.4], [-0.74, 0.54], [-0.58, 0.53 + d], [-0.5, 0.54 + d]];
-    const cheekR = [[0.72, 0.54 + d], [0.8, 0.53 + d], [0.92, 0.52], [0.9, 0.12], [0.88, -0.18]];
+    // cheek lines: one smooth curve from the sideburn down to the moustache corner,
+    // leaving bare cheek under the eyes
+    const cheekL = [[-0.8, -0.62], [-0.8, 0.04], [-0.77, 0.3], [-0.68, 0.5], [-0.5, 0.5 + d]];
+    const cheekR = [[0.72, 0.5 + d], [0.75, 0.5], [0.78, 0.38], [0.8, 0.2], [0.8, 0.04], [0.8, -0.62]];   // the sideburn mirrors the left one
     // the moustache band: hair-edged top, arched lip edge, ends tucked into the beard at the corners
-    const stacheTop = [[-0.5, 0.52], [-0.4, 0.36], [-0.22, 0.29], [-0.04, 0.27], [0.11, 0.3], [0.26, 0.27], [0.44, 0.29], [0.62, 0.36], [0.72, 0.52]].map(([x, y]) => [x, y + d]);
+    const stacheTop = [[-0.5, 0.5], [-0.4, 0.36], [-0.22, 0.29], [-0.04, 0.27], [0.11, 0.3], [0.26, 0.27], [0.44, 0.29], [0.62, 0.36], [0.72, 0.5]].map(([x, y]) => [x, y + d]);
     const lip = [[0.62, 0.48], [0.46, 0.44], [0.28, 0.41], [0.11, 0.4], [-0.06, 0.41], [-0.24, 0.44], [-0.4, 0.48]].map(([x, y]) => [x, y + d]);
     return { outer, cheekL, cheekR, stacheTop, lip };
   };
   // the lower the point, the further it drops with the jaw
   const fullStretch = jaw => pts => hu(pts).map(([x, y]) => [x, y + jaw * Math.min(1, Math.max(0, (y / RY - 0.4) / 0.6))]);
-  // short strokes along an edge, uneven in length, spacing and angle, leaning down and out the way the hair grows
-  const hairEdge = (ctx, pts, k0, { len = 13, out = 3 } = {}) => {
-    for (let i = 0; i < pts.length - 1; i++) {
-      const n = 1 + Math.floor(hh(k0 + i * 7) * 2.6);
-      for (let j = 0; j < n; j++) {
-        const k = k0 + i * 7 + j * 3, f = (j + 0.2 + 0.6 * hh(k + 1)) / n;
-        const x = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, y = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f;
-        const L = len * (0.55 + 0.8 * hh(k + 2)), lean = Math.sign(x || 1) * (0.15 + 0.35 * hh(k + 3)) + x / RX * 0.2;
-        const o = out * (0.4 + 1.2 * hh(k + 4));
-        stroke(ctx, [[x - lean * o, y - o], [x + lean * L, y + L - o]], { w: 3 + 1.2 * hh(k + 5), taper0: 0.3, taper1: 0.65, jit: 0.3 });
-      }
+  // A few short strokes along the bottom edge only: all the same length, all pointing
+  // straight down, straddling the edge so none sit inside the fill. They hint at hair;
+  // the fill and the outline carry the shape.
+  const beardTicks = (ctx, pts, every = 4, len = 20) => {
+    for (let i = 2; i < pts.length - 2; i += every) {
+      const [x, y] = pts[i];
+      stroke(ctx, [[x, y - 3], [x, y + len - 3]], { w: 3.5, taper0: 0.2, taper1: 0.6, jit: 0.2, wob: 0 });
     }
   };
   const beardFull2 = (ctx, jaw = 0, p) => {
     ctx.translate(0, -jaw);   // stretch with the jaw instead of sliding down with it
-    const P = fullStretch(jaw), { outer, cheekL, cheekR, stacheTop } = fullParts(fullDrop(p));
-    fill(ctx, P([...outer, ...cheekL, ...stacheTop.slice(1, -1), ...cheekR]), FULLB, 1);
-    if (STACHE_UNDER.has(p?.mouth)) drawStache(ctx, P, fullParts(fullDrop(p)));   // under a wide grin, so the whole grin shows
-    stroke(ctx, P(outer), { w: 8, taper0: 0.3, taper1: 0.3 });   // the jaw edge
-    hairEdge(ctx, P(cheekL), 700);
-    hairEdge(ctx, P([...cheekR].reverse()), 740);
-    hairEdge(ctx, P(outer.slice(4, 21)), 820, { len: 13, out: 6 });   // across the jaw edge, all along the bottom
+    const P = fullStretch(jaw), parts = fullParts(fullDrop(p)), { outer, cheekL, cheekR, stacheTop } = parts;
+    fill(ctx, P([...outer, ...cheekL, ...stacheTop.slice(1, -1), ...cheekR]), FULLB, 1);   // one solid fill, sideburns included
+    if (STACHE_UNDER.has(p?.mouth)) drawStache(ctx, P, parts);   // under a wide grin, so the whole grin shows
+    const O = P(outer);
+    stroke(ctx, O, { w: 8, taper0: 0.3, taper1: 0.3 });   // the jaw edge
+    beardTicks(ctx, O.filter((_, i) => { const a = Math.PI * (-0.2 + 1.4 * i / 48); return Math.sin(a) > 0.62; }));
   };
   // The moustache, on top of the mouth: a darker band over the upper lip whose
   // ends join the beard at the mouth corners, so mouths open beneath it.
   const stacheFull2 = (ctx, fx, rage, p) => {
     if (p?.sadTear) { sadLids(ctx, fx, p.lid ?? 0); tearStreak(ctx, fx); }
+    if (p?.clenchTeeth) clenchedTeeth(ctx, fx + 4, 62 + FULL_MOUTH_DY + 18);   // under the moustache, which is drawn next
     if (rage || STACHE_UNDER.has(p?.mouth)) return;
     const jaw = p?.mouth === 'yell' ? 46 * (p.open ?? 0) : 0, P = fullStretch(jaw);
     const { stacheTop, lip } = fullParts(fullDrop(p));
@@ -1381,15 +1380,14 @@ const Cameos = (() => {
       ctx.restore();
     }
     drawStache(ctx, P, { stacheTop, lip });
-    if (p?.clenchTeeth) clenchedTeeth(ctx, fx + 4, 62 + FULL_MOUTH_DY + 6);   // in front, so both rows show under the moustache
   };
   // one tear: a thin streak from the outer corner of the screen-left eye, ending in a drop on the bare cheek
   const tearStreak = (ctx, fx) => {
     const x = fx - 40 - 30;   // the eye's outer edge (eyes sit 40 either side of the face line, 30 wide)
-    stroke(ctx, [[x + 4, 22], [x - 2, 40], [x - 4, 54]], { w: 7, color: '#6a6a6a', taper0: 0.2, taper1: 0.2 });
-    const d = [[x - 4, 50], [x + 5, 64], [x - 4, 73], [x - 13, 64]];
+    stroke(ctx, [[x + 4, 8], [x, 22], [x - 2, 32]], { w: 7, color: '#6a6a6a', taper0: 0.2, taper1: 0.2 });
+    const d = [[x - 2, 30], [x + 6, 43], [x - 2, 52], [x - 10, 43]];   // the drop stays on bare cheek, above the beard
     fill(ctx, d, W, 0.3); outline(ctx, d, { w: 4 });
-    stroke(ctx, [[x - 8, 62], [x - 6, 58]], { w: 3, color: '#9a9a9a' });   // a glint, so it reads as water
+    stroke(ctx, [[x - 6, 42], [x - 4, 38]], { w: 3, color: '#9a9a9a' });   // a glint, so it reads as water
   };
   // drooping upper lids in his skin tone (the shared lid fill is white, which shows on grey skin)
   const sadLids = (ctx, fx, lid) => {
@@ -1424,6 +1422,9 @@ const Cameos = (() => {
   const sqFace = p => {
     if (p.mouth === 'rage') return { ...p, mouth: 'none', open: 0, clenchTeeth: true };
     if (p.tears) return { ...p, tears: false, lid: 0.45, mouth: 'frown', sadTear: true };
+    // open mouths a size smaller for him, so the stretched beard wraps under them with a band to spare
+    if (p.mouth === 'yell') return { ...p, mouthScale: (p.mouthScale ?? 1) * 0.68 };
+    if (p.mouth === 'gape') return { ...p, mouthScale: (p.mouthScale ?? 1) * 0.72, stress: false };   // the stress lines under the eyes would land in the beard
     return p;
   };
 
