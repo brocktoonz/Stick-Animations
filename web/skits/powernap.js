@@ -142,14 +142,13 @@ Skits.powernap = (() => {
     // "Alrighty... just a 10 minute power nap, huh?", lids getting heavier, and
     // drops off
     [0, 3.45, (ctx, t) => {
-      const sink = easeInOut(seg(t, 1.3, 2.7)), ang = lerp(-0.72, -1.3, sink);              // slides down from propped up to flat
+      const sink = easeInOut(seg(t, 1.3, 2.7)), ang = lerp(-0.72, -1.12, sink);              // slides down from propped up to flat
       const hx = 620, hy = SEAT - 62;                                                       // hips stay put on the seat
       const push = easeInOut(seg(t, 2.6, 3.45));
       ctx.save(); cam(ctx, lerp(540, 380, push), lerp(1250, 1210, push), lerp(1.25, 1.45, push), 540, 1150);
       couchBack(ctx);
       // the pillow stays put against the couch arm; his head sinks down onto it
-      const hdEnd = HEAD * CS - HIP;
-      pillow(ctx, [hx + Math.sin(-1.3) * hdEnd - 20, hy - Math.cos(-1.3) * hdEnd + 120], 118, 54, 0.1);
+      pillow(ctx, [205, 1262], 125, 56, 0.12);   // against the arm, where his head comes to rest on top of it
       // legs stretched out along the seat the whole time, one knee up a little
       for (const [kx, ky, ex, ey] of [[hx + 110, SEAT - 100, hx + 205, SEAT - 52], [hx + 120, SEAT - 66, hx + 225, SEAT - 44]]) {   // far knee bent up, near leg out straight; feet clear of the arm
         const leg = [[hx + 10, hy + 6], [kx, ky], [ex, ey]];
@@ -163,7 +162,7 @@ Skits.powernap = (() => {
         : { lid: Math.max(heavy, blink(t, 2.7, 0.3)), lowLid: 0.2, brow: -0.25, pupil: 9, lookX: 0.3, lookY: -0.2, tilt: -0.08,
             ...(said ?? (t < 0.44 ? { mouth: 'smile' } : { mouth: 'flat' })) };            // content smile before he speaks
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
-      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.arm(1, [110, -500], 'out', false, 150), ...Arms.arm(-1, [-110, -500], 'out', false, 150), ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });   // near hand on his stomach; mouth bigger while his head is on its side
+      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, ...Arms.both([104, -150], 'out'), ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });   // near hand on his stomach; mouth bigger while his head is on its side
       ctx.restore();
       couchFront(ctx);
       ctx.restore();
