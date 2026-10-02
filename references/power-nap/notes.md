@@ -1,18 +1,15 @@
 # "Just a 10 minute power nap" (9.21 s)
 
 Source: Nutshell Animations. Captions are the original's burned-in text.
-Beats (from 6 fps frames + loudness):
-- 0.0–0.3  lying back in bed, tired
-- 0.33–1.15 "Alrighty"
-- 1.17–2.15 "Just a 10 minute power nap"
-- 2.2–2.5  eyes shut, yawn
-- 2.6–3.3  close on him, mouth wide open, snoring (loud)
-- 3.45–6.45 wide: clock above the bed, ticks every 0.2 s, hands spinning.
-            "FEW HOURS LATER" card 3.45–4.95 only. 3.5–4.3 asleep;
-            4.3–5.0 tossing; 5.0–5.75 floats up spread-eagled above the bed;
-            5.75–6.2 drops off the front of the bed onto the floor
-- 6.45–6.65 sits up into a close-up on the floor beside the bed
-- 6.65–8.0 bleary stare (a music sting under it, mouth closed)
-- 8.1–8.6  "Where am I?"
-- 8.75–10.4 holds the confused look (silence after the clip's audio ends at 9.21);
-            caption stays up. "ALRIGHTY" is on screen from frame one (the hook).
+Beats (from 6 fps frames + loudness), as animated (three shots):
+- 0.0–3.45 the couch. "ALRIGHTY" on screen from frame one (content face);
+            0.33–1.17 "Alrighty"; 1.17–2.15 "Just a 10 minute power nap"
+            while he lies back onto the couch arm (1.25–2.15); 2.2–2.55 yawn;
+            2.55–3.45 out cold, snoring with the audio, slow push in
+- 3.45–6.45 the clock, hands whipping round on the 0.2 s ticks;
+            "FEW HOURS LATER" card 3.45–4.95
+- 6.45–6.95 dramatic close-up: he heaves himself up into camera, full
+            scraggly beard (Hero.mainBearded), half asleep
+- 8.1–8.75 "Where am I?"
+- 8.75–10.4 holds the confused look (silence after the audio ends at 9.21);
+            caption stays up

@@ -839,6 +839,36 @@ const Cameos = (() => {
   const spikyShades = Object.fromEntries(Object.entries(SHADES).map(([k, [fillC, lineC]]) => [k,
     build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ back: ears, hair: outlineHair(...SPIKES, fillC, { lineColor: lineC }) }), detail: hoodieFront })]));
 
+  // A few months' growth: a full scraggly beard from the sideburns down past
+  // the chin (tufts poking out of the edge) and a moustache, on the spiky guy.
+  // The beard goes under the mouth, so the mouth still reads when he talks.
+  const scragglyBeard = ctx => {
+    const tufts = [];
+    for (let i = 0; i <= 14; i++) {   // ragged bottom edge, right to left
+      const a = Math.PI * (0.06 + 0.88 * i / 14), r = 1.14 + 0.16 * hh(i * 3 + 1) + (i % 2 ? 0.1 : 0);
+      tufts.push([Math.cos(a) * RX * (0.98 + 0.04 * (i % 2)), Math.sin(a) * RY * r]);
+    }
+    const shape = [[RX * 0.94, -RY * 0.18], [RX * 1.03, RY * 0.12], ...tufts, [-RX * 1.03, RY * 0.12], [-RX * 0.94, -RY * 0.18],
+      [-RX * 0.8, RY * 0.02], [-RX * 0.62, RY * 0.22], [-RX * 0.4, RY * 0.34], [RX * 0.42, RY * 0.34], [RX * 0.64, RY * 0.22], [RX * 0.82, RY * 0.02]];
+    fill(ctx, shape, '#6e6e6e', 1.6);
+    outline(ctx, shape, { w: 9 });
+    for (let i = 0; i < 9; i++) {   // stray hairs and texture
+      const a = Math.PI * (0.18 + 0.64 * hh(i + 40)), r = 0.72 + 0.3 * hh(i + 50);
+      const x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r + 10;
+      stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 18, y + 16]], { w: 4, color: '#9a9a9a' });
+    }
+  };
+  const scragglyMoustache = (ctx, fx, rage) => {
+    if (rage) ctx.translate(0, -12);
+    const m = [[fx - 70, 60], [fx - 58, 38], [fx - 30, 28], [fx, 34], [fx + 30, 28], [fx + 58, 38], [fx + 70, 60],
+               [fx + 50, 50], [fx + 40, 58], [fx + 24, 46], [fx, 50], [fx - 24, 46], [fx - 40, 58], [fx - 50, 50]];
+    fill(ctx, m, '#6e6e6e', 1.4);
+    outline(ctx, m, { w: 7 });
+  };
+  const spikyBearded = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a',
+    head: head({ back: ears, hair: outlineHair(...SPIKES, ...SHADES.brown.slice(0, 1), { lineColor: SHADES.brown[1] }), beard: scragglyBeard, front: scragglyMoustache }),
+    detail: hoodieFront });
+
   // Signature accent colour: hair stays a natural colour, the one unnatural
   // colour lives on the clothes. Everything else stays black/white/grey, and
   // red is left to the captions.
@@ -1051,5 +1081,5 @@ const Cameos = (() => {
     beard: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', sleeveHem: 0.42, head: head({ hair: shaggy, beard: fullBeard }), detail: collarTee }),
   };
 
-  return { speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyBearded, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();

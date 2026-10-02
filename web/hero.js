@@ -661,6 +661,8 @@ const Hero = (() => {
   const mainOld = (ctx, p) => mainBody(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
   // The main character: the spiky-haired guy, mid-grey hair, grey hoodie.
   const main = (ctx, p) => Cameos.spikyShades.brown(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
+  // the main character after a very long nap: full scraggly beard and moustache
+  const mainBearded = (ctx, p) => Cameos.spikyBearded(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
 
   // J3 THE CHAOS GREMLIN: wide squat head, big sticking-out ears, one strand up, manic grin
   const gremlinHead = (ctx, p) => {
@@ -689,5 +691,5 @@ const Hero = (() => {
   };
   const J3 = build({ shirt: W, sleeveHem: 0.42, head: gremlinHead, detail: crew });
 
-  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6, J1, J2, J3, K1, K2, K3, main, mainOld, mainHair };
+  return { A, B, C, D, E, F, G, H, I, E1, E2, E3, E4, E5, E6, N1, N2, N3, N4, N5, N6, M1, M2, M3, M4, M5, M6, J1, J2, J3, K1, K2, K3, main, mainBearded, mainOld, mainHair };
 })();
