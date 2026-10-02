@@ -30,8 +30,11 @@ Beats (a cutaway edit, hard cuts only):
             swoop. Almost still: 3% scale-in, sparkles at 3.45, 3.75, 4.05, the
             right brow lifts at 4.25–4.45.
             Caption: "Me that one random moment during my haircut"
-- 5.50–6.50 C, wide. The last snip over the top (5.78): the mop is now the
-            bowl, the last clumps drop. The barber tugs the cape (5.92–6.34, the arm going round his head).
+- 5.50–6.50 C, wide (A's framing). The last snip closes on the hair's upper
+            right (5.78): the mop is now the bowl, the last clumps drop onto the
+            cape. His hand goes round to the cape's shoulder, the scissors passing
+            to his other hand (5.90–6.12), and he slides the cape off to the right
+            (6.16–6.33, 5 frames).
 - 6.50–9.50 D, the close-up again, same framing as B: his plain face, bowl
             cut, deflated (`Emotions.deflated`). A few-pixel droop as it lands,
             one slow blink at 7.95–8.45. Caption: "Me after getting my haircut"
