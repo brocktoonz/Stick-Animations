@@ -79,7 +79,7 @@ const Cameos = (() => {
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
       } else brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
-      const mdy = (o.mouthDy ?? 0) * (1 - open);   // eases off as a yell opens, so a big mouth stays inside the chin
+      const mdy = (typeof o.mouthDy === 'function' ? o.mouthDy(p) : o.mouthDy ?? 0) * (1 - open);   // eases off as a yell opens, so a big mouth stays inside the chin
       if (rage) mouth(ctx, fx + 4, 34 + mdy + jaw * 0.2, p, 0.95);   // fills the lower half of the face
       else mouth(ctx, fx + 4, 62 + mdy - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
       o.front?.(ctx, fx, rage, p);
@@ -1410,8 +1410,11 @@ const Cameos = (() => {
   // Squeex's own takes on two of the shared emotions, so the face stays his:
   // the rage yell becomes big squared teeth clenched inside the beard (the head
   // keeps its shape), and sad gets plain drooping eyes, one tear and a frown.
+  const SMALL_MOUTHS = new Set(['wobbly', 'tiny', 'o']);
   const sqFace = p => {
-    if (p.mouth === 'rage') return { ...p, mouth: 'none', open: 0, clenchTeeth: true };
+    if (p.mouth === 'rage' || p.mouth === 'clench') return { ...p, mouth: 'none', open: 0, clenchTeeth: true, stretch: 0 };
+    // small closed mouths drop clear of the moustache and grow a size, so they read on the beard
+    if (SMALL_MOUTHS.has(p.mouth)) return { ...p, mouthScale: (p.mouthScale ?? 1) * 1.3, smallMouth: true };
     if (p.tears) return { ...p, tears: false, lid: 0.45, mouth: 'frown', sadTear: true };
     // open mouths a size smaller for him, so the stretched beard wraps under them with a band to spare
     if (p.mouth === 'yell') return { ...p, mouthScale: (p.mouthScale ?? 1) * 0.68 };
@@ -1435,7 +1438,7 @@ const Cameos = (() => {
       head: head({ skin: SQ_SKIN, hair: sqHair(SQ_TUFT), beard: sqBeard(), front: sqStache, hat: headphones, browW: 9 }),
       detail: boxrTee }),
     overshirt: sqC(sqBeard({ full: 0.12, flecks: true }), sqStache),
-    beards: { trimmed: sqC(beardTrim, stacheTrim), full: (draw => (ctx, p) => draw(ctx, sqFace(p)))(sqC(beardFull2, stacheFull2, { mouthDy: FULL_MOUTH_DY })), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
+    beards: { trimmed: sqC(beardTrim, stacheTrim), full: (draw => (ctx, p) => draw(ctx, sqFace(p)))(sqC(beardFull2, stacheFull2, { mouthDy: p => FULL_MOUTH_DY + (p.smallMouth ? 16 : 0) })), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
   };
 
   return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
