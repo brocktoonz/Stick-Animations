@@ -169,13 +169,13 @@ Skits.powernap = (() => {
       for (const side of [-1, 1]) {
         const hip = [hx + Math.cos(ang) * side * 28 - Math.sin(ang) * 33, hy + Math.sin(ang) * side * 28 + Math.cos(ang) * 33];
         const sitK = side < 0 ? [hx - 52, SEAT + 14] : [hx + 40, SEAT + 14], sitF = side < 0 ? [hx - 78, FLOOR - 22] : [hx + 46, FLOOR - 22];   // one knee angled out
-        const lieK = side > 0 ? [hx + 95, SEAT - 120] : [hx + 105, SEAT - 64], lieF = side > 0 ? [hx + 165, SEAT - 56] : [hx + 180, SEAT - 42];   // feet stop short of the right armrest   // upper leg's knee up, lower leg straight
+        const lieK = side > 0 ? [hx + 95, SEAT - 110] : [hx + 105, SEAT - 46], lieF = side > 0 ? [hx + 165, SEAT - 22] : [hx + 185, SEAT - 20];   // feet resting on the seat, short of the right armrest   // upper leg's knee up, lower leg straight
         const arc = Math.sin(Math.PI * swing) * 60;                                         // lifted up and over the seat edge on the way
         const knee = [lerp(sitK[0], lieK[0], swing), lerp(sitK[1], lieK[1], swing) - arc];
         const foot = [lerp(sitF[0], lieF[0], swing), lerp(sitF[1], lieF[1], swing) - arc * 1.4];
         const leg = [hip, knee, foot];
         stroke(ctx, leg, { w: 40, taper0: 0, taper1: 0 });                                   // ink edge...
-        stroke(ctx, leg, { w: 26, taper0: 0, taper1: 0, color: side < 0 ? '#4a4a4a' : '#585858' });   // ...dark trousers inside, so the legs read apart
+        stroke(ctx, leg, { w: 26, taper0: 0, taper1: 0, color: '#4f4f4f' });                // both trouser legs the same colour   // ...dark trousers inside, so the legs read apart
         fill(ctx, Brush.ellipsePts(foot[0] + 24 * swing, foot[1] + 6, 38, 17, 10), INK, 0.8);   // shoe
       }
       ctx.restore();
@@ -198,7 +198,13 @@ Skits.powernap = (() => {
       // them, mouth hanging open with a drip of drool, brows relaxed in their usual place
       // like the references: head lolled right over, eyes shut under heavy drooping
       // lids with lashes and dark shading, mouth hanging open, drool, sleep bubbles
-      const droopy = { noEyes: true, sleepy: true, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };
+      // eyes start shut, then he blinks them open trying to wake up, but they never
+      // get past half open: the lid line cuts his centred pupils in half
+      const tries = [[7.15, 7.5, 0.95], [7.65, 8.0, 0.88], [8.05, 99, 0.83]];   // [open, close again, how far open (lid)]
+      let lid = 1;
+      for (const [a, b, l] of tries) if (t >= a && t < b) lid = lerp(1, l, easeOut(seg(t, a, a + 0.12))) + (b < 99 ? lerp(0, 1 - l, easeInOut(seg(t, b - 0.12, b))) : 0);
+      if (t > 9.3 && t < 9.65) lid = lerp(0.83, 1, Math.sin(Math.PI * seg(t, 9.3, 9.65)));   // a slow heavy blink
+      const droopy = { lid, flatLid: true, pupil: 12, lookX: 0, lookY: 0, bags: true, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };
       const groggy = t > 7.0 ? lerp(0, 0.3, easeInOut(seg(t, 7.0, 8.0))) : 0;                // head lolls right over to one side, and holds
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
         ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'),            // arms spread wide, hands planted on the cushion

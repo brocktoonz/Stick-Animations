@@ -47,6 +47,7 @@ Backgrounds
 - The halo never shows as a visible white disc or blob against the grey.
 Characters
 - Each character matches their design notes in STYLE.md and cameos.js/hero.js.
+- No character has ears (STYLE.md rule, user decision): flag any ear on any head.
 - Hair reads as hair (not a cap, leaf or helmet). Facial hair reads as hair (not a smear or mask).
 - Silhouettes stay distinct between characters.
 - Anatomy is correct: no backwards elbows, and no hands detached from arms. Check this on characters that are only partly in frame too (e.g. Slime leaning in from the edge): the user caught arms bending backwards there that the reviewer missed.
