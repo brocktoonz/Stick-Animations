@@ -588,16 +588,38 @@ Skits.haircut = (() => {
     fill(ctx, pts, W, 0.2); outline(ctx, pts, { w: 7 });
   }
 
-  // ---------- 3: his reflection, "looks good" (5.0 - 7.5) ----------
+  // ---------- 3: his reflection, "looks good" (4.5 - 7.0) ----------
   // The glow-up face in the mirror: the glass behind him, the frame's edges at
   // the sides, a sheen. Almost still: a 3% scale-in, one brow micro-raise,
   // sparkles one at a time.
   const RAISE3 = [CUT_3 + 0.75, CUT_3 + 0.95], SPARKS3 = [CUT_3 + 0.25, CUT_3 + 0.55, CUT_3 + 0.85];
+  // The barber still at work behind him in the mirror, as in the first shot: his
+  // head over the customer's shoulder at the side (clear of the caption), his
+  // hands and the scissors down behind the head, out of sight; a nod into each
+  // snip. Uneven, hand-timed.
+  const SNIPS3 = [0.15, 0.42, 0.8, 1.06, 1.42, 1.7, 2.12].map(d => CUT_3 + d);
+  const B3 = { x: 592, feet: 1250, s: 0.66 };   // his whole face just over the hair at the right, clear of the caption block
+  function barberBehind3(ctx, t, z) {
+    let since = 9;
+    for (const sAt of SNIPS3) if (t >= sAt) since = t - sAt;
+    const dip = since < 0.22 ? Math.sin(Math.PI * since / 0.22) : 0;
+    // he holds his place on screen through the mirror shot's slow push-in (so he doesn't creep up into the caption or behind the frame)
+    const bx = B3.x - 8 - (z - 1) * 210 / z, fy0 = B3.feet + (z - 1) * 300 / z;
+    const lean = -0.04 - 0.05 * dip, fy = fy0 + 22 * dip;   // he dips into each snip
+    const loc = W2 => b1Local(W2, lean, bx, fy, B3.s);
+    const hl = loc([470, 1010 + 6 * dip]), hr = loc([520, 1040]);   // both hands behind his head
+    ctx.save(); ctx.beginPath(); ctx.rect(-2000, -2000, 5000, 2900 + 22 * dip); ctx.clip();   // below his mouth he's behind the customer's hair
+    barberRig(ctx, { x: bx, y: fy, s: B3.s, lean, ...fussy, lookX: -0.5, lookY: 0.65, tilt: 0.16 * dip,
+      ...Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, 160), holdL: scissors(Math.PI, 0, 1.5, W),
+      ...Arms.arm(1, [hr[0], hr[1] - BDY], 'down', false, 160), holdR: comb });
+    ctx.restore();
+  }
   function shot3(ctx, t) {
     const z = lerp(1.0, 1.03, easeInOut(seg(t, CUT_3, CUT_4)));
     const raise = easeOutBack(seg(t, RAISE3[0], RAISE3[1]));
     ctx.save(); ctx.beginPath(); ctx.rect(40, 0, 1000, 1920); ctx.clip();   // the glass: nothing of the reflection past the frame
     closeUp(ctx, z, () => {
+      barberBehind3(ctx, t, z);
       glowRig(ctx, { x: GX, y: gFeet, s: GS, raise, tilt: -0.04 + 0.006 * Math.sin(t * 1.2) });
       cape(ctx, null, CU_CAPE);
     });
@@ -614,7 +636,7 @@ Skits.haircut = (() => {
     return { top: Math.min(cuHeadY(-1.84 * RY, z) - 10, ...sp.map(([, y, r]) => CU_AT[1] + (y - CU_AT[1]) * z - r)) };
   }
 
-  // ---------- 2: extreme close-up, he opens his eyes (3.5 - 5.0) ----------
+  // ---------- 2: extreme close-up, he opens his eyes (3.0 - 4.5) ----------
   // Framed from the eyes down, so whatever the barber did stays out of frame.
   // No caption. The lids come up slowly, stall, then open.
   const EYE_AT = [540, 480], EYE_S = 5.0;   // his eyes' centre on screen, world scale: high enough that his hair stays out of frame
@@ -659,7 +681,7 @@ Skits.haircut = (() => {
     return { top: 9999 };
   }
 
-  // ---------- 4: driving home with it (7.5 - 11) ----------
+  // ---------- 4: driving home with it (7.0 - 10.5) ----------
   // Eye level, straight on: him in the driver's seat of an American car, so his
   // side window is on our left with the roadside streaming past, the door below
   // it, the pillar on our right. A small wheel in front that he just holds.
