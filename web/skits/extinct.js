@@ -395,7 +395,7 @@ Skits.extinct = (() => {
       const pops = [[1.8, 225, 0.8, FLOOR - 70, (x, y) => A.mammoth(ctx, { x, y, s: 0.8, t, eyes: 'happy' })],
                     [2.05, 850, 1.0, FLOOR - 80, (x, y) => A.trex(ctx, { x, y, s: 1.0, t, dir: -1, snarl: t > 2.3 })],
                     [2.3, 420, 0.7, FLOOR + 201, (x, y) => A.dodo(ctx, { x, y, s: 0.7, t })],
-                    [2.55, 800, 0.7, FLOOR + 221, (x, y) => A.raptor(ctx, { x, y, s: 0.7, t, walk: true })]];
+                    [2.55, 800, 0.7, FLOOR + 221, (x, y) => A.raptor(ctx, { x, y, s: 0.7, t })]];
       for (const [t0, x, sc, y, draw] of pops) {
         const k = seg(t, t0, t0 + 0.28);
         if (k > 0) shadow(ctx, x, 110 * sc * Math.min(1, k * 2), y + 6);
@@ -460,7 +460,7 @@ Skits.extinct = (() => {
     // "...or get an equal amount of new animals": cutaway, new creatures pop in
     [14.0, 16.0, (ctx, t) => {
       newWorld(ctx, t);
-      const pops = [[14.1, 225, 1.2, () => A.fishLegs(ctx, { x: 225, y: FLOOR + 60, s: 1.2, t, walk: true })],
+      const pops = [[14.1, 225, 1.2, () => A.fishLegs(ctx, { x: 225, y: FLOOR + 60, s: 1.2, t })],
                     [14.55, 570, 1.4, () => A.longCat(ctx, { x: 570, y: FLOOR + 20, s: 1.4, t })],
                     [15.0, 895, 1.1, () => A.wingPig(ctx, { x: 895, y: FLOOR - 120, s: 1.1, t, dir: -1 })]];
       for (const [t0, x, sc, draw] of pops) {
@@ -482,7 +482,7 @@ Skits.extinct = (() => {
       stage(ctx);
       A.wingPig(ctx, { x: 960, y: FLOOR - 700, s: 0.65, t, dir: -1 });
       shadow(ctx, 900, 55, FLOOR + 6);
-      A.fishLegs(ctx, { x: 900, y: FLOOR, s: 0.8, t, walk: true, dir: -1 });
+      A.fishLegs(ctx, { x: 900, y: FLOOR, s: 0.8, t, dir: -1 });
       // wind-up, contact at 17.12, then a
       // visible arc off the left edge
       const wind = seg(t, 16.98, 17.08), kick = seg(t, 17.08, 17.14), fly = seg(t, 17.14, 17.5);
