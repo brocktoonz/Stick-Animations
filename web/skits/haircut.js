@@ -600,7 +600,7 @@ Skits.haircut = (() => {
   // snip. Uneven, hand-timed.
   const SNIPS3 = [0.15, 0.42, 0.8, 1.06, 1.42, 1.7, 2.12].map(d => CUT_3 + d);
   const AT3 = [450, 1380], Z3 = 0.84;   // the mirror shot pulled back a little and him a little left, to make room for the barber beside him
-  const B3 = { hx: 645, hy: 805, s: 0.7, lean: -0.08 };   // the barber's head centre (world): just over the hair at the right, under the caption; his body down the right side
+  const B3 = { hx: 605, hy: 878, s: 0.9, lean: -0.06 };   // behind his head and to the right: the customer covers his far side, the chair back his waist down   // the barber's head centre (world): just over the hair at the right, under the caption; his body down the right side
   function barberBehind3(ctx, t) {
     let since = 9;
     for (const sAt of SNIPS3) if (t >= sAt) since = t - sAt;
@@ -611,7 +611,7 @@ Skits.haircut = (() => {
     const hx = B3.hx, hy = B3.hy + 10 * dip;
     const bx = hx - Math.sin(lean) * H, fy = hy + Math.cos(lean) * H;
     const loc = W2 => b1Local(W2, lean, bx, fy, B3.s);
-    const hl = loc([470, 1010 + 6 * dip]), hr = loc([520, 1050]);   // both hands behind his head
+    const hl = loc([430, 1040 + 6 * dip]), hr = loc([470, 1070]);   // both hands behind his head
     barberRig(ctx, { x: bx, y: fy, s: B3.s, lean, ...fussy, lookX: -0.5, lookY: 0.6, tilt: 0.12 * dip,
       ...Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, 160), holdL: scissors(Math.PI, 0, 1.5, W),
       ...Arms.arm(1, [hr[0], hr[1] - BDY], 'down', false, 160), holdR: comb });
@@ -629,7 +629,7 @@ Skits.haircut = (() => {
       glowRig(ctx, { x: GX, y: gFeet, s: GS, raise, tilt: -0.04 + 0.006 * Math.sin(t * 1.2) });
       cape(ctx, null, CU_CAPE);
     }, AT3, Z3);
-    const sp = [[300, 925, 36], [960, 1300, 34], [140, 1215, 40]];   // just outside the hair, clear of the caption and the frame
+    const sp = [[300, 925, 36], [700, 1080, 34], [140, 1215, 40]];   // on and around his hair, off the barber   // just outside the hair, clear of the caption and the frame
     sp.forEach(([x, y, r], i) => {
       const k = easeOutBack(seg(t, SPARKS3[i], SPARKS3[i] + 0.15));
       if (k > 0) star(ctx, AT3[0] + (x - CU_AT[0]) * z * Z3, AT3[1] + (y - CU_AT[1]) * z * Z3, r * k * (1 - 0.12 * Math.abs(Math.sin((t - SPARKS3[i]) * 2.1 + i))));
@@ -681,10 +681,17 @@ Skits.haircut = (() => {
       ctx.save(); ctx.beginPath(); ctx.moveTo(...shape[0]); for (const q of shape) ctx.lineTo(...q); ctx.closePath(); ctx.clip();
       ctx.fillStyle = INK; ctx.beginPath(); ctx.ellipse(ex, y + 4, 13, 14, 0, 0, 7); ctx.fill();   // pupil, under the lid
       ctx.restore();
-      // one closed line with round joins: no start/end seam (at this zoom the
-      // brush's join and boil would show as a tick and a wobble)
-      ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = 12 * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(...shape[0]); for (const q of shape) ctx.lineTo(...q); ctx.closePath(); ctx.stroke(); ctx.restore();
+      if (lid <= 0.02) outline(ctx, shape, { w: 12, jit: 0, pressure: 0 });
+      else {
+        // hand-drawn: the round of the eye in one stroke, fading at its ends where
+        // it meets the lid; then the lid in one heavier tapered stroke that runs a
+        // little past the eye at each side (no mitred corners)
+        const n = 72, under = shape.slice(0, n + 1), xo = under[0][0] - ex;
+        stroke(ctx, under, { w: 12, taper0: 0.12, taper1: 0.12, minW: 1, jit: 0, pressure: 0.2 });
+        const bow = 0.3 * Math.abs(xo), lidPts = [];
+        for (let i = 0; i <= 24; i++) { const k = i / 24, x = ex - Math.abs(xo) * 1.12 + 2 * Math.abs(xo) * 1.12 * k; lidPts.push([x, ly + 3 - bow * Math.sin(Math.PI * (0.06 + 0.88 * k)) ]); }
+        stroke(ctx, lidPts, { w: 15, taper0: 0.25, taper1: 0.25, minW: 1, jit: 0, pressure: 0.3 });
+      }
     }
   };
   const eyeRig = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', detail: hoodieFront,
