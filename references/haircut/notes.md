@@ -1,4 +1,4 @@
-# "Me before / during / after getting my haircut" (11 s)
+# "Me before / during / after getting my haircut" (10.5 s)
 
 Source: the three-panel haircut meme (`meme.jpg`): before (shaggy, blank),
 "that one random moment during my haircut" (tousled, chiselled, smouldering),
@@ -12,7 +12,7 @@ the safe zone at 84 px.
 
 **No audio yet.** Timing follows the user's beat sheet so a sound can be laid
 over it. If a viral sound is chosen, re-time to it (peak should land at the
-mirror look, now 5.0 s).
+mirror look, now 4.5 s).
 
 `glowup_style.jpg`: the user's style reference for the "looks good"
 close-up (jaw and cheekbone shading, heavy angled brow, narrowed eyes, long
@@ -22,25 +22,24 @@ nose line, smirk; its pink blush is not used).
 (frontal phone-camera framing, a bad bowl cut, upset).
 
 Beats (four shots, hard cuts only):
-- 0.00–3.50 1, wide. The barber starts beside the chair, arms down, the
-            scissors loose at his thigh (0–0.5); lifts them to his chest
-            (0.5–0.85), steps round behind him (0.9–1.45), raises them straight up
-            beside the customer's head and over the top (1.45–1.74); the scissor
-            arm is drawn in front of the customer once it's above his head, so
-            the scissors never disappear behind it.
-            He snips with the blades angled across the crown, closing on a lock
-            lifted into them (6 snips, hand-timed: 1.78, 2.02, 2.36, 2.60, 2.95,
-            3.22); nothing visibly comes off. 2.25–2.85 his eyes fall shut;
-            2.2–3.5 the camera pushes in on his face.
+- 0.00–3.00 1, wide. The barber starts beside the chair, arms down (0–0.3);
+            lifts the scissors up by his head (0.3–0.62) as he starts round
+            behind the chair (0.42–1.12), a step further back so his face shows
+            over the customer's head; brings them down onto the top of the hair
+            from behind (1.2–1.45), blades shut until they're in the hair. Big
+            white scissors, so they read on the grey hair; the hand is drawn
+            over the hair once it's above it, the arm running down behind.
+            Six snips (1.62, 1.84, 2.14, 2.36, 2.64, 2.86); nothing visibly comes
+            off. 1.7–2.3 his eyes fall shut; 1.65–3.0 the camera pushes in.
             Caption: "Me before getting my haircut"
-- 3.50–5.00 2, extreme close-up from the eyes down (the haircut stays out of
-            frame). His eyes open: half at 3.85–4.2, a stall, then open at
-            4.45–4.7. No caption.
-- 5.00–7.50 3, his reflection: the glow-up face in the mirror (frame edges, a
-            sheen), auburn swept hair; sparkles at 5.25, 5.55, 5.85, the brow
-            lifts at 5.75–5.95, a 3% scale-in.
+- 3.00–4.50 2, extreme close-up from the eyes down (the haircut stays out of
+            frame). His eyes open: half at 3.35–3.7, a stall, then open at
+            3.95–4.2. No caption.
+- 4.50–7.00 3, his reflection: the glow-up face in the mirror (frame edges, a
+            sheen), auburn swept hair; sparkles at 4.75, 5.05, 5.35, the brow
+            lifts at 5.25–5.45, a 3% scale-in.
             Caption: "Me that one random moment during my haircut"
-- 7.50–11.0 4, the truth: driving home, eye level and straight on from the
+- 7.00–10.5 4, the truth: driving home, eye level and straight on from the
             dashboard. He sits right of centre (an American driver). Four flat
             shapes behind him: the side window on our left (roadside trees and
             poles scrolling through it), the door below it with one armrest line,
@@ -49,4 +48,4 @@ Beats (four shots, hard cuts only):
             just holds, its lower half behind the dashboard; the edge of the
             rear-view mirror at the top left. The botched cut, eyes welling
             (`Emotions.sad`), looking into the lens; a 1 px road bob, one blink at
-            9.8 (the tears stay). Caption: "Me after getting my haircut"
+            9.3 (the tears stay). Caption: "Me after getting my haircut"

@@ -406,7 +406,7 @@ Skits.haircut = (() => {
   // hair from behind: the blades in view in the hair.
   // Nothing visibly comes off yet. He lets his eyes fall shut and we push in.
   const B1 = { x0: 860, x1: 470, f0: 1660, f1: 1415, s0: 1.15, s1: 1.0 };   // further back behind the chair he's a little smaller, his eyes above the work
-  const LIFT = [0.3, 0.62], WALK = [0.62, 1.32], RISE = [1.32, 1.54];
+  const LIFT = [0.3, 0.62], WALK = [0.42, 1.12], RISE = [1.2, 1.45];   // the walk starts as the scissors come up
   const SNIPS1 = [1.62, 1.84, 2.14, 2.36, 2.64, 2.86];        // hand-timed, uneven
   const CUT_SPOTS = [[336, 818], [318, 830], [352, 810]];      // his scissor hand over the crown, blades down into the hair
   const SPOT_AT = [0, 1, 0, 2, 1, 0];
@@ -449,14 +449,14 @@ Skits.haircut = (() => {
       const bob = since < 0.18 ? 6 * Math.sin(Math.PI * since / 0.18) : 0;   // a small dip on each snip
       const spot = Stage.mix(spotWas, spotNow, move);
       hl = Stage.mix(high, b1Local([spot[0], spot[1] + bob], lean, bx, fy, bs), rise);
-      rot = lerp(-1.45, CUT_ROT - lean, rise); open1 = rise < 1 ? 1 : open;
+      rot = lerp(-1.45, CUT_ROT - lean, rise); open1 = rise < 1 ? 0 : Math.min(open, easeOut(seg(t, RISE[1], RISE[1] + 0.06)));   // shut until the blades are in the hair
       if (rise >= 1) lockAt = spot;
     }
     // the comb hand stays down at his side (behind the chair once he's round there)
-    const hr = [96, -196];
+    const hr = Stage.mix([96, -196], [40, -300], walk);   // tucked in out of sight behind him once he's round there
     const armL = Arms.arm(-1, [hl[0], hl[1] - BDY], 'out', false, 160);
     const armR = Arms.arm(1, [hr[0], hr[1] - BDY], 'out', false, 160);
-    const holdL = scissors(rot, open1);
+    const holdL = scissors(rot, open1, 1.5, W);   // big and white, so they read on his grey hair
     // the barber, drawn first: behind the chair and him
     barberRig(ctx, { x: bx, y: fy, s: bs, lean, step, weight: walk > 0 && walk < 1 ? 0 : 0.5, ...fussy,
       lookX: lerp(-0.4, -0.3, walk), lookY: lerp(0.2, 0.6, walk), ...armL, holdL, ...armR, holdR: comb });
@@ -479,13 +479,7 @@ Skits.haircut = (() => {
     }
     const handL = [armL.armL[0], armL.armL[1] + BDY];
     ctx.save(); ctx.translate(bx, fy); ctx.scale(bs, bs); ctx.rotate(lean);
-    if (b1World(handL, lean, bx, fy, bs)[1] < HAIRLINE) {
-      // the forearm over the crown from his side, then the scissors bigger and white so they read on the grey hair
-      const sh = [-56, -526], mx = (sh[0] + handL[0]) / 2, my = (sh[1] + handL[1]) / 2, dx = handL[0] - sh[0], dy = handL[1] - sh[1];
-      const el = [mx - dy * armL.bendL, my + dx * armL.bendL];
-      Chars.tube(ctx, el, handL, 0, 24, W, false);
-      scissors(rot, open1, 1.5, W)(ctx, handL[0], handL[1]); Chars.hand(ctx, handL[0], handL[1], null, 1, W);
-    }
+    if (t >= RISE[0] && b1World(handL, lean, bx, fy, bs)[1] < HAIRLINE) { holdL(ctx, handL[0], handL[1]); Chars.hand(ctx, handL[0], handL[1], null, 1, W); }
     ctx.restore();
     ctx.restore();
     // what has to stay under the caption: his hair, and the barber's head
