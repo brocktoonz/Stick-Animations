@@ -2,8 +2,8 @@
 
 Source: screen recording of an Instagram post by theaifilmmaker ("It's a
 medical condition I'm pretty sure"). Starring the main character (`Hero.main`)
-only. Captions are the original's burned-in title cards, word for word with
-the same line breaks; here they use the house red title style.
+only. Captions are the user's: "Me every night" and "Me every morning", drawn
+in the original's caption style (black sans in a white rounded box).
 
 **The clip has no usable audio**: the recording was made with the post muted
 (mute icon in the corner; the track is digital silence, -91 dB throughout).
@@ -14,7 +14,8 @@ the phone for the slaps). If the real audio turns up, re-time against it.
 Beats:
 - 0.00–1.00 night, lamp on. In bed, propped on the pillow, holding the phone
             up in front of his face, thumb tapping away. Pleased with himself.
-            Caption: "Me setting my morning\nself up for success"
+            Caption: "Me every night" (the user's caption; the clip's own
+            burned-in text was "Me setting my morning / self up for success")
 - 1.00–1.93 cut to the phone screen (his hands at the bottom of the frame):
             Alarm list, every toggle on: 6:00, 6:03, 6:06, 6:06, 6:07, 6:19,
             6:15, 6:21, 6:28, 6:29, 6:30… (out of order, duplicates). No caption.
@@ -28,4 +29,5 @@ Beats:
             original the hand lands about every 0.23 s (3.10, 3.33, 3.57, 3.80,
             4.03 … 6.13: 14 slaps, a mechanical loop). Here they're hand-timed
             around that pace but uneven (STYLE: nothing on a fixed beat).
-            Caption from the cut to the end: "My morning self"
+            Caption from the cut to the end: "Me every morning" (the user's;
+            the clip's was "My morning self")
