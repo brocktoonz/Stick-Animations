@@ -10,7 +10,7 @@ Skits.haircut = (() => {
   const { build, head, hh, RX, RY } = Cameos.parts;
   const W = '#fff', RED = '#d9261c';
   // the edit: four shots, hard cuts only
-  const CUT_2 = 3.5, CUT_3 = 5.0, CUT_4 = 7.5, END = 11.0;
+  const CUT_2 = 3.0, CUT_3 = 4.5, CUT_4 = 7.0, END = 10.5;
 
   // ---------- captions: the meme's three panels, word for word ----------
   // [start, end, text]. The meme's own line breaks are kept; extra breaks are
@@ -399,33 +399,30 @@ Skits.haircut = (() => {
   const WIDE = 0.9, wide = ctx => zoom(ctx, 540, 1920, WIDE);
   const wideY = y => 1920 - (1920 - y) * WIDE;
 
-  // ---------- 1: wide (0 - 3.5) ----------
-  // The barber starts beside the chair, arms down. He lifts the scissors, steps
-  // round behind him and snips with the blades in the top of his hair; nothing
-  // visibly comes off yet. He lets his eyes fall shut and we push in on his face.
-  const B1 = { x0: 860, x1: 700, feet: 1660, s: 1.15 };   // ends up behind him, off his shoulder, with his own shoulder in view so the scissor arm visibly comes from it
-  const LIFT = [0.5, 0.85], WALK = [0.9, 1.45], RISE = [1.45, 1.74];
-  const SNIPS1 = [1.78, 2.02, 2.36, 2.6, 2.95, 3.22];        // hand-timed, uneven
-  // his scissor hand over the top of the head (world space), the blades angled
-  // down across the crown, closing on a lock lifted into them. The whole arm is
-  // drawn in front of the customer, so it never goes behind his head.
-  const UP = [600, 800];   // the raise goes up between the two heads to here, clear of both, then over the top
-  const CUT_SPOTS = [[520, 800], [498, 790], [540, 808]];   // the blades sunk into the top of the hair
+  // ---------- 1: wide (0 - 3.0) ----------
+  // The barber starts beside the chair, arms down. He lifts the scissors up by
+  // his head, walks round behind the chair (a step further back, so his face
+  // shows over the customer's head) and brings them down onto the top of his
+  // hair from behind: the blades in view in the hair.
+  // Nothing visibly comes off yet. He lets his eyes fall shut and we push in.
+  const B1 = { x0: 860, x1: 470, f0: 1660, f1: 1415, s0: 1.15, s1: 1.0 };   // further back behind the chair he's a little smaller, his eyes above the work
+  const LIFT = [0.3, 0.62], WALK = [0.62, 1.32], RISE = [1.32, 1.54];
+  const SNIPS1 = [1.62, 1.84, 2.14, 2.36, 2.64, 2.86];        // hand-timed, uneven
+  const CUT_SPOTS = [[336, 818], [318, 830], [352, 810]];      // his scissor hand over the crown, blades down into the hair
   const SPOT_AT = [0, 1, 0, 2, 1, 0];
-  const CUT_ROT = -2.18;
-  const ELBOW_SIGN = -1;   // the blades pointing down and left, about 35 degrees below level
-  const CLOSE = [2.25, 2.85], PUSH1 = [2.2, CUT_2];
-  const b1Local = ([X, Y], lean, bx) => { const x = (X - bx) / B1.s, y = (Y - B1.feet) / B1.s; const c = Math.cos(-lean), sn = Math.sin(-lean); return [x * c - y * sn, x * sn + y * c]; };
-  const b1HeadTop = B1.feet - 678 * B1.s - RY * 0.9 * B1.s;
+  const CUT_ROT = -2.3;                                        // the blades pointing down and left into the hair
+  const HAIRLINE = 840;                                        // above this a hand is clear of his hair, so drawing it in front changes nothing
+  const CLOSE = [1.7, 2.3], PUSH1 = [1.65, CUT_2];
+  const b1Local = ([X, Y], lean, bx, fy, bs) => { const x = (X - bx) / bs, y = (Y - fy) / bs; const c = Math.cos(-lean), sn = Math.sin(-lean); return [x * c - y * sn, x * sn + y * c]; };
+  const b1World = ([x, y], lean, bx, fy, bs) => { const c = Math.cos(lean), sn = Math.sin(lean); return [bx + (x * c - y * sn) * bs, fy + (x * sn + y * c) * bs]; };
   function shot1(ctx, t) {
     // camera: the wide framing, then a push in on his face as his eyes close
-    const c0 = { S: WIDE, A: [540 + WIDE * (GX - 540), 1920 + WIDE * (GY - 1920)] }, c1 = { S: 1.55, A: [600, 1330] };   // ends with the barber cropped well past his face
+    const c0 = { S: WIDE, A: [540 + WIDE * (GX - 540), 1920 + WIDE * (GY - 1920)] }, c1 = { S: 1.5, A: [610, 1540] };   // his face low, the barber's head clear of the caption
     const p = easeInOut(seg(t, PUSH1[0], PUSH1[1]));
     const S = lerp(c0.S, c1.S, p), A = Stage.mix(c0.A, c1.A, p);
     ctx.save(); ctx.translate(A[0], A[1]); ctx.scale(S, S); ctx.translate(-GX, -GY);
     wall(ctx); floor(ctx);
     cutCount = 0; hairNow = mopHair;   // nothing comes off in this shot
-    // the barber, drawn first: behind the chair and him
     let open = 1, since = 9;
     SNIPS1.forEach(sAt => {
       if (t >= sAt - 0.07 && t < sAt) open = Math.min(open, 1 - easeInOut(seg(t, sAt - 0.07, sAt)));
@@ -434,37 +431,35 @@ Skits.haircut = (() => {
     });
     const n = SNIPS1.filter(sAt => t >= sAt).length;
     const walk = easeInOut(seg(t, WALK[0], WALK[1]));
-    const bx = lerp(B1.x0, B1.x1, walk);
+    const bx = lerp(B1.x0, B1.x1, walk), fy = lerp(B1.f0, B1.f1, walk), bs = lerp(B1.s0, B1.s1, walk);   // round behind the chair, a step back
     const step = t > WALK[0] && t < WALK[1] ? 0.7 * Math.sin(Math.PI * 2 * (t - WALK[0]) / 0.35) * (1 - Math.abs(2 * walk - 1) ** 3) : 0;
-    const lean = lerp(-0.03, 0.08, walk) - 0.008 * Math.sin(t * 0.9);   // behind him, he leans out a little to see over
-    // the scissor arm, in his pose space: hanging at his side, lifted to his chest,
-    // raised up and over the customer's head, then snipping on the crown
-    const rest = [-104, -284], atChest = [-118, -190 + BDY];   // held out in front of his chest, scissors in view
+    const lean = lerp(-0.03, 0.03, walk) - 0.008 * Math.sin(t * 0.9);
+    // the scissor hand (pose space): at his side, lifted up by his head, carried
+    // high over the chair, then down onto the crown, snipping
+    const rest = [-104, -284], high = [-160, -690];   // up by his head, the blades pointing out sideways
     let hl, rot, open1 = 0, lockAt = null;
-    if (t < LIFT[0]) { hl = rest; rot = Math.PI; }
-    else if (t < RISE[0]) { const lift = easeOutBack(seg(t, LIFT[0], LIFT[1])); hl = Stage.mix(rest, atChest, lift); rot = lerp(Math.PI, 1.15, lift); }
-    else {
+    const rise = easeInOut(seg(t, RISE[0], RISE[1]));
+    if (t < RISE[0]) {
+      const lift = easeOutBack(seg(t, LIFT[0], LIFT[1]));
+      hl = Stage.mix(rest, high, lift); rot = lerp(Math.PI, -1.45, lift); open1 = 0;
+    } else {
       const spotNow = CUT_SPOTS[SPOT_AT[Math.min(n, SPOT_AT.length - 1)]], spotWas = n > 0 ? CUT_SPOTS[SPOT_AT[n - 1]] : spotNow;
       const prevAt = n > 0 ? SNIPS1[n - 1] : 0, nextAt = SNIPS1[Math.min(n, SNIPS1.length - 1)];
       const move = n === 0 || n >= SNIPS1.length ? (n === 0 ? 1 : 0) : easeInOut(seg(t, prevAt + 0.12, Math.max(prevAt + 0.13, nextAt - 0.08)));
       const bob = since < 0.18 ? 6 * Math.sin(Math.PI * since / 0.18) : 0;   // a small dip on each snip
-      const spot = Stage.mix(spotWas, spotNow, move), onHair = b1Local([spot[0], spot[1] + bob], lean, bx);
-      const k = easeInOut(seg(t, RISE[0], RISE[1]));   // up beside his head, then over the crown
-      const up = b1Local(UP, lean, bx);
-      hl = k < 0.5 ? Stage.mix(atChest, up, easeOut(k / 0.5)) : Stage.mix(up, onHair, easeInOut((k - 0.5) / 0.5));
-      rot = lerp(1.15, CUT_ROT - lean, k); open1 = k < 1 ? 1 : open;
-      if (k >= 1) lockAt = spot;
+      const spot = Stage.mix(spotWas, spotNow, move);
+      hl = Stage.mix(high, b1Local([spot[0], spot[1] + bob], lean, bx, fy, bs), rise);
+      rot = lerp(-1.45, CUT_ROT - lean, rise); open1 = rise < 1 ? 1 : open;
+      if (rise >= 1) lockAt = spot;
     }
-    const armL = Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, 160);   // a long reach over the chair
-    // the elbow: outward while the arm hangs and holds the scissors at his chest,
-    // swinging smoothly over (through a straight arm) toward the customer as the
-    // hand goes up, so the arm never crosses the barber's own face
-    const elbowK = t < RISE[0] ? 0 : easeInOut(seg(t, RISE[0], RISE[1]));
-    armL.bendL = lerp(-ELBOW_SIGN, ELBOW_SIGN, elbowK) * Math.abs(armL.bendL);
+    // the comb hand stays down at his side (behind the chair once he's round there)
+    const hr = [96, -196];
+    const armL = Arms.arm(-1, [hl[0], hl[1] - BDY], 'out', false, 160);
+    const armR = Arms.arm(1, [hr[0], hr[1] - BDY], 'out', false, 160);
     const holdL = scissors(rot, open1);
-    barberRig(ctx, { x: bx, y: B1.feet, s: B1.s, lean, step, weight: walk > 0 && walk < 1 ? 0 : 0.5, ...fussy, lookX: lerp(-0.4, -0.75, walk), lookY: lerp(0.2, 0.55, walk),
-      ...armL, holdL, ...Arms.arm(1, [96, -196 - BDY], 'out', false, B_ARM), holdR: comb });
-    // (his scissor arm is drawn again after the customer, below, so it's in front)
+    // the barber, drawn first: behind the chair and him
+    barberRig(ctx, { x: bx, y: fy, s: bs, lean, step, weight: walk > 0 && walk < 1 ? 0 : 0.5, ...fussy,
+      lookX: lerp(-0.4, -0.3, walk), lookY: lerp(0.2, 0.6, walk), ...armL, holdL, ...armR, holdR: comb });
     chairBack(ctx);
     const nod = since < 0.2 ? 0.015 * (1 - since / 0.2) : 0;
     const shut = easeInOut(seg(t, CLOSE[0], CLOSE[1]));   // a slow, relaxed close
@@ -474,27 +469,22 @@ Skits.haircut = (() => {
     ctx.restore();
     cape(ctx);
     chairFront(ctx);
-    // the barber's scissor arm again, in front of the customer: the same tube,
-    // scissors and hand the rig drew, so it never disappears behind his head
+    // his hand comes over the top of the hair from behind: once it's above the
+    // hairline it's drawn again over the hair, so the scissors stay in view where
+    // they meet it (the arm runs down behind his head)
     if (lockAt) {   // the lock, pulled up from the crown into the blades
       const dir = [Math.sin(rot + lean), -Math.cos(rot + lean)], X = [lockAt[0] + dir[0] * 108, lockAt[1] + dir[1] * 108];
       const L = lock([0, 0.3], [0.02, -0.12], 0.2, 0.04).map(([u, v]) => [X[0] + u * RX * GS * 0.5, X[1] + v * RY * GS * 0.5]);
       outline(ctx, L, { w: 9 }); fill(ctx, L, GREY, 0.3);
     }
-    // in front only once the hand is up over his head: below that it's the
-    // barber's own arm, behind the customer (and in view beside him)
-    // in front of the customer from the start of the raise on: never behind his head
-    if (t >= RISE[0]) {
-    ctx.save(); ctx.translate(bx, B1.feet); ctx.scale(B1.s, B1.s); ctx.rotate(lean);
-    const sh = [-56, -526], hnd = [armL.armL[0], armL.armL[1] + BDY];
-    Chars.tube(ctx, sh, hnd, armL.bendL, 24, W, false);
-    holdL(ctx, hnd[0], hnd[1]); Chars.hand(ctx, hnd[0], hnd[1], null, 1, W);
+    const handL = [armL.armL[0], armL.armL[1] + BDY];
+    ctx.save(); ctx.translate(bx, fy); ctx.scale(bs, bs); ctx.rotate(lean);
+    if (b1World(handL, lean, bx, fy, bs)[1] < HAIRLINE) { holdL(ctx, handL[0], handL[1]); Chars.hand(ctx, handL[0], handL[1], null, 1, W); }
     ctx.restore();
-    }
     ctx.restore();
-    // what has to stay under the caption: his hair, and the barber's head while it's across the caption
-    const y = Y => A[1] + (Y - GY) * S, bLeft = A[0] + (bx + Math.sin(lean) * 678 * B1.s - RX * 0.9 * B1.s - GX) * S;
-    return { top: Math.min(y(GY - 1.66 * RY * GS), bLeft < 880 ? y(b1HeadTop) : 9999) };
+    // what has to stay under the caption: his hair, and the barber's head
+    const y = Y => A[1] + (Y - GY) * S, headTop = fy - 678 * bs - RY * 0.9 * bs;
+    return { top: Math.min(y(GY - 1.66 * RY * GS), y(headTop)) };
   }
 
   // ---------- the close-ups (B and D): identical framing ----------
@@ -612,7 +602,7 @@ Skits.haircut = (() => {
   // The glow-up face in the mirror: the glass behind him, the frame's edges at
   // the sides, a sheen. Almost still: a 3% scale-in, one brow micro-raise,
   // sparkles one at a time.
-  const RAISE3 = [5.75, 5.95], SPARKS3 = [5.25, 5.55, 5.85];
+  const RAISE3 = [CUT_3 + 0.75, CUT_3 + 0.95], SPARKS3 = [CUT_3 + 0.25, CUT_3 + 0.55, CUT_3 + 0.85];
   function shot3(ctx, t) {
     const z = lerp(1.0, 1.03, easeInOut(seg(t, CUT_3, CUT_4)));
     const raise = easeOutBack(seg(t, RAISE3[0], RAISE3[1]));
