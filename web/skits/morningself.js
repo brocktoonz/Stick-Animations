@@ -10,12 +10,13 @@ Skits.morningself = (() => {
   const hh = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
   const CUT1 = 1.0, CUT2 = 1.933, CUT3 = 3.033, END = 6.333;
 
-  // [start, end, text]: the original's captions, word for word with its line
+  // [start, end, text]: the user's captions for the two scenes ("Me every night",
+  // "Me every morning"), in the original's caption style:
   // breaks, in its style: black sentence-case sans in a white rounded box
   // (sized from the original: 70 px text, a 2-line box about 190 px tall).
   const LINES = [
-    [0, CUT1, 'Me setting my morning\nself up for success'],
-    [CUT3, END + 1, 'My morning self'],
+    [0, CUT1, 'Me every night'],
+    [CUT3, END + 1, 'Me every morning'],
   ];
   const CAP = 70, LEAD = 80, PAD_X = 44, PAD_Y = 34, CAP_TOP = Stage.SAFE.top;
   const capBottom = t => { const l = LINES.find(([a, b]) => t >= a && t < b); return l ? CAP_TOP + l[2].split('\n').length * LEAD + 2 * PAD_Y : 0; };
@@ -180,8 +181,10 @@ Skits.morningself = (() => {
   // camera: (cx, cy) stays put on screen, everything scales about it
   const zoom = (ctx, cx, cy, z) => { ctx.translate(cx, cy); ctx.scale(z, z); ctx.translate(-cx, -cy); };
   const TOP_UP = UP + 345, TOP_DOWN = DOWN + 200;   // blanket edge: at his chest, then up to his chin
-  const HOLD = [196, -318];                           // phone up in his right hand, beside his face (pose space)
-  const TAP_L = [-60, -140];                          // the other hand stays under the blanket
+  // Two hands, as in the phone close-up that follows: the right holds the phone
+  // up beside his face, the left reaches across and taps its screen side.
+  const HOLD = [215, -318];                           // phone in his right hand (pose space)
+  const TAP_L = [160, -380];                          // left thumb on the phone's screen edge
   const UNDER_L = [-60, -140], UNDER_R = [60, -140];  // hands under the blanket
   const ON_STAND = [PHONE[0] - 24, PHONE[1] - 34];
   // pleased with himself but sleepy: heavy lids, a small closed smile (no teeth)
@@ -194,8 +197,8 @@ Skits.morningself = (() => {
       room(ctx, false); mattress(ctx);
       const dip = 6 * tap(t);
       pose(UP, { ...smug,
-        ...Arms.arm(1, [HOLD[0], HOLD[1] + dip], 'down', true, 100), holdR: heldPhone(-0.12 + 0.05 * tap(t)),   // his thumb taps: the phone dips
-        ...Arms.arm(-1, TAP_L, 'down') }, TOP_UP)(ctx);
+        ...Arms.arm(1, [HOLD[0], HOLD[1] + dip * 0.5], 'down', false, 100), holdR: heldPhone(-0.12 + 0.03 * tap(t)),   // behind his left hand
+        ...Arms.arm(-1, [TAP_L[0] + 10 * tap(t), TAP_L[1] + dip], 'down', true, 120) }, TOP_UP)(ctx);   // each tap presses in
       ctx.restore();
     }],
     // the phone screen: a wall of alarms, all switched on
@@ -212,20 +215,20 @@ Skits.morningself = (() => {
       const swing = (a, b, k) => { const m = [(a[0] + b[0]) / 2 + 40, Math.max(a[1], b[1]) + 110]; return [0, 1].map(i => (1 - k) ** 2 * a[i] + 2 * k * (1 - k) * m[i] + k * k * b[i]); };   // dips below his jaw
       const rHand = holding ? local(hy, swing([holdScr[0] - wind, holdScr[1]], ON_STAND, easeOutBack(reach)))
                             : Stage.mix(local(hy, ON_STAND), UNDER_R, easeInOut(back));
-      const lHand = UNDER_L;
+      const lHand = Stage.mix(TAP_L, UNDER_L, easeInOut(seg(t, 1.97, 2.2)));   // the tapping hand lets go and slides under the blanket
       // the face carries over from shot 1, then lids heavy, heavier, shut
       const lid = t < 2.28 ? smug.lid : t < 2.42 ? lerp(smug.lid, 0.72, seg(t, 2.28, 2.42)) : t < 2.48 ? 0.8 : 1;
       const face = t < 2.3 ? { ...smug } : { mouth: t < 2.6 ? 'smile' : 'flat', brow: 0, browLiftL: 18, browLiftR: 18, lookX: 0.55, lookY: 0.3, lowLid: 0.2, heavyLid: true };
       pose(hy, { ...face, lid, tilt: lerp(0.1, 0.16, sink),
         ...Arms.arm(1, rHand, 'down', false, 100), ...(holding ? { holdR: heldPhone(lerp(-0.12, -1.45, easeOut(reach))) } : {}),
-        ...Arms.arm(-1, lHand, 'down') }, top,
+        ...Arms.arm(-1, lHand, 'down', t < 2.1, 120) }, top,
         () => { if (!holding) phoneFlat(ctx, PHONE[0], PHONE[1], t < 2.66); })(ctx);
       ctx.restore();
     }],
     // morning: asleep, the alarm buzzes, his arm slaps snooze again and again
     [CUT3, END + 1, (ctx, t) => {
       const f = Math.round(t * FPS);
-      ctx.save(); zoom(ctx, 1000, 2900, lerp(1.2, 1.21, easeInOut(seg(t, CUT3, END))));   // stops short of the caption box
+      ctx.save(); zoom(ctx, 1000, 2780, lerp(1.2, 1.21, easeInOut(seg(t, CUT3, END))));   // stops short of the caption box
       room(ctx, true); mattress(ctx);
       const { k, contact, since } = slap(t);
       const jolt = since < 0.12 ? 0.06 * (1 - since / 0.12) : 0;   // his head nods into each slap
