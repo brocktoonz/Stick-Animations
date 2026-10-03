@@ -93,6 +93,14 @@ const Chars = (() => {
         ctx.moveTo(ex - rx - 10, y - ry - 10); ctx.lineTo(ex + rx + 10, y - ry - 10); ctx.lineTo(ex + rx + 10, lowY + 4 * size);
         ctx.quadraticCurveTo(ex, lowY - 16 * size, ex - rx - 10, lowY + 4 * size); ctx.closePath(); ctx.clip();
       }
+      // heavyLid (opt-in): drowsy. Nothing of the eye shows above the lid line,
+      // which is thick and sags toward the outer corner; the pupil sits under it.
+      const heavy = p.heavyLid && lid > 0.02, hly = y - ry + lid * ry * 1.2, sag = 9 * size;
+      if (heavy) {
+        ctx.save(); ctx.beginPath();
+        ctx.moveTo(ex - side * (rx + 10), hly - 2); ctx.lineTo(ex + side * (rx + 10), hly + sag - 2);
+        ctx.lineTo(ex + side * (rx + 10), y + ry + 10); ctx.lineTo(ex - side * (rx + 10), y + ry + 10); ctx.closePath(); ctx.clip();
+      }
       blob(ctx, ex, y, rx, ry, { w: 6 * size, n: 12 });
       const pr = (p.pupil ?? 13) * size;
       // pupils can travel right to the rim, so a sideways look reads at phone size
@@ -115,7 +123,10 @@ const Chars = (() => {
         const drop = [[dx, dy - 10 * size], [dx + 8 * size, dy + 6 * size], [dx, dy + 12 * size], [dx - 8 * size, dy + 6 * size]];
         fill(ctx, drop, '#d9d9d9', 0.3); outline(ctx, drop, { w: 4 * size });
       }
-      if (lid > 0.02) {
+      if (heavy) {
+        ctx.restore();
+        stroke(ctx, [[ex - side * (rx + 4), hly], [ex, hly + sag * 0.25], [ex + side * (rx + 6), hly + sag + 2]], { w: 9 * size, taper0: 0.1, taper1: 0.15 });
+      } else if (lid > 0.02) {
         const ly = y - ry + lid * ry * 1.2;
         clipEye();
         ctx.fillStyle = W; ctx.fillRect(ex - rx - 4, y - ry - 4, rx * 2 + 8, ly - (y - ry) + 4);
