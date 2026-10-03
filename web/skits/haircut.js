@@ -448,7 +448,8 @@ Skits.haircut = (() => {
       const move = n === 0 || n >= SNIPS1.length ? (n === 0 ? 1 : 0) : easeInOut(seg(t, prevAt + 0.12, Math.max(prevAt + 0.13, nextAt - 0.08)));
       const bob = since < 0.18 ? 6 * Math.sin(Math.PI * since / 0.18) : 0;   // a small dip on each snip
       const spot = Stage.mix(spotWas, spotNow, move);
-      hl = Stage.mix(high, b1Local([spot[0], spot[1] + bob], lean, bx, fy, bs), rise);
+      const over = b1Local([410, 770], lean, bx, fy, bs), onSpot = b1Local([spot[0], spot[1] + bob], lean, bx, fy, bs);   // in over the crown, then straight down behind his head
+      hl = rise < 0.5 ? Stage.mix(high, over, easeInOut(rise / 0.5)) : Stage.mix(over, onSpot, ((rise - 0.5) / 0.5) ** 2);
       rot = lerp(-1.45, CUT_ROT - lean, rise); open1 = rise < 1 ? 0 : Math.min(open, easeOut(seg(t, RISE[1], RISE[1] + 0.06)));   // turned down and shut before they reach his hair; the snips happen out of sight
       
     }
@@ -599,7 +600,7 @@ Skits.haircut = (() => {
   // snip. Uneven, hand-timed.
   const SNIPS3 = [0.15, 0.42, 0.8, 1.06, 1.42, 1.7, 2.12].map(d => CUT_3 + d);
   const AT3 = [450, 1380], Z3 = 0.84;   // the mirror shot pulled back a little and him a little left, to make room for the barber beside him
-  const B3 = { hx: 640, hy: 789, s: 0.7, lean: -0.08 };   // the barber's head centre (world): just over the hair at the right, under the caption; his body down the right side
+  const B3 = { hx: 645, hy: 805, s: 0.7, lean: -0.08 };   // the barber's head centre (world): just over the hair at the right, under the caption; his body down the right side
   function barberBehind3(ctx, t) {
     let since = 9;
     for (const sAt of SNIPS3) if (t >= sAt) since = t - sAt;
@@ -649,35 +650,41 @@ Skits.haircut = (() => {
   // At this size the rig's half-lidded eye shows its construction, so these eyes
   // are drawn clean: a solid ring, the pupil under the lid, the lid's edge.
   const eyesClean = (ctx, fx, rage, p) => {
-    const lid = p.cleanLid ?? 0, rx = 30, ry = 40, y = -6, T = 1.3;   // ring half-thickness: about twice the head line here
+    const lid = p.cleanLid ?? 0, rx = 30, ry = 40, y = -6;
     for (const side of [-1, 1]) {
       const ex = fx + side * 40;
       fill(ctx, Brush.ellipsePts(ex, y, rx + 10, ry + 10, 24), W, 0);           // over the rig's eye
-      // The lid's edge is one curve, bowed up over the eyeball, that meets the
-      // ring exactly where it crosses it; the ring and the pupil stop along that
-      // same curve, so there are no cut corners or tabs where they join.
-      const ly = y - ry + Math.min(lid, 0.92) * ry * 2;
-      const open = lid <= 0.02;
-      const xo = rx * Math.sqrt(Math.max(0, 1 - ((ly - y) / ry) ** 2)), bow = 0.22 * xo;
-      const L = [ex - xo, ly], R = [ex + xo, ly], C = [ex, ly - 2 * bow];      // C: quadratic control (the curve's peak is bow above the ends)
-      const below = () => {   // the region under the lid's edge
-        ctx.beginPath(); ctx.moveTo(L[0] - 40, ly); ctx.lineTo(L[0], ly); ctx.quadraticCurveTo(C[0], C[1], R[0], R[1]);
-        ctx.lineTo(R[0] + 40, ly); ctx.lineTo(R[0] + 40, y + ry + 30); ctx.lineTo(L[0] - 40, y + ry + 30); ctx.closePath();
-      };
-      ctx.save(); if (!open) { below(); ctx.clip(); }
-      fill(ctx, Brush.ellipsePts(ex, y, rx + T, ry + T, 40), INK, 0);
-      fill(ctx, Brush.ellipsePts(ex, y, rx - T, ry - T, 40), W, 0);
-      ctx.beginPath(); ctx.ellipse(ex, y, rx - T, ry - T, 0, 0, 7); ctx.clip();
-      ctx.fillStyle = INK; ctx.beginPath(); ctx.ellipse(ex, y + 4, 13, 14, 0, 0, 7); ctx.fill();   // pupil, smooth
-      if (!open) {   // the lid: everything inside the eye above its edge
-        ctx.fillStyle = W; ctx.beginPath(); ctx.moveTo(L[0] - 40, y - ry - 30); ctx.lineTo(L[0] - 40, ly); ctx.lineTo(L[0], ly);
-        ctx.quadraticCurveTo(C[0], C[1], R[0], R[1]); ctx.lineTo(R[0] + 40, ly); ctx.lineTo(R[0] + 40, y - ry - 30); ctx.closePath(); ctx.fill();
+      if (lid >= 0.72) {   // shut: one soft curve, the lashes' line
+        stroke(ctx, [[ex - rx - 2, y + 14], [ex - rx * 0.5, y + 24], [ex, y + 27], [ex + rx * 0.5, y + 24], [ex + rx + 2, y + 14]], { w: 13, taper0: 0.3, taper1: 0.3, jit: 0 });
+        continue;
       }
+      // Open or lidded: the eye is ONE closed shape, the lid's curve across the
+      // top running into the round of the eye below it, outlined in one go, so
+      // there are no joins, corners or tabs where lid and eye meet.
+      const ly = y - ry + lid * ry * 2;
+      const shape = [];
+      if (lid <= 0.02) shape.push(...Brush.ellipsePts(ex, y, rx, ry, 96));
+      else {
+        const t0 = Math.asin(Math.max(-1, Math.min(1, (ly - y) / ry)));   // where the lid's line crosses the eye
+        const n = 72;
+        for (let i = 0; i <= n; i++) {   // the round of the eye, under the lid: right crossing, down round the bottom, to the left crossing
+          const a = t0 + (Math.PI - 2 * t0) * i / n;
+          shape.push([ex + rx * Math.cos(a), y + ry * Math.sin(a)]);
+        }
+        const xo = rx * Math.cos(t0), bow = 0.3 * xo;
+        for (let i = 1; i < 24; i++) {   // the lid, bowed up over the eyeball, back across to the right
+          const k = i / 24;
+          shape.push([ex - xo + 2 * xo * k, ly - bow * Math.sin(Math.PI * k)]);
+        }
+      }
+      fill(ctx, shape, W, 0);
+      ctx.save(); ctx.beginPath(); ctx.moveTo(...shape[0]); for (const q of shape) ctx.lineTo(...q); ctx.closePath(); ctx.clip();
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.ellipse(ex, y + 4, 13, 14, 0, 0, 7); ctx.fill();   // pupil, under the lid
       ctx.restore();
-      if (!open) {
-        const edge = []; for (let i = 0; i <= 12; i++) { const k = i / 12, u = 1 - k; edge.push([u * u * L[0] + 2 * u * k * C[0] + k * k * R[0], u * u * L[1] + 2 * u * k * C[1] + k * k * R[1]]); }
-        stroke(ctx, edge, { w: 12, taper0: 0.15, taper1: 0.15, minW: 1, jit: 0 });   // the lid's edge, ending on the ring
-      }
+      // one closed line with round joins: no start/end seam (at this zoom the
+      // brush's join and boil would show as a tick and a wobble)
+      ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = 12 * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(...shape[0]); for (const q of shape) ctx.lineTo(...q); ctx.closePath(); ctx.stroke(); ctx.restore();
     }
   };
   const eyeRig = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', detail: hoodieFront,
