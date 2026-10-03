@@ -403,18 +403,18 @@ Skits.haircut = (() => {
   // The barber starts beside the chair, arms down. He lifts the scissors up by
   // his head, walks round behind the chair (a step further back, so his face
   // shows over the customer's head) and brings them down onto the top of his
-  // hair from behind: the blades in view in the hair.
-  // Nothing visibly comes off yet. He lets his eyes fall shut and we push in.
+  // hair from behind: his hands and the scissors go down behind the customer's
+  // head, out of sight, so we never see the actual cutting; only the barber's
+  // face over the top, nodding a little on each snip. Nothing visibly comes off
+  // yet. He lets his eyes fall shut and we push in.
   const B1 = { x0: 860, x1: 470, f0: 1660, f1: 1415, s0: 1.15, s1: 1.0 };   // further back behind the chair he's a little smaller, his eyes above the work
   const LIFT = [0.3, 0.62], WALK = [0.42, 1.12], RISE = [1.2, 1.45];   // the walk starts as the scissors come up
   const SNIPS1 = [1.62, 1.84, 2.14, 2.36, 2.64, 2.86];        // hand-timed, uneven
-  const CUT_SPOTS = [[336, 818], [318, 830], [352, 810]];      // his scissor hand over the crown, blades down into the hair
+  const CUT_SPOTS = [[370, 1010], [352, 1030], [392, 1000]];   // his scissor hand behind the back of the head, hidden
   const SPOT_AT = [0, 1, 0, 2, 1, 0];
-  const CUT_ROT = -2.3;                                        // the blades pointing down and left into the hair
-  const HAIRLINE = 840;                                        // above this a hand is clear of his hair, so drawing it in front changes nothing
+  const CUT_ROT = -0.6;                                        // the blades up into the back of the hair (hidden)
   const CLOSE = [1.7, 2.3], PUSH1 = [1.65, CUT_2];
   const b1Local = ([X, Y], lean, bx, fy, bs) => { const x = (X - bx) / bs, y = (Y - fy) / bs; const c = Math.cos(-lean), sn = Math.sin(-lean); return [x * c - y * sn, x * sn + y * c]; };
-  const b1World = ([x, y], lean, bx, fy, bs) => { const c = Math.cos(lean), sn = Math.sin(lean); return [bx + (x * c - y * sn) * bs, fy + (x * sn + y * c) * bs]; };
   function shot1(ctx, t) {
     // camera: the wide framing, then a push in on his face as his eyes close
     const c0 = { S: WIDE, A: [540 + WIDE * (GX - 540), 1920 + WIDE * (GY - 1920)] }, c1 = { S: 1.5, A: [610, 1540] };   // his face low, the barber's head clear of the caption
@@ -437,7 +437,7 @@ Skits.haircut = (() => {
     // the scissor hand (pose space): at his side, lifted up by his head, carried
     // high over the chair, then down onto the crown, snipping
     const rest = [-104, -284], high = [-160, -690];   // up by his head, the blades pointing out sideways
-    let hl, rot, open1 = 0, lockAt = null;
+    let hl, rot, open1 = 0;
     const rise = easeInOut(seg(t, RISE[0], RISE[1]));
     if (t < RISE[0]) {
       const lift = easeOutBack(seg(t, LIFT[0], LIFT[1]));
@@ -450,7 +450,7 @@ Skits.haircut = (() => {
       const spot = Stage.mix(spotWas, spotNow, move);
       hl = Stage.mix(high, b1Local([spot[0], spot[1] + bob], lean, bx, fy, bs), rise);
       rot = lerp(-1.45, CUT_ROT - lean, rise); open1 = rise < 1 ? 0 : Math.min(open, easeOut(seg(t, RISE[1], RISE[1] + 0.06)));   // shut until the blades are in the hair
-      if (rise >= 1) lockAt = spot;
+      
     }
     // the comb hand stays down at his side (behind the chair once he's round there)
     const hr = Stage.mix([96, -196], [40, -300], walk);   // tucked in out of sight behind him once he's round there
@@ -459,7 +459,8 @@ Skits.haircut = (() => {
     const holdL = scissors(rot, open1, 1.5, W);   // big and white, so they read on his grey hair
     // the barber, drawn first: behind the chair and him
     barberRig(ctx, { x: bx, y: fy, s: bs, lean, step, weight: walk > 0 && walk < 1 ? 0 : 0.5, ...fussy,
-      lookX: lerp(-0.4, -0.3, walk), lookY: lerp(0.2, 0.6, walk), ...armL, holdL, ...armR, holdR: comb });
+      lookX: lerp(-0.4, -0.3, walk), lookY: lerp(0.2, 0.6, walk), tilt: since < 0.2 ? 0.05 * Math.sin(Math.PI * since / 0.2) : 0,   // a little nod on each snip
+      ...armL, holdL, ...armR, holdR: comb });
     chairBack(ctx);
     const nod = since < 0.2 ? 0.015 * (1 - since / 0.2) : 0;
     const shut = easeInOut(seg(t, CLOSE[0], CLOSE[1]));   // a slow, relaxed close
@@ -469,18 +470,7 @@ Skits.haircut = (() => {
     ctx.restore();
     cape(ctx);
     chairFront(ctx);
-    // his hand comes over the top of the hair from behind: once it's above the
-    // hairline it's drawn again over the hair, so the scissors stay in view where
-    // they meet it (the arm runs down behind his head)
-    if (lockAt) {   // the lock, pulled up from the crown into the blades
-      const dir = [Math.sin(rot + lean), -Math.cos(rot + lean)], X = [lockAt[0] + dir[0] * 108, lockAt[1] + dir[1] * 108];
-      const L = lock([0, 0.3], [0.02, -0.12], 0.2, 0.04).map(([u, v]) => [X[0] + u * RX * GS * 0.5, X[1] + v * RY * GS * 0.5]);
-      outline(ctx, L, { w: 9 }); fill(ctx, L, GREY, 0.3);
-    }
-    const handL = [armL.armL[0], armL.armL[1] + BDY];
-    ctx.save(); ctx.translate(bx, fy); ctx.scale(bs, bs); ctx.rotate(lean);
-    if (t >= RISE[0] && b1World(handL, lean, bx, fy, bs)[1] < HAIRLINE) { holdL(ctx, handL[0], handL[1]); Chars.hand(ctx, handL[0], handL[1], null, 1, W); }
-    ctx.restore();
+    // (the scissor hand stays behind his head: the rig drew it before him, so he covers it)
     ctx.restore();
     // what has to stay under the caption: his hair, and the barber's head
     const y = Y => A[1] + (Y - GY) * S, headTop = fy - 678 * bs - RY * 0.9 * bs;
@@ -627,7 +617,7 @@ Skits.haircut = (() => {
   // ---------- 2: extreme close-up, he opens his eyes (3.5 - 5.0) ----------
   // Framed from the eyes down, so whatever the barber did stays out of frame.
   // No caption. The lids come up slowly, stall, then open.
-  const EYE_AT = [540, 560], EYE_S = 5.0;   // low enough that the fringe tips show across the top edge   // his eyes' centre on screen, world scale
+  const EYE_AT = [540, 480], EYE_S = 5.0;   // his eyes' centre on screen, world scale: high enough that his hair stays out of frame
   // At this size the rig's half-lidded eye shows its construction, so these eyes
   // are drawn clean: a solid ring, the pupil under the lid, the lid's edge.
   const eyesClean = (ctx, fx, rage, p) => {

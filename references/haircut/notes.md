@@ -26,13 +26,13 @@ Beats (four shots, hard cuts only):
             lifts the scissors up by his head (0.3–0.62) as he starts round
             behind the chair (0.42–1.12), a step further back so his face shows
             over the customer's head; brings them down onto the top of the hair
-            from behind (1.2–1.45), blades shut until they're in the hair. Big
-            white scissors, so they read on the grey hair; the hand is drawn
-            over the hair once it's above it, the arm running down behind.
+            from behind (1.2–1.45) and down behind the back of his head, out of
+            sight: we never see the scissors doing the cutting, only the barber's
+            face over the top, nodding a little on each snip.
             Six snips (1.62, 1.84, 2.14, 2.36, 2.64, 2.86); nothing visibly comes
             off. 1.7–2.3 his eyes fall shut; 1.65–3.0 the camera pushes in.
             Caption: "Me before getting my haircut"
-- 3.00–4.50 2, extreme close-up from the eyes down (the haircut stays out of
+- 3.00–4.50 2, extreme close-up from the brows down (his hair stays out of
             frame). His eyes open: half at 3.35–3.7, a stall, then open at
             3.95–4.2. No caption.
 - 4.50–7.00 3, his reflection: the glow-up face in the mirror (frame edges, a
