@@ -491,7 +491,8 @@ Skits.extinct = (() => {
       const kickAmt = t < 17.08 ? -0.35 * easeOut(wind) : kick < 1 ? lerp(-0.35, 1, kick) : 1 - easeInOut(seg(fly, 0.35, 1));
       // smug the whole time: eyes closed, arms folded, and he never opens his
       // eyes or changes expression, even for the kick
-      lud(ctx, { t, x: 640, ...E.smirk, lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06, crossArms: true,
+      // (between his two lines the mouth holds the same closed rest shape the lip sync uses)
+      lud(ctx, { t, x: 640, ...E.smirk, mouth: 'talk', viz: { kind: 'rest', open: LipSync.OPEN.rest, intensity: 1, smile: 0, side: 1, var: 0 }, lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06, crossArms: true,
                  ...talkLine(t, t < 17.0 ? 13 : 14),
                  kick: kickAmt, lean: -0.1 * kick * (1 - fly) + 0.05 * wind, ...(t > 16.98 ? { weight: -0.6 } : {}) });
       // a small raptor wanders in on its own from the left (separate from the
