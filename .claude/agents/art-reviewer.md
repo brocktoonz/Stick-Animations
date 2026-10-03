@@ -48,6 +48,7 @@ Backgrounds
 Characters
 - Each character matches their design notes in STYLE.md and cameos.js/hero.js.
 - No character has ears (STYLE.md rule, user decision): flag any ear on any head.
+- No stray expression flashes: in short pauses between a character's lines (and at line starts and ends), the mouth holds a closed speech shape that fits the shot's emotion. Flag any 1–3 frame pop of a different expression mouth (a grin, a smirk) left over from a fallback pose. Step through every pause frame by frame.
 - Hair reads as hair (not a cap, leaf or helmet). Facial hair reads as hair (not a smear or mask).
 - Silhouettes stay distinct between characters.
 - Anatomy is correct: no backwards elbows, and no hands detached from arms. Check this on characters that are only partly in frame too (e.g. Slime leaning in from the edge): the user caught arms bending backwards there that the reviewer missed.
