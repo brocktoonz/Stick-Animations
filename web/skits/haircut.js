@@ -407,9 +407,9 @@ Skits.haircut = (() => {
   // head, out of sight, so we never see the actual cutting; only the barber's
   // face over the top, nodding a little on each snip. Nothing visibly comes off
   // yet. He lets his eyes fall shut and we push in.
-  const B1 = { x0: 860, x1: 470, f0: 1660, f1: 1415, s0: 1.15, s1: 1.0 };   // further back behind the chair he's a little smaller, his eyes above the work
-  const LIFT = [0.3, 0.62], WALK = [0.42, 1.12], RISE = [0.92, 1.36];   // down behind his head as he settles there   // the walk starts as the scissors come up
-  const SNIPS1 = [1.62, 1.84, 2.14, 2.36, 2.64, 2.86];        // hand-timed, uneven
+  const B1 = { x0: 860, x1: 470, f0: 1660, f1: 1660, s0: 1.28, s1: 1.28 };   // he walks along the floor behind the chair; tall enough that his eyes clear the customer's hair
+  const LIFT = [0.3, 0.62], WALK = [0.4, 1.3], RISE = [1.15, 1.55];   // a steady walk round behind the chair, then down behind his head as he settles there   // the walk starts as the scissors come up
+  const SNIPS1 = [1.66, 1.88, 2.14, 2.36, 2.64, 2.86];        // hand-timed, uneven
   const CUT_SPOTS = [[370, 1010], [352, 1030], [392, 1000]];   // his scissor hand behind the back of the head, hidden
   const SPOT_AT = [0, 1, 0, 2, 1, 0];
   const CUT_ROT = -Math.PI;                                    // the blades pointing down, so they slide in behind his head tips first
@@ -430,7 +430,7 @@ Skits.haircut = (() => {
       if (t >= sAt) since = t - sAt;
     });
     const n = SNIPS1.filter(sAt => t >= sAt).length;
-    const walk = easeInOut(seg(t, WALK[0], WALK[1]));
+    const wk = seg(t, WALK[0], WALK[1]), walk = 0.25 * easeInOut(wk) + 0.75 * wk;   // a steady pace, easing only a little at each end
     const bx = lerp(B1.x0, B1.x1, walk), fy = lerp(B1.f0, B1.f1, walk), bs = lerp(B1.s0, B1.s1, walk);   // round behind the chair, a step back
     const step = t > WALK[0] && t < WALK[1] ? 0.7 * Math.sin(Math.PI * 2 * (t - WALK[0]) / 0.35) * (1 - Math.abs(2 * walk - 1) ** 3) : 0;
     const lean = lerp(-0.03, 0.03, walk) - 0.008 * Math.sin(t * 0.9) + (since < 0.22 ? -0.035 * Math.sin(Math.PI * since / 0.22) : 0);   // he dips into each snip
@@ -598,8 +598,8 @@ Skits.haircut = (() => {
   // hands and the scissors down behind the head, out of sight; a nod into each
   // snip. Uneven, hand-timed.
   const SNIPS3 = [0.15, 0.42, 0.8, 1.06, 1.42, 1.7, 2.12].map(d => CUT_3 + d);
-  const AT3 = [450, 1560], Z3 = 0.84;   // the mirror shot pulled back a little and him a little left, to make room for the barber beside him
-  const B3 = { hx: 592, hy: 790, s: 0.9, lean: -0.08 };   // the barber's head centre (world): just over the hair at the right, under the caption; his body down the right side
+  const AT3 = [450, 1380], Z3 = 0.84;   // the mirror shot pulled back a little and him a little left, to make room for the barber beside him
+  const B3 = { hx: 640, hy: 789, s: 0.7, lean: -0.08 };   // the barber's head centre (world): just over the hair at the right, under the caption; his body down the right side
   function barberBehind3(ctx, t) {
     let since = 9;
     for (const sAt of SNIPS3) if (t >= sAt) since = t - sAt;
@@ -621,6 +621,10 @@ Skits.haircut = (() => {
     ctx.save(); ctx.beginPath(); ctx.rect(40, 0, 1000, 1920); ctx.clip();   // the glass: nothing of the reflection past the frame
     closeUp(ctx, z * Z3, () => {
       barberBehind3(ctx, t);
+      // the chair's back behind his shoulders: the barber stands behind it, so it hides his legs
+      const cb = [[GX - 330, 1560], [GX - 340, 1250], [GX - 280, 1185], [GX + 280, 1185], [GX + 340, 1250], [GX + 330, 1560]];
+      panel(ctx, cb, '#3a3a3a', 11);
+      stroke(ctx, [[GX - 300, 1236], [GX + 300, 1238]], { w: 5, color: '#8a8a8a' });
       glowRig(ctx, { x: GX, y: gFeet, s: GS, raise, tilt: -0.04 + 0.006 * Math.sin(t * 1.2) });
       cape(ctx, null, CU_CAPE);
     }, AT3, Z3);
@@ -634,7 +638,8 @@ Skits.haircut = (() => {
     for (const x0 of [-20, 1040]) panel(ctx, box(x0, -40, x0 + 60, 1960, 6), '#5a5a5a', 12);
     stroke(ctx, [[930, 330], [1010, 210]], { w: 20, color: W, taper0: 0.3, taper1: 0.3 });   // up in the corner, clear of the barber
     stroke(ctx, [[960, 410], [1015, 330]], { w: 9, color: W, taper0: 0.3, taper1: 0.3 });
-    return { top: Math.min(AT3[1] - 1.84 * RY * GS * CU_S * z * Z3 - 10, AT3[1] + (B3.hy - 0.9 * RY * B3.s - GY) * CU_S * z * Z3, ...sp.map(([, y, r]) => AT3[1] + (y - CU_AT[1]) * z * Z3 - r)) };
+    // (the barber stands off to the right of the caption block, so only his hair and the sparkles count here)
+    return { top: Math.min(AT3[1] - 1.84 * RY * GS * CU_S * z * Z3 - 10, ...sp.map(([, y, r]) => AT3[1] + (y - CU_AT[1]) * z * Z3 - r)) };
   }
 
   // ---------- 2: extreme close-up, he opens his eyes (3.0 - 4.5) ----------
@@ -648,21 +653,31 @@ Skits.haircut = (() => {
     for (const side of [-1, 1]) {
       const ex = fx + side * 40;
       fill(ctx, Brush.ellipsePts(ex, y, rx + 10, ry + 10, 24), W, 0);           // over the rig's eye
-      // the ring shows only below the lid's edge, so the lid always closes it off
-      // at the top: shut, a small curve; open, nearly the whole ring
-      const ly0 = y - ry + Math.min(lid, 0.9) * ry * 2;
-      ctx.save(); ctx.beginPath(); ctx.rect(ex - rx - 6, lid > 0.02 ? ly0 : y - ry - 6, rx * 2 + 12, ry * 3); ctx.clip();
+      // The lid's edge is one curve, bowed up over the eyeball, that meets the
+      // ring exactly where it crosses it; the ring and the pupil stop along that
+      // same curve, so there are no cut corners or tabs where they join.
+      const ly = y - ry + Math.min(lid, 0.92) * ry * 2;
+      const open = lid <= 0.02;
+      const xo = rx * Math.sqrt(Math.max(0, 1 - ((ly - y) / ry) ** 2)), bow = 0.22 * xo;
+      const L = [ex - xo, ly], R = [ex + xo, ly], C = [ex, ly - 2 * bow];      // C: quadratic control (the curve's peak is bow above the ends)
+      const below = () => {   // the region under the lid's edge
+        ctx.beginPath(); ctx.moveTo(L[0] - 40, ly); ctx.lineTo(L[0], ly); ctx.quadraticCurveTo(C[0], C[1], R[0], R[1]);
+        ctx.lineTo(R[0] + 40, ly); ctx.lineTo(R[0] + 40, y + ry + 30); ctx.lineTo(L[0] - 40, y + ry + 30); ctx.closePath();
+      };
+      ctx.save(); if (!open) { below(); ctx.clip(); }
       fill(ctx, Brush.ellipsePts(ex, y, rx + T, ry + T, 40), INK, 0);
       fill(ctx, Brush.ellipsePts(ex, y, rx - T, ry - T, 40), W, 0);
-      ctx.restore();
-      ctx.save(); ctx.beginPath(); ctx.ellipse(ex, y, rx - T, ry - T, 0, 0, 7); ctx.clip();
+      ctx.beginPath(); ctx.ellipse(ex, y, rx - T, ry - T, 0, 0, 7); ctx.clip();
       ctx.fillStyle = INK; ctx.beginPath(); ctx.ellipse(ex, y + 4, 13, 14, 0, 0, 7); ctx.fill();   // pupil, smooth
-      const ly = y - ry + Math.min(lid, 0.9) * ry * 2;                              // shut: the lid down to near the bottom
-      if (lid > 0.02) {
-        ctx.fillStyle = W; ctx.fillRect(ex - rx - 6, y - ry - 6, rx * 2 + 12, ly - (y - ry) + 6);
-        stroke(ctx, [[ex - rx - 2, ly + 2], [ex, ly - 1], [ex + rx + 2, ly + 2]], { w: 14, taper0: 0, taper1: 0, minW: 1 });   // the lid's edge, inside the ring
+      if (!open) {   // the lid: everything inside the eye above its edge
+        ctx.fillStyle = W; ctx.beginPath(); ctx.moveTo(L[0] - 40, y - ry - 30); ctx.lineTo(L[0] - 40, ly); ctx.lineTo(L[0], ly);
+        ctx.quadraticCurveTo(C[0], C[1], R[0], R[1]); ctx.lineTo(R[0] + 40, ly); ctx.lineTo(R[0] + 40, y - ry - 30); ctx.closePath(); ctx.fill();
       }
       ctx.restore();
+      if (!open) {
+        const edge = []; for (let i = 0; i <= 12; i++) { const k = i / 12, u = 1 - k; edge.push([u * u * L[0] + 2 * u * k * C[0] + k * k * R[0], u * u * L[1] + 2 * u * k * C[1] + k * k * R[1]]); }
+        stroke(ctx, edge, { w: 12, taper0: 0.15, taper1: 0.15, minW: 1, jit: 0 });   // the lid's edge, ending on the ring
+      }
     }
   };
   const eyeRig = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', detail: hoodieFront,

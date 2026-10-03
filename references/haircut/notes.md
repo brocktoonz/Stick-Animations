@@ -23,13 +23,13 @@ nose line, smirk; its pink blush is not used).
 
 Beats (four shots, hard cuts only):
 - 0.00–3.00 1, wide. The barber starts beside the chair, arms down (0–0.3);
-            lifts the scissors up by his head (0.3–0.62) as he starts round
-            behind the chair (0.42–1.12), a step further back so his face shows
-            over the customer's head; takes them down behind the back of his head
-            as he settles there (0.92–1.36), out of sight: we never see the scissors doing the cutting, only the barber's
+            lifts the scissors up by his head (0.3–0.62) as he walks steadily
+            round behind the chair along the floor (0.4–1.3), tall enough that
+            his face shows over the customer's head; takes them down behind the back of his head
+            as he settles there (1.15–1.55), out of sight: we never see the scissors doing the cutting, only the barber's
             face over the top, nodding and dipping into each snip, the customer's
             head tugged a little.
-            Six snips (1.62, 1.84, 2.14, 2.36, 2.64, 2.86); nothing visibly comes
+            Six snips (1.66, 1.88, 2.14, 2.36, 2.64, 2.86); nothing visibly comes
             off. 1.7–2.3 his eyes fall shut; 1.65–3.0 the camera pushes in.
             Caption: "Me before getting my haircut"
 - 3.00–4.50 2, extreme close-up from the brows down (his hair stays out of
@@ -41,7 +41,9 @@ Beats (four shots, hard cuts only):
             the mirror, standing at his shoulder on the right: head just over the
             hair (under the caption), body down the right side, hands and
             scissors behind his head, nodding into each snip. The framing is
-            pulled back a little (0.84) and the customer set left to make room.
+            pulled back a little (0.84), the customer set left and raised so the
+            caption sits right over his hair; the chair's back behind his
+            shoulders hides the barber's legs.
             Caption: "Me that one random moment during my haircut"
 - 7.00–10.5 4, the truth: driving home, eye level and straight on from the
             dashboard. He sits right of centre (an American driver). Four flat
