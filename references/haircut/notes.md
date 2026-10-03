@@ -38,8 +38,10 @@ Beats (four shots, hard cuts only):
 - 4.50–7.00 3, his reflection: the glow-up face in the mirror (frame edges, a
             sheen), auburn swept hair; sparkles at 4.75, 5.05, 5.35, the brow
             lifts at 5.25–5.45, a 3% scale-in. The barber is still behind him in
-            the mirror, his head over the hair at the right (clear of the
-            caption), hands and scissors out of sight, nodding into each snip.
+            the mirror, standing at his shoulder on the right: head just over the
+            hair (under the caption), body down the right side, hands and
+            scissors behind his head, nodding into each snip. The framing is
+            pulled back a little (0.84) and the customer set left to make room.
             Caption: "Me that one random moment during my haircut"
 - 7.00–10.5 4, the truth: driving home, eye level and straight on from the
             dashboard. He sits right of centre (an American driver). Four flat

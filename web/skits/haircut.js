@@ -485,12 +485,12 @@ Skits.haircut = (() => {
   const CU_WEIGHT = WIDE / CU_S;
   const CU_CAPE = 46;   // the cape sits a little lower in the close-ups, so it doesn't cut off his chin and jaw
   const cuHeadY = (yHead, z) => CU_AT[1] + yHead * GS * CU_S * z;   // a head-space y on screen
-  function closeUp(ctx, z, draw) {
+  function closeUp(ctx, z, draw, at = CU_AT, zLine = 1) {   // zLine: a framing scale whose line weight is kept the same
     ctx.fillStyle = CU_BG; ctx.fillRect(0, 0, 1080, 1920);
     ctx.save();
-    ctx.translate(CU_AT[0], CU_AT[1]); ctx.scale(z, z);
+    ctx.translate(at[0], at[1]); ctx.scale(z, z);
     ctx.scale(CU_S, CU_S); ctx.translate(-GX, -GY);
-    const w0 = Brush.getWeight(); Brush.setWeight(w0 * CU_WEIGHT);
+    const w0 = Brush.getWeight(); Brush.setWeight(w0 * CU_WEIGHT / zLine);
     draw();
     Brush.setWeight(w0);
     ctx.restore();
@@ -598,42 +598,43 @@ Skits.haircut = (() => {
   // hands and the scissors down behind the head, out of sight; a nod into each
   // snip. Uneven, hand-timed.
   const SNIPS3 = [0.15, 0.42, 0.8, 1.06, 1.42, 1.7, 2.12].map(d => CUT_3 + d);
-  const B3 = { x: 592, feet: 1250, s: 0.66 };   // his whole face just over the hair at the right, clear of the caption block
-  function barberBehind3(ctx, t, z) {
+  const AT3 = [450, 1560], Z3 = 0.84;   // the mirror shot pulled back a little and him a little left, to make room for the barber beside him
+  const B3 = { hx: 592, hy: 790, s: 0.9, lean: -0.08 };   // the barber's head centre (world): just over the hair at the right, under the caption; his body down the right side
+  function barberBehind3(ctx, t) {
     let since = 9;
     for (const sAt of SNIPS3) if (t >= sAt) since = t - sAt;
     const dip = since < 0.22 ? Math.sin(Math.PI * since / 0.22) : 0;
-    // he holds his place on screen through the mirror shot's slow push-in (so he doesn't creep up into the caption or behind the frame)
-    const bx = B3.x - 8 - (z - 1) * 210 / z, fy0 = B3.feet + (z - 1) * 300 / z;
-    const lean = -0.04 - 0.05 * dip, fy = fy0 + 22 * dip;   // he dips into each snip
+    // his body down the right side beside the customer's head, his arms in
+    // behind it
+    const H = 678 * B3.s, lean = B3.lean - 0.04 * dip;
+    const hx = B3.hx, hy = B3.hy + 10 * dip;
+    const bx = hx - Math.sin(lean) * H, fy = hy + Math.cos(lean) * H;
     const loc = W2 => b1Local(W2, lean, bx, fy, B3.s);
-    const hl = loc([470, 1010 + 6 * dip]), hr = loc([520, 1040]);   // both hands behind his head
-    ctx.save(); ctx.beginPath(); ctx.rect(-2000, -2000, 5000, 2900 + 22 * dip); ctx.clip();   // below his mouth he's behind the customer's hair
-    barberRig(ctx, { x: bx, y: fy, s: B3.s, lean, ...fussy, lookX: -0.5, lookY: 0.65, tilt: 0.16 * dip,
+    const hl = loc([470, 1010 + 6 * dip]), hr = loc([520, 1050]);   // both hands behind his head
+    barberRig(ctx, { x: bx, y: fy, s: B3.s, lean, ...fussy, lookX: -0.5, lookY: 0.6, tilt: 0.12 * dip,
       ...Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, 160), holdL: scissors(Math.PI, 0, 1.5, W),
       ...Arms.arm(1, [hr[0], hr[1] - BDY], 'down', false, 160), holdR: comb });
-    ctx.restore();
   }
   function shot3(ctx, t) {
     const z = lerp(1.0, 1.03, easeInOut(seg(t, CUT_3, CUT_4)));
     const raise = easeOutBack(seg(t, RAISE3[0], RAISE3[1]));
     ctx.save(); ctx.beginPath(); ctx.rect(40, 0, 1000, 1920); ctx.clip();   // the glass: nothing of the reflection past the frame
-    closeUp(ctx, z, () => {
-      barberBehind3(ctx, t, z);
+    closeUp(ctx, z * Z3, () => {
+      barberBehind3(ctx, t);
       glowRig(ctx, { x: GX, y: gFeet, s: GS, raise, tilt: -0.04 + 0.006 * Math.sin(t * 1.2) });
       cape(ctx, null, CU_CAPE);
-    });
+    }, AT3, Z3);
     const sp = [[300, 925, 36], [960, 1300, 34], [140, 1215, 40]];   // just outside the hair, clear of the caption and the frame
     sp.forEach(([x, y, r], i) => {
       const k = easeOutBack(seg(t, SPARKS3[i], SPARKS3[i] + 0.15));
-      if (k > 0) star(ctx, CU_AT[0] + (x - CU_AT[0]) * z, CU_AT[1] + (y - CU_AT[1]) * z, r * k * (1 - 0.12 * Math.abs(Math.sin((t - SPARKS3[i]) * 2.1 + i))));
+      if (k > 0) star(ctx, AT3[0] + (x - CU_AT[0]) * z * Z3, AT3[1] + (y - CU_AT[1]) * z * Z3, r * k * (1 - 0.12 * Math.abs(Math.sin((t - SPARKS3[i]) * 2.1 + i))));
     });
     ctx.restore();
     // the mirror: its frame down both edges, a hard white sheen in the corner
     for (const x0 of [-20, 1040]) panel(ctx, box(x0, -40, x0 + 60, 1960, 6), '#5a5a5a', 12);
-    stroke(ctx, [[930, 900], [1010, 780]], { w: 20, color: W, taper0: 0.3, taper1: 0.3 });
-    stroke(ctx, [[960, 980], [1015, 900]], { w: 9, color: W, taper0: 0.3, taper1: 0.3 });
-    return { top: Math.min(cuHeadY(-1.84 * RY, z) - 10, ...sp.map(([, y, r]) => CU_AT[1] + (y - CU_AT[1]) * z - r)) };
+    stroke(ctx, [[930, 330], [1010, 210]], { w: 20, color: W, taper0: 0.3, taper1: 0.3 });   // up in the corner, clear of the barber
+    stroke(ctx, [[960, 410], [1015, 330]], { w: 9, color: W, taper0: 0.3, taper1: 0.3 });
+    return { top: Math.min(AT3[1] - 1.84 * RY * GS * CU_S * z * Z3 - 10, AT3[1] + (B3.hy - 0.9 * RY * B3.s - GY) * CU_S * z * Z3, ...sp.map(([, y, r]) => AT3[1] + (y - CU_AT[1]) * z * Z3 - r)) };
   }
 
   // ---------- 2: extreme close-up, he opens his eyes (3.0 - 4.5) ----------
