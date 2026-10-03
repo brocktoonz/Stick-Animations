@@ -221,13 +221,13 @@ Skits.haircut = (() => {
 
   // ---------- props ----------
   // scissors: hand at the origin, blades pointing up (rot turns them); open 0..1
-  const scissors = (rot, open) => (ctx, x, y) => {
-    ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  const scissors = (rot, open, sc = 1, col = '#d6d6d6') => (ctx, x, y) => {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(sc, sc);
     const a = 0.05 + 0.32 * open;
     for (const s of [-1, 1]) {
       ctx.save(); ctx.translate(0, -34); ctx.rotate(s * a);
       const blade = [[-7, 0], [7, 0], [3, -104], [0, -112], [-3, -100]];
-      fill(ctx, blade, '#d6d6d6', 0.3); outline(ctx, blade, { w: 6 });
+      fill(ctx, blade, col, 0.3); outline(ctx, blade, { w: 6 });
       ctx.restore();
     }
     for (const s of [-1, 1]) blob(ctx, s * 15, 4, 14, 12, { fill: null, w: 7, n: 8 });   // finger rings (under the hand)
@@ -479,7 +479,13 @@ Skits.haircut = (() => {
     }
     const handL = [armL.armL[0], armL.armL[1] + BDY];
     ctx.save(); ctx.translate(bx, fy); ctx.scale(bs, bs); ctx.rotate(lean);
-    if (b1World(handL, lean, bx, fy, bs)[1] < HAIRLINE) { holdL(ctx, handL[0], handL[1]); Chars.hand(ctx, handL[0], handL[1], null, 1, W); }
+    if (b1World(handL, lean, bx, fy, bs)[1] < HAIRLINE) {
+      // the forearm over the crown from his side, then the scissors bigger and white so they read on the grey hair
+      const sh = [-56, -526], mx = (sh[0] + handL[0]) / 2, my = (sh[1] + handL[1]) / 2, dx = handL[0] - sh[0], dy = handL[1] - sh[1];
+      const el = [mx - dy * armL.bendL, my + dx * armL.bendL];
+      Chars.tube(ctx, el, handL, 0, 24, W, false);
+      scissors(rot, open1, 1.5, W)(ctx, handL[0], handL[1]); Chars.hand(ctx, handL[0], handL[1], null, 1, W);
+    }
     ctx.restore();
     ctx.restore();
     // what has to stay under the caption: his hair, and the barber's head
