@@ -25,10 +25,10 @@ Beats (four shots, hard cuts only):
 - 0.00–3.00 1, wide. The barber starts beside the chair, arms down (0–0.3);
             lifts the scissors up by his head (0.3–0.62) as he starts round
             behind the chair (0.42–1.12), a step further back so his face shows
-            over the customer's head; brings them down onto the top of the hair
-            from behind (1.2–1.45) and down behind the back of his head, out of
-            sight: we never see the scissors doing the cutting, only the barber's
-            face over the top, nodding a little on each snip.
+            over the customer's head; takes them down behind the back of his head
+            as he settles there (0.92–1.36), out of sight: we never see the scissors doing the cutting, only the barber's
+            face over the top, nodding and dipping into each snip, the customer's
+            head tugged a little.
             Six snips (1.62, 1.84, 2.14, 2.36, 2.64, 2.86); nothing visibly comes
             off. 1.7–2.3 his eyes fall shut; 1.65–3.0 the camera pushes in.
             Caption: "Me before getting my haircut"

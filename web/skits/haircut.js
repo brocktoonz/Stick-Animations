@@ -408,11 +408,11 @@ Skits.haircut = (() => {
   // face over the top, nodding a little on each snip. Nothing visibly comes off
   // yet. He lets his eyes fall shut and we push in.
   const B1 = { x0: 860, x1: 470, f0: 1660, f1: 1415, s0: 1.15, s1: 1.0 };   // further back behind the chair he's a little smaller, his eyes above the work
-  const LIFT = [0.3, 0.62], WALK = [0.42, 1.12], RISE = [1.2, 1.45];   // the walk starts as the scissors come up
+  const LIFT = [0.3, 0.62], WALK = [0.42, 1.12], RISE = [0.92, 1.36];   // down behind his head as he settles there   // the walk starts as the scissors come up
   const SNIPS1 = [1.62, 1.84, 2.14, 2.36, 2.64, 2.86];        // hand-timed, uneven
   const CUT_SPOTS = [[370, 1010], [352, 1030], [392, 1000]];   // his scissor hand behind the back of the head, hidden
   const SPOT_AT = [0, 1, 0, 2, 1, 0];
-  const CUT_ROT = -0.6;                                        // the blades up into the back of the hair (hidden)
+  const CUT_ROT = -Math.PI;                                    // the blades pointing down, so they slide in behind his head tips first
   const CLOSE = [1.7, 2.3], PUSH1 = [1.65, CUT_2];
   const b1Local = ([X, Y], lean, bx, fy, bs) => { const x = (X - bx) / bs, y = (Y - fy) / bs; const c = Math.cos(-lean), sn = Math.sin(-lean); return [x * c - y * sn, x * sn + y * c]; };
   function shot1(ctx, t) {
@@ -433,7 +433,7 @@ Skits.haircut = (() => {
     const walk = easeInOut(seg(t, WALK[0], WALK[1]));
     const bx = lerp(B1.x0, B1.x1, walk), fy = lerp(B1.f0, B1.f1, walk), bs = lerp(B1.s0, B1.s1, walk);   // round behind the chair, a step back
     const step = t > WALK[0] && t < WALK[1] ? 0.7 * Math.sin(Math.PI * 2 * (t - WALK[0]) / 0.35) * (1 - Math.abs(2 * walk - 1) ** 3) : 0;
-    const lean = lerp(-0.03, 0.03, walk) - 0.008 * Math.sin(t * 0.9);
+    const lean = lerp(-0.03, 0.03, walk) - 0.008 * Math.sin(t * 0.9) + (since < 0.22 ? -0.035 * Math.sin(Math.PI * since / 0.22) : 0);   // he dips into each snip
     // the scissor hand (pose space): at his side, lifted up by his head, carried
     // high over the chair, then down onto the crown, snipping
     const rest = [-104, -284], high = [-160, -690];   // up by his head, the blades pointing out sideways
@@ -449,20 +449,20 @@ Skits.haircut = (() => {
       const bob = since < 0.18 ? 6 * Math.sin(Math.PI * since / 0.18) : 0;   // a small dip on each snip
       const spot = Stage.mix(spotWas, spotNow, move);
       hl = Stage.mix(high, b1Local([spot[0], spot[1] + bob], lean, bx, fy, bs), rise);
-      rot = lerp(-1.45, CUT_ROT - lean, rise); open1 = rise < 1 ? 0 : Math.min(open, easeOut(seg(t, RISE[1], RISE[1] + 0.06)));   // shut until the blades are in the hair
+      rot = lerp(-1.45, CUT_ROT - lean, rise); open1 = rise < 1 ? 0 : Math.min(open, easeOut(seg(t, RISE[1], RISE[1] + 0.06)));   // turned down and shut before they reach his hair; the snips happen out of sight
       
     }
     // the comb hand stays down at his side (behind the chair once he's round there)
     const hr = Stage.mix([96, -196], [40, -300], walk);   // tucked in out of sight behind him once he's round there
-    const armL = Arms.arm(-1, [hl[0], hl[1] - BDY], 'out', false, 160);
+    const armL = Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, 160);   // elbow down: it never flips over as the hand comes down past his shoulder
     const armR = Arms.arm(1, [hr[0], hr[1] - BDY], 'out', false, 160);
     const holdL = scissors(rot, open1, 1.5, W);   // big and white, so they read on his grey hair
     // the barber, drawn first: behind the chair and him
     barberRig(ctx, { x: bx, y: fy, s: bs, lean, step, weight: walk > 0 && walk < 1 ? 0 : 0.5, ...fussy,
-      lookX: lerp(-0.4, -0.3, walk), lookY: lerp(0.2, 0.6, walk), tilt: since < 0.2 ? 0.05 * Math.sin(Math.PI * since / 0.2) : 0,   // a little nod on each snip
+      lookX: lerp(-0.4, -0.3, walk), lookY: lerp(0.2, 0.6, walk), tilt: since < 0.22 ? 0.09 * Math.sin(Math.PI * since / 0.22) : 0,   // a nod into each snip, the work going on behind his head
       ...armL, holdL, ...armR, holdR: comb });
     chairBack(ctx);
-    const nod = since < 0.2 ? 0.015 * (1 - since / 0.2) : 0;
+    const nod = since < 0.2 ? 0.025 * (1 - since / 0.2) : 0;   // each snip tugs his head a little
     const shut = easeInOut(seg(t, CLOSE[0], CLOSE[1]));   // a slow, relaxed close
     ctx.save(); ctx.beginPath(); ctx.rect(-600, -600, 2300, gNeck + 600 + 40); ctx.clip();
     guy(ctx, { x: GX, y: gFeet, s: GS, ...dead, lookY: lerp(0.6, 0.3, shut), lookX: lerp(-0.45, 0, shut), pupil: 9,
@@ -651,7 +651,7 @@ Skits.haircut = (() => {
     ctx.save();
     ctx.translate(EYE_AT[0], EYE_AT[1]); ctx.scale(EYE_S, EYE_S); ctx.translate(-GX - 12 * GS, -GY + 6 * GS);
     const w0 = Brush.getWeight(); Brush.setWeight(w0 * WIDE / EYE_S);
-    hairNow = neatHair;
+    hairNow = () => {};   // whatever the barber did stays out of frame
     eyeRig(ctx, { x: GX, y: gFeet, s: GS, mouth: 'flat', lid: 0, cleanLid: lid, brow: lerp(-0.25, -0.5, seg(r, 0.95, 1.2)), tilt: 0.004 * Math.sin(t * 1.1) });
     cape(ctx, null, CU_CAPE + 50);   // the collar well clear of his chin
     Brush.setWeight(w0);
