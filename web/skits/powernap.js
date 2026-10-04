@@ -69,6 +69,19 @@ Skits.powernap = (() => {
   };
   const panel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); outline(ctx, pts, { w }); };
   const shape = (ctx, pts, col, w = 10) => { fill(ctx, Brush.spline(pts, true, 3), col, 0.5); outline(ctx, pts, { w }); };
+  // The couch: its outline follows the same path as its fill, resampled to short
+  // segments like a character's head, so the brush overshoot at the join stays a
+  // short overlap instead of redrawing a whole side (which jumped around each boil).
+  const even = (pts, step = 36) => {
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length], k = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+      for (let j = 0; j < k; j++) out.push([a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k]);
+    }
+    return out;
+  };
+  const couchPanel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); outline(ctx, even(pts), { w }); };
+  const couchShape = (ctx, pts, col, w = 10) => { const sm = Brush.spline(pts, true, 3); fill(ctx, sm, col, 0.5); outline(ctx, even(sm.filter((_, i) => i % 12 === 0)), { w }); };
 
   // Body frame for a figure with feet at (fx, fy) rotated by ang (clockwise):
   // a runs from the feet toward the head, b across the body (+b = the side
@@ -123,15 +136,15 @@ Skits.powernap = (() => {
     ctx.fillStyle = '#e2e2e2'; ctx.fillRect(-2000, FLOOR, 5000, 3000);                       // floor
     stroke(ctx, [[-900, FLOOR], [540, FLOOR + 3], [2000, FLOOR - 3]], { w: 9, taper0: 0, taper1: 0 });
     fill(ctx, Brush.ellipsePts(540, FLOOR + 8, 470, 20, 16), '#cfcfcf', 0.4);              // flat shadow
-    shape(ctx, [[150, 1040], [540, 1010], [930, 1040], [940, SEAT + 20], [140, SEAT + 20]], '#5c5c5c', 11);   // back cushions
+    couchShape(ctx, [[150, 1040], [540, 1010], [930, 1040], [940, SEAT + 20], [140, SEAT + 20]], '#5c5c5c', 11);   // back cushions
     stroke(ctx, [[540, 1030], [540, SEAT]], { w: 6 });                                       // seam between the two back cushions
-    shape(ctx, [[70, 1150], [140, 1110], [220, 1140], [230, FLOOR - 40], [80, FLOOR - 40]], '#4e4e4e', 11);   // left arm (his head ends up on it)
+    couchShape(ctx, [[70, 1150], [140, 1110], [220, 1140], [230, FLOOR - 40], [80, FLOOR - 40]], '#4e4e4e', 11);   // left arm (his head ends up on it)
   }
   function couchFront(ctx) {
-    shape(ctx, [[860, 1150], [940, 1110], [1010, 1150], [1000, FLOOR - 40], [850, FLOOR - 40]], '#4e4e4e', 11);   // right arm
-    panel(ctx, box(200, SEAT, 870, FLOOR - 40), '#6a6a6a', 11);                               // seat cushions, front face
+    couchShape(ctx, [[860, 1150], [940, 1110], [1010, 1150], [1000, FLOOR - 40], [850, FLOOR - 40]], '#4e4e4e', 11);   // right arm
+    couchPanel(ctx, box(200, SEAT, 870, FLOOR - 40), '#6a6a6a', 11);                               // seat cushions, front face
     stroke(ctx, [[535, SEAT + 6], [535, FLOOR - 48]], { w: 6 });
-    for (const x of [130, 950]) panel(ctx, box(x - 20, FLOOR - 40, x + 20, FLOOR + 4, 2), '#555', 8);   // stubby legs
+    for (const x of [130, 950]) couchPanel(ctx, box(x - 20, FLOOR - 40, x + 20, FLOOR + 4, 2), '#555', 8);   // stubby legs
   }
 
   const CS = 1.1, HIP = 150 * CS;   // his hips sit on the seat; the legs hang behind the seat cushions
@@ -225,7 +238,7 @@ Skits.powernap = (() => {
         blob(ctx, bx, by, br, br, { fill: '#e6edf2', w: 6, n: 14, jit: 0.4 });
         stroke(ctx, [[bx - br * 0.5, by - br * 0.1], [bx - br * 0.3, by - br * 0.5]], { w: 5, color: W, taper0: 0.2, taper1: 0.2 });
       }
-      shape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
+      couchShape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
       stroke(ctx, [[540, 1840], [540, 1940]], { w: 6 });
     }],
   ];
