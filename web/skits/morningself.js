@@ -38,6 +38,8 @@ Skits.morningself = (() => {
     return pts;
   };
   const panel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); outline(ctx, pts, { w }); };
+  // a straight-sided polygon with points along every edge, so the brush's smoothing can't bulge it
+  const poly = (corners, n = 6) => corners.flatMap((a, i) => { const b = corners[(i + 1) % corners.length]; return Array.from({ length: n }, (_, k) => [a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]); });
   const shape = (ctx, pts, col, w = 10) => { fill(ctx, Brush.spline(pts, true, 3), col, 0.5); outline(ctx, pts, { w }); };
 
   function pillow(ctx, cx, cy, w, h, col) {
@@ -54,20 +56,20 @@ Skits.morningself = (() => {
                   head: '#5a5a5a', stand: '#6c6c6c', standTop: '#808080', mattress: '#b4b4b4', blanket: '#a6a6a6', pillow: '#c2c2c2', shade: W };
   const DAY = { ceiling: '#f2f2f2', wall: '#dedede', floor: '#d0d0d0', skirting: '#f4f4f4', pane: W, curtain: '#a8a8a8', frame: '#f4f4f4',
                 head: '#8f8f8f', stand: '#9a9a9a', standTop: '#b4b4b4', mattress: '#dcdcdc', blanket: '#bdbdbd', pillow: '#d6d6d6', shade: '#cfcfcf' };
-  const FLOOR_Y = 1430, CEIL_Y = 250;
-  // a wall clock left of the caption: just past 1 at night, 7 in the morning
+  const FLOOR_Y = 1430, CEIL_Y = 90;
+  // a wall clock left of the caption: just past 1 at night, 6 in the morning
   function clock(ctx, c, day) {
-    const x = 150, y = 500, r = 70, face = Brush.ellipsePts(x, y, r, r, 20);
+    const x = 108, y = 486, r = 62, face = Brush.ellipsePts(x, y, r, r, 20);
     fill(ctx, face, c.frame, 0.4); outline(ctx, face, { w: 10 });
     for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; stroke(ctx, [[x + Math.sin(a) * r * 0.74, y - Math.cos(a) * r * 0.74], [x + Math.sin(a) * r * 0.86, y - Math.cos(a) * r * 0.86]], { w: 4 }); }
     const hand = (a, l, w) => stroke(ctx, [[x, y], [x + Math.sin(a) * l, y - Math.cos(a) * l]], { w, taper0: 0, taper1: 0.3 });
-    if (day) { hand(Math.PI * 7 / 6, r * 0.5, 9); hand(0.05, r * 0.72, 6); } else { hand(Math.PI / 6 + 0.1, r * 0.5, 9); hand(Math.PI * 0.4, r * 0.72, 6); }
+    if (day) { hand(Math.PI, r * 0.5, 9); hand(0.02, r * 0.72, 6); }   // 6:00, when the alarms start else { hand(Math.PI / 6 + 0.1, r * 0.5, 9); hand(Math.PI * 0.4, r * 0.72, 6); }
     blob(ctx, x, y, 6, 6, { fill: INK, w: 0, n: 6 });
   }
   const WIN = [630, 650, 890, 990];                    // window, right of the bed
   const PIC = [110, 690, 330, 900];                    // framed picture, left wall
-  const STAND = { x0: 770, x1: 975, top: 1236, bot: 1478, back: 26 };   // nightstand beside the bed's head end
-  const LAMP_X = 945, PHONE = [835, 1226];
+  const STAND = { x0: 772, x1: 1000, top: 1236, bot: 1478, back: 40 };   // nightstand beside the bed's head end
+  const LAMP_X = 966, PHONE = [812, 1222];
   // the bed, seen from its foot: mattress top runs from the headboard (far) to the near edge
   const BED = { farY: 1310, nearY: 1700, farL: 150, farR: 735, nearL: -40, nearR: 840, front: 1780 };   // the near-left corner runs well off frame
   const bedX = (y, side) => lerp(side < 0 ? BED.farL : BED.farR, side < 0 ? BED.nearL : BED.nearR, (y - BED.farY) / (BED.nearY - BED.farY));
@@ -99,7 +101,7 @@ Skits.morningself = (() => {
     // curtains: a rod and two hanging panels with folds, a wavy hem
     ctx.save(); ctx.beginPath(); ctx.rect(x0 - 200, y0 - 38, x1 - x0 + 400, 600); ctx.clip();   // nothing above the rod
     for (const [a, b] of [[x0 - 70, x0 + 22], [x1 - 20, x1 + 66]]) {
-      const hem = y1 + 34, pts = [[a, y0 - 34], [b, y0 - 34], [b + 4, hem - 6], [(a + b) / 2 + 12, hem + 8], [(a + b) / 2 - 8, hem - 4], [a - 4, hem + 6]];
+      const hem = y1 + 6, pts = [[a, y0 - 34], [b, y0 - 34], [b + 4, hem - 6], [(a + b) / 2 + 12, hem + 8], [(a + b) / 2 - 8, hem - 4], [a - 4, hem + 6]];
       panel(ctx, pts, c.curtain, 9);   // straight top, hung from the rod
       for (const fx of [0.33, 0.66]) stroke(ctx, [[a + (b - a) * fx, y0 - 24], [a + (b - a) * fx + 6, hem - 12]], { w: 5 });
     }
@@ -114,7 +116,7 @@ Skits.morningself = (() => {
     blob(ctx, x1 - 60, y0 + 62, 16, 16, { w: 5, n: 8 });
   }
   function nightstand(ctx, c) {
-    const { x0, x1, top, bot, back } = STAND, d = 18;   // the left side face shows: it's right of the camera
+    const { x0, x1, top, bot, back } = STAND, d = 30;   // the left side face shows: it's right of the camera
     panel(ctx, [[x0, top], [x0 - d, top - back], [x0 - d, bot - back], [x0, bot]], c.stand, 9);          // side
     panel(ctx, [[x0 - d, top - back], [x1 - d, top - back], [x1 + 8, top], [x0, top]], c.standTop, 9);   // top
     panel(ctx, box(x0, top, x1 + 8, bot, 4), c.stand, 10);                                              // front
@@ -126,7 +128,7 @@ Skits.morningself = (() => {
     const x = LAMP_X, base = STAND.top - 14;
     fill(ctx, [[x - 34, base], [x + 34, base], [x + 22, base - 18], [x - 22, base - 18]], INK, 0.6);
     stroke(ctx, [[x, base - 14], [x + 2, base - 120]], { w: 8, taper0: 0, taper1: 0, minW: 1 });
-    panel(ctx, [[x - 46, base - 112], [x + 44, base - 110], [x + 26, base - 200], [x - 26, base - 202]], on ? W : c.shade, 9);
+    panel(ctx, [[x - 42, base - 104], [x + 40, base - 102], [x + 24, base - 186], [x - 24, base - 188]], on ? W : c.shade, 9);
     stroke(ctx, [[x + 24, base - 112], [x + 26, base - 80]], { w: 4 });   // pull cord
   }
   function bed(ctx, c) {
@@ -134,9 +136,9 @@ Skits.morningself = (() => {
     stroke(ctx, [[BED.farL + 70, 1030], [BED.farR - 70, 1028]], { w: 6 });
     // frame and legs at the foot
     panel(ctx, box(BED.nearL - 10, BED.front - 20, BED.nearR + 10, BED.front + 50, 4), c.head, 10);
-    for (const lx of [BED.nearL + 20, BED.nearR - 20]) panel(ctx, box(lx - 16, BED.front + 50, lx + 16, BED.front + 96, 2), c.head, 8);
+    for (const lx of [60, BED.nearR - 20]) panel(ctx, box(lx - 16, BED.front + 50, lx + 16, BED.front + 96, 2), c.head, 8);
     // mattress top
-    panel(ctx, [[BED.farL, BED.farY], [BED.farR, BED.farY], [BED.nearR, BED.nearY], [BED.nearL, BED.nearY]], c.mattress, 10);
+    panel(ctx, poly([[BED.farL, BED.farY], [BED.farR, BED.farY], [BED.nearR, BED.nearY], [BED.nearL, BED.nearY]]), c.mattress, 10);
   }
   function room(ctx, day) {
     const c = day ? DAY : NIGHT;
@@ -171,7 +173,7 @@ Skits.morningself = (() => {
   // a hard ring: ")))" vibration arcs up and out of both ends, new on every frame
   function buzz(ctx, x, y, f) {
     for (const side of [-1, 1]) for (let i = 0; i < 3; i++) {
-      const r = 22 + i * 17 + 4 * hh(f * 3 + i + side), cx = x + side * 40, cy = y - 22, mid = side > 0 ? -0.75 : -Math.PI + 0.75, pts = [];
+      const r = 20 + i * 15 + 4 * hh(f * 3 + i + side), cx = x + side * 34, cy = y - 24, mid = side > 0 ? -0.8 : -Math.PI + 0.8, pts = [];
       for (let j = 0; j <= 6; j++) { const a = mid + (j / 6 - 0.5) * 1.1; pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); }
       stroke(ctx, pts, { w: 6 });
     }
@@ -185,10 +187,12 @@ Skits.morningself = (() => {
   function blanket(ctx, c, top, hump = 0) {
     const yl = top + 26, nl = BED.nearL - 18, nr = BED.nearR + 18;
     const pts = [[bedX(yl, -1) - 8, yl], [HX - 150, top + 6], [HX - 70, top - 4 - hump], [HX + 40, top - 6 - hump], [HX + 120, top + 2], [bedX(top + 12, 1) + 10, top + 12],
-                 [bedX(1500, 1) + 14, 1500], [nr, BED.nearY], [nr + 4, BED.front + 4], [(nl + nr) / 2 + 40, BED.front + 16], [(nl + nr) / 2 - 60, BED.front + 4], [nl - 4, BED.front + 10], [nl, BED.nearY], [bedX(1500, -1) - 14, 1500]];
+                 [nr, BED.nearY], [nr + 4, BED.front + 4], [(nl + nr) / 2 + 40, BED.front + 16], [(nl + nr) / 2 - 60, BED.front + 4], [nl - 4, BED.front + 10], [nl, BED.nearY]];
     // outline a lightly smoothed copy: outline() starts at a random point and
     // overshoots, which crossed itself on the raw corners (a flickering loop)
-    fill(ctx, pts, c.blanket, 0.5); outline(ctx, Brush.spline(pts, true, 2), { w: 11, jit: 0.8 });
+    const sp = Brush.spline(pts, true, 2);   // fill and outline trace exactly the same path
+    ctx.fillStyle = c.blanket; ctx.beginPath(); sp.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill();
+    outline(ctx, sp, { w: 11, jit: 0.8 });
     stroke(ctx, [[bedX(top + 40, -1) + 20, top + 44], [HX - 40, top + 34], [bedX(top + 44, 1) - 20, top + 50]], { w: 5 });   // folded hem
     stroke(ctx, [[HX - 60, top + 140], [HX - 20, top + 300]], { w: 5 });   // folds over his body
     stroke(ctx, [[HX + 90, top + 120], [HX + 60, top + 260]], { w: 5 });
@@ -223,8 +227,8 @@ Skits.morningself = (() => {
   const HOLD = [215, -318];                           // phone in his right hand (pose space)
   const TAP_L = [160, -380];                          // left thumb on the phone's screen edge
   const UNDER_L = [-60, -140], UNDER_R = [60, -140];  // hands under the blanket
-  const ON_STAND = [PHONE[0] - 14, PHONE[1] - 22];
-  const R_UPPER = 122;                                // his right arm reaches the nightstand
+  const ON_STAND = [PHONE[0] - 16, PHONE[1] - 22];
+  const R_UPPER = 100, R_REACH = 124;                                // his right arm reaches the nightstand
   // pleased with himself but sleepy: heavy lids, a small closed smile (no teeth)
   const smug = { mouth: 'smile', mouthScale: 0.7, lid: 0.62, heavyLid: true, lowLid: 0.12, pupil: 12, brow: 0, browLiftL: 18, browLiftR: 18, lookX: 0.55, lookY: 0.2, tilt: 0.14 };
 
@@ -263,7 +267,7 @@ Skits.morningself = (() => {
       const lid = t < 2.28 ? smug.lid : t < 2.42 ? lerp(smug.lid, 0.72, seg(t, 2.28, 2.42)) : t < 2.48 ? 0.8 : 1;
       const face = t < 2.3 ? { ...smug } : { mouth: t < 2.6 ? 'smile' : 'flat', brow: 0, browLiftL: 18, browLiftR: 18, lookX: 0.55, lookY: 0.3, lowLid: 0.2, heavyLid: true };
       pose(c, hy, { ...face, lid, tilt: lerp(0.1, 0.16, sink),
-        ...Arms.arm(1, rHand, 'down', false, R_UPPER), ...(holding ? { holdR: heldPhone(lerp(-0.12, -1.45, easeOut(reach))), handSR: 0.72 } : {}),
+        ...Arms.arm(1, rHand, 'down', false, lerp(R_UPPER, R_REACH, Math.sin(Math.PI * seg(t, 2.0, 2.56)))), ...(holding ? { holdR: heldPhone(lerp(-0.12, -1.45, easeOut(reach))), handSR: 0.72 } : {}),
         ...Arms.arm(-1, lHand, 'down', t < 2.1, 120) }, top,
         () => { if (!holding) phoneFlat(ctx, PHONE[0], PHONE[1], t < 2.66); })(ctx);
     }],
