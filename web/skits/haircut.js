@@ -265,7 +265,8 @@ Skits.haircut = (() => {
     buzz: ctx => hairShapes(ctx, [ALT_BUZZ], '#a2a2a2', ALT_BUZZ_LINES, '#7a7a7a'),
     mushroom: ctx => hairShapes(ctx, [ALT_MUSHROOM], GREY, ALT_MUSHROOM_LINES, '#5a5a5a'),
   };
-  let hairPick = 'current';   // the video always uses 'current'; the preview skit sets the others
+  const DRIVE_HAIR = 'crop_low';   // the cut he drives home with (B2, the user's pick)
+  let hairPick = null;   // preview only: the haircut_hair_options skit sets the others
 
   let hairNow = mopHair;
   const hoodieFront = (ctx, n) => stroke(ctx, [[-50, n + 2], [-30, n + 30], [0, n + 38], [30, n + 30], [50, n + 2]], { w: 9 });
@@ -880,7 +881,7 @@ Skits.haircut = (() => {
     // him
     ctx.save(); ctx.translate(DRV_AT[0], DRV_AT[1]); ctx.scale(DRV_S, DRV_S); ctx.translate(0, 438);
     Brush.setWeight(w0 * WIDE * GS / DRV_S);
-    hairNow = HAIR_OPTIONS[hairPick] ?? botchedHair;
+    hairNow = HAIR_OPTIONS[hairPick ?? DRIVE_HAIR];
     const sad = { ...Emotions.sad, brow: -0.3 }, lid = r > 2.3 && r < 2.45 ? 1 : sad.lid;   // one blink
     // his body from the chest up, the barbershop build without the cape; his arms
     // come down to his hands on the wheel
@@ -955,14 +956,15 @@ Skits.haircut = (() => {
 })();
 
 // PREVIEW ONLY, not part of the video: the driving shot with each bad-haircut
-// option, one per second (current, bowl, crop, buzz, mushroom).
+// option, one per second (current = the earlier hacked cut, bowl, crop, crop_low
+// = the one the video uses, buzz, mushroom).
 Skits.haircut_hair_options = (() => {
   const H = Skits.haircut, keys = H.hairOptions;
   return {
     title: '', subtitle: '', duration: keys.length,
     draw(ctx, t) {
       H.setHairPreview(keys[Math.min(keys.length - 1, Math.floor(t))]);
-      try { H.draw(ctx, 8.5); } finally { H.setHairPreview('current'); }
+      try { H.draw(ctx, 8.5); } finally { H.setHairPreview(null); }
     },
   };
 })();

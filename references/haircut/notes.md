@@ -53,6 +53,8 @@ Beats (four shots, hard cuts only):
             his one-piece seat, the dark pillar on our right. The belt comes in
             from off frame at the right and crosses his chest; a small wheel he
             just holds, its lower half behind the dashboard; the edge of the
-            rear-view mirror at the top left. The botched cut, eyes welling
+            rear-view mirror at the top left. The bad cut (a short choppy crop with the bangs hacked straight across
+            above the brows, uneven strand tips, short pointed sideburns; option
+            B2, crop_low in the code), eyes welling
             (`Emotions.sad`), looking into the lens; a 1 px road bob, one blink at
             9.3 (the tears stay). Caption: "Me after getting my haircut"
