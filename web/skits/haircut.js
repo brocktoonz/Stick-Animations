@@ -705,12 +705,13 @@ Skits.haircut = (() => {
     ctx.save();
     ctx.translate(EYE_AT[0], EYE_AT[1]); ctx.scale(EYE_S, EYE_S); ctx.translate(-GX - 12 * GS, -GY + 6 * GS);
     const w0 = Brush.getWeight(); Brush.setWeight(w0 * WIDE / EYE_S);
+    Brush.setJitter(WIDE / EYE_S);   // the lines wobble as much as they do at the wide shot's size, not 5x that
     hairNow = () => {};   // whatever the barber did stays out of frame
     chairBack(ctx);       // the same black chair behind him as in the wide shot
     const pose = { x: GX, y: gFeet, s: GS, mouth: 'flat', lid: 0, cleanLid: lid, brow: lerp(-0.25, -0.5, seg(r, 0.95, 1.2)), tilt: 0.004 * Math.sin(t * 1.1) };
     cape(ctx);            // the barber's cape up to his neck, as in the wide shot, his head over its collar
     eyeRig(ctx, { ...pose, armL: [-10, -350], armR: [10, -350], bendL: 0, bendR: 0 });
-    Brush.setWeight(w0);
+    Brush.setWeight(w0); Brush.setJitter(1);
     ctx.restore();
     return { top: 9999 };
   }
