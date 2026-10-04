@@ -202,9 +202,9 @@ Skits.haircut = (() => {
   //     with choppy notches, strands showing in them so it reads as hair.
   const ALT_CROP_LOW = (() => {
     // the sides: short pointed sideburns that follow the head's curve down from the temples
-    const pts = [[0.86, -0.36], [0.98, -0.5]];
+    const pts = [[0.9, -0.22], [1.0, -0.42]];
     for (let i = 0; i <= 20; i++) { const a = -0.52 - (Math.PI - 1.04) * i / 20, r = 1.07 + (i % 3 === 1 ? 0.05 : i % 3 === 2 ? 0.02 : 0); pts.push([Math.cos(a) * r, Math.sin(a) * r]); }
-    pts.push([-0.98, -0.5], [-0.86, -0.36], [-0.8, -0.56]);
+    pts.push([-1.0, -0.42], [-0.9, -0.22], [-0.8, -0.56]);
     // the bangs, left to right: uneven clumps of pointed strands, some long, some
     // hacked short, a gap here and there; hanging to just above the brows
     const tips = [[-0.74, -0.62], [-0.68, -0.6], [-0.6, -0.66], [-0.53, -0.58], [-0.46, -0.64],
@@ -213,6 +213,7 @@ Skits.haircut = (() => {
                   [0.02, -0.66], [0.1, -0.6], [0.16, -0.67],
                   [0.24, -0.59], [0.32, -0.57], [0.4, -0.65], [0.46, -0.61],
                   [0.54, -0.68], [0.62, -0.63], [0.7, -0.66], [0.76, -0.62]];
+    tips.forEach((t, i) => { if (t[0] > -0.48 && t[0] < 0.62) t[1] = Math.min(t[1], -0.65 - 0.06 * hh(i * 7 + 3)); });   // over the brows: cut shorter (still uneven), so the bangs end clearly above them
     tips.forEach(([x, y], i) => { if (i) pts.push([x - 0.035, Math.min(y, tips[i - 1][1]) - 0.06]); pts.push([x, y]); });
     pts.push([0.8, -0.56]);
     return pts;
