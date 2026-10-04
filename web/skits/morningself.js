@@ -50,23 +50,32 @@ Skits.morningself = (() => {
 
   // ---------- the bedroom: one wide shot, one camera, night and morning ----------
   // Only the lighting changes between them: these palettes.
-  const NIGHT = { wall: '#8c8c8c', floor: '#777777', skirting: '#9c9c9c', pane: '#4c4c4c', curtain: '#5c5c5c', frame: '#a8a8a8',
+  const NIGHT = { ceiling: '#7a7a7a', wall: '#8c8c8c', floor: '#777777', skirting: '#9c9c9c', pane: '#4c4c4c', curtain: '#5c5c5c', frame: '#a8a8a8',
                   head: '#5a5a5a', stand: '#6c6c6c', standTop: '#808080', mattress: '#b4b4b4', blanket: '#a6a6a6', pillow: '#c2c2c2', shade: W };
-  const DAY = { wall: '#ebebeb', floor: '#d0d0d0', skirting: '#f4f4f4', pane: W, curtain: '#a8a8a8', frame: '#f4f4f4',
+  const DAY = { ceiling: '#f2f2f2', wall: '#dedede', floor: '#d0d0d0', skirting: '#f4f4f4', pane: W, curtain: '#a8a8a8', frame: '#f4f4f4',
                 head: '#8f8f8f', stand: '#9a9a9a', standTop: '#b4b4b4', mattress: '#dcdcdc', blanket: '#bdbdbd', pillow: '#d6d6d6', shade: '#cfcfcf' };
-  const FLOOR_Y = 1430;
+  const FLOOR_Y = 1430, CEIL_Y = 250;
+  // a wall clock left of the caption: just past 1 at night, 7 in the morning
+  function clock(ctx, c, day) {
+    const x = 150, y = 500, r = 70, face = Brush.ellipsePts(x, y, r, r, 20);
+    fill(ctx, face, c.frame, 0.4); outline(ctx, face, { w: 10 });
+    for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; stroke(ctx, [[x + Math.sin(a) * r * 0.74, y - Math.cos(a) * r * 0.74], [x + Math.sin(a) * r * 0.86, y - Math.cos(a) * r * 0.86]], { w: 4 }); }
+    const hand = (a, l, w) => stroke(ctx, [[x, y], [x + Math.sin(a) * l, y - Math.cos(a) * l]], { w, taper0: 0, taper1: 0.3 });
+    if (day) { hand(Math.PI * 7 / 6, r * 0.5, 9); hand(0.05, r * 0.72, 6); } else { hand(Math.PI / 6 + 0.1, r * 0.5, 9); hand(Math.PI * 0.4, r * 0.72, 6); }
+    blob(ctx, x, y, 6, 6, { fill: INK, w: 0, n: 6 });
+  }
   const WIN = [630, 650, 890, 990];                    // window, right of the bed
   const PIC = [110, 690, 330, 900];                    // framed picture, left wall
   const STAND = { x0: 770, x1: 975, top: 1236, bot: 1478, back: 26 };   // nightstand beside the bed's head end
-  const LAMP_X = 918, PHONE = [835, 1226];
+  const LAMP_X = 945, PHONE = [835, 1226];
   // the bed, seen from its foot: mattress top runs from the headboard (far) to the near edge
-  const BED = { farY: 1310, nearY: 1700, farL: 150, farR: 735, nearL: 30, nearR: 840, front: 1790 };
+  const BED = { farY: 1310, nearY: 1700, farL: 150, farR: 735, nearL: -40, nearR: 840, front: 1780 };   // the near-left corner runs well off frame
   const bedX = (y, side) => lerp(side < 0 ? BED.farL : BED.farR, side < 0 ? BED.nearL : BED.nearR, (y - BED.farY) / (BED.nearY - BED.farY));
 
   function windowSet(ctx, c, day) {
     const [x0, y0, x1, y1] = WIN, mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
     if (day)   // morning sun through the window: a flat pale patch down the wall and across the floor
-      fill(ctx, [[x0 + 10, y1], [x1 - 10, y1], [x1 - 140, FLOOR_Y + 160], [x0 - 260, FLOOR_Y + 160]], '#f8f8f8', 0.3);
+      fill(ctx, [[x0 + 10, y1], [x1 - 10, y1], [x1 - 140, FLOOR_Y + 160], [x0 - 260, FLOOR_Y + 160]], '#f9f9f9', 0.3);
     panel(ctx, box(x0, y0, x1, y1), c.pane, 11);
     ctx.save(); ctx.beginPath(); ctx.rect(x0 + 6, y0 + 6, x1 - x0 - 12, y1 - y0 - 12); ctx.clip();
     if (day) {
@@ -117,7 +126,7 @@ Skits.morningself = (() => {
     const x = LAMP_X, base = STAND.top - 14;
     fill(ctx, [[x - 34, base], [x + 34, base], [x + 22, base - 18], [x - 22, base - 18]], INK, 0.6);
     stroke(ctx, [[x, base - 14], [x + 2, base - 120]], { w: 8, taper0: 0, taper1: 0, minW: 1 });
-    panel(ctx, [[x - 54, base - 112], [x + 52, base - 110], [x + 30, base - 200], [x - 30, base - 202]], on ? W : c.shade, 9);
+    panel(ctx, [[x - 46, base - 112], [x + 44, base - 110], [x + 26, base - 200], [x - 26, base - 202]], on ? W : c.shade, 9);
     stroke(ctx, [[x + 24, base - 112], [x + 26, base - 80]], { w: 4 });   // pull cord
   }
   function bed(ctx, c) {
@@ -125,7 +134,7 @@ Skits.morningself = (() => {
     stroke(ctx, [[BED.farL + 70, 1030], [BED.farR - 70, 1028]], { w: 6 });
     // frame and legs at the foot
     panel(ctx, box(BED.nearL - 10, BED.front - 20, BED.nearR + 10, BED.front + 50, 4), c.head, 10);
-    for (const lx of [BED.nearL + 20, BED.nearR - 20]) panel(ctx, box(lx - 16, BED.front + 50, lx + 16, BED.front + 110, 2), c.head, 8);
+    for (const lx of [BED.nearL + 20, BED.nearR - 20]) panel(ctx, box(lx - 16, BED.front + 50, lx + 16, BED.front + 96, 2), c.head, 8);
     // mattress top
     panel(ctx, [[BED.farL, BED.farY], [BED.farR, BED.farY], [BED.nearR, BED.nearY], [BED.nearL, BED.nearY]], c.mattress, 10);
   }
@@ -135,6 +144,9 @@ Skits.morningself = (() => {
     fill(ctx, box(-100, FLOOR_Y, 1200, 2100, 4), c.floor, 0);
     panel(ctx, box(-60, FLOOR_Y - 26, 1140, FLOOR_Y, 6), c.skirting, 8);
     for (const [fx, dx] of [[60, -240], [330, -110], [610, 40], [880, 230], [1060, 330]]) stroke(ctx, [[fx, FLOOR_Y + 4], [fx + dx, 1940]], { w: 5 });   // floorboards
+    fill(ctx, box(-100, -100, 1200, CEIL_Y, 4), c.ceiling, 0);               // ceiling
+    panel(ctx, box(-60, CEIL_Y, 1140, CEIL_Y + 30, 6), c.skirting, 8);       // cornice
+    clock(ctx, c, day);
     picture(ctx, c);
     windowSet(ctx, c, day);
     nightstand(ctx, c);
@@ -156,16 +168,12 @@ Skits.morningself = (() => {
     panel(ctx, box(-66, 2, 98, 14, 3), INK, 5);
     ctx.restore();
   }
-  // a hard ring: arcs off both ends and zigzag shake lines above, new on every frame
-  function buzz(ctx, x, y, f, k) {
-    for (const side of [-1, 1]) for (let i = 0; i < 2; i++) {
-      const r = 26 + i * 20 + 6 * hh(f * 3 + i + side), cx = x + side * 52, cy = y - 18, mid = side > 0 ? -0.35 : Math.PI + 0.35, pts = [];
-      for (let j = 0; j <= 6; j++) { const a = mid + (j / 6 - 0.5) * 1.6; pts.push([cx + Math.cos(a) * r * k, cy + Math.sin(a) * r * k]); }
-      stroke(ctx, pts, { w: 7 });
-    }
-    for (const dx of [-30, 4, 38]) {   // zigzag shake lines over the phone
-      const zx = x + dx + (hh(f + dx) - 0.5) * 8, zy = y - 56 - 6 * hh(f * 2 + dx);
-      stroke(ctx, [[zx - 7, zy + 14], [zx + 7, zy + 5], [zx - 7, zy - 4], [zx + 7, zy - 13]], { w: 5 });
+  // a hard ring: ")))" vibration arcs up and out of both ends, new on every frame
+  function buzz(ctx, x, y, f) {
+    for (const side of [-1, 1]) for (let i = 0; i < 3; i++) {
+      const r = 22 + i * 17 + 4 * hh(f * 3 + i + side), cx = x + side * 40, cy = y - 22, mid = side > 0 ? -0.75 : -Math.PI + 0.75, pts = [];
+      for (let j = 0; j <= 6; j++) { const a = mid + (j / 6 - 0.5) * 1.1; pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); }
+      stroke(ctx, pts, { w: 6 });
     }
   }
 
@@ -178,7 +186,9 @@ Skits.morningself = (() => {
     const yl = top + 26, nl = BED.nearL - 18, nr = BED.nearR + 18;
     const pts = [[bedX(yl, -1) - 8, yl], [HX - 150, top + 6], [HX - 70, top - 4 - hump], [HX + 40, top - 6 - hump], [HX + 120, top + 2], [bedX(top + 12, 1) + 10, top + 12],
                  [bedX(1500, 1) + 14, 1500], [nr, BED.nearY], [nr + 4, BED.front + 4], [(nl + nr) / 2 + 40, BED.front + 16], [(nl + nr) / 2 - 60, BED.front + 4], [nl - 4, BED.front + 10], [nl, BED.nearY], [bedX(1500, -1) - 14, 1500]];
-    fill(ctx, Brush.spline(pts, true, 3), c.blanket, 0.5); outline(ctx, pts, { w: 11 });
+    // outline a lightly smoothed copy: outline() starts at a random point and
+    // overshoots, which crossed itself on the raw corners (a flickering loop)
+    fill(ctx, pts, c.blanket, 0.5); outline(ctx, Brush.spline(pts, true, 2), { w: 11, jit: 0.8 });
     stroke(ctx, [[bedX(top + 40, -1) + 20, top + 44], [HX - 40, top + 34], [bedX(top + 44, 1) - 20, top + 50]], { w: 5 });   // folded hem
     stroke(ctx, [[HX - 60, top + 140], [HX - 20, top + 300]], { w: 5 });   // folds over his body
     stroke(ctx, [[HX + 90, top + 120], [HX + 60, top + 260]], { w: 5 });
@@ -262,13 +272,14 @@ Skits.morningself = (() => {
       const f = Math.round(t * FPS), c = room(ctx, true);
       const r = ringAt(t), ringing = r >= 0, since = sinceRing(t), n = burrowed(t);
       // phone: shakes and hops while ringing (a new offset every frame), still and dark between
-      const [jx, jy, jr] = ringing ? [(hh(f) - 0.5) * 18, -Math.abs(hh(f + 40) - 0.5) * 12, (hh(f + 80) - 0.5) * 0.22] : [0, 0, 0];
+      const [jx, jy, jr] = ringing ? [(hh(f) - 0.5) * 30, -Math.abs(hh(f + 40) - 0.5) * 20, (hh(f + 80) - 0.5) * 0.36] : [0, 0, 0];   // about ±15 px and ±0.18 rad
       phoneFlat(ctx, PHONE[0] + jx, PHONE[1] + jy, ringing, jr);
-      if (ringing) buzz(ctx, PHONE[0], PHONE[1], f, 1 + 0.15 * hh(f + 7));
+      if (ringing) buzz(ctx, PHONE[0] + jx * 0.5, PHONE[1] + jy, f);
       // flinch: a snap of the head away from the phone and a squash, settling over 0.3 s
       const fl = since < 0.36 ? (since < 0.06 ? since / 0.06 : 1 - easeOut(seg(since, 0.06, 0.36))) : 0;
-      const hy = DOWN + 13 * n + 6 * fl, top = TOP_DOWN + 13 * n - 11 * n;
-      pose(c, hy, { lid: 1, brow: 0.55, mouth: 'wobbly', tilt: 0.16 - 0.2 * fl, stretch: -0.25 * fl }, top, null, null, 8 * fl)(ctx);
+      const hy = DOWN + 14 * n + 20 * fl, top = hy + 134 - 24 * n - 14 * fl;   // the head ducks, the blanket yanks up
+      const away = since < 0.36 ? -1 : 0;   // the flinch turns his head away from the phone
+      pose(c, hy, { lid: 1, brow: 0.55, mouth: 'wobbly', tilt: 0.16 + away * 0.34 * fl, stretch: -0.45 * fl }, top, null, null, 22 * fl)(ctx);
     }],
     // hard cut back to the night: he's at it again
     [END, END2 + 1, (ctx, t) => setting(ctx, t - END, tapOf(TAPS_LOOP))],
