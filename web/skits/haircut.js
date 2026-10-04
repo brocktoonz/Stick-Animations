@@ -836,20 +836,16 @@ Skits.haircut = (() => {
     return pts;
   };
   // one roadside thing standing on the horizon at x: a pole, or a small tree (tapered trunk, round top)
-  function roadside(ctx, x, i) {
+  function roadside(ctx, x, i) {   // a tree: a trunk and a round top, sizes varying
     const k = hh(i * 13 + 5), base = HORIZON - 3;
-    if (k < 0.25) {
-      stroke(ctx, [[x, base], [x, base - 200]], { w: 13, color: V.scenery, taper0: 0, taper1: 0, minW: 1, jit: 0, pressure: 0 });
-    } else {
-      const h = 50 + k * 30, rx = 25 + k * 7, ry = 24 + k * 6;
-      stroke(ctx, [[x, base], [x, base - h]], { w: 18, color: V.scenery, taper0: 0, taper1: 0, minW: 1, jit: 0, pressure: 0 });
-      blob(ctx, x, base - h - ry * 0.7, rx, ry, { fill: V.scenery, w: 0, n: 14 });
-    }
+    const h = 50 + k * 30, rx = 25 + k * 7, ry = 24 + k * 6;
+    stroke(ctx, [[x, base], [x, base - h]], { w: 18, color: V.scenery, taper0: 0, taper1: 0, minW: 1, jit: 0, pressure: 0 });
+    blob(ctx, x, base - h - ry * 0.7, rx, ry, { fill: V.scenery, w: 0, n: 14 });
   }
-  // the roadside, spaced unevenly, scrolled left to right (pre-rolled so the window starts full)
+  // the roadside trees, well apart and unevenly spaced, scrolled left to right (pre-rolled so the window starts with some in it)
   function scenery(ctx, r) {
     const sc = r * SCROLL + 700;
-    for (let i = 0, p = 0; p < sc + 600; i++, p += 70 + hh(i * 7 + 11) * 40) {
+    for (let i = 0, p = 0; p < sc + 600; i++, p += 115 + 135 * hh(i * 7 + 11)) {
       const x = -20 - p + sc;
       if (x > -60 && x < DWIN.x1 + 60) roadside(ctx, x, i);
     }
