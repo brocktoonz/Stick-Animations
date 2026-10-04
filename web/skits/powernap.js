@@ -80,8 +80,13 @@ Skits.powernap = (() => {
     }
     return out;
   };
-  const couchPanel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); outline(ctx, even(pts), { w }); };
-  const couchShape = (ctx, pts, col, w = 10) => { const sm = Brush.spline(pts, true, 3); fill(ctx, sm, col, 0.5); outline(ctx, even(sm.filter((_, i) => i % 12 === 0)), { w }); };
+  // Each couch line gets its own fixed seed, so it only boils on the 3-frame beat
+  // and never re-rolls when the character drawn before it changes.
+  const couchSeed = pts => 5000 + Math.round(pts[0][0] * 3 + pts[0][1]);
+  const couchLine = (ctx, pts, w) => { const e = even(pts); stroke(ctx, [...e, e[0], e[1]], { w, taper0: 0, taper1: 0, minW: 1, seed: couchSeed(pts) }); };
+  const flat = (ctx, pts, col) => { ctx.fillStyle = col; ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); };
+  const couchPanel = (ctx, pts, col, w = 10) => { flat(ctx, pts, col); couchLine(ctx, pts, w); };
+  const couchShape = (ctx, pts, col, w = 10) => { const sm = Brush.spline(pts, true, 3); flat(ctx, sm, col); couchLine(ctx, sm.filter((_, i) => i % 12 === 0), w); };
 
   // Body frame for a figure with feet at (fx, fy) rotated by ang (clockwise):
   // a runs from the feet toward the head, b across the body (+b = the side
@@ -143,7 +148,7 @@ Skits.powernap = (() => {
   function couchFront(ctx) {
     couchShape(ctx, [[860, 1150], [940, 1110], [1010, 1150], [1000, FLOOR - 40], [850, FLOOR - 40]], '#4e4e4e', 11);   // right arm
     couchPanel(ctx, box(200, SEAT, 870, FLOOR - 40), '#6a6a6a', 11);                               // seat cushions, front face
-    stroke(ctx, [[535, SEAT + 6], [535, FLOOR - 48]], { w: 6 });
+    stroke(ctx, [[535, SEAT + 6], [535, FLOOR - 48]], { w: 6, seed: 4999 });
     for (const x of [130, 950]) couchPanel(ctx, box(x - 20, FLOOR - 40, x + 20, FLOOR + 4, 2), '#555', 8);   // stubby legs
   }
 
