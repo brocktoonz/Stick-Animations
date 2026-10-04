@@ -50,7 +50,7 @@ Characters
 - No character has ears (STYLE.md rule, user decision): flag any ear on any head.
 - No stray expression flashes: in short pauses between a character's lines (and at line starts and ends), the mouth holds a closed speech shape that fits the shot's emotion. Flag any 1–3 frame pop of a different expression mouth (a grin, a smirk) left over from a fallback pose. Step through every pause frame by frame.
 - No walking in place: a character or animal whose legs step must actually travel across the ground. Flag any walk cycle on a figure that stays put; it should stand still instead.
-- Props and set pieces boil like the characters: same 3-frame beat, same small wobble. Flag any outline that redraws a whole side, shows doubled or stray lines that jump to a new spot each boil, or changes between beats.
+- MANDATORY on every render (user's hard rule, see CLAUDE.md): every line, including props, furniture, set pieces and animals, boils like the characters: only on the 3-frame beat, with the same small wobble. Step through consecutive frames wherever a prop or set piece is on screen, crop it next to the character, and compare. A FAIL is any outline that redraws a whole side, doubled or stray lines that jump to a new spot each boil, or lines that change between beats. Report this as MAJOR, and state in every report that you ran this check and over which frames.
 - Hair reads as hair (not a cap, leaf or helmet). Facial hair reads as hair (not a smear or mask).
 - Silhouettes stay distinct between characters.
 - Anatomy is correct: no backwards elbows, and no hands detached from arms. Check this on characters that are only partly in frame too (e.g. Slime leaning in from the edge): the user caught arms bending backwards there that the reviewer missed.

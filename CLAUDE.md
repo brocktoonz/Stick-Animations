@@ -37,6 +37,25 @@ Once the user has seen a render, they decide what changes. From then on:
 - Every other finding is reported to the user as a suggestion, not acted on. The
   user picks what to change next.
 
+## HARD RULE: line boil must be checked before anything reaches the user
+
+Every line in a render (characters, props, furniture, set pieces, animals) must
+boil the same controlled way the characters do: it only changes on the 3-frame
+boil beat, by a small wobble, and never shows doubled lines, a whole side
+redrawn, or stray strokes that jump to a new spot each boil. (User decision,
+after the power nap couch.)
+
+- Before sending a render for review, check it yourself: step through
+  consecutive frames wherever a prop or set piece is on screen and compare its
+  lines with the character's. Don't hand over work that fails this.
+- The art-reviewer must check this on every render (it is on its checklist as a
+  mandatory frame-by-frame check). A failure is a MAJOR finding.
+- How to build lines that pass: give big closed shapes enough outline points
+  (short segments, about 30-40 px, like a character's head), so the brush's
+  overshoot at the join stays a short overlap. Give each prop line its own fixed
+  `seed` so it doesn't re-roll when something drawn before it changes. See
+  `couchLine` in `web/skits/powernap.js`.
+
 ## Mandatory review loop (every session, every render)
 1. After rendering any skit or revision, invoke the art-reviewer subagent on the rendered MP4. Give it the file path only. Do not tell it what you changed or what you think is fixed.
 2. If the verdict is FAIL, fix every BLOCKER and MAJOR issue, re-render, and invoke art-reviewer again with a fresh review. (First draft only. After the user has seen a render, follow the hard rule above: fix only findings in what the user asked to change.)
