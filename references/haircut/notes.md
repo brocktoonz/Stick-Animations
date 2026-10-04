@@ -48,8 +48,8 @@ Beats (four shots, hard cuts only):
             Caption: "Me that one random moment during my haircut"
 - 7.00–10.5 4, the truth: driving home, eye level and straight on from the
             dashboard. He sits right of centre (an American driver). Four flat
-            shapes behind him: the side window on our left (roadside trees and
-            poles scrolling through it), the door below it with one armrest line,
+            shapes behind him: the side window on our left (roadside trees
+            scrolling through it, well apart and unevenly spaced), the door below it with one armrest line,
             his one-piece seat, the dark pillar on our right. The belt comes in
             from off frame at the right and crosses his chest; a small wheel he
             just holds, its lower half behind the dashboard; the edge of the
