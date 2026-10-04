@@ -244,7 +244,7 @@ Skits.powernap = (() => {
         stroke(ctx, [[bx - br * 0.5, by - br * 0.1], [bx - br * 0.3, by - br * 0.5]], { w: 5, color: W, taper0: 0.2, taper1: 0.2 });
       }
       couchShape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
-      stroke(ctx, [[540, 1840], [540, 1940]], { w: 6 });
+      stroke(ctx, [[540, 1840], [540, 1940]], { w: 6, seed: 4998 });   // fixed seed: boils only on the beat
     }],
   ];
 
