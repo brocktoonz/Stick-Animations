@@ -581,7 +581,8 @@ Skits.haircut = (() => {
     // the hair
     hairShapes(ctx, GLOW_HAIR, AUBURN, GLOW_LINES, AUBURN_DARK);
   }
-  const glowRig = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', detail: hoodieFront, head: glowHead });
+  // under the cape: as in the eye close-up, only his head is drawn over it (torso and shoulders tucked up inside the head)
+  const glowRig = build({ shirt: '#ececec', sleeve: '#ececec', body: { torso: n => [[-20, n], [20, n], [20, n + 8], [-20, n + 8]], shY: -40 }, head: glowHead });
 
   function star(ctx, x, y, r) {
     const pts = [];
@@ -626,8 +627,8 @@ Skits.haircut = (() => {
       const cb = [[GX - 330, 1560], [GX - 340, 1250], [GX - 280, 1185], [GX + 280, 1185], [GX + 340, 1250], [GX + 330, 1560]];
       panel(ctx, cb, '#3a3a3a', 11);
       stroke(ctx, [[GX - 300, 1236], [GX + 300, 1238]], { w: 5, color: '#8a8a8a' });
-      glowRig(ctx, { x: GX, y: gFeet, s: GS, raise, tilt: -0.04 + 0.006 * Math.sin(t * 1.2) });
-      cape(ctx, null, CU_CAPE);
+      cape(ctx);   // the cape up at his neck, as in the wide shot, his head over its collar
+      glowRig(ctx, { x: GX, y: gFeet, s: GS, raise, tilt: -0.04 + 0.006 * Math.sin(t * 1.2), armL: [-10, -350], armR: [10, -350], bendL: 0, bendR: 0 });
     }, AT3, Z3);
     const sp = [[300, 925, 36], [700, 1080, 34], [140, 1215, 40]];   // on and around his hair, off the barber   // just outside the hair, clear of the caption and the frame
     sp.forEach(([x, y, r], i) => {
