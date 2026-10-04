@@ -375,14 +375,25 @@ const Chars = (() => {
   }
 
   // Mitten hand. point = direction (radians) to stick a finger out, or null.
-  function hand(ctx, x, y, point = null, s = 1, skin = W, thumb = true) {
+  // clean (opt-in, a fixed seed): no thumb mark, and a closed outline with short
+  // segments so the brush's overshoot never sticks out as a hook in close-ups.
+  function hand(ctx, x, y, point = null, s = 1, skin = W, clean = null) {
     if (point !== null) {
       const fx = x + Math.cos(point) * 40 * s, fy = y + Math.sin(point) * 40 * s;
       stroke(ctx, [[x, y], [fx, fy]], { w: 22 * s, taper0: 0, taper1: 0, minW: 1 });
       stroke(ctx, [[x, y], [fx, fy]], { w: 10 * s, taper0: 0, taper1: 0, minW: 1, color: skin, jit: 0 });
     }
+    if (clean !== null) {
+      const r = Brush.random(clean);   // changes only on the boil beat
+      const pts = Brush.ellipsePts(x, y, 24 * s, 22 * s, 16).map(([px, py]) => [px + (r() - 0.5) * 1.1 * s, py + (r() - 0.5) * 1.1 * s]);
+      const ring = Brush.spline(pts, true, 3);
+      ctx.beginPath(); ring.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
+      ctx.fillStyle = skin; ctx.fill();
+      ctx.lineWidth = 7 * s * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
+      return;
+    }
     blob(ctx, x, y, 24 * s, 22 * s, { w: 7 * s, n: 10, fill: skin });
-    if (thumb) stroke(ctx, [[x - 18 * s, y - 6 * s], [x - 28 * s, y - 18 * s], [x - 20 * s, y - 24 * s]], { w: 6 * s });
+    stroke(ctx, [[x - 18 * s, y - 6 * s], [x - 28 * s, y - 18 * s], [x - 20 * s, y - 24 * s]], { w: 6 * s });
   }
 
   // Short-sleeve hem: a line across the arm, a fraction `at` of the way from
@@ -564,7 +575,7 @@ const Chars = (() => {
       tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, darkTorso);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
-      hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W, p.thumbs !== false);   // thumbs: false drops the thumb mark (opt-in)
+      hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W, p.thumbs === false ? 7100 + side : null);   // thumbs: false = clean hands (opt-in)
     };
     if (p.crossArms) {
       // arms folded: upper arms down the sides to the elbows, forearms across
