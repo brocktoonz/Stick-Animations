@@ -33,7 +33,8 @@ Beats (four shots, hard cuts only):
             off. 1.7–2.3 his eyes fall shut; 1.65–3.0 the camera pushes in.
             Caption: "Me before getting my haircut"
 - 3.00–4.50 2, extreme close-up from the brows down (his hair stays out of
-            frame). His eyes open: half at 3.35–3.7, a stall, then open at
+            frame), in the barber's cape with the black chair behind him, as in
+            the wide shot. His eyes open: half at 3.35–3.7, a stall, then open at
             3.95–4.2. No caption.
 - 4.50–7.00 3, his reflection: the glow-up face in the mirror (frame edges, a
             sheen), auburn swept hair; sparkles at 4.75, 5.05, 5.35, the brow

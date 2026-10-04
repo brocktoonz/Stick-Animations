@@ -694,7 +694,9 @@ Skits.haircut = (() => {
       }
     }
   };
-  const eyeRig = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', detail: hoodieFront,
+  // In the close-up only his head is drawn over the cape: the rig's torso and
+  // shoulders are tucked up inside the head, and his legs are far below the frame
+  const eyeRig = build({ shirt: '#ececec', sleeve: '#ececec', body: { torso: n => [[-20, n], [20, n], [20, n + 8], [-20, n + 8]], shY: -40 },
     head: head({ hair: ctx => hairNow(ctx), front: eyesClean }) });
   function shot2(ctx, t) {
     const r = t - CUT_2;
@@ -704,8 +706,10 @@ Skits.haircut = (() => {
     ctx.translate(EYE_AT[0], EYE_AT[1]); ctx.scale(EYE_S, EYE_S); ctx.translate(-GX - 12 * GS, -GY + 6 * GS);
     const w0 = Brush.getWeight(); Brush.setWeight(w0 * WIDE / EYE_S);
     hairNow = () => {};   // whatever the barber did stays out of frame
-    eyeRig(ctx, { x: GX, y: gFeet, s: GS, mouth: 'flat', lid: 0, cleanLid: lid, brow: lerp(-0.25, -0.5, seg(r, 0.95, 1.2)), tilt: 0.004 * Math.sin(t * 1.1) });
-    cape(ctx, null, CU_CAPE + 50);   // the collar well clear of his chin
+    chairBack(ctx);       // the same black chair behind him as in the wide shot
+    const pose = { x: GX, y: gFeet, s: GS, mouth: 'flat', lid: 0, cleanLid: lid, brow: lerp(-0.25, -0.5, seg(r, 0.95, 1.2)), tilt: 0.004 * Math.sin(t * 1.1) };
+    cape(ctx);            // the barber's cape up to his neck, as in the wide shot, his head over its collar
+    eyeRig(ctx, { ...pose, armL: [-10, -350], armR: [10, -350], bendL: 0, bendR: 0 });
     Brush.setWeight(w0);
     ctx.restore();
     return { top: 9999 };
