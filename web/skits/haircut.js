@@ -173,6 +173,76 @@ Skits.haircut = (() => {
                          [[-0.9, -0.44], [-0.88, -0.24]]];
   const botchedHair = ctx => hairShapes(ctx, [BOTCHED, ...BOTCHED_TUFTS], GREY, BOTCHED_LINES, '#5a5a5a');
 
+  // ----- PREVIEW ONLY: other bad haircuts to choose from (not used in the video;
+  // shown by the haircut_hair_options skit). After the user's references.
+  // A. "Lloyd" bowl: a heavy dome with an uneven top, the fringe ruled dead
+  //    straight just above the brows, the sides cut straight down.
+  const ALT_BOWL = (() => {
+    const pts = [[0.94, -0.06], [1.1, -0.06], [1.12, -0.4]];
+    const lumps = [0, 0.04, -0.02, 0.06, 0.01, 0.05, -0.01, 0.07, 0.02, 0.04, -0.02, 0.05, 0.0, 0.06, 0.02, 0.03, 0];
+    for (let i = 0; i <= 16; i++) { const a = -0.24 - (Math.PI - 0.48) * i / 16, k = 1.14 + lumps[i]; pts.push([Math.cos(a) * k, Math.sin(a) * (k + 0.04) - 0.02]); }
+    pts.push([-1.12, -0.4], [-1.1, -0.06], [-0.94, -0.06], [-0.78, -0.62]);   // straight down the side, square at the bottom, in under the hair to the temple
+    pts.push([0.78, -0.62]);                                                  // the fringe: one dead-straight cut
+    return pts;
+  })();
+  const ALT_BOWL_LINES = [[[-0.62, -1.06], [-0.52, -0.8]], [[0.1, -1.14], [0.14, -0.86]], [[0.66, -1.02], [0.6, -0.82]]];
+  // B. Micro fringe: a short crop with the bangs cut straight across far too
+  //    short, halfway up the forehead.
+  const ALT_CROP = (() => {
+    const pts = [[0.92, -0.24], [1.06, -0.3]];
+    for (let i = 0; i <= 20; i++) { const a = -0.34 - (Math.PI - 0.68) * i / 20, r = 1.08 + (i % 2 ? 0.05 : 0); pts.push([Math.cos(a) * r, Math.sin(a) * r]); }
+    pts.push([-1.06, -0.3], [-0.92, -0.24], [-0.8, -0.6], [-0.68, -0.74]);
+    for (let i = 0; i <= 12; i++) pts.push([-0.62 + i * 0.103, -0.76 - (i % 2 ? 0.025 : 0)]);   // blunt, straight, too short
+    pts.push([0.68, -0.74], [0.8, -0.6]);
+    return pts;
+  })();
+  const ALT_CROP_LINES = [[[-0.5, -0.98], [-0.46, -0.84]], [[-0.08, -1.04], [-0.08, -0.86]], [[0.32, -1.0], [0.3, -0.86]]];
+  // C. Buzz with a botched line-up: clippered right down, the hairline squared
+  //    off far too high, with a chunk gouged out of the front.
+  const ALT_BUZZ = (() => {
+    const pts = [[-0.97, -0.14]];
+    for (let i = 0; i <= 18; i++) { const a = Math.PI + 0.14 + (Math.PI - 0.28) * i / 18; pts.push([Math.cos(a) * 1.03, Math.sin(a) * 1.03]); }
+    pts.push([0.97, -0.14], [0.9, -0.16], [0.86, -0.56], [0.66, -0.66], [0.62, -0.78]);
+    for (const x of [0.52, 0.42]) pts.push([x, -0.78]);
+    pts.push([0.4, -0.95], [0.32, -0.98], [0.22, -0.96], [0.12, -0.99], [0.0, -0.97], [-0.02, -0.78]);   // the gouge: a clipper slip, ragged at the top
+    for (const x of [-0.2, -0.4, -0.56]) pts.push([x, -0.78]);
+    pts.push([-0.62, -0.78], [-0.66, -0.66], [-0.86, -0.56], [-0.9, -0.16]);
+    return pts;
+  })();
+  // stubble: a scatter of short flecks inside the buzzed area
+  const ALT_BUZZ_LINES = (() => {
+    const out = [];
+    for (let i = 0; i < 46; i++) {
+      const x = -0.84 + 1.68 * hh(i * 3 + 7), y = -1.0 + 0.42 * hh(i * 5 + 11);
+      if (x * x + y * y > 0.92 || (y > -0.82 && Math.abs(x) < 0.62) || (x > -0.04 && x < 0.44 && y > -1.0)) continue;
+      out.push([[x, y], [x + 0.025, y + 0.03]]);
+    }
+    return out;
+  })();
+  // D. Mushroom: a puffed-up rounded top hugging the head, the fringe a row of
+  //    heavy rounded clumps curling under.
+  const ALT_MUSHROOM = (() => {
+    const pts = [[0.9, -0.2], [1.06, -0.26], [1.14, -0.44]];
+    const lumps = [0, 0.03, 0.06, 0.02, 0.07, 0.03, 0.08, 0.04, 0.06, 0.02, 0.07, 0.05, 0.03, 0.07, 0.02, 0.05, 0];
+    for (let i = 0; i <= 16; i++) { const a = -0.36 - (Math.PI - 0.72) * i / 16, k = 1.18 + lumps[i]; pts.push([Math.cos(a) * k, Math.sin(a) * (k + 0.06) - 0.06]); }
+    pts.push([-1.14, -0.44], [-1.06, -0.26], [-0.9, -0.2], [-0.82, -0.56]);
+    for (let c = 0; c < 6; c++) {   // the fringe: rounded scallops, left to right
+      const x0 = -0.8 + c * 0.267, x1 = x0 + 0.267;
+      for (let j = 1; j <= 4; j++) { const k = j / 4, x = x0 + (x1 - x0) * k; pts.push([x, -0.6 - 0.07 * Math.sin(Math.PI * k) * -1 + (j === 4 ? -0.04 : 0)]); }
+    }
+    pts.push([0.82, -0.56]);
+    return pts;
+  })();
+  const ALT_MUSHROOM_LINES = [[[-0.86, -0.92], [-0.5, -1.2], [-0.1, -1.3]], [[0.16, -1.3], [0.56, -1.18], [0.86, -0.92]], [[-0.4, -1.0], [-0.18, -1.08]], [[0.3, -1.0], [0.52, -0.92]]];
+  const HAIR_OPTIONS = {
+    current: botchedHair,
+    bowl: ctx => hairShapes(ctx, [ALT_BOWL], GREY, ALT_BOWL_LINES, '#5a5a5a'),
+    crop: ctx => hairShapes(ctx, [ALT_CROP], GREY, ALT_CROP_LINES, '#5a5a5a'),
+    buzz: ctx => hairShapes(ctx, [ALT_BUZZ], '#a2a2a2', ALT_BUZZ_LINES, '#7a7a7a'),
+    mushroom: ctx => hairShapes(ctx, [ALT_MUSHROOM], GREY, ALT_MUSHROOM_LINES, '#5a5a5a'),
+  };
+  let hairPick = 'current';   // the video always uses 'current'; the preview skit sets the others
+
   let hairNow = mopHair;
   const hoodieFront = (ctx, n) => stroke(ctx, [[-50, n + 2], [-30, n + 30], [0, n + 38], [30, n + 30], [50, n + 2]], { w: 9 });
   // Hero.main's build (Cameos.spikyShades.brown) with a swappable haircut
@@ -786,7 +856,7 @@ Skits.haircut = (() => {
     // him
     ctx.save(); ctx.translate(DRV_AT[0], DRV_AT[1]); ctx.scale(DRV_S, DRV_S); ctx.translate(0, 438);
     Brush.setWeight(w0 * WIDE * GS / DRV_S);
-    hairNow = botchedHair;
+    hairNow = HAIR_OPTIONS[hairPick] ?? botchedHair;
     const sad = { ...Emotions.sad, brow: -0.3 }, lid = r > 2.3 && r < 2.45 ? 1 : sad.lid;   // one blink
     // his body from the chest up, the barbershop build without the cape; his arms
     // come down to his hands on the wheel
@@ -855,5 +925,20 @@ Skits.haircut = (() => {
       caption(ctx, t);
     },
     capBottom,
+    setHairPreview: k => { hairPick = k; },   // preview only (haircut_hair_options)
+    hairOptions: Object.keys(HAIR_OPTIONS),
+  };
+})();
+
+// PREVIEW ONLY, not part of the video: the driving shot with each bad-haircut
+// option, one per second (current, bowl, crop, buzz, mushroom).
+Skits.haircut_hair_options = (() => {
+  const H = Skits.haircut, keys = H.hairOptions;
+  return {
+    title: '', subtitle: '', duration: keys.length,
+    draw(ctx, t) {
+      H.setHairPreview(keys[Math.min(keys.length - 1, Math.floor(t))]);
+      try { H.draw(ctx, 8.5); } finally { H.setHairPreview('current'); }
+    },
   };
 })();
