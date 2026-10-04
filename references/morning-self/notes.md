@@ -1,4 +1,4 @@
-# "Me setting my morning self up for success" (6.33 s)
+# "Me every night / Me every morning" (8.0 s; reference clip 6.33 s)
 
 Source: screen recording of an Instagram post by theaifilmmaker ("It's a
 medical condition I'm pretty sure"). Starring the main character (`Hero.main`)
@@ -22,12 +22,19 @@ Beats:
 - 1.93–3.03 back on the bed: puts the phone face-up on the nightstand
             (1.95–2.3), arm slides back under the blanket (2.3–2.6), eyes close
             (~2.5), he snuggles down into the pillow (2.6–3.0). No caption.
-- 3.03–6.33 cut to morning: same framing, daylight (sun through the window),
-            lamp off. The phone buzzes on the nightstand; still fast asleep, his
-            arm shoots out from under the blanket and slaps snooze, again and
-            again, the buzzing starting the moment the hand leaves. In the
-            original the hand lands about every 0.23 s (3.10, 3.33, 3.57, 3.80,
-            4.03 … 6.13: 14 slaps, a mechanical loop). Here they're hand-timed
-            around that pace but uneven (STYLE: nothing on a fixed beat).
-            Caption from the cut to the end: "Me every morning" (the user's;
-            the clip's was "My morning self")
+- 3.03–6.33 cut to morning: the same wide shot and camera, daylight (sun in
+            the window, a pale patch of light down the wall), lamp off. He
+            sleeps; the phone on the nightstand rings hard three times
+            (3.26–3.9, 4.36–5.0, 5.4–6.2: unevenly spaced), shaking and hopping
+            with arcs and zigzag shake lines. On each ring he flinches (head
+            snaps away, squashes) and burrows a little deeper (head sinks into
+            the pillow, blanket comes up). The original's snooze slap is gone
+            (user's choice, review of 2026-10-04).
+            Caption: "Me every morning" (the user's; the clip's was "My morning self")
+- 6.33–8.0  hard cut back to the night shot, same framing as the opening:
+            smug, tapping in alarms again. Caption: "Me every night".
+
+Bedroom shots are one wide shot of the whole room with a locked camera
+(picture, window with curtains, bed filling the bottom third, nightstand with
+lamp beside it). Night and morning differ only in lighting, pose and face.
+The video runs 8.0 s; the clip's silent audio is padded with silence to fit.
