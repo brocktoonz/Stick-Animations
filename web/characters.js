@@ -563,8 +563,17 @@ const Chars = (() => {
     }
     S.bottoms?.(ctx, hipY, neckY);
     const torso = S.torso(neckY, hipY);
-    fill(ctx, torso, S.torsoFill ?? W, 0.5);
-    outline(ctx, torso, { w: 10 });
+    if (p.cleanTorso) {   // opt-in for close-ups: one closed outline with a small seeded wobble, no overshoot at the join
+      const r = Brush.random(7200), lw = Brush.getWeight();
+      const pts = torso.map(([px, py]) => [px + (r() - 0.5) * 2, py + (r() - 0.5) * 2]);
+      const ring = Brush.spline(pts, true, 3);
+      ctx.beginPath(); ring.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
+      ctx.fillStyle = S.torsoFill ?? W; ctx.fill();
+      ctx.lineWidth = 10 * lw; ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
+    } else {
+      fill(ctx, torso, S.torsoFill ?? W, 0.5);
+      outline(ctx, torso, { w: 10 });
+    }
     S.torsoDetail?.(ctx, neckY, hipY);
 
     const arm = (side, target, bend, point, hold) => {
