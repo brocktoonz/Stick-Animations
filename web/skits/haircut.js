@@ -197,6 +197,28 @@ Skits.haircut = (() => {
     return pts;
   })();
   const ALT_CROP_LINES = [[[-0.5, -0.98], [-0.46, -0.84]], [[-0.08, -1.04], [-0.08, -0.86]], [[0.32, -1.0], [0.3, -0.86]]];
+  // B2. Micro fringe, longer: the same short choppy crop, but the bangs come down
+  //     to about the bowl's level (just above the brows), cut straight across
+  //     with choppy notches, strands showing in them so it reads as hair.
+  const ALT_CROP_LOW = (() => {
+    // the sides: short pointed sideburns that follow the head's curve down from the temples
+    const pts = [[0.86, -0.36], [0.98, -0.5]];
+    for (let i = 0; i <= 20; i++) { const a = -0.52 - (Math.PI - 1.04) * i / 20, r = 1.07 + (i % 3 === 1 ? 0.05 : i % 3 === 2 ? 0.02 : 0); pts.push([Math.cos(a) * r, Math.sin(a) * r]); }
+    pts.push([-0.98, -0.5], [-0.86, -0.36], [-0.8, -0.56]);
+    // the bangs, left to right: uneven clumps of pointed strands, some long, some
+    // hacked short, a gap here and there; hanging to just above the brows
+    const tips = [[-0.74, -0.62], [-0.68, -0.6], [-0.6, -0.66], [-0.53, -0.58], [-0.46, -0.64],
+                  [-0.4, -0.7], [-0.34, -0.69],                                   // a hacked-short gap
+                  [-0.28, -0.6], [-0.2, -0.56], [-0.12, -0.64], [-0.05, -0.58],
+                  [0.02, -0.66], [0.1, -0.6], [0.16, -0.67],
+                  [0.24, -0.59], [0.32, -0.57], [0.4, -0.65], [0.46, -0.61],
+                  [0.54, -0.68], [0.62, -0.63], [0.7, -0.66], [0.76, -0.62]];
+    tips.forEach(([x, y], i) => { if (i) pts.push([x - 0.035, Math.min(y, tips[i - 1][1]) - 0.06]); pts.push([x, y]); });
+    pts.push([0.8, -0.56]);
+    return pts;
+  })();
+  const ALT_CROP_LOW_LINES = [[[-0.62, -0.88], [-0.6, -0.68]], [[-0.36, -0.98], [-0.26, -0.66]], [[-0.02, -1.02], [0.02, -0.7]], [[0.3, -0.96], [0.36, -0.66]],
+                              [[0.6, -0.86], [0.66, -0.7]], [[-0.5, -1.04], [-0.36, -1.0]], [[0.14, -1.08], [0.3, -1.03]]];
   // C. Buzz with a botched line-up: clippered right down, the hairline squared
   //    off far too high, with a chunk gouged out of the front.
   const ALT_BUZZ = (() => {
@@ -238,6 +260,7 @@ Skits.haircut = (() => {
     current: botchedHair,
     bowl: ctx => hairShapes(ctx, [ALT_BOWL], GREY, ALT_BOWL_LINES, '#5a5a5a'),
     crop: ctx => hairShapes(ctx, [ALT_CROP], GREY, ALT_CROP_LINES, '#5a5a5a'),
+    crop_low: ctx => hairShapes(ctx, [ALT_CROP_LOW], GREY, ALT_CROP_LOW_LINES, '#5a5a5a'),
     buzz: ctx => hairShapes(ctx, [ALT_BUZZ], '#a2a2a2', ALT_BUZZ_LINES, '#7a7a7a'),
     mushroom: ctx => hairShapes(ctx, [ALT_MUSHROOM], GREY, ALT_MUSHROOM_LINES, '#5a5a5a'),
   };
