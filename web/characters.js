@@ -378,12 +378,15 @@ const Chars = (() => {
   // fingers, even when a pose points (the point argument is ignored). One closed
   // outline with a small wobble that changes only on the boil beat, so no brush
   // overshoot ever sticks out as a hook. seed: optional fixed seed per hand.
-  function hand(ctx, x, y, point = null, s = 1, skin = W, seed = null) {
+  // halo: a thin white edge outside the ink (hands in front of the head), so a
+  // hair or brim line that stops at the hand never reads as a stalk on it.
+  function hand(ctx, x, y, point = null, s = 1, skin = W, seed = null, halo = false) {
     const r = Brush.random(seed ?? 7150 + Math.sign(x));
     // the boil is a whole-shape change (slight stretch and turn), never per-point
     // jitter, so even a close-up hand stays a smooth round shape
     const ring = Brush.ellipsePts(x, y, 24 * s * (1 + (r() - 0.5) * 0.06), 22 * s * (1 + (r() - 0.5) * 0.06), 64, (r() - 0.5) * 0.6);
     ctx.beginPath(); ring.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
+    if (halo) { ctx.lineWidth = (7 * s + 12) * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.strokeStyle = W; ctx.stroke(); }
     ctx.fillStyle = skin; ctx.fill();
     ctx.lineWidth = 7 * s * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
   }
@@ -568,7 +571,7 @@ const Chars = (() => {
     }
     S.torsoDetail?.(ctx, neckY, hipY);
 
-    const arm = (side, target, bend, point, hold) => {
+    const arm = (side, target, bend, point, hold, front = false) => {
       const sh = [side * S.shX, neckY + S.shY];
       const hnd = target ?? [side * S.restX, hipY + S.restY];
       // The white halo only matters over dark clothes; on light shirts it would
@@ -576,7 +579,7 @@ const Chars = (() => {
       tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, darkTorso);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
-      hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W, 7100 + side);   // each hand its own seed
+      hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W, 7100 + side, front);   // each hand its own seed
     };
     if (p.crossArms) {
       // arms folded: upper arms down the sides to the elbows, forearms across
@@ -610,8 +613,8 @@ const Chars = (() => {
     S.head(ctx, p);
     ctx.restore();
 
-    if (p.armLFront && !p.crossArms) arm(-1, p.armL, p.bendL, null, p.holdL);
-    if (p.armRFront && !p.crossArms) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
+    if (p.armLFront && !p.crossArms) arm(-1, p.armL, p.bendL, null, p.holdL, true);
+    if (p.armRFront && !p.crossArms) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR, true);
     ctx.restore();
   }
 
