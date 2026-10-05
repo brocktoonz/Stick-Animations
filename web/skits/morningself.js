@@ -198,10 +198,11 @@ Skits.morningself = (() => {
     stroke(ctx, [[HX + 90, top + 120], [HX + 60, top + 260]], { w: 5 });
     stroke(ctx, [[nl + 60, BED.nearY - 10], [nl + 110, BED.front - 6]], { w: 5 });
   }
-  const pose = (c, hy, p, top, before, after, hump) => (ctx) => {
+  const pose = (c, hy, p, top, before, after, hump, under) => (ctx) => {
     pillow(ctx, HX - 15, hy + 62, 178, 76, c.pillow);   // behind his head, inside the bed's width
     before?.();
     Hero.main(ctx, { x: HX, y: feet(hy), s: S, shadow: false, ...p });
+    under?.();   // drawn over him but under the blanket (an arm coming out from under it)
     blanket(ctx, c, top, hump);
     after?.();
   };
@@ -260,14 +261,11 @@ Skits.morningself = (() => {
     }
     return { k, contact, since };
   }
-  // The rig draws the arm before the blanket (all of it under the covers here), so the
-  // part that comes out is drawn on top: from under the hem by his chin, arching a
-  // little over the covers to the hand. Clipped to above the hem, so it starts under it.
-  function armOverCovers(ctx, top, hand) {
-    const out = [HX + 70, top + 18];
-    ctx.save(); ctx.beginPath(); ctx.rect(HX + 40, 0, 1000, top + 2); ctx.clip();
-    Chars.tube(ctx, out, hand, -0.14, 24 * S, SLEEVE, false);
-    ctx.restore();
+  // The arm that comes out is drawn after him and before the blanket, so the
+  // blanket's own hem covers where it comes out: one clean edge, no patch.
+  function armFromCovers(ctx, top, hand) {
+    const out = [HX + 66, top + 40];
+    Chars.tube(ctx, out, hand, -0.05, 24 * S, SLEEVE, false);
     Chars.hand(ctx, hand[0], hand[1], null, S, W, true);
   }
 
@@ -322,7 +320,8 @@ Skits.morningself = (() => {
         ...Arms.arm(-1, hemHand(hy, top, -1), 'out', false, 120),
         ...Arms.arm(1, UNDER_R, 'down') }, top,   // the rig's right arm stays under the covers; the one that comes out is drawn on top
         () => phoneFlat(ctx, PHONE[0] + jx, PHONE[1] + jy, ringing, jr),
-        () => { if (ringing) buzz(ctx, PHONE[0] + jx * 0.5, PHONE[1] + jy, f); armOverCovers(ctx, top, slapHand); })(ctx);
+        () => { if (ringing) buzz(ctx, PHONE[0] + jx * 0.5, PHONE[1] + jy, f); }, 0,
+        () => armFromCovers(ctx, top, slapHand))(ctx);
     }],
     // hard cut back to the night: he's at it again
     [END, END2 + 1, (ctx, t) => setting(ctx, t - END, tapOf(TAPS_LOOP))],
