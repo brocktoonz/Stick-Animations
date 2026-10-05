@@ -569,7 +569,12 @@ const Chars = (() => {
       fill(ctx, torso, S.torsoFill ?? W, 0.5);
       outline(ctx, torso, { w: 10 });
     }
-    S.torsoDetail?.(ctx, neckY, hipY);
+    {   // where the hands will rest, so a shirt print can stay clear of them
+      const elY = neckY + S.shY + (hipY - neckY) * 0.42;
+      const hands = p.crossArms ? [[S.shX + S.armW * 0.2, elY - S.armW * 0.6], [-(S.shX + S.armW * 0.45), elY - S.armW * 0.15]]
+        : [p.armL ?? [-S.restX, hipY + S.restY], p.armR ?? [S.restX, hipY + S.restY]];
+      S.torsoDetail?.(ctx, neckY, hipY, hands);
+    }
 
     const arm = (side, target, bend, point, hold, front = false) => {
       const sh = [side * S.shX, neckY + S.shY];

@@ -222,11 +222,12 @@ const Cameos = (() => {
     body: { hipY: -172, neckY: -352, legW: 21, footX: 18, hipX: 20, torso: (n, h) => [[-42, n], [42, n], [56, n + 60], [58, h - 4], [-58, h - 4], [-56, n + 60]] },
     headScale: [0.92, 1.06],
     head: head({ hair: swoop(), eyeLop: { side: -1, dy: 0.12, s: 1.07 } }),   // lopsided eyes: the screen-right eye (he faces left) a little lower and bigger
-    detail: (ctx, n) => {
+    detail: (ctx, n, h, hands = []) => {
       outline(ctx, [[-40, n - 2], [0, n + 44], [-18, n + 60]], { w: 7 });
       outline(ctx, [[40, n - 2], [0, n + 44], [18, n + 60]], { w: 7 });
       for (let i = 0; i < 4; i++) {   // pineapples: crosshatched body, crown of leaves
         const x = [-40, 36, -20, 46][i], y = n + [82, 92, 142, 152][i];
+        if (hands.some(([hx, hy]) => Math.hypot(hx - x, hy - (y - 6)) < 44)) continue;   // a hand rests here: leave this pineapple out, so none pokes out from behind a hand
         for (const a of [-0.9, -0.35, 0.2, 0.75]) {
           const r = a === -0.35 || a === 0.2 ? 20 : 14;
           stroke(ctx, [[x, y - 14], [x + Math.sin(a) * r, y - 14 - Math.cos(a) * r]], { w: 5, taper0: 0.1, taper1: 0.9 });
