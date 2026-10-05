@@ -227,8 +227,8 @@ Skits.morningself = (() => {
   const HOLD = [215, -318];                           // phone in his right hand (pose space)
   const TAP_L = [160, -380];                          // left thumb on the phone's screen edge
   const UNDER_R = [60, -140];                         // a hand under the blanket
-  const ON_STAND = [PHONE[0] - 16, PHONE[1] - 22];
-  const R_UPPER = 100, R_REACH = 130;                                // his right arm reaches the nightstand
+  const ON_STAND = [PHONE[0] - 74, PHONE[1] - 8];   // his hand at the phone's near end as it lays it flat
+  const R_UPPER = 100, R_REACH = 106;                                // his right arm reaches the nightstand
   // pleased with himself but sleepy: heavy lids, a small closed smile (no teeth)
   const smug = { mouth: 'smile', mouthScale: 0.7, lid: 0.62, heavyLid: true, lowLid: 0.12, pupil: 12, brow: 0, browLiftL: 18, browLiftR: 18, lookX: 0.55, lookY: 0.2, tilt: 0.14 };
 
@@ -289,26 +289,27 @@ Skits.morningself = (() => {
       const wind = Math.sin(Math.PI * seg(t, 1.94, 2.02)) * 8;   // a small wind-up first
       const holding = t < 2.28;
       const holdScr = screen(UP, HOLD);
-      const swing = (a, b, k) => { const m = [(a[0] + b[0]) / 2 + 30, Math.max(a[1], b[1]) + 70]; return [0, 1].map(i => (1 - k) ** 2 * a[i] + 2 * k * (1 - k) * m[i] + k * k * b[i]); };   // dips below his jaw
-      // right hand: phone to the nightstand, then to the hem; left hand: off the phone straight to the hem
-      const rHand = holding ? local(hy, swing([holdScr[0] - wind, holdScr[1]], ON_STAND, easeOutBack(reach)))
+      // the phone goes up and over onto the nightstand in a short arc, tipping away
+      // from his face, his mitten on its near end the whole way
+      const arc = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k) - 40 * Math.sin(Math.PI * k)];
+      const rHand = holding ? local(hy, arc([holdScr[0] - wind, holdScr[1]], ON_STAND, easeInOut(reach)))
                             : Stage.mix(local(hy, ON_STAND), hemHand(hy, top, 1), easeInOut(seg(t, 2.28, 2.42)));
-      const lHand = Stage.mix(TAP_L, hemHand(hy, top, -1), easeInOut(seg(t, 1.98, 2.3)));
+      // the tapping hand drops below his chin first, then goes across to the covers
+      const lHand = t < 2.12 ? Stage.mix(TAP_L, [150, -232], easeInOut(seg(t, 1.98, 2.12)))
+                             : Stage.mix([150, -232], hemHand(hy, top, -1), easeInOut(seg(t, 2.12, 2.32)));
       // the face carries over from shot 1, then lids heavy, heavier, shut
+      const early = t < 2.0;   // until the reach starts it's exactly shot 1's grip
       const lid = t < 2.28 ? smug.lid : t < 2.42 ? lerp(smug.lid, 0.72, seg(t, 2.28, 2.42)) : t < 2.5 ? 0.8 : 1;
       const face = t < 2.3 ? { ...smug } : { mouth: t < 2.6 ? 'smile' : 'flat', brow: 0, browLiftL: 18, browLiftR: 18, lookX: 0.55, lookY: 0.3, lowLid: 0.2, heavyLid: true };
       const settle = 0.03 * easeInOut(seg(t, 3.05, 3.4));   // a small nestle into the pillow, then still
-      const R = Arms.arm(1, rHand, t < 2.28 ? 'down' : 'out', t >= 2.36, lerp(R_UPPER, R_REACH, Math.sin(Math.PI * seg(t, 2.0, 2.4))));
-      const L = Arms.arm(-1, lHand, t < 2.12 ? 'down' : 'out', true, 120);   // in front of him: hands on the covers under his chin
-      const early = t < 2.0;   // until the reach starts it's exactly shot 1's grip
+      const R = Arms.arm(1, rHand, t < 2.37 ? 'down' : 'out', !early, lerp(R_UPPER, R_REACH, Math.sin(Math.PI * seg(t, 2.0, 2.4))));
+      const L = Arms.arm(-1, lHand, t < 2.16 ? 'down' : 'out', true, 120);   // in front of him: hands on the covers under his chin
       pose(c, hy, { ...face, lid, tilt: lerp(0.1, 0.16, sink) + settle, ...R, ...L,
-        handSR: lerp(0.72, 1, seg(t, 2.28, 2.42)), ...(early ? { holdR: heldPhone(-0.12) } : {}) }, top,
-        () => { if (!holding) phoneFlat(ctx, PHONE[0], PHONE[1], t < 2.66); },
-        () => {   // while he sets it down the phone is in front of his hand: he grips its bottom end
-          if (!holding || early) return;
-          const [hx, hy2] = screen(hy, R.armR), tilt = lerp(-0.12, -1.45, easeOut(reach));
-          ctx.save(); ctx.translate(hx, hy2); ctx.rotate(tilt); ctx.translate(0, -20); heldPhone(0)(ctx, 0, 0); ctx.restore();
-        })(ctx);
+        handSR: lerp(0.72, 1, seg(t, 2.28, 2.42)),
+        // held: the phone under his mitten, which covers only its near end; it tips
+        // clockwise (away from his face) until it lies flat on the nightstand
+        ...(holding ? { holdR: heldPhone(lerp(-0.12, 1.5, easeInOut(reach))) } : {}) }, top,
+        () => { if (!holding) phoneFlat(ctx, PHONE[0], PHONE[1], t < 2.66); })(ctx);
     }],
     // morning: the alarm goes and goes, and he slaps snooze again and again without waking
     [CUT3, END, (ctx, t) => {
