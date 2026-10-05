@@ -68,8 +68,8 @@ Skits.morningself = (() => {
   }
   const WIN = [630, 650, 890, 990];                    // window, right of the bed
   const PIC = [110, 690, 330, 900];                    // framed picture, left wall
-  const STAND = { x0: 750, x1: 1000, top: 1236, bot: 1478, back: 40 };   // nightstand beside the bed's head end
-  const LAMP_X = 970, PHONE = [842, 1222];   // well inside the nightstand top
+  const STAND = { x0: 750, x1: 1000, top: 1330, bot: 1478, back: 40 };   // a low nightstand beside the bed's head end, top about level with his shoulder
+  const LAMP_X = 970, PHONE = [842, 1316];   // well inside the nightstand top
   // the bed, seen from its foot: mattress top runs from the headboard (far) to the near edge
   const BED = { farY: 1310, nearY: 1700, farL: 150, farR: 735, nearL: -40, nearR: 840, front: 1780 };   // the near-left corner runs well off frame
   const bedX = (y, side) => lerp(side < 0 ? BED.farL : BED.farR, side < 0 ? BED.nearL : BED.nearR, (y - BED.farY) / (BED.nearY - BED.farY));
@@ -120,8 +120,8 @@ Skits.morningself = (() => {
     panel(ctx, [[x0, top], [x0 - d, top - back], [x0 - d, bot - back], [x0, bot]], c.stand, 9);          // side
     panel(ctx, [[x0 - d, top - back], [x1 - d, top - back], [x1 + 8, top], [x0, top]], c.standTop, 9);   // top
     panel(ctx, box(x0, top, x1 + 8, bot, 4), c.stand, 10);                                              // front
-    outline(ctx, box(x0 + 26, top + 40, x1 - 18, top + 150, 4), { w: 6 });                           // drawer
-    blob(ctx, (x0 + x1) / 2, top + 95, 10, 8, { fill: INK, w: 0, n: 6 });
+    outline(ctx, box(x0 + 26, top + 30, x1 - 18, top + 112, 4), { w: 6 });                           // drawer
+    blob(ctx, (x0 + x1) / 2, top + 71, 10, 8, { fill: INK, w: 0, n: 6 });
     fill(ctx, Brush.ellipsePts((x0 + x1) / 2, bot + 6, (x1 - x0) / 2 + 10, 9, 12), INK, 0.3);       // flat shadow
   }
   function lamp(ctx, c, on) {
@@ -229,7 +229,7 @@ Skits.morningself = (() => {
   const TAP_L = [160, -380];                          // left thumb on the phone's screen edge
   const UNDER_R = [60, -140];                         // a hand under the blanket
   const ON_STAND = [PHONE[0] - 60, PHONE[1] - 14];   // his hand at the flat phone's near end
-  const R_UPPER = 100, R_REACH = 106;                                // his right arm reaches the nightstand
+  const R_UPPER = 100, R_REACH = 100;                                // his right arm reaches the nightstand
   // pleased with himself but sleepy: heavy lids, a small closed smile (no teeth)
   const smug = { mouth: 'smile', mouthScale: 0.7, lid: 0.62, heavyLid: true, lowLid: 0.12, pupil: 12, brow: 0, browLiftL: 18, browLiftR: 18, lookX: 0.55, lookY: 0.2, tilt: 0.14 };
 
@@ -260,22 +260,15 @@ Skits.morningself = (() => {
     }
     return { k, contact, since };
   }
-  // the snoozing arm: out from under the blanket, upper arm and forearm the same
-  // length with the elbow bending down, so it reads as an arm, not a line
-  const SLAP_ROOT = [728, TOP_DOWN + 18], SEG = 105, REST = [772, 1236];   // at rest: draped over to the nightstand, by the phone
-  function slapArm(ctx, c, hand) {
-    const [ax, ay] = SLAP_ROOT, dx = hand[0] - ax, dy = hand[1] - ay, d0 = Math.hypot(dx, dy);
-    const d = Math.min(d0, SEG * 2 * 0.98), ux = dx / d0, uy = dy / d0;
-    const h = Math.sqrt(Math.max(0, SEG * SEG - (d / 2) ** 2));
-    const hx = ax + ux * d, hy = ay + uy * d;
-    const elbow = [ax + ux * d / 2 - uy * h, ay + uy * d / 2 + ux * h];   // the side toward the floor
-    Chars.tube(ctx, [ax, ay], elbow, 0, 24 * S, SLEEVE, false);
-    Chars.tube(ctx, elbow, [hx, hy], 0, 24 * S, SLEEVE, false);
-    Chars.hand(ctx, hx, hy, null, S, W, true);
-    // a fold of the blanket over the sleeve where it comes out
-    const [x, y] = SLAP_ROOT;
-    fill(ctx, [[x - 48, y - 18], [x - 10, y - 30], [x + 34, y - 26], [x + 52, y - 8], [x + 44, y + 40], [x - 46, y + 40]], c.blanket, 0.3);
-    stroke(ctx, [[x - 48, y - 16], [x - 10, y - 30], [x + 34, y - 26], [x + 52, y - 6]], { w: 9 });
+  // The rig draws the arm before the blanket (all of it under the covers here), so the
+  // part that comes out is drawn on top: from under the hem by his chin, arching a
+  // little over the covers to the hand. Clipped to above the hem, so it starts under it.
+  function armOverCovers(ctx, top, hand) {
+    const out = [HX + 70, top + 18];
+    ctx.save(); ctx.beginPath(); ctx.rect(HX + 40, 0, 1000, top + 2); ctx.clip();
+    Chars.tube(ctx, out, hand, -0.14, 24 * S, SLEEVE, false);
+    ctx.restore();
+    Chars.hand(ctx, hand[0], hand[1], null, S, W, true);
   }
 
   const shots = [
@@ -323,13 +316,13 @@ Skits.morningself = (() => {
       const [jx, jy, jr] = ringing ? [(hh(f) - 0.5) * 30, -Math.abs(hh(f + 40) - 0.5) * 20, (hh(f + 80) - 0.5) * 0.36] : [0, 0, 0];   // about ±15 px and ±0.18 rad
       const jolt = since < 0.12 ? 0.06 * (1 - since / 0.12) : 0;   // his head nods into each slap
       const hy = DOWN, top = TOP_DOWN;
+      // between slaps his hand holds the covers by his chin, as it did at night
+      const slapHand = Stage.mix([HX + 92, top - 10], [PHONE[0] - 24 + jx, PHONE[1] - 18], k);   // screen
       pose(c, hy, { lid: 1, brow: 0.55, mouth: 'wobbly', tilt: 0.16 + jolt,
-        ...Arms.arm(-1, hemHand(hy, top, -1), 'out', false, 120), ...Arms.arm(1, UNDER_R, 'down') }, top,
+        ...Arms.arm(-1, hemHand(hy, top, -1), 'out', false, 120),
+        ...Arms.arm(1, UNDER_R, 'down') }, top,   // the rig's right arm stays under the covers; the one that comes out is drawn on top
         () => phoneFlat(ctx, PHONE[0] + jx, PHONE[1] + jy, ringing, jr),
-        () => {
-          if (ringing) buzz(ctx, PHONE[0] + jx * 0.5, PHONE[1] + jy, f);
-          slapArm(ctx, c, Stage.mix(REST, [PHONE[0] + 8 + jx, PHONE[1] - 22], k));   // on the snooze button
-        })(ctx);
+        () => { if (ringing) buzz(ctx, PHONE[0] + jx * 0.5, PHONE[1] + jy, f); armOverCovers(ctx, top, slapHand); })(ctx);
     }],
     // hard cut back to the night: he's at it again
     [END, END2 + 1, (ctx, t) => setting(ctx, t - END, tapOf(TAPS_LOOP))],
