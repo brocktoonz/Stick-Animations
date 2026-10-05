@@ -407,7 +407,7 @@ Skits.extinct = (() => {
     // "but there's no-" ... Ludwig cuts in off-screen ("other option"): stay
     // on Nick and let him go blank while Ludwig speaks
     // his raised hand drops to his side over a few frames as he goes blank
-    [3.35, 4.7, (ctx, t) => { const d = easeInOut(seg(t, 4.0, 4.2)), hand = [lerp(170, 120, d), lerp(-400, -150, d)];
+    [3.35, 4.7, (ctx, t) => { const d = easeInOut(seg(t, 4.0, 4.2)), hand = [lerp(185, 120, d), lerp(-445, -150, d)];
       mediumNick(ctx, t, t < 4.0
         ? { ...E.happy, pointR: -1.2, ...Ar.arm(1, hand, 'down', true), ...talkLine(t, 2) }
         : { ...E.stunned, lookX: 0.75, ...Ar.arm(1, hand, 'down', d < 0.5) }); }],
