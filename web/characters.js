@@ -380,8 +380,9 @@ const Chars = (() => {
   // overshoot ever sticks out as a hook. seed: optional fixed seed per hand.
   function hand(ctx, x, y, point = null, s = 1, skin = W, seed = null) {
     const r = Brush.random(seed ?? 7150 + Math.sign(x));
-    const pts = Brush.ellipsePts(x, y, 24 * s, 22 * s, 32).map(([px, py]) => [px + (r() - 0.5) * 0.7 * s, py + (r() - 0.5) * 0.7 * s]);
-    const ring = Brush.spline(pts, true, 1.5);
+    // the boil is a whole-shape change (slight stretch and turn), never per-point
+    // jitter, so even a close-up hand stays a smooth round shape
+    const ring = Brush.ellipsePts(x, y, 24 * s * (1 + (r() - 0.5) * 0.06), 22 * s * (1 + (r() - 0.5) * 0.06), 64, (r() - 0.5) * 0.6);
     ctx.beginPath(); ring.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
     ctx.fillStyle = skin; ctx.fill();
     ctx.lineWidth = 7 * s * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
