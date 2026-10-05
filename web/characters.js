@@ -18,6 +18,7 @@
 //              by default arms go behind the head, which sits on the shoulders
 //   holdR(ctx, x, y)  draws a prop at the right hand (before the hand, so it grips it)
 //   handSL/handSR  scale one hand (opt-in; e.g. a smaller hand on a thin prop)
+//   noThumb    plain mitten hands with no thumb hook
 //   happy      with lid >= 1, draw ^ ^ laughing eyes
 //   sweat      bool     eyesOnly  draw only the eyes (dark-room gags)
 const Chars = (() => {
@@ -388,14 +389,15 @@ const Chars = (() => {
   }
 
   // Mitten hand. point = direction (radians) to stick a finger out, or null.
-  function hand(ctx, x, y, point = null, s = 1, skin = W) {
+  // noThumb: a plain mitten, no thumb hook (the main character's hands)
+  function hand(ctx, x, y, point = null, s = 1, skin = W, noThumb = false) {
     if (point !== null) {
       const fx = x + Math.cos(point) * 40 * s, fy = y + Math.sin(point) * 40 * s;
       stroke(ctx, [[x, y], [fx, fy]], { w: 22 * s, taper0: 0, taper1: 0, minW: 1 });
       stroke(ctx, [[x, y], [fx, fy]], { w: 10 * s, taper0: 0, taper1: 0, minW: 1, color: skin, jit: 0 });
     }
     blob(ctx, x, y, 24 * s, 22 * s, { w: 7 * s, n: 10, fill: skin });
-    stroke(ctx, [[x - 18 * s, y - 6 * s], [x - 28 * s, y - 18 * s], [x - 20 * s, y - 24 * s]], { w: 6 * s });
+    if (!noThumb) stroke(ctx, [[x - 18 * s, y - 6 * s], [x - 28 * s, y - 18 * s], [x - 20 * s, y - 24 * s]], { w: 6 * s });
   }
 
   // Short sleeve in a different colour from the skin (opt-in, S.sleeveFill):
@@ -586,7 +588,7 @@ const Chars = (() => {
       if (S.sleeveHem && S.sleeveFill) sleeveFill(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem, S.sleeveFill);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
-      hand(ctx, hnd[0], hnd[1], point ?? null, (side < 0 ? p.handSL : p.handSR) ?? S.handS, S.skin ?? W);
+      hand(ctx, hnd[0], hnd[1], point ?? null, (side < 0 ? p.handSL : p.handSR) ?? S.handS, S.skin ?? W, p.noThumb);
     };
     if (p.crossArms) {
       // arms folded: upper arms down the sides to the elbows, forearms across

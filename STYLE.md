@@ -94,6 +94,8 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
 - Faces come from the shared emotion set (`web/emotions.js`, `...Emotions.angry`).
   Don't hand-tune a face in a skit when an emotion covers it; add or adjust the
   emotion instead and re-render `characters/` so the references stay true.
+- The main character's hands are plain mittens, no thumb hook (user decision;
+  `Hero.main` sets `noThumb`). Draw his hands in close-ups the same way.
 - Main character: `Hero.main`, the spiky-haired guy with mid-grey hair and a
   grey hoodie (`Cameos.spikyShades.brown`). The previous design is kept as
   `Hero.mainOld`.

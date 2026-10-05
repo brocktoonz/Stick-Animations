@@ -42,6 +42,7 @@ Backgrounds
 Characters
 - Each character matches their design notes in STYLE.md and cameos.js/hero.js.
 - No character has ears (user rule, STYLE.md Cast): flag any ear on any human character, cast or one-off.
+- The main character's hands are plain mittens with no thumb hook (user rule): flag any hook on his hands, in any shot or close-up.
 - Hair reads as hair (not a cap, leaf or helmet). Facial hair reads as hair (not a smear or mask).
 - Silhouettes stay distinct between characters.
 - Anatomy is correct: no backwards elbows, and no hands detached from arms. Check this on characters that are only partly in frame too (e.g. Slime leaning in from the edge): the user caught arms bending backwards there that the reviewer missed.
@@ -73,6 +74,11 @@ Scene logic and continuity between shots
 - Count the hands: which hand holds what, and is a hand that's busy in the next shot free in this one? A held prop needs a visible hand on it; a hand can't be in two places.
 - Props, lighting, time of day, clothing, the set and where things are (a phone put on the nightstand stays on the nightstand) stay consistent across cuts unless the story changes them.
 - Each action must be physically possible and read the right way: a "tapping" hand must actually touch the screen side of the phone, a thing being put down ends resting on a surface, an arm reaching for something takes a path that a real arm could.
+- Things rest inside what holds them: a pillow stays within the bed's width (the user caught one hanging off the bed past the headboard), a phone or cup sits fully on its table top with no overhang. Flag as MAJOR.
+- A held prop and the hand holding it layer correctly: the hand grips the prop's edge or is behind it, never drawn over the middle of it as if poking through (the user caught a hand showing through the phone as it was set down).
+- Poses fit the action: a sleeper doesn't lie with arms crossed in an X over the chest; someone getting into bed grabs the top of the covers and pulls them up.
+- Beats need room to land: before a cut that pays off a setup (going to sleep, then the alarm), the setup holds long enough to read (about a second of him settled and still), not cut away the instant it happens.
+- The core gag of the reference is kept: if the clip's joke is an action (slapping snooze over and over), check it's still on screen and reads; flag its absence as a BLOCKER.
 - If the brief describes an action ("holding the phone up, thumb tapping"), check the frames show exactly that action, not a stand-in.
 Captions
 - The text is the exact words, with nothing dropped or added.

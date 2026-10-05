@@ -660,7 +660,8 @@ const Hero = (() => {
   const mainBody = build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: mainHead, detail: overshirt });
   const mainOld = (ctx, p) => mainBody(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
   // The main character: the spiky-haired guy, mid-grey hair, grey hoodie.
-  const main = (ctx, p) => Cameos.spikyShades.brown(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
+  // plain mitten hands, no thumb hook (user decision)
+  const main = (ctx, p) => Cameos.spikyShades.brown(ctx, { mouth: 'smile', lid: 0, brow: 0, noThumb: true, ...p });
 
   // J3 THE CHAOS GREMLIN: wide squat head, one strand up, manic grin
   const gremlinHead = (ctx, p) => {
