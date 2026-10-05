@@ -380,8 +380,8 @@ const Chars = (() => {
   // overshoot ever sticks out as a hook. seed: optional fixed seed per hand.
   function hand(ctx, x, y, point = null, s = 1, skin = W, seed = null) {
     const r = Brush.random(seed ?? 7150 + Math.sign(x));
-    const pts = Brush.ellipsePts(x, y, 24 * s, 22 * s, 24).map(([px, py]) => [px + (r() - 0.5) * 0.9 * s, py + (r() - 0.5) * 0.9 * s]);
-    const ring = Brush.spline(pts, true, 3);
+    const pts = Brush.ellipsePts(x, y, 24 * s, 22 * s, 32).map(([px, py]) => [px + (r() - 0.5) * 0.7 * s, py + (r() - 0.5) * 0.7 * s]);
+    const ring = Brush.spline(pts, true, 1.5);
     ctx.beginPath(); ring.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
     ctx.fillStyle = skin; ctx.fill();
     ctx.lineWidth = 7 * s * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
@@ -585,7 +585,7 @@ const Chars = (() => {
       // upper arm; the near forearm angles up over it to a fist by the far elbow.
       for (const side of [-1, 1]) {
         const sh = [side * S.shX, neckY + S.shY], el = [side * (S.shX + S.armW * 0.5), elY];
-        const hd = side < 0 ? [S.shX + S.armW * 0.2, elY - S.armW * 0.6] : [-S.shX * 0.95, elY - S.armW * 1.1];
+        const hd = side < 0 ? [S.shX + S.armW * 0.2, elY - S.armW * 0.6] : [-(S.shX + S.armW * 0.45), elY - S.armW * 0.15];   // near fist covers the far elbow's end, so no stub shows under it
         if (side < 0) {   // under: forearm and hidden hand first
           tube(ctx, el, hd, 0.05, S.armW, S.armFill ?? W, darkTorso);
           hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);

@@ -415,7 +415,7 @@ Skits.extinct = (() => {
     [4.7, 6.0, (ctx, t) => single(ctx, t, 'lud', { ...E.smirk, mouth: 'smirk', lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06,
       crossArms: true }, lerp(1.35, 1.5, easeInOut(seg(t, 4.7, 6.0))), 1160)],
     // "what do you mean other option"
-    [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...talkLine(t, 4) })],
+    [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...Ar.arm(1, [168, -505], 'out', true, 150), ...talkLine(t, 4) })],   // scratching hand just outside the hair line, so no strand ends on it
     // "give me the other option" (points at him) / "why you don't want that?":
     // fastest stretch, and Ludwig points at Nick, so both in one two-shot
     [7.0, 7.72, (ctx, t) => twoShot(ctx, t, { ...E.confused, mouth: 'flat', weight: TS_WN },
