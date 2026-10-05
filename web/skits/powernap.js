@@ -240,8 +240,11 @@ Skits.powernap = (() => {
         const ph = ((t - 7.0) / 2.2 + i / 3) % 1;
         if (t < 7.0) break;
         const bx = 120 - 25 * i + 20 * Math.sin((t + i) * 2), by = 760 - 240 * ph, br = 18 + 26 * ph * (1 - 0.3 * i);
-        blob(ctx, bx, by, br, br, { fill: '#e6edf2', w: 6, n: 14, jit: 0.4 });
-        stroke(ctx, [[bx - br * 0.5, by - br * 0.1], [bx - br * 0.3, by - br * 0.5]], { w: 5, color: W, taper0: 0.2, taper1: 0.2 });
+        // one closed outline with its own fixed seed: boils only on the beat, no overshoot nub
+        const r = Brush.random(4900 + i), ring = Brush.ellipsePts(bx, by, br * (1 + (r() - 0.5) * 0.08), br * (1 + (r() - 0.5) * 0.08), 48, r() * 3);
+        ctx.beginPath(); ring.forEach(([px, py], k) => k ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
+        ctx.fillStyle = '#e6edf2'; ctx.fill(); ctx.lineWidth = 6 * Brush.getWeight(); ctx.strokeStyle = Brush.INK; ctx.stroke();
+        stroke(ctx, [[bx - br * 0.5, by - br * 0.1], [bx - br * 0.3, by - br * 0.5]], { w: 5, color: W, taper0: 0.2, taper1: 0.2, seed: 4910 + i });
       }
       couchShape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
       stroke(ctx, [[540, 1840], [540, 1940]], { w: 6, seed: 4998 });   // fixed seed: boils only on the beat
