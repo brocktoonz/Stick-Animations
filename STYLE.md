@@ -38,9 +38,8 @@ disagree, the rule wins.
   hair different, off-centre poses.
 - Arms go behind the head. Short sleeves are a hem line on the arm, not extra
   shapes. Leave shirt lines visible beside the arms.
-- **Hands are plain circles** (Animal Crossing style): no thumb, no fingers
-  (except a pointing finger when a pose needs it), and no hook or tail where the
-  outline closes. (User decision.)
+- **Hands are plain circles** (Animal Crossing style): no thumb, no fingers (not
+  even to point), and no hook or tail where the outline closes. (User decision.)
 - Check stills and zoomed crops of every change before calling it done.
 
 ## Hair

@@ -374,18 +374,13 @@ const Chars = (() => {
     outline(ctx, pts, { w: 5 * s, jit: 0.6 });
   }
 
-  // Hand: a plain circle (Animal Crossing style, user decision), no thumb.
-  // point = direction (radians) to stick a finger out, or null. One closed
+  // Hand: a plain circle (Animal Crossing style, user decision): no thumb and no
+  // fingers, even when a pose points (the point argument is ignored). One closed
   // outline with a small wobble that changes only on the boil beat, so no brush
   // overshoot ever sticks out as a hook. seed: optional fixed seed per hand.
   function hand(ctx, x, y, point = null, s = 1, skin = W, seed = null) {
-    if (point !== null) {
-      const fx = x + Math.cos(point) * 40 * s, fy = y + Math.sin(point) * 40 * s;
-      stroke(ctx, [[x, y], [fx, fy]], { w: 22 * s, taper0: 0, taper1: 0, minW: 1 });
-      stroke(ctx, [[x, y], [fx, fy]], { w: 10 * s, taper0: 0, taper1: 0, minW: 1, color: skin, jit: 0 });
-    }
     const r = Brush.random(seed ?? 7150 + Math.sign(x));
-    const pts = Brush.ellipsePts(x, y, 24 * s, 22 * s, 16).map(([px, py]) => [px + (r() - 0.5) * 1.1 * s, py + (r() - 0.5) * 1.1 * s]);
+    const pts = Brush.ellipsePts(x, y, 24 * s, 22 * s, 24).map(([px, py]) => [px + (r() - 0.5) * 0.9 * s, py + (r() - 0.5) * 0.9 * s]);
     const ring = Brush.spline(pts, true, 3);
     ctx.beginPath(); ring.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
     ctx.fillStyle = skin; ctx.fill();
@@ -580,7 +575,7 @@ const Chars = (() => {
       tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, darkTorso);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
-      hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W, p.thumbs === false ? 7100 + side : null);
+      hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W, 7100 + side);   // each hand its own seed
     };
     if (p.crossArms) {
       // arms folded: upper arms down the sides to the elbows, forearms across

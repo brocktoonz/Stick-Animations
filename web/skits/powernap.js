@@ -233,7 +233,7 @@ Skits.powernap = (() => {
       const droopy = { noEyes: true, halfOpen: open, slackKind: said?.viz.kind, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };
       const groggy = t > 7.0 ? lerp(0, 0.3, easeInOut(seg(t, 7.0, 8.0))) : 0;                // head lolls right over to one side, and holds
       Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
-        ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'), thumbs: false, cleanTorso: true,   // clean hand and hoodie outlines; no thumb marks: at this size they read as hooks; arms spread wide, hands planted on the cushion
+        ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'), cleanTorso: true,   // clean hoodie outline; arms spread wide, hands planted on the cushion
         ...droopy,
         slackMouth: mouthOpen });                 // jaw hanging slack
       for (let i = 0; i < 3; i++) {   // sleep bubbles drifting up off him, each popping and starting again
