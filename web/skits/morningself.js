@@ -220,6 +220,7 @@ Skits.morningself = (() => {
   // thumb taps while he sets alarms (hand-timed, uneven); the loop-back gets its own
   const TAPS = [0.14, 0.27, 0.49, 0.58, 0.81, 0.9];
   const TAPS_LOOP = [0.1, 0.24, 0.33, 0.57, 0.71, 0.96, 1.08, 1.31, 1.44];
+  const GRIP = 18;   // the phone sits above his holding mitten, which covers only its bottom rim
   const tapOf = list => t => list.reduce((m, a) => Math.max(m, 1 - Math.abs(t - a) / 0.05), 0);
   const TOP_UP = UP + 236, TOP_DOWN = DOWN + 134;   // blanket edge: at his chest, then up to his chin
   // Two hands, as in the phone close-up that follows: the right holds the phone
@@ -236,7 +237,7 @@ Skits.morningself = (() => {
   function setting(ctx, u, tap) {
     const c = room(ctx, false), k = tap(u), dip = 6 * k;
     pose(c, UP, { ...smug,
-      ...Arms.arm(1, [HOLD[0], HOLD[1] + dip * 0.5], 'down', false, R_UPPER), holdR: heldPhone(-0.12 + 0.03 * k), handSR: 0.72,   // behind his left hand
+      ...Arms.arm(1, [HOLD[0], HOLD[1] + dip * 0.5], 'down', false, R_UPPER), holdR: heldPhone(-0.12 + 0.03 * k, GRIP), handSR: 0.72,   // behind his left hand
       ...Arms.arm(-1, [TAP_L[0] + 10 * k, TAP_L[1] + dip], 'down', true, 120) }, TOP_UP)(ctx);   // each tap presses in
   }
 
@@ -311,7 +312,7 @@ Skits.morningself = (() => {
         // clockwise (away from his face) until it lies flat on the nightstand
         // the phone slides up so his mitten grips its end over the rim, not inside it;
         // near the end of the move it's already the flat phone in its final spot, under his hand
-        ...(holding && !landed ? { holdR: heldPhone(lerp(-0.12, 1.5, easeInOut(reach)), 14 * seg(t, 1.94, 2.02)) } : {}) }, top,
+        ...(holding && !landed ? { holdR: heldPhone(lerp(-0.12, 1.5, easeInOut(reach)), GRIP) } : {}) }, top,
         () => { if (!holding || landed) phoneFlat(ctx, PHONE[0], PHONE[1], t < 2.66); })(ctx);
     }],
     // morning: the alarm goes and goes, and he slaps snooze again and again without waking
