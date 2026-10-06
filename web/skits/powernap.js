@@ -178,8 +178,8 @@ Skits.powernap = (() => {
       ctx.restore();
       const heavy = lerp(0.42, 0.78, easeInOut(seg(t, 1.6, 3.0)));                         // lids getting heavier as he goes
       const said = talk(t, ...SAID.alrighty) ?? talk(t, ...SAID.nap) ?? talk(t, ...SAID.huh);
-      const pose = t >= 3.3 ? { lid: 1, brow: -0.15, mouth: 'o', open: 0.12, tilt: -0.1 }   // out
-        : { lid: Math.max(heavy, blink(t, 2.7, 0.3)), lowLid: 0.2, brow: -0.25, pupil: 9, lookX: 0.3, lookY: -0.2, tilt: -0.08,
+      const pose = t >= 3.34 ? { lid: 1, brow: -0.15, mouth: 'o', open: 0.12, tilt: -0.1 }   // out (after "huh")
+        : { lid: Math.max(heavy, blink(t, 2.7, 0.3), easeInOut(seg(t, 3.22, 3.34))), lowLid: 0.2,   // lids slide shut over the last few frames brow: -0.25, pupil: 9, lookX: 0.3, lookY: -0.2, tilt: -0.08,
             ...(said ?? (t < 0.44 ? { mouth: 'smile' } : { mouth: 'flat' })) };            // content smile before he speaks
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
       Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, legs: false,
@@ -246,9 +246,13 @@ Skits.powernap = (() => {
         ...droopy,
         slackMouth: mouthOpen });                 // jaw hanging slack
       for (let i = 0; i < 3; i++) {   // sleep bubbles drifting up off him, each popping and starting again
-        const ph = ((t - 7.0) / 2.2 + i / 3) % 1;
-        if (t < 7.0) break;
-        const bx = 120 - 25 * i + 20 * Math.sin((t + i) * 2), by = 760 - 240 * ph, br = 18 + 26 * ph * (1 - 0.3 * i);
+        // staggered: each bubble starts one third of a cycle after the last, grows in
+        // from nothing and shrinks away at the top (never blinks on or off)
+        const u = (t - 7.0) / 2.2 - i / 3;
+        if (u < 0) continue;
+        const ph = u % 1, grow = easeOut(clamp(ph / 0.12)) * (1 - easeInOut(clamp((ph - 0.9) / 0.1)));
+        if (grow <= 0.01) continue;
+        const bx = 120 - 25 * i + 20 * Math.sin((t + i) * 2), by = 760 - 240 * ph, br = (18 + 26 * ph * (1 - 0.3 * i)) * grow;
         // one closed outline with its own fixed seed: boils only on the beat, no overshoot nub
         const r = Brush.random(4900 + i), ring = Brush.ellipsePts(bx, by, br * (1 + (r() - 0.5) * 0.08), br * (1 + (r() - 0.5) * 0.08), 48, r() * 3);
         ctx.beginPath(); ring.forEach(([px, py], k) => k ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
