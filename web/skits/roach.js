@@ -99,15 +99,16 @@ Skits.roach = (() => {
     const up = easeInOut(seg(t, 0.28, 0.46)), arms = easeInOut(seg(t, 0.3, 0.5)) * (1 - easeInOut(seg(t, 0.68, 0.88)));   // the shrug drops before the cut to the close-up
     const out = [150, -214];
     // slumped for the "UGhh...", head hung, eyes shut; then eyes open to a flat stare
-    const lid = t < 0.26 ? 1 : lerp(1, 0.3, easeOut(seg(t, 0.26, 0.4)));
+    const lid = t < 0.26 ? 1 : lerp(1, 0.4, easeOut(seg(t, 0.26, 0.4)));   // heavy, drooping lids
+    const sp = speak(t);
     return {
-      dir: 1, t, ...E.neutral, pupil: 10, lookX: 0.95, lookY: 0.25,
-      lid: blink(t, 2.9, 1.1) && lid < 0.9 ? 1 : lid, brow: lerp(-0.4, -0.95, up),
-      tilt: keys(t, [[0, 0.17], [0.26, 0.17], [0.46, -0.05], [1.0, 0.03], [1.9, 0.03], [2.15, 0.08]]),
-      lean: keys(t, [[0, 0.07], [0.26, 0.07], [0.46, 0.0], [1.9, 0.0], [2.2, 0.03]]),
+      dir: 1, t, ...E.neutral, mouth: 'flatdown', pupil: 9, lookX: 0.8, lookY: 0.4,   // downbeat: eyes down and away, mouth corners tipped down
+      lid: blink(t, 2.9, 1.1) && lid < 0.9 ? 1 : lid, brow: lerp(-0.6, -1.3, up),
+      tilt: keys(t, [[0, 0.17], [0.26, 0.17], [0.46, 0.08], [1.0, 0.11], [1.9, 0.13], [2.15, 0.15]]),   // head drooped to one side and held
+      lean: keys(t, [[0, 0.07], [0.26, 0.07], [0.46, 0.04], [1.9, 0.05], [2.2, 0.06]]),   // shoulders slumped forward
       bob: Math.sin(t * 2.3) * 3, weight: 0.8,
       ...glide(-1, REST(-1), [-out[0], out[1]], arms, 'rest', 'out'), ...glide(1, REST(1), out, arms, 'rest', 'out'),
-      ...(speak(t) ?? {}),
+      ...(sp ? (sp.mouth === 'flat' ? { mouth: 'flatdown' } : sp) : {}),
     };
   };
 
