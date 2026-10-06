@@ -56,6 +56,36 @@ after the power nap couch.)
   `seed` so it doesn't re-roll when something drawn before it changes. See
   `couchLine` in `web/skits/powernap.js`.
 
+## HARD RULE: every frame is checked for pops before anything reaches the user
+
+No part of anything may jump out of its path for a frame or a few and come back,
+or flip sides between two frames (user decision, after an arm in the power nap
+video kicked out sideways for 3 frames and both I and the reviewer passed it).
+Sampling every 3rd frame or a 2 fps contact sheet is NOT a check.
+Pops are always fixed, in a first draft or a revision, even outside what the
+user asked to change: they are glitches, not design choices (user decision).
+
+Before sending any render to art-reviewer, and again before showing it to the
+user:
+1. Render a motion copy with frozen line boil:
+   `node scripts/export.cjs <skit> <scratch>/motion.mp4 --no-boil`
+2. Run `python3 scripts/glitch_check.py <scratch>/motion.mp4 --out <dir>` and look
+   at every strip it writes. Each hit is fixed or explained (a blink, a cut, a
+   lip-sync shape) in your notes.
+3. Run `python3 scripts/frame_sheets.py <video> <dir> --onion` and look at EVERY
+   sheet, in order, following each moving limb, hand, head and prop from tile
+   to tile. A part that jumps out of its path, flips its elbow or knee, or
+   swaps pose with no in-betweens is a BLOCKER.
+
+How to build motion that can't pop:
+- Never switch a pose value with a threshold mid-move (`k > 0.5 ? 'down' :
+  'out'`, an elbow side, a facing, a different arm target). Blend numbers
+  instead; see `glide` in `web/skits/powernap.js`, which blends the elbow bend.
+- Don't re-solve fixed-length arms with `'out'`/`'down'` while the hand passes
+  close to the shoulder line; the elbow side can flip from one frame to the
+  next. Interpolate the bend between the two end poses.
+- A held pose that changes must ease over at least 3 frames.
+
 ## Mandatory review loop (every session, every render)
 1. After rendering any skit or revision, invoke the art-reviewer subagent on the rendered MP4. Give it the file path only. Do not tell it what you changed or what you think is fixed.
 2. If the verdict is FAIL, fix every BLOCKER and MAJOR issue, re-render, and invoke art-reviewer again with a fresh review. (First draft only. After the user has seen a render, follow the hard rule above: fix only findings in what the user asked to change.)

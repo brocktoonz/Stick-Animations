@@ -67,6 +67,13 @@ Skits.powernap = (() => {
     for (let i = 0; i < 4; i++) { const [a, b] = [c[i], c[(i + 1) % 4]]; for (let k = 0; k < n; k++) pts.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]); }
     return pts;
   };
+  // An arm moving from hand a (elbow out) to hand b (elbow down) as k goes 0 to 1:
+  // the hand follows the line and the bend blends between the two end poses.
+  const glide = (side, a, b, k) => {
+    const A = Arms.arm(side, a, 'out'), B = Arms.arm(side, b, 'down'), K = side < 0 ? 'L' : 'R';
+    const at = Arms.arm(side, [lerp(a[0], b[0], k), lerp(a[1], b[1], k)], 'out')['arm' + K];
+    return { ['arm' + K]: at, ['bend' + K]: lerp(A['bend' + K], B['bend' + K], k) };
+  };
   const panel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); outline(ctx, pts, { w }); };
   const shape = (ctx, pts, col, w = 10) => { fill(ctx, Brush.spline(pts, true, 3), col, 0.5); outline(ctx, pts, { w }); };
   // The couch: its outline follows the same path as its fill, resampled to short
@@ -176,8 +183,10 @@ Skits.powernap = (() => {
             ...(said ?? (t < 0.44 ? { mouth: 'smile' } : { mouth: 'flat' })) };            // content smile before he speaks
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
       Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, legs: false,
-        ...Arms.arm(1, [lerp(40, 58, lie), lerp(-150, -150, lie)], lie > 0.5 ? 'down' : 'out'),   // top arm: hand on his knee, then lying along his side, hand on his hip
-        ...Arms.arm(-1, [lerp(-40, -60, lie), lerp(-150, -330, lie)], lie > 0.5 ? 'down' : 'out'),   // bottom arm: hand on his knee, then tucked under his head
+        // the elbow bend blends smoothly from the sitting pose to the lying one (never
+        // switched or re-solved mid-move, which flipped the elbow for a few frames)
+        ...glide(1, [40, -150], [58, -150], lie),     // top arm: hand on his knee, then lying along his side, hand on his hip
+        ...glide(-1, [-40, -150], [-60, -330], lie),  // bottom arm: hand on his knee, then tucked under his head
         ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });                                 // mouth bigger while his head is on its side
       ctx.restore();
       couchFront(ctx);
