@@ -57,9 +57,10 @@ Skits.roach = (() => {
       if (ov > most + 0.005 || (Math.abs(ov - most) <= 0.005 && LipSync.OPEN[v] > LipSync.OPEN[kind])) { kind = v; most = ov; }
     }
     if (lips) kind = 'mbp';
+    if (kind === 'rest') return { mouth: 'flat' };   // between sounds: the same closed line the shot holds in pauses, not the small pout
     return { mouth: 'talk', viz: { kind, open: LipSync.OPEN[kind], intensity: 1, smile: 0, side: 1, var: (beat * 7919 % 5) / 4 } };
   };
-  const SPEECH = [[0, 0.28], [0.29, 0.91], [0.9, 1.67], [3.85, 4.55], [4.78, 5.47]];
+  const SPEECH = [[0, 0.28], [0.29, 0.91], [0.9, 1.67], [3.85, 4.6], [4.78, 5.47]];
   const speak = t => { for (const [a, b] of SPEECH) { const m = talk(t, a, b); if (m) return m; } return null; };
 
   // ---------- helpers ----------
@@ -98,10 +99,10 @@ Skits.roach = (() => {
     const up = easeInOut(seg(t, 0.28, 0.46)), arms = easeInOut(seg(t, 0.3, 0.5)) * (1 - easeInOut(seg(t, 0.68, 0.88)));   // the shrug drops before the cut to the close-up
     const out = [150, -214], down = REST(1);
     // slumped for the "UGhh...", head hung, eyes shut; then eyes open to a flat stare
-    const lid = t < 0.26 ? 1 : lerp(1, 0.45, easeOut(seg(t, 0.26, 0.4)));
+    const lid = t < 0.26 ? 1 : lerp(1, 0.3, easeOut(seg(t, 0.26, 0.4)));
     return {
-      dir: 1, t, ...E.neutral, flatLid: lid < 1, pupil: 9, lookX: 0.95, lookY: 0.05,
-      lid: blink(t, 2.9, 1.1) && lid < 0.9 ? 1 : lid, brow: lerp(0.1, 0.25, up),
+      dir: 1, t, ...E.neutral, pupil: 10, lookX: 0.95, lookY: 0.25,
+      lid: blink(t, 2.9, 1.1) && lid < 0.9 ? 1 : lid, brow: lerp(-0.4, -0.95, up),
       tilt: keys(t, [[0, 0.17], [0.26, 0.17], [0.46, -0.05], [1.0, 0.03], [1.9, 0.03], [2.15, 0.08]]),
       lean: keys(t, [[0, 0.07], [0.26, 0.07], [0.46, 0.0], [1.9, 0.0], [2.2, 0.03]]),
       bob: Math.sin(t * 2.3) * 3, weight: 0.8,
@@ -113,19 +114,17 @@ Skits.roach = (() => {
   // ---------- Slime ----------
   const slimePose = t => {
     const k = loud('roach', t);   // the shout follows the sound
-    const rage = easeOut(seg(t, 2.5, 2.56)) * (1 - easeInOut(seg(t, 3.12, 3.3)));   // furious through the shout, then flat
-    const shouting = t < 3.2 && k > 0.06;
+    const rage = easeOut(seg(t, 2.5, 2.56)) * (1 - easeInOut(seg(t, 3.0, 3.26)));   // furious through the shout, then eases flat over ~8 frames
+    const fade = 1 - easeInOut(seg(t, 3.02, 3.26));
+    const shouting = fade > 0.3 && k > 0.06;
     const base = {
       dir: -1, t, ...E.neutral, lookX: 0.9, lookY: 0.05, pupil: 10, bob: Math.sin(t * 2.1) * 3, weight: -0.8,
-      lid: blink(t, 3.7) || lerp(0.5, 0.15, rage), flatLid: rage < 0.5, brow: lerp(0.4, 1.0, rage),
-      tilt: keys(t, [[2.5, 0], [2.65, -0.08], [3.0, -0.15], [3.2, -0.06], [3.5, 0.0]]) - 0.07 * k,
-      lean: -0.03 - 0.05 * k,
+      lid: blink(t, 3.7) || 0.5, flatLid: true, brow: lerp(0.4, 0.55, rage),
+      tilt: keys(t, [[2.5, 0], [2.65, -0.08], [3.0, -0.15], [3.26, -0.06], [3.5, 0.0]]) - 0.07 * k * fade,
+      lean: -0.03 - 0.05 * k * fade,
     };
-    // near fist (screen-left, toward Ludwig) comes up while he yells, then drops; the far arm swings back
-    const fistUp = easeOut(seg(t, 2.46, 2.6)) * (1 - easeInOut(seg(t, 3.1, 3.4)));
-    const arms = { ...glide(1, REST(1), [128, -250], fistUp, 'down', 'down'),
-                   ...glide(-1, [-100, -138], [-132, -176], fistUp, 'down', 'down') };
-    return shouting ? { ...base, ...arms, mouth: 'yell', open: 0.2 + 0.8 * k, stretch: 0.5 * k, mouthScale: 1.0 }
+    const arms = Ar.both([124, -170], 'out');   // hands on his hips
+    return shouting ? { ...base, ...arms, mouth: 'gape', open: (0.25 + 0.75 * k) * fade, stretch: 0.5 * k * fade, mouthScale: 1.0 }
                     : { ...base, ...arms, mouth: 'flat' };
   };
 
@@ -152,7 +151,7 @@ Skits.roach = (() => {
     // 3.85-4.8: close-up, "What am i?", hand on his chest
     [3.85, 4.8, (ctx, t) => {
       const s = lerp(2.7, 2.78, seg(t, 3.85, 4.8));
-      const m = t < 4.55 ? talk(t, 3.85, 4.55) : null;
+      const m = t < 4.6 ? talk(t, 3.85, 4.6) : null;
       backdrop(ctx);
       put(ctx, 'slime', s, 560, 1010, {
         dir: -1, t, ...E.neutral, mouth: 'flat', lookX: 0.25, lookY: 0.05, pupil: 10, lid: blink(t, 3.7, 0.5) || 0.5, flatLid: true, brow: 0.55,
@@ -166,7 +165,7 @@ Skits.roach = (() => {
       const calm = easeInOut(seg(t, 5.45, 5.7)), m = t < 5.47 ? talk(t, 4.78, 5.47) : null;
       backdrop(ctx); ground(ctx, 1680);
       put(ctx, 'roach', s, 540, 1680 - 438 * s, {
-        dir: 1, t, ...E.neutral, mouth: 'flat', lookX: 0.0, pupil: 10, lid: blink(t, 3.7, 1.9) || lerp(0.2, 0.5, calm), flatLid: calm > 0.5, brow: lerp(0.8, 0.45, calm),
+        dir: 1, t, ...E.neutral, mouth: 'flat', lookX: 0.0, pupil: 10, lid: blink(t, 3.7, 1.9) || lerp(0.2, 0.5, calm), flatLid: calm > 0.5, brow: lerp(0.55, 0.45, calm),
         tilt: keys(t, [[4.8, 0.0], [5.1, 0.06], [5.5, 0.06], [5.9, -0.02]]), bob: Math.sin(t * 2.1) * 3, weight: 0.7, droop,
         ...glide(-1, [-128, -236], [-REST(1)[0], REST(1)[1]], easeInOut(seg(t, 5.3, 5.7)), 'out', 'down'),
         ...glide(1, [128, -236], REST(1), easeInOut(seg(t, 5.3, 5.7)), 'out', 'down'), ...(m ?? {}),
