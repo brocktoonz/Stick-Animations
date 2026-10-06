@@ -72,11 +72,11 @@ Skits.roach = (() => {
   };
   // An arm moving from hand a (elbow ea) to hand b (elbow eb) as k goes 0 to 1: the hand follows the line and the bend blends between the two end poses.
   const glide = (side, a, b, k, ea = 'down', eb = 'down') => {
-    const A = Arms.arm(side, a, ea), B = Arms.arm(side, b, eb), K = side < 0 ? 'L' : 'R';
+    const K = side < 0 ? 'L' : 'R', bendOf = (h, e) => e === 'rest' ? Arms.rest(side)['bend' + K] : Arms.arm(side, h, e)['bend' + K];   // 'rest': the shared resting arm's bend
     const at = Arms.arm(side, [lerp(a[0], b[0], k), lerp(a[1], b[1], k)], 'out')['arm' + K];
-    return { ['arm' + K]: at, ['bend' + K]: lerp(A['bend' + K], B['bend' + K], k) };
+    return { ['arm' + K]: at, ['bend' + K]: lerp(bendOf(a, ea), bendOf(b, eb), k) };
   };
-  const REST = side => [side * 100, -138];
+  const REST = side => Arms.rest(side)[side < 0 ? 'armL' : 'armR'];   // the shared resting arm (soft hang), never a hand-coded rest
   const shadow = (ctx, x, rx, y) => fill(ctx, Brush.ellipsePts(x, y + 6, rx, rx * 0.13, 14), '#bcbcbc', 0.5);
   const ground = (ctx, y) => stroke(ctx, [[-700, y], [540, y + 3], [1800, y - 4]], { w: 6, taper0: 0, taper1: 0, seed: 6100 });
   const backdrop = ctx => { ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040); };
@@ -97,7 +97,7 @@ Skits.roach = (() => {
   // Always screen-left facing right (dir 1); Slime is screen-right facing left.
   const ludPose = t => {
     const up = easeInOut(seg(t, 0.28, 0.46)), arms = easeInOut(seg(t, 0.3, 0.5)) * (1 - easeInOut(seg(t, 0.68, 0.88)));   // the shrug drops before the cut to the close-up
-    const out = [150, -214], down = REST(1);
+    const out = [150, -214];
     // slumped for the "UGhh...", head hung, eyes shut; then eyes open to a flat stare
     const lid = t < 0.26 ? 1 : lerp(1, 0.3, easeOut(seg(t, 0.26, 0.4)));
     return {
@@ -106,7 +106,7 @@ Skits.roach = (() => {
       tilt: keys(t, [[0, 0.17], [0.26, 0.17], [0.46, -0.05], [1.0, 0.03], [1.9, 0.03], [2.15, 0.08]]),
       lean: keys(t, [[0, 0.07], [0.26, 0.07], [0.46, 0.0], [1.9, 0.0], [2.2, 0.03]]),
       bob: Math.sin(t * 2.3) * 3, weight: 0.8,
-      ...glide(-1, [-down[0], down[1]], [-out[0], out[1]], arms, 'down', 'out'), ...glide(1, down, out, arms, 'down', 'out'),
+      ...glide(-1, REST(-1), [-out[0], out[1]], arms, 'rest', 'out'), ...glide(1, REST(1), out, arms, 'rest', 'out'),
       ...(speak(t) ?? {}),
     };
   };
@@ -156,7 +156,7 @@ Skits.roach = (() => {
       put(ctx, 'slime', s, 560, 1010, {
         dir: -1, t, ...E.neutral, mouth: 'flat', lookX: 0.25, lookY: 0.05, pupil: 10, lid: blink(t, 3.7, 0.5) || 0.5, flatLid: true, brow: 0.55,
         tilt: keys(t, [[3.85, 0.02], [4.3, -0.03], [4.8, -0.03]]), bob: Math.sin(t * 2.1) * 3, weight: 0,
-        ...Ar.arm(1, [-18, -246], 'down', true), ...Ar.arm(-1, [-100, -138], 'down'), ...(m ?? {}),
+        ...Ar.arm(1, [-18, -246], 'down', true), ...Arms.rest(-1), ...(m ?? {}),
       });
     }],
     // 4.80-6.05: the reveal, full body in the roach suit
@@ -167,8 +167,8 @@ Skits.roach = (() => {
       put(ctx, 'roach', s, 540, 1680 - 438 * s, {
         dir: 1, t, ...E.neutral, mouth: 'flat', lookX: 0.0, pupil: 10, lid: blink(t, 3.7, 1.9) || lerp(0.2, 0.5, calm), flatLid: calm > 0.5, brow: lerp(0.55, 0.45, calm),
         tilt: keys(t, [[4.8, 0.0], [5.1, 0.06], [5.5, 0.06], [5.9, -0.02]]), bob: Math.sin(t * 2.1) * 3, weight: 0.7, droop,
-        ...glide(-1, [-128, -236], [-REST(1)[0], REST(1)[1]], easeInOut(seg(t, 5.3, 5.7)), 'out', 'down'),
-        ...glide(1, [128, -236], REST(1), easeInOut(seg(t, 5.3, 5.7)), 'out', 'down'), ...(m ?? {}),
+        ...glide(-1, [-128, -236], REST(-1), easeInOut(seg(t, 5.3, 5.7)), 'out', 'rest'),
+        ...glide(1, [128, -236], REST(1), easeInOut(seg(t, 5.3, 5.7)), 'out', 'rest'), ...(m ?? {}),
       }, { top: 1680 - (438 + 136 + 28 + 196 * (1 - 0.35 * droop)) * s });
     }],
   ];

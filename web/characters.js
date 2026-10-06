@@ -581,6 +581,11 @@ const Chars = (() => {
     }
     S.bottoms?.(ctx, hipY, neckY);
     const torso = S.torso(neckY, hipY);
+    // Resting arms (user decision): a soft hang, the arms falling close to the
+    // body with a slight bend and the hands just beside the hips, a touch uneven.
+    // Never the old rest (hands flared out wide at the hips, elbows bowed in).
+    const restHand = side => [side * (S.shX + (side < 0 ? 10 : 14)), Math.min(hipY, neckY + S.shY + 136) + (side < 0 ? 22 : 28)];   // an arm's length below the shoulder, never below the hips
+    const restBend = side => (side < 0 ? 0.12 : -0.09);
     if (p.cleanTorso) {   // opt-in for close-ups: one closed outline with a small seeded wobble, no overshoot at the join
       const r = Brush.random(7200), lw = Brush.getWeight();
       const pts = torso.map(([px, py]) => [px + (r() - 0.5) * 2, py + (r() - 0.5) * 2]);
@@ -595,13 +600,14 @@ const Chars = (() => {
     {   // where the hands will rest, so a shirt print can stay clear of them
       const elY = neckY + S.shY + (hipY - neckY) * 0.42;
       const hands = p.crossArms ? [[S.shX + S.armW * 0.2, elY - S.armW * 0.6], [-(S.shX + S.armW * 0.45), elY - S.armW * 0.15]]
-        : [p.armL ?? [-S.restX, hipY + S.restY], p.armR ?? [S.restX, hipY + S.restY]];
+        : [p.armL ?? restHand(-1), p.armR ?? restHand(1)];
       S.torsoDetail?.(ctx, neckY, hipY, hands);
     }
 
     const arm = (side, target, bend, point, hold, front = false) => {
       const sh = [side * S.shX, neckY + S.shY];
-      const hnd = target ?? [side * S.restX, hipY + S.restY];
+      const hnd = target ?? restHand(side);
+      bend = target ? bend : bend ?? restBend(side);
       // The white halo only matters over dark clothes; on light shirts it would
       // erase the shirt's outline next to the arm.
       tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, darkTorso);
