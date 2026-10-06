@@ -60,7 +60,7 @@ Skits.roach = (() => {
     if (kind === 'rest') return { mouth: 'flat' };   // between sounds: the same closed line the shot holds in pauses, not the small pout
     return { mouth: 'talk', viz: { kind, open: LipSync.OPEN[kind], intensity: 1, smile: 0, side: 1, var: (beat * 7919 % 5) / 4 } };
   };
-  const SPEECH = [[0, 0.28], [0.29, 0.91], [0.9, 1.67], [3.85, 4.6], [4.78, 5.47]];
+  const SPEECH = [[0, 0.30], [0.29, 0.91], [0.9, 1.67], [3.88, 4.6], [4.84, 5.48]];
   const speak = t => { for (const [a, b] of SPEECH) { const m = talk(t, a, b); if (m) return m; } return null; };
 
   // ---------- helpers ----------
@@ -114,10 +114,10 @@ Skits.roach = (() => {
 
   // ---------- Slime ----------
   const slimePose = t => {
-    const k = loud('roach', t);   // the shout follows the sound
+    const k = loud('roach', t + 1 / 30);   // the shout follows the sound, a frame ahead like the speech
     const rage = easeOut(seg(t, 2.5, 2.56)) * (1 - easeInOut(seg(t, 3.0, 3.26)));   // furious through the shout, then eases flat over ~8 frames
     const fade = 1 - easeInOut(seg(t, 3.02, 3.26));
-    const shouting = fade > 0.3 && k > 0.06;
+    const shouting = fade > 0.3 && k > 0.3;   // the yell proper (the quieter burst before it, 2.37-2.5, is Slime's tiny mouth below)
     const base = {
       dir: -1, t, ...E.neutral, lookX: 0.9, lookY: 0.05, pupil: 10, bob: Math.sin(t * 2.1) * 3, weight: -0.8,
       lid: blink(t, 3.7) || 0.5, flatLid: true, brow: lerp(0.4, 0.55, rage),
@@ -125,7 +125,7 @@ Skits.roach = (() => {
       lean: -0.03 - 0.05 * k * fade,
     };
     const arms = Ar.both([72, -178], 'out');   // hands on his hips: the hand circles sit on the torso edge at the waist, elbows out
-    return shouting ? { ...base, ...arms, mouth: 'gape', open: (0.25 + 0.75 * k) * fade, stretch: 0.5 * k * fade, mouthScale: 1.0 }
+    return shouting ? { ...base, ...arms, mouth: 'gape', open: (0.2 + 0.8 * loud('roach_fast', t + 1 / 30)) * fade, stretch: 0.5 * k * fade, mouthScale: 1.0 }   // the jaw follows the syllables (fast envelope), the head stretch the overall volume
                     : { ...base, ...arms, mouth: 'flat' };
   };
 
@@ -144,7 +144,7 @@ Skits.roach = (() => {
       const slide = easeInOut(seg(t, 1.95, 2.2)), w = easeOut(seg(t, 2.05, 2.5));
       backdrop(ctx);   // no ground line: the world just opens up, like the original
       const x = lerp(1190, 905, w), amp = 1 - seg(t, 2.3, 2.5);
-      put(ctx, 'slime', 0.36, x, 1500 - 438 * 0.36, { dir: -1, t, ...E.neutral, lookX: 0.9, lid: 0.5, flatLid: true, weight: 0, step: Math.sin(x * 0.11) * 0.8 * amp, bob: 0 }, { top: 9999 });
+      put(ctx, 'slime', 0.36, x, 1500 - 438 * 0.36, { dir: -1, t, ...E.neutral, lookX: 0.9, lid: 0.5, flatLid: true, weight: 0, step: Math.sin(x * 0.11) * 0.8 * amp, bob: 0, ...(loud('roach', t + 1 / 30) > 0.12 ? { mouth: 'yell', open: 0.2 + 0.6 * loud('roach', t + 1 / 30) } : {}) }, { top: 9999 });
       put(ctx, 'lud', 2.42, lerp(450, 90, slide), 1170, ludPose(t));
     }],
     // 2.50-3.85: Slime shouts at him (uncaptioned), then goes stone-faced
@@ -152,7 +152,7 @@ Skits.roach = (() => {
     // 3.85-4.8: close-up, "What am i?", hand on his chest
     [3.85, 4.8, (ctx, t) => {
       const s = lerp(2.7, 2.78, seg(t, 3.85, 4.8));
-      const m = t < 4.6 ? talk(t, 3.85, 4.6) : null;
+      const m = t < 4.6 ? talk(t, 3.88, 4.6) : null;
       backdrop(ctx);
       put(ctx, 'slime', s, 560, 1010, {
         dir: -1, t, ...E.neutral, mouth: 'flat', lookX: 0.25, lookY: 0.05, pupil: 10, lid: blink(t, 3.7, 0.5) || 0.5, flatLid: true, brow: 0.55,
@@ -163,7 +163,7 @@ Skits.roach = (() => {
     // 4.80-6.05: the reveal, full body in the roach suit
     [4.8, DUR, (ctx, t) => {
       const s = 1.35, droop = t < 5.0 ? lerp(0.5, 0, easeOut(seg(t, 4.8, 5.0))) : lerp(0, 0.75, easeInOut(seg(t, 5.55, 5.98)));
-      const calm = easeInOut(seg(t, 5.45, 5.7)), m = t < 5.47 ? talk(t, 4.78, 5.47) : null;
+      const calm = easeInOut(seg(t, 5.45, 5.7)), m = t < 5.48 ? talk(t, 4.84, 5.48) : null;
       backdrop(ctx); ground(ctx, 1680);
       put(ctx, 'roach', s, 540, 1680 - 438 * s, {
         dir: 1, t, cleanTorso: true, ...E.neutral, mouth: 'flat', lookX: 0.0, pupil: 10, lid: blink(t, 3.7, 1.9) || lerp(0.2, 0.5, calm), flatLid: calm > 0.5, brow: lerp(0.55, 0.45, calm),
