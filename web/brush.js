@@ -54,7 +54,12 @@ const Brush = (() => {
     return out;
   }
 
+  // jitScale: shrinks the wobble for a shot drawn at a big zoom (where it would be
+  // magnified past what the same lines show at normal size). 1 = normal.
+  let jitScale = 1;
+  function setJitter(k) { jitScale = k; }
   function jitter(pts, r, amt) {
+    amt *= jitScale;
     return pts.map(p => [p[0] + (r() - 0.5) * 2 * amt, p[1] + (r() - 0.5) * 2 * amt]);
   }
 
@@ -151,5 +156,5 @@ const Brush = (() => {
   function setWeight(k) { weight = k; }
   const getWeight = () => weight;
 
-  return { INK, frame, setWeight, getWeight, stroke, fill, outline, blob, ellipsePts, spline, random };
+  return { INK, frame, setWeight, getWeight, setJitter, stroke, fill, outline, blob, ellipsePts, spline, random };
 })();

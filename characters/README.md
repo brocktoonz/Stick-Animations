@@ -11,6 +11,7 @@ emotion plus `sheet.png` with all of them on one page:
 | `beast/` | MrBeast | `Cameos.beast` |
 | `nick/` | Nick | `Cameos.nick` |
 | `slime/` | Slime | `Cameos.slime` |
+| `squeex/` | Squeex | `Cameos.squeex.beards.full` |
 
 These are renders of the code, not separate drawings, so they always match
 what a skit draws. Use an emotion in a skit by name:

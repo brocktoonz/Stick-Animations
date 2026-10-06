@@ -50,6 +50,37 @@ disagree, the rule wins.
 - Natural hair colours only (greys in the house style, or real hair colours).
   Never orange, blue, pink or other unnatural colours on hair.
 
+## Beards
+
+A full beard reads as one dense, short beard, never as stubble (hatching over
+skin) or as scraggly hair (long, uneven strokes). Squeex's beard
+(`beardFull2` in `web/cameos.js`, `?skit=squeex_beard2`) is the model.
+
+- Fill: one solid fill for the whole beard, sideburns and upper cheeks
+  included, a grey that stays apart from both the hair and the clothes. No
+  area is hatching alone over skin. The sideburns run up under the hair (drawn
+  over the beard), so there's no gap between them.
+- Boundary: the cheek line is one smooth, clean curve from the sideburn down
+  to the moustache corner, low enough to leave bare cheek under the eyes. The
+  bottom edge follows the head outline as a rounded curve with small, regular
+  scallops, never spikes. The edge round the mouth stays clean: nothing
+  intrudes into the mouth opening.
+- Moustache: a band over the upper lip in the same grey as the beard, so the
+  two read as one beard; its shape shows in the beard's top edge, and it
+  joins the beard at the mouth corners. Mouths open beneath it.
+- Sideburns start narrow at the temples, under the hair, and widen gradually
+  toward the jaw. A sideburn the same thickness all the way down frames the
+  face like a hood.
+- Texture: the small scallops on the bottom edge are enough. Nothing hangs
+  below the edge onto the neck (strokes there read as drips), and nothing is
+  drawn inside the fill. Any extra strokes go along the outer edge only, all the
+  same length and direction, and few enough to suggest hair rather than
+  outline the shape.
+- The chin may push slightly past the head outline for fullness.
+- Every expression: the same beard in every emotion. In open-mouth poses the
+  beard stretches down with the jaw and wraps under the mouth, so a band of
+  beard always shows below it.
+
 ## Colour
 
 - Base is black, white and grey.
@@ -60,13 +91,19 @@ disagree, the rule wins.
 
 - **No ears, on anyone.** Every character's head is one clean outline with no
   ears, whether the hair would cover them or not (user decision). Don't add
-  ears to new characters, including one-off characters inside a skit.
+  ears to new characters, including one-off characters inside a skit. The
+  `withEars` pose flag exists only for the `?skit=no_ears` comparison.
 - Faces come from the shared emotion set (`web/emotions.js`, `...Emotions.angry`).
   Don't hand-tune a face in a skit when an emotion covers it; add or adjust the
   emotion instead and re-render `characters/` so the references stay true.
 - Main character: `Hero.main`, the spiky-haired guy with mid-grey hair and a
   grey hoodie (`Cameos.spikyShades.brown`). The previous design is kept as
   `Hero.mainOld`.
+- Squeex: the approved design is draft C with the full dark beard,
+  `Cameos.squeex.beards.full` (see `?skit=squeex_beard2` and
+  `characters/squeex/beards/`). It has his own angry (squared clenched teeth)
+  and sad (skin-tone drooping lids, one tear, a frown). The other drafts and
+  beard options are kept only for reference.
 - Cameos (`web/cameos.js`) are caricatures recognisable from hair silhouette
   plus one or two signature items.
 

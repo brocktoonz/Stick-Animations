@@ -26,7 +26,7 @@ const Cameos = (() => {
       hipY: -150, neckY: -320, headUp: 118, legTop: 30, hipX: 26, footX: 28, stride: 36, lift: 26,
       legW: 24, shoeRx: 34, shX: 56, shY: 34, restX: 104, restY: 16, armW: 24, handS: 1,
       skin: o.skin ?? W, armFill: o.sleeve ?? o.skin ?? W,
-      sleeveHem: o.sleeveHem,
+      sleeveHem: o.sleeveHem, sleeveFill: o.sleeveFill,
       head: o.head,
       behind: o.behind,
       bottoms: (ctx, hipY) => fill(ctx, [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56],
@@ -51,7 +51,7 @@ const Cameos = (() => {
   }
 
   // ---------- head ----------
-  // o: skin back hair beard browW front(ctx, fx) hat eyeLop
+  // o: skin back hair beard browW front(ctx, fx) hat eyeLop mouthDy (moves the mouth down, e.g. under a moustache)
   function head(o) {
     return (ctx, p) => {
       const fx = p.face ?? 12;
@@ -60,13 +60,14 @@ const Cameos = (() => {
       const st = p.stretch ?? 0;
       ctx.save();
       stretchHead(ctx, st);
-      o.back?.(ctx);   // behind the head: hoods, long hair
+      o.back?.(ctx);   // behind the head: hoods, long hair (no ears: nobody in the cast has them)
+      if (p.withEars) previewEars(ctx, o.skin ?? W);   // previews only (?skit=no_ears)
       // a yell drops the jaw: the head stretches down and the mouth rides up
       // a little, so even a wide-open mouth stays inside the chin
       const rage = p.mouth === 'rage';
       const open = p.mouth === 'yell' || rage ? (p.open ?? 0) : 0, jaw = (rage ? 60 : 46) * open;
       blob(ctx, 0, jaw * 0.5, RX - jaw * 0.1, RY + jaw * 0.5, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
-      if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx, p); ctx.restore(); }
+      if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx, jaw, p); ctx.restore(); }   // beards that stretch with the jaw undo the translate
       o.hair?.(ctx);
       if (p.gloom) {   // dread: shading lines down the forehead
         ctx.save();
@@ -79,9 +80,10 @@ const Cameos = (() => {
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
       } else if (!p.noBrows) brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
+      const mdy = (typeof o.mouthDy === 'function' ? o.mouthDy(p) : o.mouthDy ?? 0) * (1 - open);   // eases off as a yell opens, so a big mouth stays inside the chin
       if (p.noMouth) { /* a front() hook draws the mouth */ }
-      else if (rage) mouth(ctx, fx + 4, 34 + jaw * 0.2, p, 0.95);   // fills the lower half of the face
-      else mouth(ctx, fx + 4, 62 - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
+      else if (rage) mouth(ctx, fx + 4, 34 + mdy + jaw * 0.2, p, 0.95);   // fills the lower half of the face
+      else mouth(ctx, fx + 4, 62 + mdy - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
       o.front?.(ctx, fx, rage, p);
       o.hat?.(ctx);
       if (p.sweat) { sweat(ctx, -126, -30); sweat(ctx, 150, -60, 0.8); }
@@ -717,14 +719,14 @@ const Cameos = (() => {
   const nick = build({ shirt: INK, sleeve: '#222', head: head({ hair: nickMop, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
-  // Slime: shaved head (light stubble), ears, short full beard + moustache, big grin.
-  const ears = ctx => {
+  const previewEars = (ctx, skin) => {
     for (const side of [-1, 1]) {
       const e = Brush.ellipsePts(side * RX * 1.0, 6, 26, 36, 10);
-      fill(ctx, e, W, 0.4); outline(ctx, e, { w: 8 });
+      fill(ctx, e, skin, 0.4); outline(ctx, e, { w: 8 });
       stroke(ctx, [[side * RX * 1.0, -12], [side * RX * 1.06, 6], [side * RX * 1.0, 22]], { w: 5 });
     }
   };
+  // Slime: shaved head (light stubble), short full beard + moustache, big grin.
   // clean shaven head: just a couple of shine marks
   const shaved = ctx => {
     stroke(ctx, [[-RX * 0.42, -RY * 0.8], [-RX * 0.1, -RY * 0.92], [RX * 0.2, -RY * 0.9]], { w: 6, color: '#bbb' });
@@ -844,7 +846,7 @@ const Cameos = (() => {
   // A few months' growth: a full scraggly beard from the sideburns down past
   // the chin (tufts poking out of the edge) and a moustache, on the spiky guy.
   // The beard goes under the mouth, so the mouth still reads when he talks.
-  const scragglyBeard = (ctx, p = {}) => {
+  const scragglyBeard = (ctx, jaw, p = {}) => {
     const out = [];
     for (let i = 0; i <= 22; i++) {   // ragged outer edge, right sideburn round under the chin to the left one
       const a = Math.PI * (-0.04 + 1.08 * i / 22), tuft = i % 2 ? 0.1 + 0.12 * hh(i * 7 + 3) : -0.02 * hh(i);
@@ -1030,7 +1032,7 @@ const Cameos = (() => {
     crew: build({ shirt: W, sleeveHem: 0.42, head: head({ hair: crewSpikes }), detail: pocketTee }),
     fringe: build({ shirt: '#bdbdbd', sleeve: '#bdbdbd', sleeveHem: 0.42, head: head({ hair: pointedFringe }), detail: polo }),
     bob: build({ shirt: INK, sleeve: '#222', head: head({ hair: bob, lashes: true }), detail: (ctx, n) => collarTee(ctx, n, W) }),
-    pony: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ctx => { ears(ctx); ponytail(ctx); }, hair: ponyFront, lashes: true }), detail: stripes }),
+    pony: build({ shirt: W, sleeveHem: 0.42, head: head({ back: ponytail, hair: ponyFront, lashes: true }), detail: stripes }),
     curls: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: bigCurls }), detail: hoodieFront }),
   };
 
@@ -1131,5 +1133,398 @@ const Cameos = (() => {
     beard: build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', sleeveHem: 0.42, head: head({ hair: shaggy, beard: fullBeard }), detail: collarTee }),
   };
 
-  return { speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyBearded, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  // ---------- Squeex: three drafts (not used in any video yet) ----------
+  // Short near-black hair with the temples set back, a full short beard (a
+  // shade lighter than the hair) with a thin moustache lifted off the mouth,
+  // and a big grin. Light-grey skin (the cameos stay grayscale). Each draft
+  // leans on a different signature item from the photos.
+  const SQ_HAIR = '#2b2b2b', SQ_LINE = '#5e5e5e', SQ_BEARD = '#555555', SQ_TICK = '#3a3a3a', SQ_SKIN = '#d4d4d4';
+  // Full short beard along the jaw. It starts below the ears, so skin shows
+  // between it and the hair, and its jaw edge is tufted so it reads as hair.
+  // The window around the mouth is wide, so the beard never outlines the lips.
+  // full > 0 grows it below the chin.
+  const sqBeard = ({ full = 0, flecks = false } = {}) => ctx => {
+    const outer = [];
+    for (let i = 0; i <= 26; i++) {
+      const a = Math.PI * (0.07 + 0.86 * i / 26), dn = Math.max(0, Math.sin(a));
+      const r = 1.0 + (i % 2 ? 0.03 + 0.05 * hh(i + 500) : 0) * dn;   // uneven hair points along the jaw
+      outer.push([Math.cos(a) * r, Math.sin(a) * (r + full * dn * dn)]);
+    }
+    const inner = [[-0.92, 0.22], [-0.82, 0.36], [-0.68, 0.42], [-0.62, 0.62], [-0.44, 0.8], [-0.2, 0.86], [0.06, 0.88],
+                   [0.32, 0.84], [0.54, 0.74], [0.68, 0.58], [0.76, 0.4], [0.88, 0.36], [0.94, 0.22]];
+    fill(ctx, hu([...outer, ...inner]), SQ_BEARD, 1);
+    stroke(ctx, hu(outer), { w: 9, taper0: 0.3, taper1: 0.3 });   // ink only on the jaw side: the beard grows out of the face
+    for (let i = 0; i < 12; i++) {   // short hair ticks, inside the beard at the chin
+      const x = (hh(i + 300) - 0.5) * 1.1, y = 0.93 + 0.04 * hh(i + 330) - 0.12 * x * x;
+      stroke(ctx, hu([[x, y], [x * 1.03, y + 0.05]]), { w: 4, color: SQ_TICK, taper0: 0.2, taper1: 0.5 });
+    }
+    if (flecks) for (let i = 0; i < 8; i++) {   // a few grey hairs, inside the beard at the chin
+      const x = (hh(i + 400) - 0.5) * 0.6, y = 0.95 + hh(i + 430) * 0.04 + full * 0.4;
+      stroke(ctx, hu([[x, y], [x + 0.015, y + 0.05]]), { w: 3, color: '#b4b4b4', taper0: 0.2, taper1: 0.5 });
+    }
+  };
+  // Moustache: a thin band well above the top lip, drooping at the corners,
+  // with a ragged lower edge. Lifts higher over open mouths.
+  const sqStache = (ctx, fx, rage) => {
+    const up = rage ? 18 : 0;
+    const m = [[fx - 54, 38], [fx - 44, 20], [fx - 18, 14], [fx + 4, 18], [fx + 28, 14], [fx + 54, 20], [fx + 64, 38],
+               [fx + 50, 30], [fx + 42, 34], [fx + 30, 28], [fx + 18, 32], [fx + 6, 26], [fx - 6, 32], [fx - 18, 27], [fx - 30, 33], [fx - 42, 29]]
+      .map(([x, y]) => [x, y - up]);
+    fill(ctx, m, SQ_BEARD, 1);
+    outline(ctx, m, { w: 6 });
+  };
+  // Rectangular frames, ink along the top and a lighter rim below (the
+  // two-tone frames from the photos), fitted around the eyes, arms back to the ears.
+  const rectGlasses = (ctx, fx) => {
+    for (const side of [-1, 1]) {
+      const cx = fx + side * 50, l = cx - 42, r = cx + 42, t = -34, b = 16;
+      const lens = [[l, t + 4], [l + 6, t], [r - 6, t - 1], [r, t + 4], [r + 1, b - 6], [r - 6, b], [l + 6, b + 1], [l, b - 6]];
+      outline(ctx, lens, { w: 8, color: '#7a7a7a', jit: 0.6 });
+      stroke(ctx, [[l - 2, t + 8], [l + 4, t], [r - 4, t - 1], [r + 2, t + 8]], { w: 12, taper0: 0, taper1: 0, minW: 1 });   // dark top bar
+      const ox = side > 0 ? r : l;
+      stroke(ctx, [[ox, t + 6], [side * RX * 0.97, t + 12]], { w: 9, taper0: 0, taper1: 0, minW: 1 });   // arm back to the ear
+      stroke(ctx, [[cx - side * 24, t + 14], [cx - side * 12, t + 8]], { w: 5, color: '#b0b0b0' });   // glint
+    }
+    stroke(ctx, [[fx - 10, -26], [fx, -31], [fx + 10, -26]], { w: 9 });   // bridge
+  };
+  // Hair. All three keep the temples set back (a high, rounded hairline).
+  // Outline style: points and waves in the silhouette, a few short inner
+  // strokes in the hair direction.
+  const SQ_CROP = [   // A: short crop, messy little points on top
+    [[-0.98, -0.2], [-1.06, -0.58], [-0.94, -0.84], [-1.02, -0.96], [-0.76, -1.04], [-0.66, -1.24], [-0.44, -1.14], [-0.3, -1.32],
+     [-0.12, -1.16], [0.06, -1.34], [0.22, -1.16], [0.42, -1.3], [0.54, -1.1], [0.8, -1.12], [0.82, -0.96], [1.06, -0.7], [0.98, -0.2]],
+    [[0.88, -0.24], [0.84, -0.52], [0.64, -0.6], [0.5, -0.76], [0.24, -0.78], [0.04, -0.7], [-0.2, -0.78], [-0.46, -0.76], [-0.62, -0.6], [-0.84, -0.52], [-0.88, -0.24]],
+    [[[-0.5, -0.86], [-0.44, -1.04]], [[-0.04, -0.86], [0.02, -1.08]], [[0.4, -0.88], [0.48, -1.06]]]];
+  const SQ_TUFT = [   // B: taller textured top, points pushed up and forward, a pointed fringe
+    [[-0.98, -0.2], [-1.06, -0.62], [-0.92, -0.9], [-1.0, -1.06], [-0.72, -1.12], [-0.64, -1.36], [-0.4, -1.22], [-0.26, -1.48],
+     [-0.04, -1.28], [0.12, -1.52], [0.3, -1.3], [0.54, -1.46], [0.62, -1.18], [0.9, -1.12], [0.86, -0.94], [1.06, -0.66], [0.98, -0.2]],
+    [[0.88, -0.24], [0.84, -0.5], [0.7, -0.66], [0.62, -0.56], [0.48, -0.74], [0.34, -0.6], [0.2, -0.78], [0.04, -0.62], [-0.12, -0.78],
+     [-0.28, -0.62], [-0.44, -0.76], [-0.58, -0.58], [-0.7, -0.68], [-0.84, -0.5], [-0.88, -0.24]],
+    [[[-0.5, -0.92], [-0.42, -1.1]], [[-0.08, -0.94], [0.0, -1.14]], [[0.34, -0.94], [0.44, -1.12]]]];
+  const SQ_UP = [   // C: pushed up and back in three locks, the front one lifting off
+    // the corners sit low and close to the head (thinner hair there), the volume stays in the middle
+    [[-0.98, -0.2], [-1.06, -0.5], [-0.98, -0.62], [-1.03, -0.8], [-0.86, -0.92], [-0.76, -1.04], [-0.54, -1.1], [-0.36, -1.3],
+     [-0.06, -1.3], [0.08, -1.44], [0.34, -1.38], [0.44, -1.46], [0.6, -1.32], [0.62, -1.18], [0.84, -1.02], [0.88, -0.86], [1.03, -0.64], [0.98, -0.2]],
+    // receding hairline: a tall bare forehead with deep corners at the temples
+    // (cut back almost to the head outline, which they must stay inside), a
+    // widow's peak pointing down in the middle and thin hair down the sides
+    [[0.93, -0.24], [0.92, -0.34], [0.84, -0.5], [0.72, -0.64], [0.6, -0.74], [0.5, -0.84], [0.4, -0.9], [0.3, -0.86], [0.24, -0.9],
+     [0.16, -0.84], [0.08, -0.78], [0.0, -0.66], [-0.08, -0.78], [-0.16, -0.84], [-0.22, -0.86], [-0.3, -0.84], [-0.38, -0.91],
+     [-0.48, -0.86], [-0.6, -0.76], [-0.74, -0.62], [-0.84, -0.46], [-0.92, -0.34], [-0.93, -0.24]],
+    [[[-0.5, -1.0], [-0.4, -1.12]], [[-0.06, -0.96], [0.06, -1.16]], [[0.42, -1.0], [0.5, -1.2]]]];
+  const sqHair = h => outlineHair(...h, SQ_HAIR, { lineColor: SQ_LINE });
+  // B: big over-ear headphones: band over the hair, cream cups on the ears.
+  const headphones = ctx => {
+    const band = [];
+    for (let i = 0; i <= 14; i++) { const a = Math.PI * (1.06 + 0.88 * i / 14); band.push([Math.cos(a) * RX * 1.12, Math.sin(a) * RY * 1.26 - 6]); }
+    stroke(ctx, band, { w: 30, taper0: 0, taper1: 0, minW: 1 });
+    stroke(ctx, band, { w: 14, taper0: 0, taper1: 0, minW: 1, color: '#e6e6e6' });
+    for (const side of [-1, 1]) {
+      const cup = Brush.ellipsePts(side * RX * 1.04, 4, 34, 52, 14);
+      fill(ctx, cup, '#e6e6e6', 0.5); outline(ctx, cup, { w: 10 });
+      const pad = Brush.ellipsePts(side * RX * 0.96, 4, 14, 40, 10);
+      fill(ctx, pad, '#9a9a9a', 0.4); outline(ctx, pad, { w: 6 });
+    }
+  };
+
+  // Outfits
+  const jacketHoodie = (ctx, n, h) => {   // A: open black jacket over a grey hoodie
+    const panel = [[-30, n + 4], [30, n + 4], [34, h + 2], [-34, h + 2]];
+    fill(ctx, panel, '#6a6a6a', 0.2);
+    outline(ctx, panel, { w: 7 });
+    stroke(ctx, [[-30, h - 50], [-20, h - 78], [20, h - 78], [30, h - 50]], { w: 5, color: '#d0d0d0' });   // pocket
+    stroke(ctx, [[-30, n + 4], [-14, n + 28], [14, n + 28], [30, n + 4]], { w: 7, color: '#d0d0d0' });   // hoodie neck
+    for (const sd of [-1, 1]) {
+      stroke(ctx, [[sd * 10, n + 26], [sd * 12, n + 104]], { w: 6, color: '#d0d0d0' });   // drawstrings
+      outline(ctx, [[sd * 30, n + 2], [sd * 60, n + 54], [sd * 36, n + 74]], { w: 6, color: '#8a8a8a' });   // jacket collar
+      stroke(ctx, [[sd * 38, n + 80], [sd * 40, h - 8]], { w: 5, color: '#8a8a8a' });   // zip edge
+    }
+  };
+  const boxrTee = (ctx, n) => {   // B: white tee with the BOXR print
+    collarTee(ctx, n);
+    Stage.text(ctx, 'BOXR', 4, n + 86, 40, 'Luckiest Guy', INK);
+    stroke(ctx, [[-36, n + 104], [42, n + 102]], { w: 4 });
+    stroke(ctx, [[-30, n + 116], [36, n + 114]], { w: 3, color: '#9a9a9a' });
+  };
+  const overshirt = (ctx, n, h) => {   // C: open dark overshirt over a grey tee
+    const tee = [[-28, n], [28, n], [32, h - 4], [-32, h - 4]];
+    fill(ctx, tee, '#8f8f8f', 0.4);
+    outline(ctx, tee, { w: 7 });
+    stroke(ctx, [[-24, n + 2], [0, n + 22], [24, n + 2]], { w: 6 });
+    for (const sd of [-1, 1]) {   // shirt tails hanging past the hem
+      const tail = [[sd * 34, h - 6], [sd * 70, h - 6], [sd * 72, h + 26], [sd * 50, h + 34], [sd * 34, h + 22]];
+      fill(ctx, tail, '#3a3a3a', 0.4); outline(ctx, tail, { w: 7 });
+    }
+    for (let i = 0; i < 3; i++) blob(ctx, -40, n + 70 + i * 44, 5, 5, { fill: '#9a9a9a', w: 3, n: 6 });   // buttons on the placket
+    for (const sd of [-1, 1]) {
+      const col = [[sd * 26, n - 2], [sd * 56, n - 4], [sd * 40, n + 52]];
+      fill(ctx, col, '#3a3a3a', 0.3); outline(ctx, col, { w: 6, color: '#9a9a9a' });
+    }
+  };
+
+  // ---- C beard options (drawn from scratch; each pairs a beard with its moustache) ----
+  // clip to a smooth closed shape, for texture inside a beard
+  const clipTo = (ctx, pts) => {
+    const sp = Brush.spline(pts, true, 4);
+    ctx.beginPath(); ctx.moveTo(sp[0][0], sp[0][1]);
+    for (const q of sp) ctx.lineTo(q[0], q[1]);
+    ctx.clip();
+  };
+  // a jaw edge from ear to ear, a little tufted below the cheeks; full grows it below the chin
+  const jawEdge = (r0, bump, full = 0, n = 24, a0 = 0.03, a1 = 0.97) => Array.from({ length: n + 1 }, (_, i) => {
+    const a = Math.PI * (a0 + (a1 - a0) * i / n), dn = Math.max(0, Math.sin(a));
+    const r = r0 + (i % 2 ? bump * dn : 0);
+    return [Math.cos(a) * r, Math.sin(a) * (r + full * dn * dn)];
+  });
+
+  // how far a moustache moves up: over rage's huge mouth it rides up; on a shocked gape the eyes are
+  // so big the moustache drops instead, over the top of the open mouth, clear of the eyes
+  const stacheLift = (rage, p) => rage ? 18 : p?.mouth === 'gape' ? -20 * (p.open ?? 0) : 0;
+
+  // 1. Trimmed: mid-grey, stippled, a crisp cheek line; the moustache drops at
+  // the corners to join the beard beside the mouth.
+  const TRIM = '#5e5e5e', TRIM_DOT = '#2e2e2e';
+  const trimShape = () => hu([...jawEdge(1.0, 0.035), [-0.95, 0.06], [-0.86, 0.28], [-0.62, 0.4], [-0.5, 0.62], [-0.28, 0.78],
+                              [0.06, 0.82], [0.4, 0.78], [0.6, 0.62], [0.72, 0.4], [0.9, 0.28], [0.96, 0.06]]);
+  const stipple = (ctx, x0, x1, y0, y1, k0) => {
+    for (let y = y0; y < y1; y += 9) for (let x = x0; x < x1; x += 10) {
+      const k = Math.round(x * 7 + y * 13) + k0;
+      if (hh(k) > 0.55) continue;
+      blob(ctx, x + (hh(k + 3) - 0.5) * 8, y + (hh(k + 5) - 0.5) * 7, 2.2, 2.2, { fill: TRIM_DOT, w: 0, n: 5 });
+    }
+  };
+  const beardTrim = ctx => {
+    const sh = trimShape();
+    fill(ctx, sh, TRIM, 1);
+    ctx.save(); clipTo(ctx, sh); stipple(ctx, -RX, RX, 0, RY * 1.1, 0); ctx.restore();
+    stroke(ctx, hu(jawEdge(1.0, 0.035)), { w: 9, taper0: 0.3, taper1: 0.3 });   // ink on the jaw side only
+  };
+  const stacheTrim = (ctx, fx, rage, p) => {
+    const up = stacheLift(rage, p);
+    const m = [[fx - 84, 60], [fx - 62, 30], [fx - 22, 20], [fx + 4, 25], [fx + 32, 20], [fx + 70, 30], [fx + 90, 60],
+               [fx + 76, 50], [fx + 66, 54], [fx + 54, 40], [fx + 40, 44], [fx + 26, 37], [fx + 12, 41], [fx + 4, 36], [fx - 6, 41],
+               [fx - 20, 37], [fx - 34, 44], [fx - 48, 40], [fx - 60, 54], [fx - 70, 50]].map(([x, y]) => [x, y - up]);
+    fill(ctx, m, TRIM, 1);
+    ctx.save(); clipTo(ctx, m); stipple(ctx, fx - 90, fx + 96, 14 - up, 62 - up, 77); ctx.restore();
+    outline(ctx, m, { w: 6 });
+  };
+
+  // 2. Full dark: as dark and curly as his hair, rounding out below the chin,
+  // with a few grey hairs; the window round the mouth is wide, so it never hugs the lips.
+  const fullOuter = () => {
+    const pts = [];
+    for (let i = 0; i <= 14; i++) {   // curl bumps, like the hair
+      const a = Math.PI * (0.08 + 0.84 * i / 14);
+      for (const f of [0, 0.5]) {
+        if (i === 14 && f) break;
+        const aa = a + f * Math.PI * 0.84 / 14, d2 = Math.max(0, Math.sin(aa));
+        const r = 0.98 + (f ? 0.08 * d2 * d2 : 0);   // curls only below the cheeks, the sides stay on the head outline
+        pts.push([Math.cos(aa) * r, Math.sin(aa) * (r + 0.16 * d2 * d2)]);
+      }
+    }
+    return pts;
+  };
+  const beardFull = ctx => {
+    const outer = fullOuter();
+    const inner = [[-0.9, 0.26], [-0.86, 0.3], [-0.66, 0.32], [-0.5, 0.56], [-0.3, 0.82], [0.08, 0.9], [0.44, 0.82],
+                   [0.64, 0.56], [0.78, 0.32], [0.88, 0.3], [0.92, 0.26]];
+    const sh = hu([...outer, ...inner]);
+    fill(ctx, sh, SQ_HAIR, 1);
+    outline(ctx, sh, { w: 9 });
+    for (const [x0, y0, x1, y1] of [[-0.74, 0.6, -0.62, 0.8], [-0.2, 1.02, -0.1, 1.12], [0.3, 1.0, 0.38, 1.1], [0.76, 0.56, 0.7, 0.76]])
+      stroke(ctx, hu([[x0, y0], [x1, y1]]), { w: 6, color: SQ_LINE, taper0: 0.2, taper1: 0.5 });
+    for (const [x0, y0, x1, y1] of [[-0.16, 0.96, -0.1, 1.08], [0.08, 0.98, 0.12, 1.12], [0.3, 0.94, 0.36, 1.06]])   // a few grey hairs in the chin
+      stroke(ctx, hu([[x0, y0], [x1, y1]]), { w: 4, color: '#b4b4b4', taper0: 0.2, taper1: 0.5 });
+  };
+
+  // two tapered halves parted in the middle, hair points along the bottom, well
+  // clear of the lip; the outer ends drop to join the beard beside the mouth.
+  // Over a shocked gape a skin-tone lip line keeps it apart from the dark mouth.
+  const stacheFull = (ctx, fx, rage, p) => {
+    const up = stacheLift(rage, p);
+    for (const sd of [-1, 1]) {
+      const X = x => fx + 4 + sd * x;
+      const h = [[X(4), 14], [X(26), 8], [X(50), 12], [X(70), 26], [X(86), 42], [X(96), 60], [X(82), 50], [X(68), 38],
+                 [X(56), 32], [X(46), 34], [X(36), 28], [X(24), 31], [X(14), 26], [X(4), 22]].map(([x, y]) => [x, y - up]);
+      if (up < 0) stroke(ctx, h.slice(6).map(([x, y]) => [x, y + 7]), { w: 9, color: SQ_SKIN, taper0: 0, taper1: 0, minW: 1 });
+      fill(ctx, h, SQ_HAIR, 1);
+      outline(ctx, h, { w: 6 });
+      stroke(ctx, [[X(22), 15 - up], [X(38), 15 - up]], { w: 4, color: SQ_LINE });
+    }
+  };
+
+  // 3. Inked: a pale beard drawn mostly with short ink hatching, like a comic
+  // panel; the hatching thickens toward the jaw.
+  const INKED = '#949494';
+  const hatch = (ctx, sh, x0, x1, y0, y1, dense, k0) => {
+    ctx.save(); clipTo(ctx, sh);
+    for (let y = y0; y < y1; y += 11) for (let x = x0; x < x1; x += 12) {
+      const k = Math.round(x * 5 + y * 11) + k0, depth = dense(x, y);
+      if (hh(k) > depth) continue;
+      const px = x + (hh(k + 2) - 0.5) * 9, py = y + (hh(k + 4) - 0.5) * 8, lean = px / RX * 0.5;
+      stroke(ctx, [[px, py], [px + lean * 10, py + 13]], { w: 3.5, taper0: 0.2, taper1: 0.6, jit: 0.3 });
+    }
+    ctx.restore();
+  };
+  const beardInked = ctx => {
+    const outer = jawEdge(1.0, 0.05, 0.06, 28, 0.04, 0.96);
+    const sh = hu([...outer, [-0.93, 0.1], [-0.82, 0.34], [-0.6, 0.44], [-0.5, 0.66], [-0.28, 0.82], [0.06, 0.86],
+                   [0.4, 0.82], [0.6, 0.66], [0.7, 0.44], [0.86, 0.34], [0.95, 0.1]]);
+    fill(ctx, sh, INKED, 1);
+    hatch(ctx, sh, -RX, RX, 0, RY * 1.12, (x, y) => Math.min(0.9, Math.max(0.15, (Math.hypot(x / RX, y / RY) - 0.6) * 2.2)), 0);
+    stroke(ctx, hu(outer), { w: 8, taper0: 0.3, taper1: 0.3 });
+  };
+  const stacheInked = (ctx, fx, rage, p) => {
+    const up = stacheLift(rage, p);
+    const m = [[fx - 62, 44], [fx - 50, 22], [fx - 18, 14], [fx + 4, 20], [fx + 28, 14], [fx + 60, 22], [fx + 72, 44],
+               [fx + 46, 36], [fx + 4, 38], [fx - 38, 36]].map(([x, y]) => [x, y - up]);
+    fill(ctx, m, INKED, 1);
+    hatch(ctx, m, fx - 70, fx + 80, 8 - up, 44 - up, () => 0.8, 91);
+    outline(ctx, m, { w: 6 });
+  };
+
+  // 2b. Full dark, revised: a short, dense, full beard in one dark-grey shape
+  // (not black, so it stays apart from the hair and the jacket) with the
+  // moustache part of it: a clean cheek line from the sideburn down to the
+  // moustache corners, the moustache on the upper lip, a rounded full chin.
+  // Ink only at the edges (short strokes along the cheek line and the bottom),
+  // a flat fill inside. It stretches with the jaw; the mouth cuts into it.
+  const FULLB = '#575757', STACHE = FULLB;   // the moustache is the beard's own grey (user decision); its shape still shows in the beard's top edge
+  // mouths the moustache goes under rather than over: his wide grin should show whole
+  const STACHE_UNDER = new Set(['grinwide']);
+  const drawStache = (ctx, P, { stacheTop, lip }) => {
+    fill(ctx, P([...stacheTop, ...lip]), STACHE, 1);   // the mouth itself is the lip line
+  };
+  // on a shocked gape the eyes are huge, so the moustache sits a little lower
+  const FULL_MOUTH_DY = 14;   // his mouth sits a little lower, under the moustache, leaving bare cheek under the eyes
+  const fullDrop = () => 0.12;
+  const fullParts = d => {
+    // outer edge: the head outline from the top of one sideburn (run well up behind
+    // the hair, which is drawn over the beard, so they join with no gap) round the jaw
+    // to the other; small regular scallops along the bottom, smooth up the sides
+    const outer = [];
+    for (let i = 0; i <= 48; i++) {
+      const a = Math.PI * (-0.2 + 1.4 * i / 48), dn = Math.max(0, Math.sin(a));
+      const r = 0.99 + (i % 2 && dn > 0.55 ? 0.03 : 0);
+      outer.push([Math.cos(a) * r, Math.sin(a) * r + 0.07 * dn ** 4]);   // the chin pushes a little past the head outline
+    }
+    // cheek lines: one smooth curve from the sideburn down to the moustache corner,
+    // leaving bare cheek under the eyes
+    // the sideburns start narrow at the temples (under the hair) and widen toward the jaw
+    const cheekL = [[-0.86, -0.5], [-0.9, -0.2], [-0.89, 0.04], [-0.84, 0.26], [-0.72, 0.44], [-0.5, 0.5 + d]];
+    const cheekR = [[0.72, 0.5 + d], [0.8, 0.46], [0.86, 0.28], [0.89, 0.04], [0.9, -0.2], [0.86, -0.5]];   // mirrors the left one
+    // the moustache band: hair-edged top, arched lip edge, ends tucked into the beard at the corners
+    const stacheTop = [[-0.5, 0.5], [-0.4, 0.36], [-0.22, 0.29], [-0.04, 0.27], [0.11, 0.3], [0.26, 0.27], [0.44, 0.29], [0.62, 0.36], [0.72, 0.5]].map(([x, y]) => [x, y + d]);
+    const lip = [[0.62, 0.48], [0.46, 0.44], [0.28, 0.41], [0.11, 0.4], [-0.06, 0.41], [-0.24, 0.44], [-0.4, 0.48]].map(([x, y]) => [x, y + d]);
+    return { outer, cheekL, cheekR, stacheTop, lip };
+  };
+  // the lower the point, the further it drops with the jaw
+  const fullStretch = jaw => pts => hu(pts).map(([x, y]) => [x, y + jaw * Math.min(1, Math.max(0, (y / RY - 0.4) / 0.6))]);
+  const beardFull2 = (ctx, jaw = 0, p) => {
+    ctx.translate(0, -jaw);   // stretch with the jaw instead of sliding down with it
+    const P = fullStretch(jaw), parts = fullParts(fullDrop(p)), { outer, cheekL, cheekR, stacheTop } = parts;
+    fill(ctx, P([...outer, ...cheekL, ...stacheTop.slice(1, -1), ...cheekR]), FULLB, 1);   // one solid fill, sideburns included
+    if (STACHE_UNDER.has(p?.mouth)) drawStache(ctx, P, parts);   // under a wide grin, so the whole grin shows
+    const O = P(outer);
+    stroke(ctx, O, { w: 8, taper0: 0.3, taper1: 0.3 });   // the jaw edge; its scallops are the texture, nothing hangs below it
+  };
+  // The moustache, on top of the mouth: a darker band over the upper lip whose
+  // ends join the beard at the mouth corners, so mouths open beneath it.
+  const stacheFull2 = (ctx, fx, rage, p) => {
+    if (p?.skinLid) skinLids(ctx, fx, p.lid ?? 0, p);
+    if (p?.sadTear) tearStreak(ctx, fx);
+    if (p?.clenchTeeth) clenchedTeeth(ctx, fx + 4, 62 + FULL_MOUTH_DY + 18);   // under the moustache, which is drawn next
+    if (rage || STACHE_UNDER.has(p?.mouth)) return;
+    const jaw = p?.mouth === 'yell' ? 46 * (p.open ?? 0) : 0, P = fullStretch(jaw);
+    const { stacheTop, lip } = fullParts(fullDrop(p));
+    if (p?.mouth === 'gape') {   // the gape starts high; hide what rises above the moustache (only inside the mouth, so the eyes are untouched)
+      const o = p.open ?? 0, sc = p.mouthScale ?? 1, w2 = (22 + 14 * o) * sc, h = (26 + 44 * o) * sc, cx = fx + 4, cy = 62 + FULL_MOUTH_DY + h * 0.18;
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(cx, cy, w2 + 6, h * 0.52 + 6, 0, 0, 7); ctx.clip();
+      const top = P(stacheTop);
+      fill(ctx, [[top[0][0], -RY], [top[top.length - 1][0], -RY], ...[...top].reverse()], SQ_SKIN, 0);
+      ctx.restore();
+    }
+    drawStache(ctx, P, { stacheTop, lip });
+  };
+  // one tear: a thin streak from the outer corner of the screen-left eye, ending in a drop on the bare cheek
+  const tearStreak = (ctx, fx) => {
+    const x = fx - 40 - 30;   // the eye's outer edge (eyes sit 40 either side of the face line, 30 wide)
+    stroke(ctx, [[x + 4, 8], [x, 22], [x - 2, 32]], { w: 7, color: '#6a6a6a', taper0: 0.2, taper1: 0.2 });
+    const d = [[x - 2, 30], [x + 6, 43], [x - 2, 52], [x - 10, 43]];   // the drop stays on bare cheek, above the beard
+    fill(ctx, d, W, 0.3); outline(ctx, d, { w: 4 });
+    stroke(ctx, [[x - 6, 42], [x - 4, 38]], { w: 3, color: '#9a9a9a' });   // a glint, so it reads as water
+  };
+  // lowered upper lids in his skin tone (the shared lid fill is white, which shows as a
+  // white cap on grey skin). Angry lids tilt down toward the nose; unimpressed stays flat.
+  const skinLids = (ctx, fx, lid, p) => {
+    const y = -6, rx = 30, ry = 40, ly = y - ry + lid * ry * 1.2;
+    const tilt = p.brow > 0.8 ? 9 : 0;
+    for (const side of [-1, 1]) {
+      const ex = fx + side * 40, inner = ly + tilt, outer = ly - tilt;   // inner end toward the nose
+      const a = [ex - side * (rx + 8), inner], b = [ex + side * (rx + 8), outer];
+      // skin over the top of the eye, outline included, so the lid line becomes the eye's top edge
+      ctx.save(); ctx.beginPath(); ctx.ellipse(ex, y, rx + 6, ry + 6, 0, 0, 7); ctx.clip();
+      ctx.fillStyle = SQ_SKIN; ctx.beginPath();
+      ctx.moveTo(a[0], y - ry - 10); ctx.lineTo(b[0], y - ry - 10); ctx.lineTo(b[0], b[1]); ctx.lineTo(a[0], a[1]); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      const hw = rx * Math.sqrt(Math.max(0, 1 - ((ly - y) / ry) ** 2)) + 2;   // eye half-width at the lid
+      const ix = ex - side * hw, ox = ex + side * hw, at = x => ly + tilt * (side * (ex - x)) / hw;
+      stroke(ctx, p.flatLid || tilt ? [[ix, at(ix)], [ox, at(ox)]] : [[ex - hw, ly + 3], [ex, ly - 2], [ex + hw, ly + 3]],
+        { w: 8, taper0: 0.05, taper1: 0.05 });
+    }
+  };
+  // angry: two rows of squared teeth clenched together, the same flat-tooth style as his laugh
+  const clenchedTeeth = (ctx, x, y) => {
+    const w2 = 56, h = 18;
+    const box = [[x - w2, y - h + 4], [x - w2 * 0.5, y - h], [x + w2 * 0.5, y - h], [x + w2, y - h + 4],
+                 [x + w2, y + h - 4], [x + w2 * 0.5, y + h], [x - w2 * 0.5, y + h], [x - w2, y + h - 4]];
+    fill(ctx, box, W, 0.3);
+    for (let i = 1; i < 6; i++) {
+      const tx = x - w2 + i * w2 / 3;
+      stroke(ctx, [[tx, y - h + 1], [tx, y - 1]], { w: 3.5, taper0: 0, taper1: 0, minW: 1 });
+      stroke(ctx, [[tx + w2 / 6, y + 1], [tx + w2 / 6, y + h - 1]], { w: 3.5, taper0: 0, taper1: 0, minW: 1 });
+    }
+    stroke(ctx, [[x - w2, y], [x + w2, y]], { w: 4, taper0: 0, taper1: 0, minW: 1 });   // where the rows meet
+    outline(ctx, box, { w: 7 });
+  };
+  // Squeex's own takes on two of the shared emotions, so the face stays his:
+  // the rage yell becomes big squared teeth clenched inside the beard (the head
+  // keeps its shape), and sad gets plain drooping eyes, one tear and a frown.
+  const SMALL_MOUTHS = new Set(['wobbly', 'tiny', 'o']);
+  const sqFace = q => {
+    // any half-lowered lid is drawn in his skin tone
+    const p = (q.lid ?? 0) > 0.02 && (q.lid ?? 0) < 1 && !q.happy ? { ...q, skinLid: true } : q;
+    if (p.tears) return { ...p, tears: false, lid: 0.45, mouth: 'frown', sadTear: true, skinLid: true };
+    if (p.mouth === 'rage' || p.mouth === 'clench') return { ...p, mouth: 'none', open: 0, clenchTeeth: true, stretch: 0 };
+    // small closed mouths drop clear of the moustache and grow a size, so they read on the beard
+    // (with both hands up in front of the face, as in scared, the hands cover it instead)
+    if (SMALL_MOUTHS.has(p.mouth))
+      return p.armLFront && p.armRFront ? { ...p, mouth: 'none' } : { ...p, mouthScale: (p.mouthScale ?? 1) * (p.mouth === 'wobbly' ? 1.5 : 1.3), smallMouth: true };
+    // open mouths a size smaller for him, so the stretched beard wraps under them with a band to spare
+    if (p.mouth === 'yell') return { ...p, mouthScale: (p.mouthScale ?? 1) * 0.68 };
+    if (p.mouth === 'gape') return { ...p, mouthScale: (p.mouthScale ?? 1) * 0.72, stress: false };   // the stress lines under the eyes would land in the beard
+    return p;
+  };
+
+  // C, with any beard and moustache: everything else is the chosen draft C
+  const sqC = (beard, stache, headOpts = {}) => build({ skin: SQ_SKIN, shirt: '#3a3a3a', sleeve: '#3a3a3a', headScale: [1.04, 0.98],
+    body: { legColor: '#8a8a8a',   // khakis, a mid grey so they don't read as bare legs, waist to ankle
+      bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
+        fill(ctx, b, '#8a8a8a', 1.2); outline(ctx, b, { w: 9 }); } },
+    head: head({ skin: SQ_SKIN, hair: sqHair(SQ_UP), beard, front: stache, browW: 9, ...headOpts }),
+    detail: overshirt });
+
+  const squeex = {
+    glasses: build({ skin: SQ_SKIN, shirt: INK, sleeve: '#3a3a3a', headScale: [1.02, 1.0],
+      head: head({ skin: SQ_SKIN, hair: sqHair(SQ_CROP), beard: sqBeard(), front: (ctx, fx, rage) => { sqStache(ctx, fx, rage); rectGlasses(ctx, fx); }, browW: 9 }),
+      detail: jacketHoodie }),
+    headset: build({ skin: SQ_SKIN, shirt: W, sleeveHem: 0.24, sleeveFill: W,
+      head: head({ skin: SQ_SKIN, hair: sqHair(SQ_TUFT), beard: sqBeard(), front: sqStache, hat: headphones, browW: 9 }),
+      detail: boxrTee }),
+    overshirt: sqC(sqBeard({ full: 0.12, flecks: true }), sqStache),
+    beards: { trimmed: sqC(beardTrim, stacheTrim), full: (draw => (ctx, p) => draw(ctx, sqFace(p)))(sqC(beardFull2, stacheFull2, { mouthDy: p => FULL_MOUTH_DY + (p.smallMouth ? 16 : 0) })), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
+  };
+
+  return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyBearded, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();

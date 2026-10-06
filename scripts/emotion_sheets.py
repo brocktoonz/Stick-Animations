@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 CROP = (90, 280, 990, 1580)   # the figure and its label, out of the 1080x1920 frame
-CAST = ['main', 'speed', 'ludwig', 'beast', 'nick', 'slime']
+CAST = ['main', 'speed', 'ludwig', 'beast', 'nick', 'slime', 'squeex']
 
 
 def emotions():

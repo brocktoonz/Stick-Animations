@@ -18,6 +18,8 @@
 //   armLFront/armRFront  draw that arm in front of the head (hand on face etc.);
 //              by default arms go behind the head, which sits on the shoulders
 //   holdR(ctx, x, y)  draws a prop at the right hand (before the hand, so it grips it)
+//   handSL/handSR  scale one hand (opt-in; e.g. a smaller hand on a thin prop)
+//   (hands are always plain circles: no thumb, no fingers)
 //   happy      with lid >= 1, draw ^ ^ laughing eyes
 //   sweat      bool     eyesOnly  draw only the eyes (dark-room gags)
 const Chars = (() => {
@@ -94,6 +96,14 @@ const Chars = (() => {
         ctx.moveTo(ex - rx - 10, y - ry - 10); ctx.lineTo(ex + rx + 10, y - ry - 10); ctx.lineTo(ex + rx + 10, lowY + 4 * size);
         ctx.quadraticCurveTo(ex, lowY - 16 * size, ex - rx - 10, lowY + 4 * size); ctx.closePath(); ctx.clip();
       }
+      // heavyLid (opt-in): drowsy. Nothing of the eye shows above the lid line,
+      // which is thick and sags toward the outer corner; the pupil sits under it.
+      const heavy = p.heavyLid && lid > 0.02, hly = y - ry + lid * ry * 1.2, sag = 9 * size;
+      if (heavy) {
+        ctx.save(); ctx.beginPath();
+        ctx.moveTo(ex - side * (rx + 10), hly - 2); ctx.lineTo(ex + side * (rx + 10), hly + sag - 2);
+        ctx.lineTo(ex + side * (rx + 10), y + ry + 10); ctx.lineTo(ex - side * (rx + 10), y + ry + 10); ctx.closePath(); ctx.clip();
+      }
       blob(ctx, ex, y, rx, ry, { w: 6 * size, n: 12 });
       const pr = (p.pupil ?? 13) * size;
       // pupils can travel right to the rim, so a sideways look reads at phone size
@@ -116,7 +126,10 @@ const Chars = (() => {
         const drop = [[dx, dy - 10 * size], [dx + 8 * size, dy + 6 * size], [dx, dy + 12 * size], [dx - 8 * size, dy + 6 * size]];
         fill(ctx, drop, '#d9d9d9', 0.3); outline(ctx, drop, { w: 4 * size });
       }
-      if (lid > 0.02) {
+      if (heavy) {
+        ctx.restore();
+        stroke(ctx, [[ex - side * (rx + 4), hly], [ex, hly + sag * 0.25], [ex + side * (rx + 6), hly + sag + 2]], { w: 9 * size, taper0: 0.1, taper1: 0.15 });
+      } else if (lid > 0.02) {
         const ly = y - ry + lid * ry * 1.2;
         clipEye();
         ctx.fillStyle = W; ctx.fillRect(ex - rx - 4, y - ry - 4, rx * 2 + 8, ly - (y - ry) + 4);
@@ -302,6 +315,8 @@ const Chars = (() => {
       stroke(ctx, [[x - 34 * s, y - 8 * s], [x, y + 14 * s], [x + 34 * s, y - 8 * s]], { w: 7 * s, color });
     } else if (k === 'frown') {
       stroke(ctx, [[x - 30 * s, y + 10 * s], [x, y - 6 * s], [x + 30 * s, y + 10 * s]], { w: 7 * s, color });
+    } else if (k === 'flatdown') {   // deflated: a flat line, only the corners tipping down
+      stroke(ctx, [[x - 27 * s, y + 4 * s], [x - 19 * s, y + 1 * s], [x + 19 * s, y], [x + 27 * s, y + 3.5 * s]], { w: 7 * s, color });
     } else if (k === 'smirk') {
       stroke(ctx, [[x - 26 * s, y + 4 * s], [x + 6 * s, y + 6 * s], [x + 32 * s, y - 10 * s]], { w: 7 * s, color });
     } else if (k === 'wobbly') {
@@ -391,6 +406,17 @@ const Chars = (() => {
     ctx.lineWidth = 7 * s * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
   }
 
+  // Short sleeve in a different colour from the skin (opt-in, S.sleeveFill):
+  // repaints the arm's fill from the shoulder to the hem, along the same curve.
+  function sleeveFill(ctx, a, b, bend, w, at, col) {
+    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+    const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
+    const e = [mx - dy / d * bend * d, my + dx / d * bend * d];
+    const c = [2 * e[0] - mx, 2 * e[1] - my];
+    const q = t => { const u = 1 - t; return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]; };
+    stroke(ctx, [a, q(at / 2), q(at)], { w: w * 0.45, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: col });
+  }
+
   // Short-sleeve hem: a line across the arm, a fraction `at` of the way from
   // shoulder to hand. Follows the same curve as tube() so it sits on the arm.
   function sleeveHem(ctx, a, b, bend, w, at) {
@@ -450,9 +476,6 @@ const Chars = (() => {
     }
     fill(ctx, head, W, 0.6);
     outline(ctx, head, { w: 13, jit: 2 });
-    for (const side of [-1, 1]) {            // ears
-      stroke(ctx, [[side * 178, -30], [side * 212, -40], [side * 218, 10], [side * 180, 30]], { w: 10 });
-    }
     fill(ctx, [[-170, -60], [-160, -130], [-90, -175], [20, -185], [120, -160], [175, -80],
                [130, -115], [60, -130], [-20, -120], [-110, -100]], INK, 1.5);   // hair swoop
     eyes(ctx, fx, -30, p, 0.9);
@@ -582,9 +605,10 @@ const Chars = (() => {
       // The white halo only matters over dark clothes; on light shirts it would
       // erase the shirt's outline next to the arm.
       tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, darkTorso);
+      if (S.sleeveHem && S.sleeveFill) sleeveFill(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem, S.sleeveFill);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
-      hand(ctx, hnd[0], hnd[1], point ?? null, S.handS, S.skin ?? W, 7100 + side, front);   // each hand its own seed
+      hand(ctx, hnd[0], hnd[1], point ?? null, (side < 0 ? p.handSL : p.handSR) ?? S.handS, S.skin ?? W, 7100 + side, front);   // each hand its own seed
     };
     if (p.crossArms) {
       // arms folded: upper arms down the sides to the elbows, forearms across

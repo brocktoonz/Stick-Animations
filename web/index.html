@@ -7,6 +7,7 @@
 <style>
   @font-face { font-family: "Luckiest Guy"; src: url(fonts/LuckiestGuy.ttf); }
   @font-face { font-family: "Patrick Hand"; src: url(fonts/PatrickHand.ttf); }
+  @font-face { font-family: "TikTok Sans"; src: url(fonts/TikTokSans.ttf); font-weight: 300 900; }   /* OFL, fonts/TikTokSans-OFL.txt */
   html, body { margin: 0; height: 100%; background: #111; font-family: sans-serif; }
   body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
   canvas { height: calc(100vh - 48px); max-width: 100vw; aspect-ratio: 9 / 16; object-fit: contain; background: #fff; }
@@ -51,8 +52,14 @@
 <script src="skits/animals_sheet.js"></script>
 <script src="skits/animals2_sheet.js"></script>
 <script src="skits/nick_hair_trial.js"></script>
+<script src="skits/squeex_drafts.js"></script>
+<script src="skits/squeex_beards.js"></script>
+<script src="skits/squeex_beard2.js"></script>
+<script src="skits/no_ears.js"></script>
 <script src="skits/extinct.js"></script>
 <script src="skits/powernap.js"></script>
+<script src="skits/morningself.js"></script>
+<script src="skits/haircut.js"></script>
 <script src="skits/talk_test.js"></script>
 <script src="skits/mouth_sheet.js"></script>
 <script>
@@ -73,6 +80,7 @@
   window.ready = Promise.all([
     document.fonts.load('40px "Luckiest Guy"'),
     document.fonts.load('40px "Patrick Hand"'),
+    document.fonts.load('500 40px "TikTok Sans"'),
   ]);
   window.ready.then(() => {
     if (params.has('f')) return renderFrame(+params.get('f'));

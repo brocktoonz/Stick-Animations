@@ -664,14 +664,9 @@ const Hero = (() => {
   // the main character after a very long nap: full scraggly beard and moustache
   const mainBearded = (ctx, p) => Cameos.spikyBearded(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
 
-  // J3 THE CHAOS GREMLIN: wide squat head, big sticking-out ears, one strand up, manic grin
+  // J3 THE CHAOS GREMLIN: wide squat head, one strand up, manic grin
   const gremlinHead = (ctx, p) => {
     ctx.translate(0, 8);
-    for (const side of [-1, 1]) {   // big ears
-      const e = Brush.ellipsePts(side * 168, 0, 40, 54, 12, side * 0.3);
-      fill(ctx, e, W, 0.5); outline(ctx, e, { w: 10 });
-      stroke(ctx, [[side * 160, -22], [side * 176, 0], [side * 162, 22]], { w: 6 });
-    }
     const pts = shapePts(170, 124, a => [1, Math.sin(a) > 0 ? 1.04 : 0.96]);
     if (!p.eyesOnly) { fill(ctx, pts, W, 0.6); outline(ctx, pts, { w: 11 }); }
     // buzzed cap with a single tall strand
