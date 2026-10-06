@@ -69,8 +69,8 @@ Skits.powernap = (() => {
   };
   // An arm moving from hand a (elbow out) to hand b (elbow down) as k goes 0 to 1:
   // the hand follows the line and the bend blends between the two end poses.
-  const glide = (side, a, b, k) => {
-    const A = Arms.arm(side, a, 'out'), B = Arms.arm(side, b, 'down'), K = side < 0 ? 'L' : 'R';
+  const glide = (side, a, b, k, ea = 'out', eb = 'down') => {
+    const A = Arms.arm(side, a, ea), B = Arms.arm(side, b, eb), K = side < 0 ? 'L' : 'R';
     const at = Arms.arm(side, [lerp(a[0], b[0], k), lerp(a[1], b[1], k)], 'out')['arm' + K];
     return { ['arm' + K]: at, ['bend' + K]: lerp(A['bend' + K], B['bend' + K], k) };
   };
@@ -186,7 +186,8 @@ Skits.powernap = (() => {
         // the elbow bend blends smoothly from the sitting pose to the lying one (never
         // switched or re-solved mid-move, which flipped the elbow for a few frames)
         ...glide(1, [40, -150], [58, -150], lie),     // top arm: hand on his knee, then lying along his side, hand on his hip
-        ...glide(-1, [-40, -150], [-60, -330], lie),  // bottom arm: hand on his knee, then tucked under his head
+        ...(lie < 0.5 ? glide(-1, [-40, -150], [-118, -112], lie * 2, 'out', 'out')   // bottom arm: hand off the knee, out to the side to brace on the seat as he tips,
+          : glide(-1, [-118, -112], [-60, -330], lie * 2 - 1, 'out', 'down')),      // then up under his head (no folding across the chest)
         ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });                                 // mouth bigger while his head is on its side
       ctx.restore();
       couchFront(ctx);
