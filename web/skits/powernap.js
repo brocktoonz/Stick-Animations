@@ -186,8 +186,7 @@ Skits.powernap = (() => {
         // the elbow bend blends smoothly from the sitting pose to the lying one (never
         // switched or re-solved mid-move, which flipped the elbow for a few frames)
         ...glide(1, [40, -150], [58, -150], lie),     // top arm: hand on his knee, then lying along his side, hand on his hip
-        ...(lie < 0.5 ? glide(-1, [-40, -150], [-118, -112], lie * 2, 'out', 'out')   // bottom arm: hand off the knee, out to the side to brace on the seat as he tips,
-          : glide(-1, [-118, -112], [-60, -330], lie * 2 - 1, 'out', 'down')),      // then up under his head (no folding across the chest)
+        ...glide(-1, [-40, -150], [-85, -190], lie, 'out', 'out'),   // bottom arm: hand slides off the knee and comes to rest on the cushion in front of his hip, visible (elbow outside, never across the chest)
         ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });                                 // mouth bigger while his head is on its side
       ctx.restore();
       couchFront(ctx);
