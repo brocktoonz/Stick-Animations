@@ -777,6 +777,95 @@ const Cameos = (() => {
   const slime = build({ shirt: INK, sleeve: '#222', head: head({ hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
+  // Slime in a roach onesie (the "What am I? A roach?!" skit): a grey hood
+  // ringing his face with a segmented crown plate and two antennae, a grey
+  // suit with a pale ribbed belly, folded wing shells and spiky insect legs
+  // behind. p.droop (0..1) lets the antennae sag. Everything is built on the
+  // normal Slime head and body; only the costume pieces are new.
+  const slimeRoach = (() => {
+    const SUIT = '#bdbdbd', PALE = '#e6e6e6', DARK = '#a6a6a6';
+    let droop = 0;
+    const evenPts = (pts, step = 34) => {   // short segments, so the brush join stays a short overlap
+      const out = [];
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[i], b = pts[(i + 1) % pts.length], k = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+        for (let j = 0; j < k; j++) out.push([a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k]);
+      }
+      return out;
+    };
+    const shape = (ctx, pts, col, w = 10, seed) => {
+      const sm = Brush.spline(pts, true, 3), e = evenPts(sm.filter((_, i) => i % 6 === 0));
+      fill(ctx, e, col, 0.5);
+      stroke(ctx, [...e, e[0], e[1]], { w, taper0: 0, taper1: 0, minW: 1, seed });
+    };
+    const lerpPts = (a, b, k) => a.map((p, i) => [p[0] + (b[i][0] - p[0]) * k, p[1] + (b[i][1] - p[1]) * k]);
+    const antennae = ctx => {
+      for (const sx of [-1, 1]) {
+        const up = [[sx * 30, -RY - 10], [sx * 52, -RY - 90], [sx * 92, -RY - 168], [sx * 150, -RY - 196]];
+        const sag = [[sx * 30, -RY - 10], [sx * 80, -RY - 76], [sx * 150, -RY - 76], [sx * 196, -RY - 6]];
+        stroke(ctx, lerpPts(up, sag, droop), { w: 11, taper0: 0, taper1: 0.85, minW: 0.3, seed: 8400 + sx });
+      }
+    };
+    const hoodRing = ctx => {
+      antennae(ctx);
+      blob(ctx, 0, -4, RX + 32, RY + 28, { fill: SUIT, w: 11, n: 28, jit: 1.8 });
+    };
+    // crown plate over the forehead, flat grey clipped inside the ring's ink; only its lower edge and seams are drawn
+    const hoodPlate = ctx => {
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(0, -4, RX + 26, RY + 22, 0, 0, 7); ctx.clip();
+      ctx.fillStyle = SUIT;
+      ctx.beginPath(); ctx.moveTo(-RX * 1.4, -RY * 1.5); ctx.lineTo(RX * 1.4, -RY * 1.5); ctx.lineTo(RX * 1.4, -84);
+      for (const q of Brush.spline([[RX * 1.4, -84], [138, -86], [70, -95], [0, -99], [-70, -95], [-138, -86], [-RX * 1.4, -84]], false, 4)) ctx.lineTo(q[0], q[1]);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+      stroke(ctx, [[-RX - 18, -80], [-138, -86], [-70, -95], [0, -99], [70, -95], [138, -86], [RX + 18, -80]], { w: 9, taper0: 0, taper1: 0, minW: 1, seed: 8410 });
+      stroke(ctx, [[0, -RY - 20], [2, -RY * 0.8], [0, -112]], { w: 6, taper0: 0.1, taper1: 0.3, seed: 8411 });
+      for (const sx of [-1, 1]) stroke(ctx, [[sx * 46, -RY - 12], [sx * 78, -RY * 0.78], [sx * 100, -106]], { w: 6, taper0: 0.1, taper1: 0.3, seed: 8412 + sx });
+      stroke(ctx, [[-16, -RY * 0.88], [16, -RY * 0.88]], { w: 6, seed: 8415 });   // the "+" on the crown
+      stroke(ctx, [[0, -RY * 0.88 - 14], [0, -RY * 0.88 + 12]], { w: 6, seed: 8416 });
+    };
+    const legs = ctx => {
+      for (const sx of [-1, 1]) [[-292, -50], [-238, -10], [-186, 24]].forEach(([y0, lift], i) => {
+        const pts = [[sx * 58, y0], [sx * 112, y0 + lift - 40], [sx * 168, y0 + lift - 52], [sx * 200 + sx * i * 8, y0 + lift + 40]];
+        stroke(ctx, pts, { w: 10, taper0: 0, taper1: 0.5, minW: 0.4, seed: 8420 + sx * 3 + i });
+        for (const [bx, by, ang] of [[0.38, 0, -1], [0.62, 0, -1], [0.88, 0, -1]]) {   // short barbs along the shin
+          const s = Brush.spline(pts, false, 6), p = s[Math.floor(s.length * bx)], q = s[Math.min(s.length - 1, Math.floor(s.length * bx) + 3)];
+          const dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy) || 1;
+          stroke(ctx, [p, [p[0] + (-dy / d) * ang * 18 + dx / d * 8, p[1] + (dx / d) * ang * 18 + dy / d * 8]], { w: 5, taper0: 0, taper1: 0.9, minW: 0.2, seed: 8440 + i * 7 + Math.round(bx * 10) + sx });
+        }
+      });
+    };
+    const wings = ctx => {
+      for (const sx of [-1, 1]) {
+        const w = [[sx * 40, -262], [sx * 96, -250], [sx * 138, -196], [sx * 144, -120], [sx * 112, -66], [sx * 66, -92], [sx * 40, -160]];
+        shape(ctx, w, DARK, 10, 8460 + sx);
+        stroke(ctx, [[sx * 58, -236], [sx * 100, -180], [sx * 106, -106]], { w: 5, taper0: 0.1, taper1: 0.6, seed: 8466 + sx });
+      }
+    };
+    const suit = build({
+      shirt: SUIT, sleeve: SUIT, skin: W,
+      head: head({ hair: shaved, beard: shortBeard, front: slimeStache, browW: 12, back: hoodRing, hat: hoodPlate }),
+      body: {
+        legColor: SUIT,
+        bottoms: (ctx, hipY) => shape(ctx, [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 46], [0, hipY + 56], [-70, hipY + 46]], SUIT, 9, 8470),
+      },
+      detail: (ctx, n, h) => {
+        const cy = (n + h) / 2 + 4;
+        blob(ctx, 0, cy, 46, 78, { fill: PALE, w: 8, n: 22 });
+        stroke(ctx, [[0, cy - 70], [2, cy], [0, cy + 72]], { w: 5, taper0: 0.1, taper1: 0.1, seed: 8480 });
+        for (const dy of [-30, 6, 42]) stroke(ctx, [[-36, cy + dy - 6], [0, cy + dy + 4], [36, cy + dy - 6]], { w: 4, taper0: 0.2, taper1: 0.2, seed: 8481 + dy });
+      },
+    });
+    return (ctx, p) => {
+      droop = p.droop ?? 0;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.scale(p.s ?? 1, p.s ?? 1);
+      legs(ctx); wings(ctx);
+      ctx.restore();
+      suit(ctx, p);
+    };
+  })();
+
   // parts: the shared build/head builders, for other adult characters (hero.js)
   // ---------- Original characters (outline-style hair, per the hair reference sheets) ----------
   const collarTee = (ctx, n, color = INK) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color });
@@ -1526,5 +1615,5 @@ const Cameos = (() => {
     beards: { trimmed: sqC(beardTrim, stacheTrim), full: (draw => (ctx, p) => draw(ctx, sqFace(p)))(sqC(beardFull2, stacheFull2, { mouthDy: p => FULL_MOUTH_DY + (p.smallMouth ? 16 : 0) })), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
   };
 
-  return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyBearded, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, slimeRoach, originals, originals2, men, spikyShades, spikyBearded, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();
