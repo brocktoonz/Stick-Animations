@@ -123,7 +123,7 @@ Skits.roach = (() => {
       tilt: keys(t, [[2.5, 0], [2.65, -0.08], [3.0, -0.15], [3.26, -0.06], [3.5, 0.0]]) - 0.07 * k * fade,
       lean: -0.03 - 0.05 * k * fade,
     };
-    const arms = Ar.both([124, -170], 'out');   // hands on his hips
+    const arms = Ar.both([72, -178], 'out');   // hands on his hips: the hand circles sit on the torso edge at the waist, elbows out
     return shouting ? { ...base, ...arms, mouth: 'gape', open: (0.25 + 0.75 * k) * fade, stretch: 0.5 * k * fade, mouthScale: 1.0 }
                     : { ...base, ...arms, mouth: 'flat' };
   };
