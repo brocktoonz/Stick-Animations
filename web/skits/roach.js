@@ -166,7 +166,7 @@ Skits.roach = (() => {
       const calm = easeInOut(seg(t, 5.45, 5.7)), m = t < 5.47 ? talk(t, 4.78, 5.47) : null;
       backdrop(ctx); ground(ctx, 1680);
       put(ctx, 'roach', s, 540, 1680 - 438 * s, {
-        dir: 1, t, ...E.neutral, mouth: 'flat', lookX: 0.0, pupil: 10, lid: blink(t, 3.7, 1.9) || lerp(0.2, 0.5, calm), flatLid: calm > 0.5, brow: lerp(0.55, 0.45, calm),
+        dir: 1, t, cleanTorso: true, ...E.neutral, mouth: 'flat', lookX: 0.0, pupil: 10, lid: blink(t, 3.7, 1.9) || lerp(0.2, 0.5, calm), flatLid: calm > 0.5, brow: lerp(0.55, 0.45, calm),
         tilt: keys(t, [[4.8, 0.0], [5.1, 0.06], [5.5, 0.06], [5.9, -0.02]]), bob: Math.sin(t * 2.1) * 3, weight: 0.7, droop,
         ...glide(-1, [-128, -236], REST(-1), easeInOut(seg(t, 5.3, 5.7)), 'out', 'rest'),
         ...glide(1, [128, -236], REST(1), easeInOut(seg(t, 5.3, 5.7)), 'out', 'rest'), ...(m ?? {}),

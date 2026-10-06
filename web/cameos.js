@@ -851,10 +851,10 @@ const Cameos = (() => {
         bottoms: (ctx, hipY) => shape(ctx, [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 46], [0, hipY + 56], [-70, hipY + 46]], SUIT, 9, 8470),
       },
       detail: (ctx, n, h) => {
-        const cy = (n + h) / 2 + 4;
-        blob(ctx, 0, cy, 46, 78, { fill: PALE, w: 8, n: 22 });
-        stroke(ctx, [[0, cy - 70], [2, cy], [0, cy + 72]], { w: 5, taper0: 0.1, taper1: 0.1, seed: 8480 });
-        for (const dy of [-30, 6, 42]) stroke(ctx, [[-36, cy + dy - 6], [0, cy + dy + 4], [36, cy + dy - 6]], { w: 4, taper0: 0.2, taper1: 0.2, seed: 8481 + dy });
+        const cy = (n + h) / 2 - 8;   // the belly plate ends clear of the waist band, so its tip never tangles with that outline
+        shape(ctx, Brush.ellipsePts(0, cy, 44, 66, 16), PALE, 8, 8479);   // fixed seed, like the rest of the suit, so the outline join doesn't re-roll
+        stroke(ctx, [[0, cy - 58], [2, cy], [0, cy + 58]], { w: 5, taper0: 0.1, taper1: 0.1, seed: 8480 });
+        for (const dy of [-28, 4, 36]) stroke(ctx, [[-34, cy + dy - 6], [0, cy + dy + 4], [34, cy + dy - 6]], { w: 4, taper0: 0.2, taper1: 0.2, seed: 8481 + dy });
       },
     });
     return (ctx, p) => {
