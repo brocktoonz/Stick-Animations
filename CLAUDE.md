@@ -68,7 +68,7 @@ user asked to change: they are glitches, not design choices (user decision).
 Before sending any render to art-reviewer, and again before showing it to the
 user:
 1. Render a motion copy with frozen line boil:
-   `node scripts/export.cjs <skit> <scratch>/motion.mp4 --no-boil`
+   `FFMPEG=$(python3 -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())") NODE_PATH=$(npm root -g) node scripts/export.cjs <skit> <scratch>/motion.mp4 --no-boil`
 2. Run `python3 scripts/glitch_check.py <scratch>/motion.mp4 --out <dir>` and look
    at every strip it writes. Each hit is fixed or explained (a blink, a cut, a
    lip-sync shape) in your notes.
