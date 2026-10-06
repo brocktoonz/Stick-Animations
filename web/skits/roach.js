@@ -141,10 +141,11 @@ Skits.roach = (() => {
     }],
     // 1.95-2.5: he's slid off to the left; a tiny Slime walks in far off on the right
     [1.95, 2.5, (ctx, t) => {
-      const slide = easeInOut(seg(t, 1.95, 2.2)), w = easeOut(seg(t, 2.05, 2.5));
+      const slide = easeInOut(seg(t, 1.95, 2.2));
       backdrop(ctx);   // no ground line: the world just opens up, like the original
-      const x = lerp(1190, 905, w), amp = 1 - seg(t, 2.3, 2.5);
-      put(ctx, 'slime', 0.36, x, 1500 - 438 * 0.36, { dir: -1, t, ...E.neutral, lookX: 0.9, lid: 0.5, flatLid: true, weight: 0, step: Math.sin(x * 0.11) * 0.8 * amp, bob: 0, ...(loud('roach', t + 1 / 30) > 0.12 ? { mouth: 'gape', open: 0.2 + 0.6 * loud('roach', t + 1 / 30) } : {}) }, { top: 9999 });
+      // a camera pan: Slime stands still and is carried in by the same move that slides Ludwig off (no walk cycle)
+      const x = lerp(1265, 905, slide), k = loud('roach', t + 1 / 30);
+      put(ctx, 'slime', 0.36, x, 1500 - 438 * 0.36, { dir: -1, t, ...E.neutral, lookX: 0.9, lid: 0.5, flatLid: true, weight: 0, bob: 0, ...(k > 0.12 ? { mouth: 'gape', open: 0.2 + 0.6 * k } : {}) }, { top: 9999 });
       put(ctx, 'lud', 2.42, lerp(450, 90, slide), 1170, ludPose(t));
     }],
     // 2.50-3.85: Slime shouts at him (uncaptioned), then goes stone-faced
