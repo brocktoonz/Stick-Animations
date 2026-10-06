@@ -128,8 +128,8 @@ Skits.powernap = (() => {
   // 1:55 at night, the hour hand dragged round with it
   function clock(ctx, x, y, r, t) {
     const k = easeInOut(seg(t, 3.5, 6.4)), mins = lerp(17 * 60, 25 * 60 + 55, k);   // minutes since midnight
-    const face = Brush.ellipsePts(x, y, r, r, 28);
-    fill(ctx, face, W, 0.4); outline(ctx, face, { w: 12 });
+    const face = Brush.ellipsePts(x, y, r, r, 120);
+    flat(ctx, face, W); couchLine(ctx, face, 12);   // rim like the couch: short segments and a fixed seed, so the brush join never jumps around
     for (let i = 0; i < 12; i++) {
       const a = i * Math.PI / 6, l = i % 3 ? 0.86 : 0.78;
       stroke(ctx, [[x + Math.sin(a) * r * l, y - Math.cos(a) * r * l], [x + Math.sin(a) * r * 0.92, y - Math.cos(a) * r * 0.92]], { w: i % 3 ? 7 : 12 });
