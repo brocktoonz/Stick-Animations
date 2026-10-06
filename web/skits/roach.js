@@ -115,13 +115,13 @@ Skits.roach = (() => {
   // ---------- Slime ----------
   const slimePose = t => {
     const k = loud('roach', t + 1 / 30);   // the shout follows the sound, a frame ahead like the speech
-    const rage = easeOut(seg(t, 2.5, 2.56)) * (1 - easeInOut(seg(t, 3.0, 3.26)));   // furious through the shout, then eases flat over ~8 frames
-    const fade = 1 - easeInOut(seg(t, 3.02, 3.26));
+    const rage = easeOut(seg(t, 2.5, 2.56)) * (1 - easeInOut(seg(t, 3.1, 3.3)));   // annoyed through the shout, then eases flat over ~6 frames
+    const fade = 1 - easeInOut(seg(t, 3.1, 3.3));
     const shouting = fade > 0.3 && k > 0.3;   // the yell proper (the quieter burst before it, 2.37-2.5, is Slime's tiny mouth below)
     const base = {
       dir: -1, t, ...E.neutral, lookX: 0.9, lookY: 0.05, pupil: 10, bob: Math.sin(t * 2.1) * 3, weight: -0.8,
       lid: blink(t, 3.7) || 0.5, flatLid: true, brow: lerp(0.4, 0.55, rage),
-      tilt: keys(t, [[2.5, 0], [2.65, -0.08], [3.0, -0.15], [3.26, -0.06], [3.5, 0.0]]) - 0.07 * k * fade,
+      tilt: keys(t, [[2.5, 0], [2.65, -0.08], [3.0, -0.15], [3.1, -0.15], [3.3, -0.06], [3.5, 0.0]]) - 0.07 * k * fade,
       lean: -0.03 - 0.05 * k * fade,
     };
     const arms = Ar.both([72, -178], 'out');   // hands on his hips: the hand circles sit on the torso edge at the waist, elbows out
@@ -144,7 +144,7 @@ Skits.roach = (() => {
       const slide = easeInOut(seg(t, 1.95, 2.2)), w = easeOut(seg(t, 2.05, 2.5));
       backdrop(ctx);   // no ground line: the world just opens up, like the original
       const x = lerp(1190, 905, w), amp = 1 - seg(t, 2.3, 2.5);
-      put(ctx, 'slime', 0.36, x, 1500 - 438 * 0.36, { dir: -1, t, ...E.neutral, lookX: 0.9, lid: 0.5, flatLid: true, weight: 0, step: Math.sin(x * 0.11) * 0.8 * amp, bob: 0, ...(loud('roach', t + 1 / 30) > 0.12 ? { mouth: 'yell', open: 0.2 + 0.6 * loud('roach', t + 1 / 30) } : {}) }, { top: 9999 });
+      put(ctx, 'slime', 0.36, x, 1500 - 438 * 0.36, { dir: -1, t, ...E.neutral, lookX: 0.9, lid: 0.5, flatLid: true, weight: 0, step: Math.sin(x * 0.11) * 0.8 * amp, bob: 0, ...(loud('roach', t + 1 / 30) > 0.12 ? { mouth: 'gape', open: 0.2 + 0.6 * loud('roach', t + 1 / 30) } : {}) }, { top: 9999 });
       put(ctx, 'lud', 2.42, lerp(450, 90, slide), 1170, ludPose(t));
     }],
     // 2.50-3.85: Slime shouts at him (uncaptioned), then goes stone-faced
