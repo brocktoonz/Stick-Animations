@@ -388,6 +388,9 @@ const Chars = (() => {
   }
 
   // Mitten hand. point = direction (radians) to stick a finger out, or null.
+  // The small thumb hook on each hand; a skit can switch it off (setHandHook(false)) for its own frames.
+  let handHook = true;
+  const setHandHook = on => { handHook = on; };
   function hand(ctx, x, y, point = null, s = 1, skin = W) {
     if (point !== null) {
       const fx = x + Math.cos(point) * 40 * s, fy = y + Math.sin(point) * 40 * s;
@@ -395,7 +398,7 @@ const Chars = (() => {
       stroke(ctx, [[x, y], [fx, fy]], { w: 10 * s, taper0: 0, taper1: 0, minW: 1, color: skin, jit: 0 });
     }
     blob(ctx, x, y, 24 * s, 22 * s, { w: 7 * s, n: 10, fill: skin });
-    stroke(ctx, [[x - 18 * s, y - 6 * s], [x - 28 * s, y - 18 * s], [x - 20 * s, y - 24 * s]], { w: 6 * s });
+    if (handHook) stroke(ctx, [[x - 18 * s, y - 6 * s], [x - 28 * s, y - 18 * s], [x - 20 * s, y - 24 * s]], { w: 6 * s });
   }
 
   // Short sleeve in a different colour from the skin (opt-in, S.sleeveFill):
@@ -694,5 +697,5 @@ const Chars = (() => {
     return [p.x, p.y + s * (S.neckY + bob - S.headUp + bob * 0.5)];
   }
 
-  return { kid, dad, mom, dadBust, headPos, figure, hand, sweat, tube, eyes, brows, mouth, RED };
+  return { kid, dad, mom, dadBust, headPos, figure, hand, setHandHook, sweat, tube, eyes, brows, mouth, RED };
 })();
