@@ -261,11 +261,14 @@ Skits.presentation = (() => {
     ...Arms.rest(-1), ...Arms.rest(1),
   });
 
-  // 8.40-9.15: arms folded, chin up, nodding like he nailed it
+  // 8.40-9.15: arms folded, nodding as if it's going fine, but his face is pure panic
   const pose7 = t => {
-    const sp = talk(t, 0.7);
+    const sp = talk(t, 0);   // no smile in the mouth shapes: he's still stumbling over the words
     return {
-      ...face(t), lookX: 0.75, brow: 0.15, browL: 0.35, browR: -0.1, lid: 0.32, pupil: 11, sweat: true, mouth: 'smirk', crossArms: true,
+      // trying to look composed, but the face gives him away (user: the smug face read as too confident):
+      // worried brows, wide eyes with small pupils that flick off the room and back, a wobbly mouth between words
+      ...face(t), brow: -0.85, eyeScale: 1.12, pupil: 8, sweat: true, mouth: 'wobbly', crossArms: true,
+      lookX: keys(t, [[8.4, 0.7], [8.66, 0.7], [8.74, -0.3], [8.86, -0.3], [8.94, 0.7]]), lookY: 0.1,
       tilt: keys(t, [[8.4, -0.06], [8.56, 0.0], [8.72, -0.06], [8.88, 0.0], [9.04, -0.06]]), lean: -0.035, weight: -0.6,
       ...(sp ?? {}),
     };

@@ -35,5 +35,6 @@ Beats, as animated:
             ("some minamon rolls")
 - 6.85-7.95 he springs up into frame, fists pumped out wide ("mini mum mom um")
 - 7.95-8.40 extreme close-up in the silence: frozen sweaty grimace, eyes slide away
-- 8.40-9.15 arms folded, chin up, nodding like he nailed it ("some men")
+- 8.40-9.15 arms folded, nodding as if it's fine, face still panicked: worried brows,
+            wide eyes, wobbly mouth (user: the smug face read as too confident) ("some men")
 - 9.15-10.0 pushed in on Speed (standing, slow head shake), Squeex and Slime: still staring
