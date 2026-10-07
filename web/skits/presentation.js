@@ -193,12 +193,9 @@ Skits.presentation = (() => {
       lean: keys(t, [[0, 0.0], [0.35, -0.03], [0.8, 0.03], [1.5, 0.05], [2.3, 0.06]]),
       bob: keys(t, [[0.85, 0], [0.95, -6], [1.1, 2], [1.3, -8], [1.5, 0], [1.75, -6], [1.95, 0]]), weight: 0.6,
       mouth: 'smile',
-      // the near arm comes up and points at the slide for the whole first sentence, with a small jab
-      // on each stressed word ("check", "made", "cinnamon", "rolls"); the far arm drops to a soft hang
-      ...armKeys(1, t, [[0, [12, -222], 'down'], [0.1, [12, -222], 'down'], [0.3, [206, -330], 'down'],
-        [0.4, [222, -340], 'down'], [0.52, [206, -330], 'down'], [0.86, [206, -330], 'down'], [0.94, [222, -340], 'down'], [1.06, [206, -330], 'down'],
-        [1.22, [206, -330], 'down'], [1.3, [222, -342], 'down'], [1.42, [206, -330], 'down'], [1.82, [206, -330], 'down'], [1.9, [222, -340], 'down'],
-        [2.04, [208, -332], 'down'], [2.38, [206, -330], 'down']]),
+      // the near arm reaches up onto the slide, at the tallest bar, and stays there through the first sentence:
+      // a clear push toward the chart and back on each stressed word ("check", "made", "cinnamon", "rolls")
+      ...armKeys(1, t, [[0, [12, -222], 'down'], [0.1, [12, -222], 'down'], [0.3, [224, -400], 'down', 140], [0.38, [250, -416], 'down', 140], [0.5, [224, -400], 'down', 140], [0.86, [224, -400], 'down', 140], [0.94, [250, -416], 'down', 140], [1.06, [224, -400], 'down', 140], [1.22, [224, -400], 'down', 140], [1.3, [250, -416], 'down', 140], [1.42, [224, -400], 'down', 140], [1.82, [224, -400], 'down', 140], [1.9, [250, -416], 'down', 140], [2.04, [224, -400], 'down', 140], [2.38, [224, -400], 'down', 140]]),
       ...armKeys(-1, t, [[0, [-8, -228], 'down'], [0.12, [-8, -228], 'down'], [0.42, 'r', 'rest'], [2.38, 'r', 'rest']]),
       ...(sp ?? {}),
     };
@@ -218,7 +215,7 @@ Skits.presentation = (() => {
       bob: keys(t, [[2.38, 0], [2.95, 0], [3.1, 6], [3.66, 6], [3.8, -4], [3.95, 0], [4.25, -5], [4.4, 0]]), weight: 0.6,
       // the stutter freezes him, arms limp; then the hands go up the outside and clutch the sides of his head
       // (behind it the whole time: no layer switch), come down, and the near arm points at the chart
-      ...armKeys(1, t, [[2.38, [206, -330], 'down'], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [186, -404], 'down'], [3.08, [174, -480], 'down'], [3.62, [170, -476], 'down'],
+      ...armKeys(1, t, [[2.38, [224, -400], 'down', 140], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [186, -404], 'down'], [3.08, [174, -480], 'down'], [3.62, [170, -476], 'down'],
         [3.8, [160, -392], 'down'], [4.02, [200, -384], 'down'], [4.62, [202, -380], 'down']]),
       ...armKeys(-1, t, [[2.38, 'r', 'rest'], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [-186, -404], 'down'], [3.08, [-174, -480], 'down'], [3.62, [-170, -476], 'down'],
         [3.9, 'r', 'rest'], [4.62, 'r', 'rest']]),   // the far arm comes down to a soft hang
