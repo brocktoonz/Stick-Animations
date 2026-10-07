@@ -320,13 +320,13 @@ Skits.haircut = (() => {
     ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(sc, sc);
     const a = 0.05 + 0.32 * open;
     for (const s of [-1, 1]) {
-      ctx.save(); ctx.translate(0, -34); ctx.rotate(s * a);
+      ctx.save(); ctx.translate(0, -14); ctx.rotate(s * a);   // the blades start at the hand (it's drawn over their root)
       const blade = [[-7, 0], [7, 0], [3, -104], [0, -112], [-3, -100]];
       fill(ctx, blade, col, 0.3); outline(ctx, blade, { w: 6 });
       ctx.restore();
     }
     for (const s of [-1, 1]) blob(ctx, s * 15, 4, 14, 12, { fill: null, w: 7, n: 8 });   // finger rings (under the hand)
-    blob(ctx, 0, -34, 5, 5, { fill: INK, w: 0, n: 6 });                                    // pivot
+    blob(ctx, 0, -14, 5, 5, { fill: INK, w: 0, n: 6 });                                    // pivot
     ctx.restore();
   };
   const comb = (ctx, x, y) => {
@@ -531,12 +531,12 @@ Skits.haircut = (() => {
     const lean = lerp(-0.03, 0.03, walk) - 0.008 * Math.sin(t * 0.9) + (since < 0.22 ? -0.035 * Math.sin(Math.PI * since / 0.22) : 0);   // he dips into each snip
     // the scissor hand (pose space): at his side, lifted up by his head, carried
     // high over the chair, then down onto the crown, snipping
-    const rest = [-104, -284], high = [-160, -690];   // up by his head, the blades pointing out sideways
+    const rest = [-122, -232], high = [-160, -690];   // rest: hanging relaxed at his side, nearly straight; high: up by his head, the blades pointing out sideways
     let hl, rot, open1 = 0;
     const rise = easeInOut(seg(t, RISE[0], RISE[1]));
     if (t < RISE[0]) {
-      const lift = easeOutBack(seg(t, LIFT[0], LIFT[1]));
-      hl = Stage.mix(rest, high, lift); rot = lerp(Math.PI, -1.45, lift); open1 = 0;
+      const lift = easeInOut(seg(t, LIFT[0], LIFT[1]));   // a smooth lift (an overshoot ease jumped a third of the way in one frame)
+      hl = Stage.mix(rest, high, lift); rot = lerp(Math.PI, 2 * Math.PI - 1.45, lift); open1 = 0;   // the short way round (-1.45 and 2π-1.45 are the same angle the rise starts from)
     } else {
       const spotNow = CUT_SPOTS[SPOT_AT[Math.min(n, SPOT_AT.length - 1)]], spotWas = n > 0 ? CUT_SPOTS[SPOT_AT[n - 1]] : spotNow;
       const prevAt = n > 0 ? SNIPS1[n - 1] : 0, nextAt = SNIPS1[Math.min(n, SNIPS1.length - 1)];
@@ -551,6 +551,11 @@ Skits.haircut = (() => {
     // the comb hand stays down at his side (behind the chair once he's round there)
     const hr = Stage.mix([96, -196], [40, -300], walk);   // tucked in out of sight behind him once he's round there
     const armL = Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, 160);   // elbow down: it never flips over as the hand comes down past his shoulder
+    // hanging at his side the elbow bows out, relaxed; it blends over to the 'down'
+    // solution as he lifts the scissors (a blend, never a switch, so it can't pop)
+    const relaxK = t < LIFT[0] ? 0 : t < LIFT[1] ? easeInOut(seg(t, LIFT[0], LIFT[1])) : 1;
+    const bendOut = Arms.arm(-1, [hl[0], hl[1] - BDY], 'out', false, 160).bendL;
+    armL.bendL = lerp(bendOut, armL.bendL, relaxK);
     const armR = Arms.arm(1, [hr[0], hr[1] - BDY], 'out', false, 160);
     const holdL = scissors(rot, open1, 1.5, W);   // big and white, so they read on his grey hair
     // the barber, drawn first: behind the chair and him
