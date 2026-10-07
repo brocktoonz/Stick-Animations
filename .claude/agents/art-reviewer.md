@@ -57,6 +57,9 @@ Characters
 - Resting arms are a soft hang close to the body (STYLE.md, user decision). Flag as MAJOR any arm resting with the hand flared out wide at hip height and the elbow bowed in toward the body ("gunslinger" arms), in any shot.
 - Hands are plain circles (STYLE.md, user decision): no thumb mark, and no hooks, tails or nubs sticking out of the outline. Zoom in on the hands at every boil beat, especially in close-ups.
 - Hands have one ink outline and NO white ring or border around them, ever (user decision; the user caught white borders on hands that reviews had passed). Flag any as MAJOR.
+- No white border or ring round any arm, and none round Speed's brows (user decision; the user caught white arm borders the reviews passed). Flag any as MAJOR.
+- Suits: the jacket runs straight into trousers of the jacket's colour. Flag any block or band under the jacket hem that reads as a skirt or shorts, and trousers in a different colour from the jacket (the user caught both).
+- A presenter's gestures match the brief's action: when he is meant to be pointing at the slide, the arm is extended toward it and held, not flailing.
 - Hair reads as hair (not a cap, leaf or helmet). Facial hair reads as hair (not a smear or mask).
 - Silhouettes stay distinct between characters.
 - Anatomy is correct: no backwards elbows, and no hands detached from arms. Check this on characters that are only partly in frame too (e.g. Slime leaning in from the edge): the user caught arms bending backwards there that the reviewer missed.

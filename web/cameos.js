@@ -81,7 +81,7 @@ const Cameos = (() => {
       if (!p.noEyes) eyes(ctx, fx, p.squint ? -22 : -6, o.eyeLop ? { eyeLop: o.eyeLop, ...p } : p, 1, !!o.lashes);   // noEyes: a front() hook draws its own   // rage eyes sit higher, clear of the teeth
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
-      } else if (!p.noBrows) brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
+      } else if (!p.noBrows) brows(ctx, fx, -62, p, 1, o.browW ?? 9, o.browHalo ?? true);   // browHalo false: no white edge (Speed)
       const mdy = (typeof o.mouthDy === 'function' ? o.mouthDy(p) : o.mouthDy ?? 0) * (1 - open);   // eases off as a yell opens, so a big mouth stays inside the chin
       if (p.noMouth) { /* a front() hook draws the mouth */ }
       else if (rage) mouth(ctx, fx + 4, 34 + mdy + jaw * 0.2, p, 0.95);   // fills the lower half of the face
@@ -206,7 +206,7 @@ const Cameos = (() => {
   // chest, buttons and a waist sash.
   const speed = build({
     skin: GREY, shirt: GREY,
-    head: head({ skin: GREY, hair: twists(), hat: strawHat }),
+    head: head({ skin: GREY, hair: twists(), hat: strawHat, browHalo: false }),   // no white border round his brows (user decision)
     detail: (ctx, n, h) => {
       for (const side of [-1, 1]) {   // vest panels, open down the middle
         const panel = [[side * 48, n], [side * 66, n + 64], [side * 68, h - 4], [side * 30, h - 4], [side * 22, n + 60], [side * 20, n + 4]];
@@ -1637,11 +1637,9 @@ const Cameos = (() => {
     stroke(ctx, [[0, n + 108], [2, h - 6]], { w: 6, taper0: 0.1, taper1: 0.1, seed: sd + 10 });   // the jacket's closing edge
     [0.42, 0.72].forEach((k, i) => { const b = Brush.ellipsePts(14, n + 108 + (h - n - 108) * k, 6, 6, 8); fill(ctx, b, W, 0.2); ring(b, 4, sd + 12 + i); });
   };
-  const suited = (draw, { jacket, tie, trousers = '#2e2e2e', seed = 9300 }) => draw.with(o => {
-    // suit trousers, not the character's own: straight legs down to the shoes, and a seat that runs into them (no puffed shorts)
-    const seat = h => [[-60, h - 12], [60, h - 12], [58, h + 36], [40, h + 50], [0, h + 42], [-40, h + 50], [-58, h + 36]];   // no wider than the jacket
-    const body = { ...(o.body ?? {}), legColor: trousers, legW: 30,
-      bottoms: (ctx, h) => { const b = seat(h); fill(ctx, b, trousers, 0.3); stroke(ctx, [...b, b[0], b[1]], { w: 9, taper0: 0, taper1: 0, minW: 1, seed: seed + 20 }); } };
+  const suited = (draw, { jacket, tie, seed = 9300 }) => draw.with(o => {
+    // trousers in the jacket's colour, starting under the jacket's hem: no separate seat block below it (user decision)
+    const body = { ...(o.body ?? {}), legColor: jacket, legW: 30, legTop: -14, bottoms: null };
     return { shirt: jacket, sleeve: jacket, sleeveHem: undefined, sleeveFill: undefined, body, detail: suitFront(tie, seed) };
   });
 

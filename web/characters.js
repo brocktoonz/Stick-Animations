@@ -429,14 +429,8 @@ const Chars = (() => {
       { w: 7, taper0: 0, taper1: 0, minW: 1, jit: 0.2, wob: 0 });
   }
 
-  const isDark = c => {   // by luminance, so coloured clothes work too (greys unchanged)
-    if (c.length !== 7) return false;
-    const [r, g, b] = [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0x70;
-  };
-
-  // Outlined noodle limb: a thick ink tube with a white core. A thin white
-  // halo keeps it readable over dark clothes (Mom's dress).
+  // Outlined noodle limb: a thick ink tube with a white core. halo: a thin white
+  // edge; the characters' arms never use it (user decision: no white borders round arms).
   function tube(ctx, a, b, bend, w = 24, fillCol = W, halo = true) {
     const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
     const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
@@ -535,7 +529,6 @@ const Chars = (() => {
     ctx.rotate(p.lean ?? 0);
     const bob = p.bob ?? 0, hipY = S.hipY + bob, neckY = S.neckY + bob;
     const step = p.step ?? 0;
-    const darkTorso = isDark(S.torsoFill ?? W);
     if (p.eyesOnly) {   // just the eyes, e.g. glowing in a dark room
       ctx.translate(0, neckY - S.headUp + bob * 0.5);
       ctx.rotate(p.tilt ?? 0);
@@ -605,9 +598,8 @@ const Chars = (() => {
       const sh = [side * S.shX, neckY + S.shY];
       const hnd = target ?? restHand(side);
       bend = target ? bend : bend ?? restBend(side);
-      // The white halo only matters over dark clothes; on light shirts it would
-      // erase the shirt's outline next to the arm.
-      tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, darkTorso);
+      // No white border round the arm, on any clothes (user decision).
+      tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, false);
       if (S.sleeveHem && S.sleeveFill) sleeveFill(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem, S.sleeveFill);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
@@ -623,13 +615,13 @@ const Chars = (() => {
         const sh = [side * S.shX, neckY + S.shY], el = [side * (S.shX + S.armW * 0.5), elY];
         const hd = side < 0 ? [S.shX + S.armW * 0.2, elY - S.armW * 0.6] : [-(S.shX + S.armW * 0.45), elY - S.armW * 0.15];   // near fist covers the far elbow's end, so no stub shows under it
         if (side < 0) {   // under: forearm and hidden hand first
-          tube(ctx, el, hd, 0.05, S.armW, S.armFill ?? W, darkTorso);
+          tube(ctx, el, hd, 0.05, S.armW, S.armFill ?? W, false);
           hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);
         }
-        tube(ctx, sh, el, side * -0.08, S.armW, S.armFill ?? W, darkTorso);
+        tube(ctx, sh, el, side * -0.08, S.armW, S.armFill ?? W, false);
         if (S.sleeveHem) sleeveHem(ctx, sh, el, side * -0.08, S.armW, Math.min(0.8, S.sleeveHem * 2));   // this segment is the upper arm only
         if (side > 0) {
-          tube(ctx, el, hd, -0.08, S.armW, S.armFill ?? W, darkTorso);
+          tube(ctx, el, hd, -0.08, S.armW, S.armFill ?? W, false);
           hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);
         }
       }

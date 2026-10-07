@@ -181,8 +181,8 @@ Skits.presentation = (() => {
   }
   const face = t => ({ ...Emotions.neutral, t, lookX: 0.6, pupil: 12 });
 
-  // 0.00-2.38: medium: he starts confident, sweeps a hand back at the slide, then
-  // gestures harder and harder as the words go wrong
+  // 0.00-2.38: medium: he starts confident, pointing at the slide through the
+  // whole first sentence (user's direction), before the stutter
   const pose1 = t => {
     const sp = talk(t, keys(t, [[0, 0.7], [1.2, 0.7], [2.0, 0.35]]));
     return {
@@ -193,11 +193,13 @@ Skits.presentation = (() => {
       lean: keys(t, [[0, 0.0], [0.35, -0.03], [0.8, 0.03], [1.5, 0.05], [2.3, 0.06]]),
       bob: keys(t, [[0.85, 0], [0.95, -6], [1.1, 2], [1.3, -8], [1.5, 0], [1.75, -6], [1.95, 0]]), weight: 0.6,
       mouth: 'smile',
-      // the near arm sweeps out at the slide on "check it out"; then both hands work harder and harder
-      ...armKeys(1, t, [[0, [12, -222], 'down'], [0.12, [12, -222], 'down'], [0.36, [206, -330], 'down'], [0.6, [206, -326], 'down'],
-        [0.84, [104, -318], 'out'], [1.1, [120, -350], 'out'], [1.3, [90, -300], 'out'], [1.55, [132, -356], 'out'], [1.78, [100, -312], 'out'], [2.0, [150, -330], 'out']]),
-      ...armKeys(-1, t, [[0, [-8, -228], 'down'], [0.12, [-8, -228], 'down'], [0.4, [-70, -238], 'down'], [0.66, [-70, -238], 'down'],
-        [0.86, [-128, -352], 'out'], [1.05, [-112, -292], 'out'], [1.25, [-150, -358], 'out'], [1.48, [-104, -300], 'out'], [1.7, [-142, -372], 'out'], [1.96, [-160, -324], 'out']]),
+      // the near arm comes up and points at the slide for the whole first sentence, with a small jab
+      // on each stressed word ("check", "made", "cinnamon", "rolls"); the far arm drops to a soft hang
+      ...armKeys(1, t, [[0, [12, -222], 'down'], [0.1, [12, -222], 'down'], [0.3, [206, -330], 'down'],
+        [0.4, [222, -340], 'down'], [0.52, [206, -330], 'down'], [0.86, [206, -330], 'down'], [0.94, [222, -340], 'down'], [1.06, [206, -330], 'down'],
+        [1.22, [206, -330], 'down'], [1.3, [222, -342], 'down'], [1.42, [206, -330], 'down'], [1.82, [206, -330], 'down'], [1.9, [222, -340], 'down'],
+        [2.04, [208, -332], 'down'], [2.38, [206, -330], 'down']]),
+      ...armKeys(-1, t, [[0, [-8, -228], 'down'], [0.12, [-8, -228], 'down'], [0.42, 'r', 'rest'], [2.38, 'r', 'rest']]),
       ...(sp ?? {}),
     };
   };
@@ -216,9 +218,9 @@ Skits.presentation = (() => {
       bob: keys(t, [[2.38, 0], [2.95, 0], [3.1, 6], [3.66, 6], [3.8, -4], [3.95, 0], [4.25, -5], [4.4, 0]]), weight: 0.6,
       // the stutter freezes him, arms limp; then the hands go up the outside and clutch the sides of his head
       // (behind it the whole time: no layer switch), come down, and the near arm points at the chart
-      ...armKeys(1, t, [[2.38, [150, -330], 'out'], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [186, -404], 'down'], [3.08, [174, -480], 'down'], [3.62, [170, -476], 'down'],
+      ...armKeys(1, t, [[2.38, [206, -330], 'down'], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [186, -404], 'down'], [3.08, [174, -480], 'down'], [3.62, [170, -476], 'down'],
         [3.8, [160, -392], 'down'], [4.02, [200, -384], 'down'], [4.62, [202, -380], 'down']]),
-      ...armKeys(-1, t, [[2.38, [-160, -324], 'out'], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [-186, -404], 'down'], [3.08, [-174, -480], 'down'], [3.62, [-170, -476], 'down'],
+      ...armKeys(-1, t, [[2.38, 'r', 'rest'], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [-186, -404], 'down'], [3.08, [-174, -480], 'down'], [3.62, [-170, -476], 'down'],
         [3.9, 'r', 'rest'], [4.62, 'r', 'rest']]),   // the far arm comes down to a soft hang
       ...(sp ?? {}),
     };

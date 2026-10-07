@@ -21,9 +21,8 @@ by hand where the aligner left loud stretches silent.
 
 Beats, as animated:
 - 0.00-2.38 medium on him at the projector screen ("Q3 RESULTS" slide):
-            hands clasped, a confident sweep back at the slide on "check it
-            out" (0.12-0.6), then both hands gesturing harder as the words
-            turn to mush ("Dude check it out I just made some cinnamon rolls!", 0.0-2.41)
+            hands clasped, then he points at the slide for the whole first
+            sentence (user's direction), a small jab on each stressed word ("Dude check it out I just made some cinnamon rolls!", 0.0-2.41)
 - 2.38-4.62 full figure: "som- som- som-" freezes him (2.4-3.44),
             hands to his head (2.86-3.04, held), silence (3.44-3.66) with his
             eyes darting, then a fake grin and a point back at the chart
