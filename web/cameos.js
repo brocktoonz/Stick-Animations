@@ -70,6 +70,9 @@ const Cameos = (() => {
       const open = p.mouth === 'yell' || rage ? (p.open ?? 0) : 0, jaw = (rage ? 60 : 46) * open;
       blob(ctx, 0, jaw * 0.5, RX - jaw * 0.1, RY + jaw * 0.5, { fill: o.skin ?? W, w: 11, n: 18, jit: 1.8 });
       if (o.beard) { ctx.save(); ctx.translate(0, jaw); o.beard(ctx, jaw, p); ctx.restore(); }   // beards that stretch with the jaw undo the translate
+      // brows go under the hair: with no white edge (user decision) a brow drawn over a fringe merges into its
+      // outline, so the hair covers whatever part of a brow reaches it. o.browDy lowers them for low fringes.
+      if (!p.squint && !p.noBrows) brows(ctx, fx, -62 + (o.browDy ?? 0), p, 1, o.browW ?? 9);
       o.hair?.(ctx);
       if (p.gloom) {   // dread: shading lines down the forehead
         ctx.save();
@@ -81,7 +84,7 @@ const Cameos = (() => {
       if (!p.noEyes) eyes(ctx, fx, p.squint ? -22 : -6, o.eyeLop ? { eyeLop: o.eyeLop, ...p } : p, 1, !!o.lashes);   // noEyes: a front() hook draws its own   // rage eyes sit higher, clear of the teeth
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
-      } else if (!p.noBrows) brows(ctx, fx, -62, p, 1, o.browW ?? 9);   // no white edge round brows, on anyone (user decision)
+      }
       const mdy = (typeof o.mouthDy === 'function' ? o.mouthDy(p) : o.mouthDy ?? 0) * (1 - open);   // eases off as a yell opens, so a big mouth stays inside the chin
       if (p.noMouth) { /* a front() hook draws the mouth */ }
       else if (rage) mouth(ctx, fx + 4, 34 + mdy + jaw * 0.2, p, 0.95);   // fills the lower half of the face
@@ -932,7 +935,7 @@ const Cameos = (() => {
   const SHADES = { blond: [W, INK], light: ['#d4d4d4', INK], brown: ['#8f8f8f', '#e0e0e0'],
                    dark: ['#555555', '#bdbdbd'], black: [INK, '#8a8a8a'] };
   const spikyShades = Object.fromEntries(Object.entries(SHADES).map(([k, [fillC, lineC]]) => [k,
-    build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: outlineHair(...SPIKES, fillC, { lineColor: lineC }) }), detail: hoodieFront })]));
+    build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: outlineHair(...SPIKES, fillC, { lineColor: lineC }), browDy: 20 }), detail: hoodieFront })]));   // brows a touch lower, clear of the spiky fringe
 
   // A few months' growth: a full scraggly beard from the sideburns down past
   // the chin (tufts poking out of the edge) and a moustache, on the spiky guy.

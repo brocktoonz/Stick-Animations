@@ -276,13 +276,14 @@ Skits.presentation = (() => {
   // Everyone looks screen-right, at him just off frame.
   const TABLE_Y = 1406, BACK_FLOOR = 1112;   // the standing two are raised clear of the seated heads, folded arms in view
   // The shared confused face (one brow up, one down, small 'o' mouth) without its head-scratching arm:
-  // they're seated at the table, eyes on him. (User: the blank faces read as if nothing was happening.)
+  // they're seated at the table, eyes rolled up toward him, heads tilted (each its own way, held in `lean`).
+  // (User: the blank faces read as if nothing was happening.)
   const { armR, bendR, armRFront, ...CONFUSED } = Emotions.confused;
   const SEATED = [
-    { who: 'nick', x: 215, s: 0.68, look: 0.7, emo: { ...CONFUSED, lookX: 0.8, lookY: 0 }, blink: 0.4 },
+    { who: 'nick', x: 215, s: 0.68, look: 0.7, emo: { ...CONFUSED, browLiftL: 2, lookX: 0.75, lookY: -0.45, open: 0.15 }, lean: 0.14, blink: 0.4 },
     { who: 'beast', x: 432, s: 0.68, look: 0.7, emo: { ...Emotions.stunned }, blink: 1.6 },
-    { who: 'squeex', x: 650, s: 0.68, look: 0.7, emo: { ...CONFUSED, browL: -0.2, browLiftL: -16, browR: 0.6, browLiftR: 8, lookX: 0.7, lookY: 0.05 }, blink: 2.3 },   // the other brow up, so the three don't match
-    { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...CONFUSED, lookX: 0.5, lookY: -0.05 }, blink: 0.9 },
+    { who: 'squeex', x: 650, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'flatdown', browL: -0.2, browLiftL: -8, browR: 0.6, browLiftR: 0, lookX: 0.6, lookY: -0.5 }, lean: -0.13, blink: 2.3 },   // the other brow up and a skewed mouth, so the three don't match
+    { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'wobbly', browLiftL: 0, lookX: 0.55, lookY: -0.4 }, lean: 0.12, blink: 0.9 },
   ];
   const STANDING = [
     { who: 'ludwig', x: 318, s: 0.62, emo: { ...Emotions.deflated, lookX: 0.7, crossArms: true }, blink: 1.1 },
@@ -308,7 +309,7 @@ Skits.presentation = (() => {
   function colleague(ctx, c, t, standing) {
     const feet = standing ? BACK_FLOOR : TABLE_Y + 210 * c.s;   // seated: the table edge crosses the waist
     const hy = feet - HEAD * c.s;
-    const tilt = Math.sin(c.x * 0.013) * 0.05 + keys(t, [[5.2, 0], [6.0, 0], [6.4, 0.04 * Math.sign(c.x - 540)], [10, 0.04 * Math.sign(c.x - 540)]]);
+    const tilt = (c.lean ?? 0) + Math.sin(c.x * 0.013) * 0.05 + keys(t, [[5.2, 0], [6.0, 0], [6.4, 0.04 * Math.sign(c.x - 540)], [10, 0.04 * Math.sign(c.x - 540)]]);
       + (c.who === 'speed' ? keys(t, [[9.2, 0], [9.42, -0.07], [9.64, 0.05], [9.84, -0.05], [10, -0.01]]) : 0);   // the last shot: a slow head shake
     SUITS[c.who](ctx, { x: c.x, y: feet, s: c.s, dir: 1, t, ...c.emo, tilt, lid: blink(t, 3.3, c.blink) || (c.emo.lid ?? 0), weight: 0.4, legs: !standing ? false : undefined });
     heads.push(hy - HEADGEO[c.who] * c.s);
