@@ -3,7 +3,8 @@
 // Timed to references/presentation/clip.mov (beats in references/presentation/notes.md).
 // He's at the front of the meeting room with the quarterly slide up, tries to
 // open with confidence and instead the words come out as mush ("check it out, I
-// just made some cinnamon rolls... some... some..."); hands to his head, a fake
+// just made some cinnamon rolls! Som- som- som- some minamon rolls..."), and he
+// can't stop stuttering; hands to his head, a fake
 // grin, a lunge at the camera, a cut to six colleagues staring blankly, a
 // ta-da with both arms up, a frozen close-up, a salute, and the room again.
 Skits.presentation = (() => {
@@ -43,7 +44,7 @@ Skits.presentation = (() => {
   };
   // Mouth while he talks: changes on twos, a frame ahead of the sound; each beat
   // shows the sound that fills most of it; lips close for m/b/p. null outside speech.
-  const SPEECH = [[0.1, 2.31], [2.4, 3.44], [3.74, 5.16], [5.4, 6.77], [6.95, 7.88], [8.46, 9.88]];
+  const SPEECH = [[0.0, 2.41], [2.42, 3.44], [3.62, 5.19], [5.4, 6.84], [6.85, 7.94], [8.46, 9.88]];   // "Dude check it out..." / "som- som- som-" / "some minamon rolls..." / ...
   const talk = (t, smile = 0) => {
     const tt = t + 1 / 30;
     const span = SPEECH.find(([a, b]) => tt >= a - 0.03 && tt <= b + 0.05);
