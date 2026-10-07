@@ -114,11 +114,15 @@ Skits.presentation = (() => {
   // ---------- set A: the front of the meeting room ----------
   const WALL = '#e3e3e3', FLOOR_COL = '#cdcdcd', FLOOR_A = 1720;
   const SCREEN = { x0: 250, x1: 690, y0: 958, y1: 1400 };   // on his facing side, so he looks across the frame at the room
-  function slide(ctx) {
+  // The title sits at the screen's right end, beside him, so it's whole in every shot that shows it;
+  // the tight shots (the lunge, the close-up) leave it off rather than show a cropped word.
+  function slide(ctx, title = true) {
     const { x0, x1, y0, y1 } = SCREEN;
-    ctx.save(); ctx.fillStyle = '#3a3a3a'; ctx.font = '600 50px "TikTok Sans"'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.fillText('Q3 RESULTS', x0 + 44, y0 + 62); ctx.restore();
-    line(ctx, [[x0 + 44, y0 + 100], [x0 + 330, y0 + 102]], 6, 9611);   // underline
+    if (title) {
+      ctx.save(); ctx.fillStyle = '#3a3a3a'; ctx.font = '600 36px "TikTok Sans"'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText('Q3 RESULTS', x1 - 26, y0 + 56); ctx.restore();
+      line(ctx, [[x1 - 236, y0 + 86], [x1 - 26, y0 + 88]], 6, 9611);   // underline
+    }
     const bx = x0 + 52, by = y1 - 50;
     line(ctx, [[bx, y0 + 140], [bx, by], [x1 - 36, by]], 8, 9612);   // axes
     [[0, 64, '#bdbdbd'], [1, 112, '#a6a6a6'], [2, 160, '#8c8c8c'], [3, 214, '#6e6e6e']].forEach(([i, hgt, col]) => {
@@ -140,7 +144,7 @@ Skits.presentation = (() => {
       line(ctx, [[x, y - 150], [(x + tip[0]) / 2, (y - 150 + tip[1]) / 2]], 4, 9670 + i);
     });
   }
-  function setA(ctx) {
+  function setA(ctx, title = true) {
     ctx.fillStyle = WALL; ctx.fillRect(-1500, -500, 4500, 4000);
     ctx.fillStyle = FLOOR_COL; ctx.fillRect(-1500, FLOOR_A, 4500, 2000);
     line(ctx, [[-700, FLOOR_A - 46], [540, FLOOR_A - 44], [1800, FLOOR_A - 47]], 6, 9600, { taper0: 0, taper1: 0 });   // skirting
@@ -150,7 +154,7 @@ Skits.presentation = (() => {
     panel(ctx, rect(x0 - 26, y0 - 34, x1 + 26, y0), '#6a6a6a', 9, 9602);
     panel(ctx, rect(x0, y0, x1, y1), W, 10, 9603);
     panel(ctx, rect(x0 - 8, y1, x1 + 8, y1 + 18), '#4a4a4a', 8, 9604);
-    slide(ctx);
+    slide(ctx, title);
   }
   // The near edge of the meeting table, across the bottom of his full shot (drawn in screen space, over his feet):
   // the room he's presenting to is right there in front of him.
@@ -190,9 +194,9 @@ Skits.presentation = (() => {
       bob: keys(t, [[0.85, 0], [0.95, -6], [1.1, 2], [1.3, -8], [1.5, 0], [1.75, -6], [1.95, 0]]), weight: 0.6,
       mouth: 'smile',
       // the near arm sweeps out at the slide on "check it out"; then both hands work harder and harder
-      ...armKeys(1, t, [[0, [24, -222], 'down'], [0.12, [24, -222], 'down'], [0.36, [206, -330], 'down'], [0.6, [206, -326], 'down'],
+      ...armKeys(1, t, [[0, [12, -222], 'down'], [0.12, [12, -222], 'down'], [0.36, [206, -330], 'down'], [0.6, [206, -326], 'down'],
         [0.84, [104, -318], 'out'], [1.1, [120, -350], 'out'], [1.3, [90, -300], 'out'], [1.55, [132, -356], 'out'], [1.78, [100, -312], 'out'], [2.0, [150, -330], 'out']]),
-      ...armKeys(-1, t, [[0, [-30, -226], 'down'], [0.12, [-30, -226], 'down'], [0.4, [-70, -238], 'down'], [0.66, [-70, -238], 'down'],
+      ...armKeys(-1, t, [[0, [-8, -228], 'down'], [0.12, [-8, -228], 'down'], [0.4, [-70, -238], 'down'], [0.66, [-70, -238], 'down'],
         [0.86, [-128, -352], 'out'], [1.05, [-112, -292], 'out'], [1.25, [-150, -358], 'out'], [1.48, [-104, -300], 'out'], [1.7, [-142, -372], 'out'], [1.96, [-160, -324], 'out']]),
       ...(sp ?? {}),
     };
@@ -215,7 +219,7 @@ Skits.presentation = (() => {
       ...armKeys(1, t, [[2.38, [150, -330], 'out'], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [186, -404], 'down'], [3.08, [174, -480], 'down'], [3.62, [170, -476], 'down'],
         [3.8, [160, -392], 'down'], [4.02, [200, -384], 'down'], [4.62, [202, -380], 'down']]),
       ...armKeys(-1, t, [[2.38, [-160, -324], 'out'], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [-186, -404], 'down'], [3.08, [-174, -480], 'down'], [3.62, [-170, -476], 'down'],
-        [3.86, [-84, -262], 'down'], [4.04, [-62, -262], 'down'], [4.25, [-72, -298], 'down'], [4.4, [-62, -262], 'down'], [4.62, [-62, -262], 'down']]),
+        [3.9, 'r', 'rest'], [4.62, 'r', 'rest']]),   // the far arm comes down to a soft hang
       ...(sp ?? {}),
     };
   };
@@ -224,13 +228,16 @@ Skits.presentation = (() => {
   const pose3 = t => {
     const sp = talk(t, 0.3);
     return {
-      ...face(t), lookX: 0.15, lookY: 0.05, brow: -0.8, pupil: 6, eyeScale: 1.25, sweat: true, mouth: 'grin',
-      tilt: keys(t, [[4.62, -0.06], [4.8, 0.05], [5.2, 0.07]]), lean: keys(t, [[4.62, 0.03], [4.82, 0.12], [5.2, 0.13]]), weight: 0.6,
-      ...armKeys(1, t, [[4.62, [202, -380], 'down'], [4.8, [150, -350], 'down'], [5.2, [154, -356], 'down']]),
-      ...armKeys(-1, t, [[4.62, [-62, -262], 'down'], [4.8, [-140, -350], 'down'], [5.2, [-144, -356], 'down']]),
+      ...face(t), lookX: 0.1, lookY: 0.05, brow: -0.8, pupil: 6, eyeScale: 1.25, sweat: true, mouth: 'grin',
+      tilt: keys(t, [[4.62, -0.06], [4.7, -0.1], [4.84, 0.06], [5.2, 0.07]]),
+      lean: keys(t, [[4.62, 0.03], [4.7, -0.06], [4.84, 0.14], [5.0, 0.11], [5.2, 0.12]]), weight: 0.6,   // rocks back, then throws himself forward
+      ...armKeys(1, t, [[4.62, [202, -380], 'down'], [4.7, [150, -330], 'down'], [4.84, [176, -360], 'down'], [5.2, [178, -364], 'down']]),
+      ...armKeys(-1, t, [[4.62, 'r', 'rest'], [4.7, 'r', 'rest'], [4.84, [-176, -360], 'down'], [5.2, [-178, -364], 'down']]),
       ...(sp ?? {}),
     };
   };
+  // his size through the lunge: a dip back, then he lurches into the lens and settles
+  const lungeS = t => keys(t, [[4.62, 1], [4.7, 0.96], [4.84, 1.3], [5.0, 1.23], [5.2, 1.25]]);
 
   // 6.85-7.95: he springs up into frame, both arms up: ta-da
   const pose5 = t => {
@@ -268,7 +275,7 @@ Skits.presentation = (() => {
   // ---------- set B: the meeting table, from where he stands ----------
   // Four seated at the table (front row), two standing behind against the wall.
   // Everyone looks screen-right, at him just off frame.
-  const TABLE_Y = 1406, BACK_FLOOR = 1262;   // the standing two are raised clear of the seated heads, folded arms in view
+  const TABLE_Y = 1406, BACK_FLOOR = 1112;   // the standing two are raised clear of the seated heads, folded arms in view
   const SEATED = [
     { who: 'nick', x: 215, s: 0.68, look: 0.7, emo: { ...Emotions.unimpressed, lookX: 0.8 }, blink: 0.4 },
     { who: 'beast', x: 432, s: 0.68, look: 0.7, emo: { ...Emotions.stunned }, blink: 1.6 },
@@ -276,8 +283,8 @@ Skits.presentation = (() => {
     { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...Emotions.unimpressed, lookX: 0.5 }, blink: 0.9 },
   ];
   const STANDING = [
-    { who: 'ludwig', x: 318, s: 0.7, emo: { ...Emotions.deflated, lookX: 0.7, crossArms: true }, blink: 1.1 },
-    { who: 'speed', x: 768, s: 0.7, emo: { mouth: 'o', open: 0.2, brow: -0.3, lookX: 0.6, pupil: 9, crossArms: true }, blink: 2.0 },
+    { who: 'ludwig', x: 318, s: 0.62, emo: { ...Emotions.deflated, lookX: 0.7, crossArms: true }, blink: 1.1 },
+    { who: 'speed', x: 768, s: 0.62, emo: { mouth: 'o', open: 0.2, brow: -0.3, lookX: 0.6, pupil: 9, crossArms: true }, blink: 2.0 },
   ];
   const HEADGEO = { nick: 175, beast: 168, squeex: 180, slime: 150, ludwig: 245, speed: 230 };   // hair/hat top above the head centre, local units
   function chair(ctx, x, s, i) {   // a tall office chair back behind a seated person
@@ -300,7 +307,7 @@ Skits.presentation = (() => {
     const feet = standing ? BACK_FLOOR : TABLE_Y + 210 * c.s;   // seated: the table edge crosses the waist
     const hy = feet - HEAD * c.s;
     const tilt = Math.sin(c.x * 0.013) * 0.05 + keys(t, [[5.2, 0], [6.0, 0], [6.4, 0.04 * Math.sign(c.x - 540)], [10, 0.04 * Math.sign(c.x - 540)]]);
-      + (c.who === 'ludwig' ? keys(t, [[9.2, 0], [9.42, -0.07], [9.64, 0.05], [9.84, -0.05], [10, -0.01]]) : 0);   // the last shot: a slow head shake
+      + (c.who === 'speed' ? keys(t, [[9.2, 0], [9.42, -0.07], [9.64, 0.05], [9.84, -0.05], [10, -0.01]]) : 0);   // the last shot: a slow head shake
     SUITS[c.who](ctx, { x: c.x, y: feet, s: c.s, dir: 1, t, ...c.emo, tilt, lid: blink(t, 3.3, c.blink) || (c.emo.lid ?? 0), weight: 0.4, legs: !standing ? false : undefined });
     heads.push(hy - HEADGEO[c.who] * c.s);
   }
@@ -331,7 +338,7 @@ Skits.presentation = (() => {
     // 0.00-2.38: medium on him at the slide
     [0, 2.38, (ctx, t) => {
       const z = lerp(2.2, 2.32, seg(t, 0, 2.38)), fx = 690, fy = 1330, sy = 1360;
-      cam(ctx, fx, fy, z, sy); setA(ctx); hero(ctx, HX, FLOOR_A, 1, pose1(t));
+      cam(ctx, fx, fy, z, sy); setA(ctx, false); hero(ctx, HX, FLOOR_A, 1, pose1(t));   // no slide title here: it would sit under the caption
       heads[heads.length - 1] = headScreen(FLOOR_A, 1, z, fy, sy);
     }],
     // 2.38-4.62: full figure, a step back
@@ -343,15 +350,16 @@ Skits.presentation = (() => {
     }],
     // 4.62-5.20: the lunge: the camera rushes in on his face
     [4.62, 5.2, (ctx, t) => {
-      const k = easeOut(seg(t, 4.62, 4.84)), z = lerp(2.3, 3.2, k), fx = lerp(690, 735, k), fy = lerp(1330, 1282, k), sy = lerp(1360, 1400, k);
-      cam(ctx, fx, fy, z, sy); setA(ctx); hero(ctx, HX, FLOOR_A, 1, pose3(t));
-      heads[heads.length - 1] = headScreen(FLOOR_A, 1, z, fy, sy);
+      const k = easeOut(seg(t, 4.62, 4.9)), z = lerp(2.25, 2.35, k), fx = lerp(690, 790, k), fy = 1330, sy = 1500;
+      const s1 = lungeS(t), y = FLOOR_A - HEAD + HEAD * s1;   // scaled about his head, so it grows toward the camera in place
+      cam(ctx, fx, fy, z, sy); setA(ctx, false); hero(ctx, HX, y, s1, pose3(t));
+      heads[heads.length - 1] = headScreen(y, s1, z, fy, sy);
     }],
     // 5.20-6.85: the room: six blank stares
     [5.2, 6.85, (ctx, t) => {
-      const z = lerp(1.19, 1.22, seg(t, 5.2, 6.85));
-      cam(ctx, 540, 1250, z, 1300); room(ctx, t);
-      for (let i = 0; i < heads.length; i++) heads[i] = 1300 + (heads[i] - 1250) * z;
+      const z = lerp(1.2, 1.23, seg(t, 5.2, 6.85));
+      cam(ctx, 540, 1250, z, 1480); room(ctx, t);
+      for (let i = 0; i < heads.length; i++) heads[i] = 1480 + (heads[i] - 1250) * z;
     }],
     // 6.85-7.95: he springs up into frame, arms up
     [6.85, 7.95, (ctx, t) => {
@@ -363,7 +371,7 @@ Skits.presentation = (() => {
     // 7.95-8.40: extreme close-up, frozen
     [7.95, 8.4, (ctx, t) => {
       const z = lerp(3.25, 3.32, seg(t, 7.95, 8.4)), fx = 742, fy = 1282, sy = 1405;
-      cam(ctx, fx, fy, z, sy); setA(ctx); hero(ctx, HX, FLOOR_A, 1, pose6(t));
+      cam(ctx, fx, fy, z, sy); setA(ctx, false); hero(ctx, HX, FLOOR_A, 1, pose6(t));
       heads[heads.length - 1] = headScreen(FLOOR_A, 1, z, fy, sy);
     }],
     // 8.40-9.15: arms folded, nodding
@@ -372,11 +380,11 @@ Skits.presentation = (() => {
       cam(ctx, fx, fy, z, sy); setA(ctx); hero(ctx, HX, FLOOR_A, 1, pose7(t));
       heads[heads.length - 1] = headScreen(FLOOR_A, 1, z, fy, sy);
     }],
-    // 9.15-10.0: the room again: Ludwig slowly shakes his head
+    // 9.15-10.0: pushed in on Squeex, Speed and Slime, still staring
     [9.15, DUR, (ctx, t) => {
-      const z = lerp(1.22, 1.26, seg(t, 9.15, DUR));
-      cam(ctx, 540, 1250, z, 1300); room(ctx, t);
-      for (let i = 0; i < heads.length; i++) heads[i] = 1300 + (heads[i] - 1250) * z;
+      const z = lerp(1.76, 1.8, seg(t, 9.15, DUR));
+      cam(ctx, 840, 1150, z, 1530); room(ctx, t);
+      for (let i = 0; i < heads.length; i++) heads[i] = 1530 + (heads[i] - 1150) * z;
     }],
   ];
 

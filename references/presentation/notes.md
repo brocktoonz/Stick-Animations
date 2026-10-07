@@ -28,7 +28,7 @@ Beats, as animated:
             hands to his head (2.86-3.04, held), silence (3.44-3.66) with his
             eyes darting, then a fake grin and a point back at the chart
             ("some minamon rolls", 3.62-4.62)
-- 4.62-5.20 he lunges at the camera: "to men"
+- 4.62-5.20 he rocks back, then lunges into the lens: "to men"
 - 5.20-6.85 the room: Nick, MrBeast, Squeex and Slime seated at the table,
             Ludwig and Speed standing behind with arms folded; blank stares
             at him (just off frame right) while his voice goes on
@@ -36,4 +36,4 @@ Beats, as animated:
 - 6.85-7.95 he springs up into frame, fists pumped out wide ("mini mum mom um")
 - 7.95-8.40 extreme close-up in the silence: frozen sweaty grimace, eyes slide away
 - 8.40-9.15 arms folded, chin up, nodding like he nailed it ("some men")
-- 9.15-10.0 the room again, pushed in on Squeex, Slime and Speed: still staring
+- 9.15-10.0 pushed in on Speed (standing, slow head shake), Squeex and Slime: still staring

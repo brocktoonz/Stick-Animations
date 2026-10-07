@@ -1639,7 +1639,7 @@ const Cameos = (() => {
   };
   const suited = (draw, { jacket, tie, trousers = '#2e2e2e', seed = 9300 }) => draw.with(o => {
     // suit trousers, not the character's own: straight legs down to the shoes, and a seat that runs into them (no puffed shorts)
-    const seat = h => [[-64, h - 12], [64, h - 12], [68, h + 40], [42, h + 58], [0, h + 46], [-42, h + 58], [-68, h + 40]];
+    const seat = h => [[-60, h - 12], [60, h - 12], [58, h + 36], [40, h + 50], [0, h + 42], [-40, h + 50], [-58, h + 36]];   // no wider than the jacket
     const body = { ...(o.body ?? {}), legColor: trousers, legW: 30,
       bottoms: (ctx, h) => { const b = seat(h); fill(ctx, b, trousers, 0.3); stroke(ctx, [...b, b[0], b[1]], { w: 9, taper0: 0, taper1: 0, minW: 1, seed: seed + 20 }); } };
     return { shirt: jacket, sleeve: jacket, sleeveHem: undefined, sleeveFill: undefined, body, detail: suitFront(tie, seed) };
