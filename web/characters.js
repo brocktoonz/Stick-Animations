@@ -614,7 +614,7 @@ const Chars = (() => {
       if (S.sleeveHem && S.sleeveFill) sleeveFill(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem, S.sleeveFill);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
-      hand(ctx, hnd[0], hnd[1], point ?? null, (side < 0 ? p.handSL : p.handSR) ?? S.handS, S.skin ?? W, 7100 + side, front);   // each hand its own seed
+      hand(ctx, hnd[0], hnd[1], point ?? null, (side < 0 ? p.handSL : p.handSR) ?? S.handS, S.skin ?? W, 7100 + side, front && !p.noHandHalo);   // noHandHalo: opt out of the white edge   // each hand its own seed
     };
     if (p.crossArms) {
       // arms folded: upper arms down the sides to the elbows, forearms across
