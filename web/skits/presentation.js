@@ -261,13 +261,18 @@ Skits.presentation = (() => {
     ...Arms.rest(-1), ...Arms.rest(1),
   });
 
-  // 8.40-9.15: arms folded, nodding as if it's going fine, but his face is pure panic
+  // 8.40-9.15: nodding as if it's going fine, rubbing the back of his neck; his face is pure panic
   const pose7 = t => {
     const sp = talk(t, 0);   // no smile in the mouth shapes: he's still stumbling over the words
     return {
       // trying to look composed, but the face gives him away (user: the smug face read as too confident):
       // worried brows, wide eyes with small pupils that flick off the room and back, a wobbly mouth between words
-      ...face(t), brow: -0.85, eyeScale: 1.12, pupil: 8, sweat: true, mouth: 'wobbly', crossArms: true,
+      ...face(t), brow: -0.85, eyeScale: 1.12, pupil: 8, sweat: true, mouth: 'wobbly',
+      // no folded arms (user's note): the far hand rubs the back of his neck (behind the head) in small, uneven
+      // rubs, the near arm hangs at his side
+      ...armKeys(-1, t, [[8.4, [-96, -372], 'out'], [8.52, [-92, -392], 'out'], [8.66, [-98, -366], 'out'], [8.76, [-92, -390], 'out'],
+        [8.94, [-97, -368], 'out'], [9.04, [-93, -386], 'out'], [9.15, [-96, -374], 'out']]),
+      ...Arms.rest(1),
       lookX: keys(t, [[8.4, 0.7], [8.66, 0.7], [8.74, -0.3], [8.86, -0.3], [8.94, 0.7]]), lookY: 0.1,
       tilt: keys(t, [[8.4, -0.06], [8.56, 0.0], [8.72, -0.06], [8.88, 0.0], [9.04, -0.06]]), lean: -0.035, weight: -0.6,
       ...(sp ?? {}),
@@ -285,8 +290,8 @@ Skits.presentation = (() => {
   const SEATED = [
     { who: 'nick', x: 215, s: 0.68, look: 0.7, emo: { ...CONFUSED, browLiftL: 2, lookX: 0.75, lookY: -0.45, open: 0.15 }, lean: 0.14, blink: 0.4 },
     { who: 'beast', x: 432, s: 0.68, look: 0.7, emo: { ...Emotions.stunned }, blink: 1.6 },
-    { who: 'squeex', x: 650, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'flatdown', browL: -0.2, browLiftL: -8, browR: 0.6, browLiftR: 0, lookX: 0.6, lookY: -0.5 }, lean: -0.13, blink: 2.3 },   // the other brow up and a skewed mouth, so the three don't match
-    { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'wobbly', browLiftL: 0, lookX: 0.55, lookY: -0.4 }, lean: 0.12, blink: 0.9 },
+    { who: 'squeex', x: 650, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'o', open: 0.3, mouthScale: 1.35, browL: -0.5, browLiftL: -12, browR: 0, browLiftR: 0, lookX: 0.6, lookY: -0.5 }, lean: -0.13, blink: 2.3 },   // the other brow raised high, the other level (not slanted, which read as a scowl); an 'o' big enough to show through the beard
+    { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'wobbly', browL: 0, browLiftL: 0, browR: -0.5, browLiftR: -12, lookX: 0.55, lookY: -0.4 }, lean: 0.12, blink: 0.9 },   // one brow high, one level: puzzled, not cross
   ];
   const STANDING = [
     { who: 'ludwig', x: 318, s: 0.62, emo: { ...Emotions.deflated, lookX: 0.7, crossArms: true }, blink: 1.1 },
@@ -380,7 +385,7 @@ Skits.presentation = (() => {
       cam(ctx, fx, fy, z, sy); setA(ctx, false); hero(ctx, HX, FLOOR_A, 1, pose6(t));
       heads[heads.length - 1] = headScreen(FLOOR_A, 1, z, fy, sy);
     }],
-    // 8.40-9.15: arms folded, nodding
+    // 8.40-9.15: rubbing his neck, nodding
     [8.4, 9.15, (ctx, t) => {
       const z = 1.95, fx = 680, fy = 1330, sy = 1330;
       cam(ctx, fx, fy, z, sy); setA(ctx); hero(ctx, HX, FLOOR_A, 1, pose7(t));
