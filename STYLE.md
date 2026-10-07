@@ -46,7 +46,8 @@ disagree, the rule wins.
   hand-code a rest target, and don't solve a resting hand with
   `Arms.arm(..., 'down')` (that bows the elbow in); blend to `'rest'` instead.
 - **Hands are plain circles** (Animal Crossing style): no thumb, no fingers (not
-  even to point), and no hook or tail where the outline closes. (User decision.)
+  even to point), and no hook or tail where the outline closes. One ink outline,
+  no white border or ring around the hand. (User decision.)
 - Check stills and zoomed crops of every change before calling it done.
 
 ## Hair

@@ -393,15 +393,12 @@ const Chars = (() => {
   // fingers, even when a pose points (the point argument is ignored). One closed
   // outline with a small wobble that changes only on the boil beat, so no brush
   // overshoot ever sticks out as a hook. seed: optional fixed seed per hand.
-  // halo: a thin white edge outside the ink (hands in front of the head), so a
-  // hair or brim line that stops at the hand never reads as a stalk on it.
-  function hand(ctx, x, y, point = null, s = 1, skin = W, seed = null, halo = false) {
+  function hand(ctx, x, y, point = null, s = 1, skin = W, seed = null) {   // one ink outline, never a white border (user decision)
     const r = Brush.random(seed ?? 7150 + Math.sign(x));
     // the boil is a whole-shape change (slight stretch and turn), never per-point
     // jitter, so even a close-up hand stays a smooth round shape
     const ring = Brush.ellipsePts(x, y, 24 * s * (1 + (r() - 0.5) * 0.06), 22 * s * (1 + (r() - 0.5) * 0.06), 64, (r() - 0.5) * 0.6);
     ctx.beginPath(); ring.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
-    if (halo) { ctx.lineWidth = (7 * s + 12) * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.strokeStyle = W; ctx.stroke(); }
     ctx.fillStyle = skin; ctx.fill();
     ctx.lineWidth = 7 * s * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
   }
@@ -614,7 +611,7 @@ const Chars = (() => {
       if (S.sleeveHem && S.sleeveFill) sleeveFill(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem, S.sleeveFill);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
-      hand(ctx, hnd[0], hnd[1], point ?? null, (side < 0 ? p.handSL : p.handSR) ?? S.handS, S.skin ?? W, 7100 + side, front && !p.noHandHalo);   // noHandHalo: opt out of the white edge   // each hand its own seed
+      hand(ctx, hnd[0], hnd[1], point ?? null, (side < 0 ? p.handSL : p.handSR) ?? S.handS, S.skin ?? W, 7100 + side);   // each hand its own seed
     };
     if (p.crossArms) {
       // arms folded: upper arms down the sides to the elbows, forearms across

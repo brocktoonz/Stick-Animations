@@ -201,7 +201,7 @@ Skits.morningself = (() => {
   const pose = (c, hy, p, top, before, after, hump, under) => (ctx) => {
     pillow(ctx, HX - 15, hy + 62, 178, 76, c.pillow);   // behind his head, inside the bed's width
     before?.();
-    Hero.main(ctx, { x: HX, y: feet(hy), s: S, shadow: false, noHandHalo: true, ...p });   // no white edge on his hands (user)
+    Hero.main(ctx, { x: HX, y: feet(hy), s: S, shadow: false, ...p });
     under?.();   // drawn over him but under the blanket (an arm coming out from under it)
     blanket(ctx, c, top, hump);
     after?.();
