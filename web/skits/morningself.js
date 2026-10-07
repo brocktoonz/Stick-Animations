@@ -248,8 +248,8 @@ Skits.morningself = (() => {
 
   // Morning: he slaps snooze again and again (hand-timed around the original's
   // ~0.23 s, never the same gap twice). The alarm rings whenever his hand is off it.
-  const FIRST_RING = 3.95;
-  const SLAPS = [4.12, 4.36, 4.57, 4.85, 5.07, 5.3, 5.56, 5.77, 6.04, 6.26, 6.5];
+  const FIRST_RING = CUT3;   // ringing from the first frame of the morning; he goes for it straight away
+  const SLAPS = [3.85, 4.09, 4.3, 4.58, 4.8, 5.03, 5.29, 5.5, 5.77, 5.99, 6.23, 6.47];
   const OUT = 0.08, ON = 0.05, BACK = 0.1;
   function slap(t) {   // k: 0 resting .. 1 on the phone; contact = hand on it
     let k = 0, contact = false, since = 9;

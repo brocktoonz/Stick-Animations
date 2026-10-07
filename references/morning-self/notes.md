@@ -24,8 +24,8 @@ Beats:
             his chin (2.44–2.66) as his eyes close; then he lies still for about
             a second (2.75–3.7) so it reads that he's trying to sleep. No caption.
 - 3.70–6.70 cut to morning: the same wide shot and camera, daylight, lamp off.
-            A quiet beat, then the alarm rings (3.95) and he slaps snooze over
-            and over without waking: 11 slaps, hand-timed around the original's
+            The alarm is already ringing on the cut and he goes for it at once
+            (first slap 3.85), slapping snooze over and over without waking: 12 slaps, hand-timed around the original's
             ~0.23 s pace but uneven. The phone rings and shakes whenever his
             hand is off it. His arm comes out from under the covers with a
             visible elbow; his other hand keeps hold of the covers.
