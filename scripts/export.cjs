@@ -4,6 +4,7 @@
 //   node scripts/export.cjs <skit> out/skit.mp4 [--audio voice.m4a]   # video
 //   node scripts/export.cjs <skit> out/stills 0 45 90                  # PNG stills
 //   node scripts/export.cjs <skit> out/stills 0 45 --safe               # stills with safe zones shaded
+//   node scripts/export.cjs <skit> out/motion.mp4 --no-boil             # frozen line boil, for scripts/glitch_check.py
 //
 // Skit names are the files in web/skits/ (thermostat, bored, lights, cast).
 // With --audio, the track is muxed in and the video runs as long as the skit.
@@ -18,6 +19,8 @@ const path = require('path');
   const args = process.argv.slice(2);
   const ai = args.indexOf('--audio');
   const audio = ai >= 0 ? args.splice(ai, 2)[1] : null;
+  const nb = args.indexOf('--no-boil');   // freeze the line boil (motion check renders only)
+  const noBoil = nb >= 0 && !!args.splice(nb, 1);
   const si = args.indexOf('--safe');   // shade caption no-go areas (for checking stills)
   const safe = si >= 0 && !!args.splice(si, 1);
   const [skit, out, ...frameArgs] = args;
@@ -30,6 +33,7 @@ const path = require('path');
   await page.goto(url);
   await page.evaluate(() => window.ready);
   if (safe) await page.evaluate(() => { window.SHOW_SAFE = true; });
+  if (noBoil) await page.evaluate(() => { window.NO_BOIL = true; });
   const total = await page.evaluate(() => window.skitFrames);
   const start = await page.evaluate(() => window.skitStart);   // audio is trimmed to match skit.start
   const grab = f => page.evaluate(f => { renderFrame(f); return document.getElementById('c').toDataURL('image/png'); }, f)

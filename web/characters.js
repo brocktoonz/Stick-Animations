@@ -5,6 +5,7 @@
 // Pose fields shared by all full-body characters:
 //   x y        ground position of the feet (world px)      s    scale
 //   dir        1 faces right, -1 faces left                 lean body tilt (rad)
+//   legs       false: don't draw the legs (the skit draws its own, e.g. lying on a couch)
 //   kick       front leg swung straight from the hip: 1 = kicked out forward, negative = wound back
 //   step       -1..1 walk cycle (feet swap)                 bob  body offset (neg = up)
 //   tilt       head tilt (rad)                              face horizontal face offset
@@ -18,6 +19,7 @@
 //              by default arms go behind the head, which sits on the shoulders
 //   holdR(ctx, x, y)  draws a prop at the right hand (before the hand, so it grips it)
 //   handSL/handSR  scale one hand (opt-in; e.g. a smaller hand on a thin prop)
+//   (hands are always plain circles: no thumb, no fingers)
 //   happy      with lid >= 1, draw ^ ^ laughing eyes
 //   sweat      bool     eyesOnly  draw only the eyes (dark-room gags)
 const Chars = (() => {
@@ -46,7 +48,7 @@ const Chars = (() => {
     // character design); drawn by shifting and scaling that eye about its centre
     const one = side => {
       const ex = fx + side * gap;
-      const lid = p.lid ?? 0;
+      const lid = (side < 0 ? p.lidL : p.lidR) ?? p.lid ?? 0;   // lidL/lidR: one eye heavier than the other
       if (p.blank) {   // stunned: small, perfectly round, thick rim, no pupil
         const r = rx * 0.72;
         blob(ctx, ex, y, r, r, { fill: W, w: 10 * size, n: 12, jit: 0.6 });
@@ -387,18 +389,18 @@ const Chars = (() => {
     outline(ctx, pts, { w: 5 * s, jit: 0.6 });
   }
 
-  // Mitten hand. point = direction (radians) to stick a finger out, or null.
-  // The small thumb hook on each hand; a skit can switch it off (setHandHook(false)) for its own frames.
-  let handHook = true;
-  const setHandHook = on => { handHook = on; };
-  function hand(ctx, x, y, point = null, s = 1, skin = W) {
-    if (point !== null) {
-      const fx = x + Math.cos(point) * 40 * s, fy = y + Math.sin(point) * 40 * s;
-      stroke(ctx, [[x, y], [fx, fy]], { w: 22 * s, taper0: 0, taper1: 0, minW: 1 });
-      stroke(ctx, [[x, y], [fx, fy]], { w: 10 * s, taper0: 0, taper1: 0, minW: 1, color: skin, jit: 0 });
-    }
-    blob(ctx, x, y, 24 * s, 22 * s, { w: 7 * s, n: 10, fill: skin });
-    if (handHook) stroke(ctx, [[x - 18 * s, y - 6 * s], [x - 28 * s, y - 18 * s], [x - 20 * s, y - 24 * s]], { w: 6 * s });
+  // Hand: a plain circle (Animal Crossing style, user decision): no thumb and no
+  // fingers, even when a pose points (the point argument is ignored). One closed
+  // outline with a small wobble that changes only on the boil beat, so no brush
+  // overshoot ever sticks out as a hook. seed: optional fixed seed per hand.
+  function hand(ctx, x, y, point = null, s = 1, skin = W, seed = null) {   // one ink outline, never a white border (user decision)
+    const r = Brush.random(seed ?? 7150 + Math.sign(x));
+    // the boil is a whole-shape change (slight stretch and turn), never per-point
+    // jitter, so even a close-up hand stays a smooth round shape
+    const ring = Brush.ellipsePts(x, y, 24 * s * (1 + (r() - 0.5) * 0.06), 22 * s * (1 + (r() - 0.5) * 0.06), 64, (r() - 0.5) * 0.6);
+    ctx.beginPath(); ring.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
+    ctx.fillStyle = skin; ctx.fill();
+    ctx.lineWidth = 7 * s * Brush.getWeight(); ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
   }
 
   // Short sleeve in a different colour from the skin (opt-in, S.sleeveFill):
@@ -552,7 +554,7 @@ const Chars = (() => {
     // p.weight (-1..1): weight on one leg (-1 left, 1 right). The hips shift
     // over it; the free leg bends at the knee and steps out a little.
     const wt = p.weight ?? 0;
-    for (const side of [-1, 1]) {
+    for (const side of (p.legs === false ? [] : [-1, 1])) {   // legs: false = the skit draws the legs itself
       const ph = side * step;
       const free = wt && Math.sign(wt) !== side ? Math.abs(wt) : 0;
       // free leg: foot stepped out to its own side and resting on its toe, knee
@@ -576,20 +578,40 @@ const Chars = (() => {
     }
     S.bottoms?.(ctx, hipY, neckY);
     const torso = S.torso(neckY, hipY);
-    fill(ctx, torso, S.torsoFill ?? W, 0.5);
-    outline(ctx, torso, { w: 10 });
-    S.torsoDetail?.(ctx, neckY, hipY);
+    // Resting arms (user decision): a soft hang, the arms falling close to the
+    // body with a slight bend and the hands just beside the hips, a touch uneven.
+    // Never the old rest (hands flared out wide at the hips, elbows bowed in).
+    const restHand = side => [side * (S.shX + (side < 0 ? 10 : 14)), Math.min(hipY, neckY + S.shY + 136) + (side < 0 ? 22 : 28)];   // an arm's length below the shoulder, never below the hips
+    const restBend = side => (side < 0 ? 0.12 : -0.09);
+    if (p.cleanTorso) {   // opt-in for close-ups: one closed outline with a small seeded wobble, no overshoot at the join
+      const r = Brush.random(7200), lw = Brush.getWeight();
+      const pts = torso.map(([px, py]) => [px + (r() - 0.5) * 2, py + (r() - 0.5) * 2]);
+      const ring = Brush.spline(pts, true, 3);
+      ctx.beginPath(); ring.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
+      ctx.fillStyle = S.torsoFill ?? W; ctx.fill();
+      ctx.lineWidth = 10 * lw; ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
+    } else {
+      fill(ctx, torso, S.torsoFill ?? W, 0.5);
+      outline(ctx, torso, { w: 10 });
+    }
+    {   // where the hands will rest, so a shirt print can stay clear of them
+      const elY = neckY + S.shY + (hipY - neckY) * 0.42;
+      const hands = p.crossArms ? [[S.shX + S.armW * 0.2, elY - S.armW * 0.6], [-(S.shX + S.armW * 0.45), elY - S.armW * 0.15]]
+        : [p.armL ?? restHand(-1), p.armR ?? restHand(1)];
+      S.torsoDetail?.(ctx, neckY, hipY, hands);
+    }
 
-    const arm = (side, target, bend, point, hold) => {
+    const arm = (side, target, bend, point, hold, front = false) => {
       const sh = [side * S.shX, neckY + S.shY];
-      const hnd = target ?? [side * S.restX, hipY + S.restY];
+      const hnd = target ?? restHand(side);
+      bend = target ? bend : bend ?? restBend(side);
       // The white halo only matters over dark clothes; on light shirts it would
       // erase the shirt's outline next to the arm.
       tube(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.armFill ?? W, darkTorso);
       if (S.sleeveHem && S.sleeveFill) sleeveFill(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem, S.sleeveFill);
       if (S.sleeveHem) sleeveHem(ctx, sh, hnd, bend ?? side * -0.18, S.armW, S.sleeveHem);
       hold?.(ctx, hnd[0], hnd[1]);
-      hand(ctx, hnd[0], hnd[1], point ?? null, (side < 0 ? p.handSL : p.handSR) ?? S.handS, S.skin ?? W);
+      hand(ctx, hnd[0], hnd[1], point ?? null, (side < 0 ? p.handSL : p.handSR) ?? S.handS, S.skin ?? W, 7100 + side);   // each hand its own seed
     };
     if (p.crossArms) {
       // arms folded: upper arms down the sides to the elbows, forearms across
@@ -599,7 +621,7 @@ const Chars = (() => {
       // upper arm; the near forearm angles up over it to a fist by the far elbow.
       for (const side of [-1, 1]) {
         const sh = [side * S.shX, neckY + S.shY], el = [side * (S.shX + S.armW * 0.5), elY];
-        const hd = side < 0 ? [S.shX + S.armW * 0.2, elY - S.armW * 0.6] : [-S.shX * 0.95, elY - S.armW * 1.1];
+        const hd = side < 0 ? [S.shX + S.armW * 0.2, elY - S.armW * 0.6] : [-(S.shX + S.armW * 0.45), elY - S.armW * 0.15];   // near fist covers the far elbow's end, so no stub shows under it
         if (side < 0) {   // under: forearm and hidden hand first
           tube(ctx, el, hd, 0.05, S.armW, S.armFill ?? W, darkTorso);
           hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);
@@ -623,8 +645,8 @@ const Chars = (() => {
     S.head(ctx, p);
     ctx.restore();
 
-    if (p.armLFront && !p.crossArms) arm(-1, p.armL, p.bendL, null, p.holdL);
-    if (p.armRFront && !p.crossArms) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR);
+    if (p.armLFront && !p.crossArms) arm(-1, p.armL, p.bendL, null, p.holdL, true);
+    if (p.armRFront && !p.crossArms) arm(1, p.armR, p.bendR, p.pointR ?? null, p.holdR, true);
     ctx.restore();
   }
 
@@ -697,5 +719,5 @@ const Chars = (() => {
     return [p.x, p.y + s * (S.neckY + bob - S.headUp + bob * 0.5)];
   }
 
-  return { kid, dad, mom, dadBust, headPos, figure, hand, setHandHook, sweat, tube, eyes, brows, mouth, RED };
+  return { kid, dad, mom, dadBust, headPos, figure, hand, sweat, tube, eyes, brows, mouth, RED };
 })();

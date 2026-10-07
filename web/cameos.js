@@ -76,12 +76,13 @@ const Cameos = (() => {
           stroke(ctx, [[fx + x, -RY * 0.62], [fx + x + 2, -36 + Math.abs(x) * 0.1]], { w: 3.5, taper0: 0.1, taper1: 0.8, seed: 300 + x });
         ctx.restore();
       }
-      eyes(ctx, fx, p.squint ? -22 : -6, o.eyeLop ? { eyeLop: o.eyeLop, ...p } : p, 1, !!o.lashes);   // rage eyes sit higher, clear of the teeth
+      if (!p.noEyes) eyes(ctx, fx, p.squint ? -22 : -6, o.eyeLop ? { eyeLop: o.eyeLop, ...p } : p, 1, !!o.lashes);   // noEyes: a front() hook draws its own   // rage eyes sit higher, clear of the teeth
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
-      } else brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
+      } else if (!p.noBrows) brows(ctx, fx, -62, p, 1, o.browW ?? 9, true);
       const mdy = (typeof o.mouthDy === 'function' ? o.mouthDy(p) : o.mouthDy ?? 0) * (1 - open);   // eases off as a yell opens, so a big mouth stays inside the chin
-      if (rage) mouth(ctx, fx + 4, 34 + mdy + jaw * 0.2, p, 0.95);   // fills the lower half of the face
+      if (p.noMouth) { /* a front() hook draws the mouth */ }
+      else if (rage) mouth(ctx, fx + 4, 34 + mdy + jaw * 0.2, p, 0.95);   // fills the lower half of the face
       else mouth(ctx, fx + 4, 62 + mdy - 18 * open + jaw * 0.5, p, (open ? 0.85 : 1) * (p.mouthScale ?? 1));
       o.front?.(ctx, fx, rage, p);
       o.hat?.(ctx);
@@ -223,11 +224,12 @@ const Cameos = (() => {
     body: { hipY: -172, neckY: -352, legW: 21, footX: 18, hipX: 20, torso: (n, h) => [[-42, n], [42, n], [56, n + 60], [58, h - 4], [-58, h - 4], [-56, n + 60]] },
     headScale: [0.92, 1.06],
     head: head({ hair: swoop(), eyeLop: { side: -1, dy: 0.12, s: 1.07 } }),   // lopsided eyes: the screen-right eye (he faces left) a little lower and bigger
-    detail: (ctx, n) => {
+    detail: (ctx, n, h, hands = []) => {
       outline(ctx, [[-40, n - 2], [0, n + 44], [-18, n + 60]], { w: 7 });
       outline(ctx, [[40, n - 2], [0, n + 44], [18, n + 60]], { w: 7 });
       for (let i = 0; i < 4; i++) {   // pineapples: crosshatched body, crown of leaves
         const x = [-40, 36, -20, 46][i], y = n + [82, 92, 142, 152][i];
+        if (hands.some(([hx, hy]) => Math.hypot(hx - x, hy - (y - 6)) < 44)) continue;   // a hand rests here: leave this pineapple out, so none pokes out from behind a hand
         for (const a of [-0.9, -0.35, 0.2, 0.75]) {
           const r = a === -0.35 || a === 0.2 ? 20 : 14;
           stroke(ctx, [[x, y - 14], [x + Math.sin(a) * r, y - 14 - Math.cos(a) * r]], { w: 5, taper0: 0.1, taper1: 0.9 });
@@ -775,6 +777,95 @@ const Cameos = (() => {
   const slime = build({ shirt: INK, sleeve: '#222', head: head({ hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
+  // Slime in a roach onesie (the "What am I? A roach?!" skit): a grey hood
+  // ringing his face with a segmented crown plate and two antennae, a grey
+  // suit with a pale ribbed belly, folded wing shells and spiky insect legs
+  // behind. p.droop (0..1) lets the antennae sag. Everything is built on the
+  // normal Slime head and body; only the costume pieces are new.
+  const slimeRoach = (() => {
+    const SUIT = '#bdbdbd', PALE = '#e6e6e6', DARK = '#a6a6a6';
+    let droop = 0;
+    const evenPts = (pts, step = 34) => {   // short segments, so the brush join stays a short overlap
+      const out = [];
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[i], b = pts[(i + 1) % pts.length], k = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+        for (let j = 0; j < k; j++) out.push([a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k]);
+      }
+      return out;
+    };
+    const shape = (ctx, pts, col, w = 10, seed) => {
+      const sm = Brush.spline(pts, true, 3), e = evenPts(sm.filter((_, i) => i % 6 === 0));
+      fill(ctx, e, col, 0.5);
+      stroke(ctx, [...e, e[0], e[1]], { w, taper0: 0, taper1: 0, minW: 1, seed });
+    };
+    const lerpPts = (a, b, k) => a.map((p, i) => [p[0] + (b[i][0] - p[0]) * k, p[1] + (b[i][1] - p[1]) * k]);
+    const antennae = ctx => {
+      for (const sx of [-1, 1]) {
+        const up = [[sx * 30, -RY - 10], [sx * 52, -RY - 90], [sx * 92, -RY - 168], [sx * 150, -RY - 196]];
+        const sag = [[sx * 30, -RY - 10], [sx * 80, -RY - 76], [sx * 150, -RY - 76], [sx * 196, -RY - 6]];
+        stroke(ctx, lerpPts(up, sag, droop), { w: 11, taper0: 0, taper1: 0.85, minW: 0.3, seed: 8400 + sx });
+      }
+    };
+    const hoodRing = ctx => {
+      antennae(ctx);
+      blob(ctx, 0, -4, RX + 32, RY + 28, { fill: SUIT, w: 11, n: 28, jit: 1.8 });
+    };
+    // crown plate over the forehead, flat grey clipped inside the ring's ink; only its lower edge and seams are drawn
+    const hoodPlate = ctx => {
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(0, -4, RX + 26, RY + 22, 0, 0, 7); ctx.clip();
+      ctx.fillStyle = SUIT;
+      ctx.beginPath(); ctx.moveTo(-RX * 1.4, -RY * 1.5); ctx.lineTo(RX * 1.4, -RY * 1.5); ctx.lineTo(RX * 1.4, -84);
+      for (const q of Brush.spline([[RX * 1.4, -84], [138, -86], [70, -95], [0, -99], [-70, -95], [-138, -86], [-RX * 1.4, -84]], false, 4)) ctx.lineTo(q[0], q[1]);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+      stroke(ctx, [[-RX - 18, -80], [-138, -86], [-70, -95], [0, -99], [70, -95], [138, -86], [RX + 18, -80]], { w: 9, taper0: 0, taper1: 0, minW: 1, seed: 8410 });
+      stroke(ctx, [[0, -RY - 20], [2, -RY * 0.8], [0, -112]], { w: 6, taper0: 0.1, taper1: 0.3, seed: 8411 });
+      for (const sx of [-1, 1]) stroke(ctx, [[sx * 46, -RY - 12], [sx * 78, -RY * 0.78], [sx * 100, -106]], { w: 6, taper0: 0.1, taper1: 0.3, seed: 8412 + sx });
+      stroke(ctx, [[-16, -RY * 0.88], [16, -RY * 0.88]], { w: 6, seed: 8415 });   // the "+" on the crown
+      stroke(ctx, [[0, -RY * 0.88 - 14], [0, -RY * 0.88 + 12]], { w: 6, seed: 8416 });
+    };
+    const legs = ctx => {
+      for (const sx of [-1, 1]) [[-292, -50], [-238, -10], [-186, 24]].forEach(([y0, lift], i) => {
+        const pts = [[sx * 58, y0], [sx * 112, y0 + lift - 40], [sx * 168, y0 + lift - 52], [sx * 200 + sx * i * 8, y0 + lift + 40]];
+        stroke(ctx, pts, { w: 10, taper0: 0, taper1: 0.5, minW: 0.4, seed: 8420 + sx * 3 + i });
+        for (const [bx, by, ang] of [[0.38, 0, -1], [0.62, 0, -1], [0.88, 0, -1]]) {   // short barbs along the shin
+          const s = Brush.spline(pts, false, 6), p = s[Math.floor(s.length * bx)], q = s[Math.min(s.length - 1, Math.floor(s.length * bx) + 3)];
+          const dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy) || 1;
+          stroke(ctx, [p, [p[0] + (-dy / d) * ang * 18 + dx / d * 8, p[1] + (dx / d) * ang * 18 + dy / d * 8]], { w: 5, taper0: 0, taper1: 0.9, minW: 0.2, seed: 8440 + i * 7 + Math.round(bx * 10) + sx });
+        }
+      });
+    };
+    const wings = ctx => {
+      for (const sx of [-1, 1]) {
+        const w = [[sx * 40, -262], [sx * 96, -250], [sx * 138, -196], [sx * 144, -120], [sx * 112, -66], [sx * 66, -92], [sx * 40, -160]];
+        shape(ctx, w, DARK, 10, 8460 + sx);
+        stroke(ctx, [[sx * 58, -236], [sx * 100, -180], [sx * 106, -106]], { w: 5, taper0: 0.1, taper1: 0.6, seed: 8466 + sx });
+      }
+    };
+    const suit = build({
+      shirt: SUIT, sleeve: SUIT, skin: W,
+      head: head({ hair: shaved, beard: shortBeard, front: slimeStache, browW: 12, back: hoodRing, hat: hoodPlate }),
+      body: {
+        legColor: SUIT,
+        bottoms: (ctx, hipY) => shape(ctx, [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 46], [0, hipY + 56], [-70, hipY + 46]], SUIT, 9, 8470),
+      },
+      detail: (ctx, n, h) => {
+        const cy = (n + h) / 2 - 8;   // the belly plate ends clear of the waist band, so its tip never tangles with that outline
+        shape(ctx, Brush.ellipsePts(0, cy, 44, 66, 16), PALE, 8, 8479);   // fixed seed, like the rest of the suit, so the outline join doesn't re-roll
+        stroke(ctx, [[0, cy - 58], [2, cy], [0, cy + 58]], { w: 5, taper0: 0.1, taper1: 0.1, seed: 8480 });
+        for (const dy of [-28, 4, 36]) stroke(ctx, [[-34, cy + dy - 6], [0, cy + dy + 4], [34, cy + dy - 6]], { w: 4, taper0: 0.2, taper1: 0.2, seed: 8481 + dy });
+      },
+    });
+    return (ctx, p) => {
+      droop = p.droop ?? 0;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.scale(p.s ?? 1, p.s ?? 1);
+      legs(ctx); wings(ctx);
+      ctx.restore();
+      suit(ctx, p);
+    };
+  })();
+
   // parts: the shared build/head builders, for other adult characters (hero.js)
   // ---------- Original characters (outline-style hair, per the hair reference sheets) ----------
   const collarTee = (ctx, n, color = INK) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color });
@@ -840,6 +931,84 @@ const Cameos = (() => {
                    dark: ['#555555', '#bdbdbd'], black: [INK, '#8a8a8a'] };
   const spikyShades = Object.fromEntries(Object.entries(SHADES).map(([k, [fillC, lineC]]) => [k,
     build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: outlineHair(...SPIKES, fillC, { lineColor: lineC }) }), detail: hoodieFront })]));
+
+  // A few months' growth: a full scraggly beard from the sideburns down past
+  // the chin (tufts poking out of the edge) and a moustache, on the spiky guy.
+  // The beard goes under the mouth, so the mouth still reads when he talks.
+  const scragglyBeard = (ctx, jaw, p = {}) => {
+    const out = [];
+    for (let i = 0; i <= 22; i++) {   // ragged outer edge, right sideburn round under the chin to the left one
+      const a = Math.PI * (-0.04 + 1.08 * i / 22), tuft = i % 2 ? 0.1 + 0.12 * hh(i * 7 + 3) : -0.02 * hh(i);
+      out.push([Math.cos(a) * RX * (1.0 + tuft * 0.5), Math.sin(a) * RY * (1.08 + tuft) + RY * 0.06]);
+    }
+    const top = [];                   // uneven top edge across the cheeks, left to right, about mid-cheek
+    for (let i = 0; i <= 10; i++) {
+      const x = -RX * 0.9 + RX * 1.8 * i / 10, sag = Math.abs(x) < RX * 0.45 ? 0.46 : 0.4 - 0.06 * Math.abs(x) / RX;   // low on the cheeks: skin shows under the eyes
+      top.push([x, RY * (sag + (i % 2 ? 0.06 : -0.02) + 0.04 * hh(i + 20))]);
+    }
+    const shape = [...out, ...top];
+    fill(ctx, shape, '#454545', 1.6);   // darker than his hair, so it reads as its own beard
+    outline(ctx, shape, { w: 9 });
+    for (let i = 0; i < 10; i++) {   // strands, all inside the beard
+      const a = Math.PI * (0.18 + 0.64 * hh(i + 40)), r = 0.6 + 0.3 * hh(i + 50), x = Math.cos(a) * RX * r, y = Math.sin(a) * RY * r + RY * 0.24;
+      stroke(ctx, [[x, y], [x + (hh(i + 60) - 0.5) * 18, y + 16]], { w: 4, color: '#6e6e6e' });
+    }
+  };
+  const scragglyMoustache = (ctx, fx, rage, p = {}) => {
+    if (p.halfOpen !== undefined) for (const sd of [-1, 1]) {   // tired eyes: a heavy lid with only the lower part of the eye under it, pupil cut in half by the lid
+      const ex = fx + sd * 42, ey = -26, rx = 30, ry = 38, op = p.halfOpen;
+      if (op <= 0.02) { stroke(ctx, [[ex - sd * 28, ey + 8], [ex, ey + 14], [ex + sd * 28, ey + 14]], { w: 9, taper0: 0.2, taper1: 0.2 }); continue; }   // shut: a sagging line, lower at the outer corner
+      const ly = ey + ry - 2 * ry * op;
+      const half = Math.sqrt(Math.max(0, 1 - ((ly - ey) / ry) ** 2)) * rx;           // the eye's width at the lid line
+      if (op >= 0.12) {   // enough opening to show white: the lower part of the eye (outline thinning as it narrows) and a half pupil
+        ctx.save(); ctx.beginPath(); ctx.rect(ex - rx - 20, ly, 2 * rx + 40, 2 * ry + 20); ctx.clip();
+        blob(ctx, ex, ey, rx, ry, { fill: W, w: Math.min(8, 3 + 20 * op), n: 12, jit: 0.4 });
+        blob(ctx, ex, ly, 12 * Math.min(1, op * 3), 12 * Math.min(1, op * 3), { fill: INK, w: 0, n: 10 });   // pupil centred on the lid line: half of it shows
+        ctx.restore();
+      }
+      stroke(ctx, [[ex - sd * (half + 3), ly - 2], [ex, ly - 2], [ex + sd * (half + 3), ly + 6]], { w: 10, taper0: 0.15, taper1: 0.15 });   // the heavy lid, drooping at the outer corner
+    }
+    if (p.sleepy) for (const sd of [-1, 1]) {   // fast asleep: heavy closed lids drooping at the outer ends, lashes, dark shading under them
+      const ex = fx + sd * 42, lid = [[ex - sd * 28, -10], [ex + sd * 2, 0], [ex + sd * 30, -6]];   // closed lid: a gentle downward curve, near level
+      fill(ctx, [[ex - sd * 20, 8], [ex + sd * 2, 15], [ex + sd * 24, 10], [ex + sd * 20, 24], [ex, 28], [ex - sd * 16, 20]], '#b4b4b4', 0.6);   // tired shading, a little below the lid
+      stroke(ctx, lid, { w: 10, taper0: 0.2, taper1: 0.3 });
+      for (const k of [0.78, 0.95]) {           // two short lashes at the outer end
+        const x = lid[0][0] + (lid[2][0] - lid[0][0]) * k, y = lid[0][1] + (lid[2][1] - lid[0][1]) * k + 4 * Math.sin(Math.PI * k);
+        stroke(ctx, [[x, y], [x + sd * 8, y + 7]], { w: 4, taper0: 0, taper1: 0.6 });
+      }
+    }
+    if (p.slackMouth !== undefined) {   // a slack, lopsided mouth hanging open (wider than tall, one corner lower), lip-lined so it reads on the dark beard
+      const op = p.slackMouth, cx = fx + 4, cy = 62, w = 48, h = 10 + 44 * op;
+      if (op <= 0.01) stroke(ctx, [[cx - w * 0.6, cy + 2], [cx, cy + 4], [cx + w * 0.6, cy + 4]], { w: 6 });   // lips pressed shut (m, b, p): one tight line
+      else if (p.slackKind === 'oo') {   // rounded pucker (w, oo)
+        const o = Brush.ellipsePts(cx + 6, cy + 10, 16, 14, 10); fill(ctx, o, '#1c1c1c', 0.3); outline(ctx, o, { w: 6 });
+      } else if (op < 0.08) stroke(ctx, [[cx - w * 0.7, cy], [cx - w * 0.2, cy + 4], [cx + w * 0.3, cy - 1], [cx + w * 0.8, cy + 8]], { w: 7, color: W }),
+        stroke(ctx, [[cx - w * 0.7, cy], [cx - w * 0.2, cy + 4], [cx + w * 0.3, cy - 1], [cx + w * 0.8, cy + 8]], { w: 4 });   // slack, nearly closed: a wavy line
+      else {
+        const m = [[cx - w, cy - 2], [cx - w * 0.3, cy - 6], [cx + w * 0.5, cy - 2], [cx + w * 1.05, cy + 10], [cx + w * 0.7, cy + h * 0.85 + 8],
+                   [cx, cy + h], [cx - w * 0.7, cy + h * 0.6]];
+        fill(ctx, m, '#1c1c1c', 0.4);
+        fill(ctx, Brush.ellipsePts(cx + 4, cy + h * 0.78, w * 0.55, h * 0.22 + 3, 10), '#8a8a8a', 0.4);   // tongue
+        outline(ctx, m, { w: 6 });
+      }
+      if (p.drool) {   // a glossy drip clinging to the low corner of the mouth, slowly stretching
+        const x = cx + w * 0.95, y0 = cy + 14, y1 = y0 + 18 + 26 * p.drool;
+        const drip = [[x - 4, y0], [x + 4, y0], [x + 3, y1 - 14], [x + 11, y1 - 2], [x + 6, y1 + 9], [x - 6, y1 + 9], [x - 11, y1 - 2], [x - 3, y1 - 14]];
+        fill(ctx, drip, W, 0.3); outline(ctx, drip, { w: 4 });
+        stroke(ctx, [[x - 4, y1 - 3], [x - 2, y1 + 3]], { w: 3, color: '#c8c8c8' });   // highlight
+      }
+    }
+    if (rage) ctx.translate(0, -12);
+    const m = [[fx - 70, 60], [fx - 58, 38], [fx - 30, 28], [fx, 34], [fx + 30, 28], [fx + 58, 38], [fx + 70, 60],
+               [fx + 50, 50], [fx + 40, 58], [fx + 24, 46], [fx, 50], [fx - 24, 46], [fx - 40, 58], [fx - 50, 50]];
+    fill(ctx, m, '#454545', 1.4);
+    outline(ctx, m, { w: 7 });
+    if (p.bags) for (const sd of [-1, 1])   // tired shading just under each eye, open or shut, drawn over the moustache's top edge
+      stroke(ctx, [[fx + sd * 48 - 22, 36], [fx + sd * 48, 45], [fx + sd * 48 + 22, 36]], { w: 7, taper0: 0.3, taper1: 0.3, color: '#7a7a7a' });
+  };
+  const spikyBearded = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a',
+    head: head({ hair: outlineHair(...SPIKES, ...SHADES.brown.slice(0, 1), { lineColor: SHADES.brown[1] }), beard: scragglyBeard, front: scragglyMoustache }),
+    detail: hoodieFront });
 
   // Signature accent colour: hair stays a natural colour, the one unnatural
   // colour lives on the clothes. Everything else stays black/white/grey, and
@@ -1446,5 +1615,5 @@ const Cameos = (() => {
     beards: { trimmed: sqC(beardTrim, stacheTrim), full: (draw => (ctx, p) => draw(ctx, sqFace(p)))(sqC(beardFull2, stacheFull2, { mouthDy: p => FULL_MOUTH_DY + (p.smallMouth ? 16 : 0) })), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
   };
 
-  return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, originals, originals2, men, spikyShades, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, slimeRoach, originals, originals2, men, spikyShades, spikyBearded, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();

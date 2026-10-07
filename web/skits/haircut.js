@@ -939,8 +939,7 @@ Skits.haircut = (() => {
     draw(ctx, t) {
       capCtx = ctx;
       const shot = shots.find(([a, b]) => t >= a && t < b) ?? shots[shots.length - 1];
-      Chars.setHandHook(false);   // plain round hands on everyone in this video, no thumb hook
-      ctx.save(); let info; try { info = shot[2](ctx, t); } finally { Chars.setHandHook(true); } ctx.restore();
+      ctx.save(); const info = shot[2](ctx, t); ctx.restore();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       const cb = capBottom(t);
       if (info?.top < cb + 10) throw new Error(`haircut: head top ${info.top.toFixed(0)} under the caption (${cb.toFixed(0)}) at t=${t.toFixed(2)}`);

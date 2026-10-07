@@ -38,6 +38,16 @@ disagree, the rule wins.
   hair different, off-centre poses.
 - Arms go behind the head. Short sleeves are a hem line on the arm, not extra
   shapes. Leave shirt lines visible beside the arms.
+- **Resting arms are a soft hang** (user decision): when a character isn't
+  doing anything with their arms, they fall close to the body with a slight
+  bend, hands just beside the hips. Leave `armL`/`armR` unset for this, or use
+  `Arms.rest(side)`. NEVER the old rest the user rejected: hands flared out
+  wide at hip height with the elbows bowed in ("gunslinger" arms). Don't
+  hand-code a rest target, and don't solve a resting hand with
+  `Arms.arm(..., 'down')` (that bows the elbow in); blend to `'rest'` instead.
+- **Hands are plain circles** (Animal Crossing style): no thumb, no fingers (not
+  even to point), and no hook or tail where the outline closes. One ink outline,
+  no white border or ring around the hand. (User decision.)
 - Check stills and zoomed crops of every change before calling it done.
 
 ## Hair
@@ -103,7 +113,7 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
   and sad (skin-tone drooping lids, one tear, a frown). The other drafts and
   beard options are kept only for reference.
 - Cameos (`web/cameos.js`) are caricatures recognisable from hair silhouette
-  plus one or two signature items. 
+  plus one or two signature items.
 
 ## Camera and staging
 

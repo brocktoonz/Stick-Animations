@@ -27,7 +27,10 @@ const Emotions = (() => {
     return { ['arm' + k]: r.at, ['bend' + k]: r.bend, ...(front ? { ['arm' + k + 'Front']: true } : {}) };
   };
   const both = (hand, elbow, front) => ({ ...arm(-1, [-hand[0], hand[1]], elbow, front), ...arm(1, hand, elbow, front) });
-  globalThis.Arms = { arm, both };   // for one-off arm poses in skits, with the same fixed-length arms
+  // The resting arm (the rig's default when a pose leaves the arm unset): a soft
+  // hang close to the body. Use this, not a hand-coded rest target.
+  const rest = side => side < 0 ? { armL: [-66, -128], bendL: 0.12 } : { armR: [70, -122], bendR: -0.09 };
+  globalThis.Arms = { arm, both, rest };   // for one-off arm poses in skits, with the same fixed-length arms
 
   const E = {
     neutral:   { mouth: 'flat' },

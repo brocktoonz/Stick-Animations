@@ -1,22 +1,49 @@
-// "Just a 10 minute power nap" (9.21 s), starring the main character.
+// "Just a 10 minute power nap", starring the main character.
 // Timed to references/power-nap/clip.mov (beats in references/power-nap/notes.md).
-// He lies back in bed promising himself a ten minute nap, snores, and a few
-// hours later (clock spinning) he has tossed, fallen off the bed and ended up
-// floating above it. Close-up: bleary, stubbled, "Where am I?"
+// Three shots: he lies back on the couch promising himself a ten minute nap
+// and drifts off snoring; an analog clock whips its hands round ("FEW HOURS
+// LATER"); a dramatic close-up as he heaves himself up into camera, now with a
+// full scraggly beard, half asleep: "Where am I?"
 Skits.powernap = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { seg, lerp, easeOut, easeInOut, easeOutBack, say, loud, blink, clamp } = Stage;
   const W = '#fff', RED = '#d9261c', BACKDROP = '#eeeeee', HEAD = 438;
   const hh = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
+  const END = 10.4;   // the clip's audio ends at 9.21; the last ~1.2 s holds his groggy face in silence
   // [start, end, colour, text]: the original's captions, word for word
   const LINES = [
-    [0.33, 1.17, W, 'ALRIGHTY'],
-    [1.17, 2.15, W, 'JUST A 10 MINUTE\nPOWER NAP'],
-    [3.45, 6.45, RED, 'FEW HOURS LATER'],
-    [8.1, 8.75, W, 'WHERE AM I?'],
+    [0, 1.14, W, 'ALRIGHTY'],             // on screen from the first frame (the hook)
+    [1.14, 3.34, W, 'JUST A 10 MINUTE\nPOWER NAP'],   // stays up through his uncaptioned "huh?"
+    [3.45, 6.45, RED, 'FEW HOURS LATER'],   // up the whole time the clock is on screen
+    [8.17, END, W, 'WHERE AM I?'],        // held to the end so the joke lands
   ];
-  const talk = (t, i) => say(t, LINES[i][0], LINES[i][1], LINES[i][3].replace(/\n/g, ' ').replace('10', 'ten').toLowerCase());
+  // Lip sync from the forced-aligned phones (web/audio/powernap_phones.js):
+  // each phone maps to a mouth drawing, changing on twos, a frame ahead of the
+  // sound. Each 2-frame beat shows the sound that fills most of it; lips close
+  // for any m/b/p. talk(t, t0, t1) animates the speech between t0 and t1.
+  const VIS = {
+    AA: 'open', AE: 'open', AH: 'half', AO: 'oh', AW: 'open', AY: 'open', EH: 'half', ER: 'half', EY: 'ee',
+    IH: 'half', IY: 'ee', OW: 'oh', OY: 'oh', UH: 'oo', UW: 'oo',
+    M: 'mbp', B: 'mbp', P: 'mbp', F: 'fv', V: 'fv', L: 'lth', TH: 'lth', DH: 'lth', W: 'oo', R: 'oo', Y: 'ee',
+  };
+  const talk = (t, t0, t1, groggy = false) => {
+    const tt = t + 1 / 30;
+    if (tt < t0 - 0.03 || tt > t1 + 0.05) return null;
+    const STEP = 2 / 30, beat = Math.floor((tt - t0) / STEP), a = t0 + beat * STEP, b = a + STEP;
+    let kind = 'rest', most = 0.015, lips = false;
+    for (const [p0, p1, ph] of Phones.powernap) {
+      if (p1 <= a || p0 >= b || p0 < t0 - 0.01 || p1 > t1 + 0.01) continue;
+      const v = VIS[ph] ?? 'teeth', ov = Math.min(p1, b) - Math.max(p0, a);
+      if (v === 'mbp' && ov > 0.02) lips = true;
+      if (ov > most + 0.005 || (Math.abs(ov - most) <= 0.005 && LipSync.OPEN[v] > LipSync.OPEN[kind])) { kind = v; most = ov; }
+    }
+    if (lips) kind = 'mbp';
+    if (groggy && (kind === 'open' || kind === 'wide')) kind = 'oh';   // slack tall oval, not a grinning D
+    if (groggy && kind === 'oo') kind = 'oh';                             // the rounded W reads at this size
+    return { mouth: 'talk', viz: { kind, open: LipSync.OPEN[kind], intensity: 1, smile: 0, side: 1, var: (beat * 7919 % 5) / 4 } };
+  };
+  const SAID = { alrighty: [0.44, 1.14], nap: [1.14, 2.65], huh: [2.65, 3.34], where: [8.17, 8.74] };   // from references/power-nap/phones.json
   const CAP = 84;
   function caption(ctx, t) {
     const l = LINES.find(([a, b]) => t >= a && t < b);
@@ -40,8 +67,33 @@ Skits.powernap = (() => {
     for (let i = 0; i < 4; i++) { const [a, b] = [c[i], c[(i + 1) % 4]]; for (let k = 0; k < n; k++) pts.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]); }
     return pts;
   };
+  // An arm moving from hand a (elbow out) to hand b (elbow down) as k goes 0 to 1:
+  // the hand follows the line and the bend blends between the two end poses.
+  const glide = (side, a, b, k, ea = 'out', eb = 'down') => {
+    const A = Arms.arm(side, a, ea), B = Arms.arm(side, b, eb), K = side < 0 ? 'L' : 'R';
+    const at = Arms.arm(side, [lerp(a[0], b[0], k), lerp(a[1], b[1], k)], 'out')['arm' + K];
+    return { ['arm' + K]: at, ['bend' + K]: lerp(A['bend' + K], B['bend' + K], k) };
+  };
   const panel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); outline(ctx, pts, { w }); };
   const shape = (ctx, pts, col, w = 10) => { fill(ctx, Brush.spline(pts, true, 3), col, 0.5); outline(ctx, pts, { w }); };
+  // The couch: its outline follows the same path as its fill, resampled to short
+  // segments like a character's head, so the brush overshoot at the join stays a
+  // short overlap instead of redrawing a whole side (which jumped around each boil).
+  const even = (pts, step = 36) => {
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length], k = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+      for (let j = 0; j < k; j++) out.push([a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k]);
+    }
+    return out;
+  };
+  // Each couch line gets its own fixed seed, so it only boils on the 3-frame beat
+  // and never re-rolls when the character drawn before it changes.
+  const couchSeed = pts => 5000 + Math.round(pts[0][0] * 3 + pts[0][1]);
+  const couchLine = (ctx, pts, w) => { const e = even(pts); stroke(ctx, [...e, e[0], e[1]], { w, taper0: 0, taper1: 0, minW: 1, seed: couchSeed(pts) }); };
+  const flat = (ctx, pts, col) => { ctx.fillStyle = col; ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); };
+  const couchPanel = (ctx, pts, col, w = 10) => { flat(ctx, pts, col); couchLine(ctx, pts, w); };
+  const couchShape = (ctx, pts, col, w = 10) => { const sm = Brush.spline(pts, true, 3); flat(ctx, sm, col); couchLine(ctx, sm.filter((_, i) => i % 12 === 0), w); };
 
   // Body frame for a figure with feet at (fx, fy) rotated by ang (clockwise):
   // a runs from the feet toward the head, b across the body (+b = the side
@@ -72,143 +124,148 @@ Skits.powernap = (() => {
     stroke(ctx, [P(L - 40 * s, -th * 0.9), P(L - 40 * s, th * 0.8 + down)], { w: 6 });   // folded hem
     stroke(ctx, [P(L * 0.4, -th * 0.6), P(L * 0.25, th * 0.3)], { w: 5 });             // a wrinkle
   }
-  // stubble after a few hours: short marks thickest on the chin, along the jaw and upper lip
-  function stubble(ctx, hx, hy, s) {
-    for (let i = 0; i < 140; i++) {
-      const u = hh(i), a = Math.PI * (0.5 + (u - 0.5) * Math.abs(u - 0.5) * 2.2), r = (98 + 20 * hh(i + 9)) * s;
-      const x = hx + Math.cos(a) * r * 0.95, y = hy + 36 * s + Math.sin(a) * r * 0.66;
-      if (((x - hx - 6 * s) / (60 * s)) ** 2 + ((y - hy - 95 * s) / (34 * s)) ** 2 < 1) continue;   // keep the mouth clear
-      stroke(ctx, [[x, y], [x + (hh(i + 3) - 0.5) * 3 * s, y + 4 * s]], { w: 1.5 * s, taper0: 0, taper1: 0, color: '#6a6a6a', jit: 0.2, wob: 0 });
-    }
-    for (let i = 0; i < 26; i++) {   // upper lip
-      const x = hx + 4 * s + (hh(i + 60) - 0.5) * 70 * s, y = hy + 52 * s + hh(i + 90) * 8 * s;
-      stroke(ctx, [[x, y], [x, y + 4 * s]], { w: 1.5 * s, taper0: 0, taper1: 0, color: '#6a6a6a', jit: 0.2, wob: 0 });
-    }
-  }
-
-  // ---------- close bed shots ----------
-  function bedClose(ctx) {
-    ctx.fillStyle = BACKDROP; ctx.fillRect(-2000, -2000, 5000, 6000);
-    panel(ctx, box(-900, 1640, 2000, 1900), '#e2e2e2', 12);                   // mattress
-    panel(ctx, box(-900, 1900, 2000, 2400), '#8a8a8a', 12);                   // bed base
-  }
-  const CFX = 60, CFY = 1640, CS = 1.6;
-  function inBed(ctx, ang, pose) {
-    const P = frame(CFX, CFY, ang);
-    pillow(ctx, P(HEAD * CS * 0.72, 165 * CS), 150 * CS, 70 * CS, ang - Math.PI / 2);   // under the shoulders
-    pillow(ctx, P(HEAD * CS * 1.02, 120 * CS), 125 * CS, 62 * CS, ang - Math.PI / 2);   // under the head
-    lying(ctx, CFX, CFY, ang, CS, { ...Arms.both([34, -196], 'down'), ...pose });        // hands resting on his stomach
-    blanket(ctx, P, CS, 0.42);
-  }
-
-  // ---------- the bedroom (wide, for "few hours later") ----------
-  const WALL = 1560, MX0 = 200, MX1 = 880, MTOP = 1380, WS = 0.8;
+  // the clock: spins round faster and faster from 5:00 in the afternoon to
+  // 1:55 at night, the hour hand dragged round with it
   function clock(ctx, x, y, r, t) {
-    const k = Math.floor(Math.max(0, t - 3.55) / 0.2);   // hands jump on each tick of the audio
-    const face = Brush.ellipsePts(x, y, r, r, 20);
-    fill(ctx, face, W, 0.4); outline(ctx, face, { w: 11 });
-    for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; stroke(ctx, [[x + Math.sin(a) * r * 0.78, y - Math.cos(a) * r * 0.78], [x + Math.sin(a) * r * 0.9, y - Math.cos(a) * r * 0.9]], { w: 4 }); }
+    const k = easeInOut(seg(t, 3.5, 6.4)), mins = lerp(17 * 60, 25 * 60 + 55, k);   // minutes since midnight
+    const face = Brush.ellipsePts(x, y, r, r, 120);
+    flat(ctx, face, W); couchLine(ctx, face, 12);   // rim like the couch: short segments and a fixed seed, so the brush join never jumps around
+    for (let i = 0; i < 12; i++) {
+      const a = i * Math.PI / 6, l = i % 3 ? 0.86 : 0.78;
+      stroke(ctx, [[x + Math.sin(a) * r * l, y - Math.cos(a) * r * l], [x + Math.sin(a) * r * 0.92, y - Math.cos(a) * r * 0.92]], { w: i % 3 ? 7 : 12 });
+    }
     const hand = (a, l, w) => stroke(ctx, [[x, y], [x + Math.sin(a) * l, y - Math.cos(a) * l]], { w, taper0: 0, taper1: 0.3 });
-    hand(-0.3 + k * 1.1, r * 0.75, 8);            // minute hand whipping round
-    hand(Math.PI * 0.95 + k * 0.1, r * 0.5, 11);   // hour hand creeping on
-    blob(ctx, x, y, 7, 7, { fill: INK, w: 0, n: 6 });
-  }
-  function room(ctx) {
-    ctx.fillStyle = BACKDROP; ctx.fillRect(-2000, -2000, 5000, 6000);
-    ctx.fillStyle = '#e2e2e2'; ctx.fillRect(-2000, WALL, 5000, 3000);        // floor, running toward us
-    stroke(ctx, [[-900, WALL], [540, WALL + 3], [2000, WALL - 3]], { w: 9, taper0: 0, taper1: 0 });
-  }
-  function bed(ctx, tilt) {
-    fill(ctx, Brush.ellipsePts(540, WALL + 6, 380, 18, 16), '#cfcfcf', 0.4);   // flat shadow
-    panel(ctx, box(MX0 - 20, MTOP + 70, MX1 + 20, WALL), '#7a7a7a', 10);        // base
-    ctx.save(); ctx.translate(540, MTOP + 70); ctx.rotate(tilt);
-    panel(ctx, box(MX0 - 540, -70, MX1 - 540, 0), '#e6e6e6', 10);             // mattress (knocked askew in the night)
-    ctx.restore();
-  }
-  // the blanket draped over the foot end once he's kicked it off
-  function drape(ctx, k) {
-    const x = MX0 - 10;
-    const pts = [[x + 90, MTOP - 6], [x, MTOP - 12], [x - 40, MTOP + 40 + 40 * k], [x - 30, MTOP + 150 + 20 * k], [x - 5, MTOP + 130], [x + 20, MTOP + 170 + 15 * k], [x + 40, MTOP + 90], [x + 70, MTOP + 60]];
-    shape(ctx, pts, '#bdbdbd', 9);
-    stroke(ctx, [[x - 10, MTOP + 30], [x + 5, MTOP + 120]], { w: 5 });
+    hand(mins / 60 * Math.PI * 2, r * 0.84, 12);         // minute hand: long and thin
+    hand(mins / 720 * Math.PI * 2, r * 0.46, 22);        // hour hand: short and fat
+    blob(ctx, x, y, 16, 16, { fill: INK, w: 0, n: 8 });
   }
 
-  const tired = { lid: 0.45, lowLid: 0.25, brow: -0.3, pupil: 9 };
-  const slack = (open, k = 0) => ({ lid: 1, brow: -0.15, mouth: 'gape', open, mouthScale: 1.6, stretch: 0.45 + 0.4 * k });   // yawn/snore: tall round mouth, lids shut
+
+  // ---------- the couch ----------
+  const SEAT = 1310, FLOOR = 1520;
+  function couchBack(ctx) {
+    ctx.fillStyle = BACKDROP; ctx.fillRect(-2000, -2000, 5000, 6000);
+    ctx.fillStyle = '#e2e2e2'; ctx.fillRect(-2000, FLOOR, 5000, 3000);                       // floor
+    stroke(ctx, [[-900, FLOOR], [540, FLOOR + 3], [2000, FLOOR - 3]], { w: 9, taper0: 0, taper1: 0 });
+    fill(ctx, Brush.ellipsePts(540, FLOOR + 8, 470, 20, 16), '#cfcfcf', 0.4);              // flat shadow
+    couchShape(ctx, [[150, 1040], [540, 1010], [930, 1040], [940, SEAT + 20], [140, SEAT + 20]], '#5c5c5c', 11);   // back cushions
+    stroke(ctx, [[540, 1030], [540, SEAT]], { w: 6 });                                       // seam between the two back cushions
+    couchShape(ctx, [[70, 1150], [140, 1110], [220, 1140], [230, FLOOR - 40], [80, FLOOR - 40]], '#4e4e4e', 11);   // left arm (his head ends up on it)
+  }
+  function couchFront(ctx) {
+    couchShape(ctx, [[860, 1150], [940, 1110], [1010, 1150], [1000, FLOOR - 40], [850, FLOOR - 40]], '#4e4e4e', 11);   // right arm
+    couchPanel(ctx, box(200, SEAT, 870, FLOOR - 40), '#6a6a6a', 11);                               // seat cushions, front face
+    stroke(ctx, [[535, SEAT + 6], [535, FLOOR - 48]], { w: 6, seed: 4999 });
+    for (const x of [130, 950]) couchPanel(ctx, box(x - 20, FLOOR - 40, x + 20, FLOOR + 4, 2), '#555', 8);   // stubby legs
+  }
+
+  const CS = 1.1, HIP = 150 * CS;   // his hips sit on the seat; the legs hang behind the seat cushions
   const shots = [
-    // propped up in bed: "Alrighty... just a 10 minute power nap", then a yawn
-    [0, 2.55, (ctx, t) => {
-      const ang = 0.85 + 0.06 * easeInOut(seg(t, 2.15, 2.5));
-      const [hx, hy] = frame(CFX, CFY, ang)(HEAD * CS, 0);
-      ctx.save(); cam(ctx, hx - 110, hy + 60, lerp(1.12, 1.18, easeInOut(seg(t, 0, 2.55))), 470, 1170);
-      bedClose(ctx);
-      const pose = t > 2.2 ? slack(clamp(0.6 + 0.5 * loud('powernap', t), 0.6, 1), 0.3)
-                           : { ...tired, lid: Math.max(tired.lid, blink(t, 2.7, 0.3)), lookX: 0.3, lookY: -0.3, tilt: -0.1,
-                               ...(t < 0.33 ? { mouth: 'flat' } : talk(t, t < 1.17 ? 0 : 1)) };
-      inBed(ctx, ang, pose);
+    // on the couch: he sits upright saying "Alrighty", then on "just a 10 minute
+    // power nap" tips over sideways onto the pillow against the arm and swings his
+    // legs up onto the seat, "huh?", and drops off. The rig's own legs are off
+    // (they'd rotate with his body and stick up through the couch); the legs are
+    // drawn here, in front of the seat, so they never pass through it.
+    [0, 3.45, (ctx, t) => {
+      const lie = easeInOut(seg(t, 1.35, 2.35)), swing = easeInOut(seg(t, 1.55, 2.5));
+      const ang = lerp(0, -1.1, lie), hx = lerp(560, 620, lie), hy = lerp(SEAT - 62, SEAT - 85, lie);   // hips stay on the seat
+      const push = easeInOut(seg(t, 2.6, 3.45));
+      ctx.save(); cam(ctx, lerp(540, 500, push), lerp(1190, 1180, push), lerp(1.08, 1.3, push), 540, 1150);
+      couchBack(ctx);
+      const squash = 1 - 0.12 * Math.sin(Math.PI * seg(t, 2.0, 2.3)) - 0.05 * lie;        // dents as his head lands on it
+      ctx.save(); ctx.translate(290, 1290); ctx.scale(1 + (1 - squash) * 0.5, squash); ctx.translate(-290, -1290);
+      pillow(ctx, [290, 1262], 140, 56, -0.06);                                            // stays put in the corner; his head comes to rest on top of it
       ctx.restore();
-    }],
-    // out cold: much closer on the head, mouth hanging open, snoring with the audio
-    [2.55, 3.45, (ctx, t) => {
-      const ang = 0.95, k = loud('powernap', t);
-      const [hx, hy] = frame(CFX, CFY, ang)(HEAD * CS, 0);
-      ctx.save(); cam(ctx, hx - 30, hy + 30, lerp(1.8, 1.86, seg(t, 2.55, 3.45)), 430, 1000);
-      bedClose(ctx);
-      inBed(ctx, ang, { ...slack(clamp(0.7 + 0.4 * k, 0.7, 1), k), tilt: -0.22 });
+      const heavy = lerp(0.42, 0.78, easeInOut(seg(t, 1.6, 3.0)));                         // lids getting heavier as he goes
+      const said = talk(t, ...SAID.alrighty) ?? talk(t, ...SAID.nap) ?? talk(t, ...SAID.huh);
+      const pose = t >= 3.34 ? { lid: 1, brow: -0.15, mouth: 'o', open: 0.12, tilt: -0.1 }   // out (after "huh")
+        : { lid: Math.max(heavy, blink(t, 2.7, 0.3), easeInOut(seg(t, 3.22, 3.34))), lowLid: 0.2,   // lids slide shut over the last few frames brow: -0.25, pupil: 9, lookX: 0.3, lookY: -0.2, tilt: -0.08,
+            ...(said ?? (t < 0.44 ? { mouth: 'smile' } : { mouth: 'flat' })) };            // content smile before he speaks
+      ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
+      Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, legs: false,
+        // the elbow bend blends smoothly from the sitting pose to the lying one (never
+        // switched or re-solved mid-move, which flipped the elbow for a few frames)
+        ...glide(1, [40, -150], [58, -150], lie),     // top arm: hand on his knee, then lying along his side, hand on his hip
+        ...glide(-1, [-40, -150], [-85, -190], lie, 'out', 'out'),   // bottom arm: hand slides off the knee and comes to rest on the cushion in front of his hip, visible (elbow outside, never across the chest)
+        ...pose, ...(t > 2.6 ? { mouthScale: 1.5 } : {}) });                                 // mouth bigger while his head is on its side
       ctx.restore();
-    }],
-    // FEW HOURS LATER: the room, clock spinning, a terrible night
-    [3.45, 6.45, (ctx, t) => {
-      const toss = seg(t, 4.3, 5.1), fall = seg(t, 5.12, 5.7), lift = seg(t, 5.9, 6.2);
-      ctx.save(); cam(ctx, 540, 1250, 1.3, 540, 1150);
-      Brush.setWeight(1.2);
-      room(ctx);
-      clock(ctx, 230, 930, 75, t);
-      bed(ctx, -0.07 * easeOut(fall));
-      const s = WS, headDown = 125 * s;     // his head is wider than his body: rest the head, not the chest
-      if (t < 5.12) {
-        // asleep, then tossing: rolls and kicks at uneven moments, kicking the blanket off
-        const beat = Math.floor((t - 4.3) / 0.13), jit = toss > 0 && toss < 1 ? hh(beat) - 0.5 : 0;
-        const ang = Math.PI / 2 + jit * 0.35, fx = MX0 + 40 + jit * 30, fy = MTOP - headDown - Math.abs(jit) * 30;
-        pillow(ctx, [MX0 + 40 + HEAD * WS + 20, MTOP - 40], 110, 48, -0.05);
-        lying(ctx, fx, fy, ang, s, { lid: 1, mouth: 'flat', tilt: -0.5, step: toss > 0 ? (hh(beat + 5) - 0.5) * 2.4 : 0,
-          ...(toss > 0 ? Arms.both([230 + 40 * hh(beat + 2), -230 - 60 * hh(beat + 3)], 'down') : {}) });
-        if (toss < 0.35) blanket(ctx, frame(fx, fy, ang), s, 0.7, 20);
-        else drape(ctx, 0);
-      } else {
-        // rolls off the front edge (toward us) in an arc, lands on the floor in
-        // front of the bed, and then, still asleep, floats up spread-eagled
-        const e = easeInOut(fall), floorY = WALL + 150;
-        const fx = MX0 + 60 + 50 * e, fyFall = lerp(MTOP - headDown, floorY, e) - Math.sin(Math.PI * e) * 90;
-        const fy = lift > 0 ? lerp(floorY, MTOP - 230, easeOutBack(lift)) + Math.sin((t - 6.2) * 6) * 5 * seg(t, 6.2, 6.3) : fyFall;
-        const ang = Math.PI / 2 + 0.3 * Math.sin(Math.PI * e) * (1 - lift) - 0.25 * lift;
-        pillow(ctx, [MX0 + 40 + HEAD * WS + 20, MTOP - 40], 110, 48, -0.05);
-        drape(ctx, e);
-        if (lift === 0) if (e > 0.85) fill(ctx, Brush.ellipsePts(fx + 200, floorY + 100, 250, 14, 14), '#cfcfcf', 0.4);   // his shadow on the floor
-        lying(ctx, fx, fy, ang, s, { lid: 1, mouth: 'o', open: 0.15, tilt: -0.5,
-          step: lerp(0.6 * e, 1.6, lift), ...Arms.both([lerp(160, 230, lift), lerp(-330, -470, lift)], 'out') });
+      couchFront(ctx);
+      // his legs: sitting, thighs over the seat edge and shins down the front of the
+      // cushion to the floor; lying, along the top of the seat with one knee up.
+      // They swing up in an arc between the two, always in front of the seat.
+      for (const side of [-1, 1]) {
+        const hip = [hx + Math.cos(ang) * side * 28 - Math.sin(ang) * 33, hy + Math.sin(ang) * side * 28 + Math.cos(ang) * 33];
+        const sitK = side < 0 ? [hx - 52, SEAT + 14] : [hx + 40, SEAT + 14], sitF = side < 0 ? [hx - 78, FLOOR - 22] : [hx + 46, FLOOR - 22];   // one knee angled out
+        const lieK = side > 0 ? [hx + 90, SEAT - 118] : [hx + 120, SEAT - 40], lieF = side > 0 ? [hx + 140, SEAT - 26] : [hx + 190, SEAT - 20];   // upper knee up, lower leg straight; two feet apart on the seat   // feet resting on the seat, short of the right armrest   // upper leg's knee up, lower leg straight
+        const arc = Math.sin(Math.PI * swing) * 60;                                         // lifted up and over the seat edge on the way
+        const knee = [lerp(sitK[0], lieK[0], swing), lerp(sitK[1], lieK[1], swing) - arc];
+        const foot = [lerp(sitF[0], lieF[0], swing), lerp(sitF[1], lieF[1], swing) - arc * 1.4];
+        const leg = [hip, knee, foot];
+        const edge = [[lerp(hip[0], knee[0], 0.45), lerp(hip[1], knee[1], 0.45)], knee, foot];   // the edge starts below the shorts, so the hip end never shows a grey ring
+        stroke(ctx, edge, { w: 36, taper0: 0, taper1: 0, color: '#6a6a6a' });   // a thin couch-grey edge round both legs (on the upper leg it also keeps the two legs apart)
+        stroke(ctx, leg, { w: 28, taper0: 0, taper1: 0 });                                   // black legs, as in his design (the same ink as his shorts)   // ...dark trousers inside, so the legs read apart
+        fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 42, 21, 10), '#6a6a6a', 0.8);
+        fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 38, 17, 10), INK, 0.8);   // shoe, tucked onto the end of the shin
       }
-      Brush.setWeight(1);
       ctx.restore();
     }],
-    // sits up into a close-up: bleary, stubbled, "Where am I?"
-    [6.45, 9.21, (ctx, t) => {
-      const s = 2.5, rise = easeOut(seg(t, 6.45, 6.68)), fy = lerp(2800, 2210, rise);
+    // FEW HOURS LATER: just the clock, its hands whipping round
+    [3.45, 6.45, (ctx, t) => {
       ctx.fillStyle = BACKDROP; ctx.fillRect(0, 0, 1080, 1920);
-      const hx = 540, hy = fy - HEAD * s, asking = t >= 8.1 && t < 8.75;
-      Hero.main(ctx, { x: hx, y: fy, s, lid: 0.55, flatLid: true, lowLid: 0.35, pupil: 7, lookX: -0.2,
-        weight: -1,
-        ...Arms.arm(-1, [-150, -150], 'out'), ...Arms.arm(1, [140, -160], 'out'),   // one hand propped on the blanket, the other slack
-        ...(asking ? { ...talk(t, 3), browL: -0.5, browLiftL: 6, browR: -0.2, browLiftR: 14, mouthScale: 1.3 } : { mouth: 'flat', brow: -0.1 }), shadow: false });
-      stubble(ctx, hx, hy, s);
-      const lap = [[-80, 1790], [200, 1745], [420, 1778], [650, 1738], [900, 1772], [1160, 1748], [1160, 2000], [-80, 2000]];
-      shape(ctx, lap, '#bdbdbd', 12);                                            // the blanket bunched up in his lap
-      stroke(ctx, [[330, 1800], [380, 1880]], { w: 6 }); stroke(ctx, [[760, 1792], [720, 1872]], { w: 6 });
+      clock(ctx, 540, 1200, 430, t);
+    }],
+    // the dramatic close-up: he heaves himself up into camera, bearded, half
+    // asleep, "Where am I?", and holds the groggy look
+    [6.45, END, (ctx, t) => {
+      ctx.fillStyle = BACKDROP; ctx.fillRect(0, 0, 1080, 1920);
+      const up = seg(t, 6.45, 7.0), e = easeOutBack(up);                                      // lurches up and toward the lens, overshoots, settles
+      const s = lerp(1.6, 2.35, easeOut(up)), fy = lerp(2420, 2150, e);   // grows as he comes at the camera; chest and shoulders above the cushion
+      const asking = t >= 8.17 && t < 8.8, after = t >= 8.8;
+      // groggy: one eye nearly shut, the other half open, brows sagging, jaw hanging slack
+      const sag = Math.sin(Math.PI * seg(t, 9.55, 9.95));                                   // the lids sag nearly shut and catch once in the hold
+      // like the references: eyes all but shut (sagging closed lines), bags under
+      // them, mouth hanging open with a drip of drool, brows relaxed in their usual place
+      // like the references: head lolled right over, eyes shut under heavy drooping
+      // lids with lashes and dark shading, mouth hanging open, drool, sleep bubbles
+      // eyes start shut, then he drags them open trying to wake up, sinking shut in
+      // between; they never get past half open, and the lid cuts his pupils in half
+      const tries = [[7.1, 7.55, 0.22], [7.65, 8.05, 0.36], [8.1, 99, 0.46]];   // [open, close again, how far open (0..0.5)]
+      let open = 0;
+      for (const [a, b, o] of tries) if (t >= a && t < b) open = lerp(0, o, easeInOut(seg(t, a, a + 0.3))) * (b < 99 ? 1 - seg(t, b - 0.1, b) ** 2 : 1);   // drag up slowly, drop back fast
+      if (t > 9.3 && t < 9.65) open = 0.46 * (1 - Math.sin(Math.PI * seg(t, 9.3, 9.65)));   // a slow heavy blink
+      // "Where am I?" from the aligned phones: each sound gets its own opening (lips
+      // shut on the m of "am", rounded for the w, wide on the vowels); shut (a slack
+      // wavy line) in the silences before and after the line
+      const SIZE = { rest: 0.06, mbp: 0, fv: 0.1, teeth: 0.14, ee: 0.22, lth: 0.3, oo: 0.26, half: 0.38, oh: 0.48, open: 0.62, wide: 0.7 };
+      const said = talk(t, ...SAID.where);
+      const mouthOpen = said ? SIZE[said.viz.kind] ?? 0.3 : 0.05;
+      const droopy = { noEyes: true, halfOpen: open, slackKind: said?.viz.kind, noBrows: true, noMouth: true, drool: lerp(0.2, 1, seg(t, 7.0, 10.4)) };
+      const groggy = t > 7.0 ? lerp(0, 0.3, easeInOut(seg(t, 7.0, 8.0))) : 0;                // head lolls right over to one side, and holds
+      Hero.mainBearded(ctx, { t, x: 540, y: fy, s, shadow: false, weight: -1, tilt: lerp(-0.35, 0.04, easeOut(up)) + groggy,
+        ...Arms.arm(-1, [-250, -120], 'out'), ...Arms.arm(1, [250, -120], 'out'), cleanTorso: true,   // clean hoodie outline; arms spread wide, hands planted on the cushion
+        ...droopy,
+        slackMouth: mouthOpen });                 // jaw hanging slack
+      for (let i = 0; i < 3; i++) {   // sleep bubbles drifting up off him, each popping and starting again
+        // staggered: each bubble starts one third of a cycle after the last, grows in
+        // from nothing and shrinks away at the top (never blinks on or off)
+        const u = (t - 7.0) / 2.2 - i / 3;
+        if (u < 0) continue;
+        const ph = u % 1, grow = easeOut(clamp(ph / 0.12)) * (1 - easeInOut(clamp((ph - 0.9) / 0.1)));
+        if (grow <= 0.01) continue;
+        const bx = 120 - 25 * i + 20 * Math.sin((t + i) * 2), by = 760 - 240 * ph, br = (18 + 26 * ph * (1 - 0.3 * i)) * grow;
+        // one closed outline with its own fixed seed: boils only on the beat, no overshoot nub
+        const r = Brush.random(4900 + i), ring = Brush.ellipsePts(bx, by, br * (1 + (r() - 0.5) * 0.08), br * (1 + (r() - 0.5) * 0.08), 48, r() * 3);
+        ctx.beginPath(); ring.forEach(([px, py], k) => k ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath();
+        ctx.fillStyle = '#e6edf2'; ctx.fill(); ctx.lineWidth = 6 * Brush.getWeight(); ctx.strokeStyle = Brush.INK; ctx.stroke();
+        stroke(ctx, [[bx - br * 0.5, by - br * 0.1], [bx - br * 0.3, by - br * 0.5]], { w: 5, color: W, taper0: 0.2, taper1: 0.2, seed: 4910 + i });
+      }
+      couchShape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
+      stroke(ctx, [[540, 1840], [540, 1940]], { w: 6, seed: 4998 });   // fixed seed: boils only on the beat
     }],
   ];
 
   return {
-    title: '', subtitle: '', duration: 9.21,
+    title: '', subtitle: '', duration: END,
     draw(ctx, t) {
       const shot = shots.find(([a, b]) => t >= a && t < b) ?? shots[shots.length - 1];
       ctx.save(); shot[2](ctx, t); ctx.restore();

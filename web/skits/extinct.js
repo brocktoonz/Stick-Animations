@@ -395,7 +395,7 @@ Skits.extinct = (() => {
       const pops = [[1.8, 225, 0.8, FLOOR - 70, (x, y) => A.mammoth(ctx, { x, y, s: 0.8, t, eyes: 'happy' })],
                     [2.05, 850, 1.0, FLOOR - 80, (x, y) => A.trex(ctx, { x, y, s: 1.0, t, dir: -1, snarl: t > 2.3 })],
                     [2.3, 420, 0.7, FLOOR + 201, (x, y) => A.dodo(ctx, { x, y, s: 0.7, t })],
-                    [2.55, 800, 0.7, FLOOR + 221, (x, y) => A.raptor(ctx, { x, y, s: 0.7, t, walk: true })]];
+                    [2.55, 800, 0.7, FLOOR + 221, (x, y) => A.raptor(ctx, { x, y, s: 0.7, t })]];
       for (const [t0, x, sc, y, draw] of pops) {
         const k = seg(t, t0, t0 + 0.28);
         if (k > 0) shadow(ctx, x, 110 * sc * Math.min(1, k * 2), y + 6);
@@ -407,7 +407,7 @@ Skits.extinct = (() => {
     // "but there's no-" ... Ludwig cuts in off-screen ("other option"): stay
     // on Nick and let him go blank while Ludwig speaks
     // his raised hand drops to his side over a few frames as he goes blank
-    [3.35, 4.7, (ctx, t) => { const d = easeInOut(seg(t, 4.0, 4.2)), hand = [lerp(170, 120, d), lerp(-400, -150, d)];
+    [3.35, 4.7, (ctx, t) => { const d = easeInOut(seg(t, 4.0, 4.2)), hand = [lerp(185, 120, d), lerp(-445, -150, d)];
       mediumNick(ctx, t, t < 4.0
         ? { ...E.happy, pointR: -1.2, ...Ar.arm(1, hand, 'down', true), ...talkLine(t, 2) }
         : { ...E.stunned, lookX: 0.75, ...Ar.arm(1, hand, 'down', d < 0.5) }); }],
@@ -415,7 +415,7 @@ Skits.extinct = (() => {
     [4.7, 6.0, (ctx, t) => single(ctx, t, 'lud', { ...E.smirk, mouth: 'smirk', lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06,
       crossArms: true }, lerp(1.35, 1.5, easeInOut(seg(t, 4.7, 6.0))), 1160)],
     // "what do you mean other option"
-    [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...talkLine(t, 4) })],
+    [6.0, 7.0, (ctx, t) => mediumNick(ctx, t, { ...E.confused, ...Ar.arm(1, [168, -505], 'out', true, 150), ...talkLine(t, 4) })],   // scratching hand just outside the hair line, so no strand ends on it
     // "give me the other option" (points at him) / "why you don't want that?":
     // fastest stretch, and Ludwig points at Nick, so both in one two-shot
     [7.0, 7.72, (ctx, t) => twoShot(ctx, t, { ...E.confused, mouth: 'flat', weight: TS_WN },
@@ -460,7 +460,7 @@ Skits.extinct = (() => {
     // "...or get an equal amount of new animals": cutaway, new creatures pop in
     [14.0, 16.0, (ctx, t) => {
       newWorld(ctx, t);
-      const pops = [[14.1, 225, 1.2, () => A.fishLegs(ctx, { x: 225, y: FLOOR + 60, s: 1.2, t, walk: true })],
+      const pops = [[14.1, 225, 1.2, () => A.fishLegs(ctx, { x: 225, y: FLOOR + 60, s: 1.2, t })],
                     [14.55, 570, 1.4, () => A.longCat(ctx, { x: 570, y: FLOOR + 20, s: 1.4, t })],
                     [15.0, 895, 1.1, () => A.wingPig(ctx, { x: 895, y: FLOOR - 120, s: 1.1, t, dir: -1 })]];
       for (const [t0, x, sc, draw] of pops) {
@@ -482,7 +482,7 @@ Skits.extinct = (() => {
       stage(ctx);
       A.wingPig(ctx, { x: 960, y: FLOOR - 700, s: 0.65, t, dir: -1 });
       shadow(ctx, 900, 55, FLOOR + 6);
-      A.fishLegs(ctx, { x: 900, y: FLOOR, s: 0.8, t, walk: true, dir: -1 });
+      A.fishLegs(ctx, { x: 900, y: FLOOR, s: 0.8, t, dir: -1 });
       // wind-up, contact at 17.12, then a
       // visible arc off the left edge
       const wind = seg(t, 16.98, 17.08), kick = seg(t, 17.08, 17.14), fly = seg(t, 17.14, 17.5);
@@ -491,7 +491,8 @@ Skits.extinct = (() => {
       const kickAmt = t < 17.08 ? -0.35 * easeOut(wind) : kick < 1 ? lerp(-0.35, 1, kick) : 1 - easeInOut(seg(fly, 0.35, 1));
       // smug the whole time: eyes closed, arms folded, and he never opens his
       // eyes or changes expression, even for the kick
-      lud(ctx, { t, x: 640, ...E.smirk, lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06, crossArms: true,
+      // (between his two lines the mouth holds the same closed rest shape the lip sync uses)
+      lud(ctx, { t, x: 640, ...E.smirk, mouth: 'talk', viz: { kind: 'rest', open: LipSync.OPEN.rest, intensity: 1, smile: 0, side: 1, var: 0 }, lid: 1, lowLid: 0, brow: 0.45, tilt: -0.06, crossArms: true,
                  ...talkLine(t, t < 17.0 ? 13 : 14),
                  kick: kickAmt, lean: -0.1 * kick * (1 - fly) + 0.05 * wind, ...(t > 16.98 ? { weight: -0.6 } : {}) });
       // a small raptor wanders in on its own from the left (separate from the

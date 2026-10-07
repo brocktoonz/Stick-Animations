@@ -21,7 +21,7 @@ const Brush = (() => {
 
   // Call once per frame. Lines re-jitter every `boilEvery` frames.
   function frame(f, boilEvery = 3) {
-    boilSeed = Math.floor(f / boilEvery) + 1;
+    boilSeed = globalThis.NO_BOIL ? 1 : Math.floor(f / boilEvery) + 1;   // NO_BOIL: frozen lines, for checking motion only
     counter = 0;
     weight = 1;
   }
