@@ -47,7 +47,9 @@ disagree, the rule wins.
   `Arms.arm(..., 'down')` (that bows the elbow in); blend to `'rest'` instead.
 - **No white borders round arms or brows** (user decision): arms are one ink
   outline with the sleeve colour inside, on light or dark clothes alike. Brows
-  are plain ink strokes with no white edge, on everyone.
+  are plain ink strokes with no white edge, on everyone. Brows are drawn under the hair, so a
+  fringe covers them cleanly; the main character's fringe points are lifted a
+  little (`SPIKES_UP`) so his brows sit on bare forehead (user decision).
 - **Suits** (`Cameos.suited`): the jacket runs straight into trousers of the
   same colour; no separate seat block under the jacket (it read as a skirt).
 - **Hands are plain circles** (Animal Crossing style): no thumb, no fingers (not

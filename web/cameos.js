@@ -918,6 +918,8 @@ const Cameos = (() => {
      [-0.4, -0.48], [-0.55, -0.66], [-0.75, -0.46], [-0.88, -0.2]],
     [[[-0.3, -0.8], [-0.2, -1.1]], [[0.3, -0.8], [0.22, -1.1]]]];
   const spikes = outlineHair(...SPIKES);
+  // the same hair with the fringe's points lifted a little, so plain-ink brows sit on bare forehead below it (user decision)
+  const SPIKES_UP = [SPIKES[0], SPIKES[1].map(([x, y]) => [x, y < -0.3 ? y - 0.13 : y]), SPIKES[2]];
 
   // 4. Wavy shoulder length with bangs (same one-silhouette method as Nick)
   const BANGS = [
@@ -935,7 +937,7 @@ const Cameos = (() => {
   const SHADES = { blond: [W, INK], light: ['#d4d4d4', INK], brown: ['#8f8f8f', '#e0e0e0'],
                    dark: ['#555555', '#bdbdbd'], black: [INK, '#8a8a8a'] };
   const spikyShades = Object.fromEntries(Object.entries(SHADES).map(([k, [fillC, lineC]]) => [k,
-    build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: outlineHair(...SPIKES, fillC, { lineColor: lineC }), browDy: 20 }), detail: hoodieFront })]));   // brows a touch lower, clear of the spiky fringe
+    build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', head: head({ hair: outlineHair(...SPIKES_UP, fillC, { lineColor: lineC }), browDy: 0 }), detail: hoodieFront })]));   // brows a touch lower, clear of the spiky fringe
 
   // A few months' growth: a full scraggly beard from the sideburns down past
   // the chin (tufts poking out of the edge) and a moustache, on the spiky guy.
