@@ -46,8 +46,8 @@ disagree, the rule wins.
   hand-code a rest target, and don't solve a resting hand with
   `Arms.arm(..., 'down')` (that bows the elbow in); blend to `'rest'` instead.
 - **No white borders round arms or brows** (user decision): arms are one ink
-  outline with the sleeve colour inside, on light or dark clothes alike. Speed's
-  brows have no white edge either.
+  outline with the sleeve colour inside, on light or dark clothes alike. Brows
+  are plain ink strokes with no white edge, on everyone.
 - **Suits** (`Cameos.suited`): the jacket runs straight into trousers of the
   same colour; no separate seat block under the jacket (it read as a skirt).
 - **Hands are plain circles** (Animal Crossing style): no thumb, no fingers (not

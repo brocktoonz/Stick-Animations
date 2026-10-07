@@ -275,11 +275,14 @@ Skits.presentation = (() => {
   // Four seated at the table (front row), two standing behind against the wall.
   // Everyone looks screen-right, at him just off frame.
   const TABLE_Y = 1406, BACK_FLOOR = 1112;   // the standing two are raised clear of the seated heads, folded arms in view
+  // The shared confused face (one brow up, one down, small 'o' mouth) without its head-scratching arm:
+  // they're seated at the table, eyes on him. (User: the blank faces read as if nothing was happening.)
+  const { armR, bendR, armRFront, ...CONFUSED } = Emotions.confused;
   const SEATED = [
-    { who: 'nick', x: 215, s: 0.68, look: 0.7, emo: { ...Emotions.unimpressed, lookX: 0.8 }, blink: 0.4 },
+    { who: 'nick', x: 215, s: 0.68, look: 0.7, emo: { ...CONFUSED, lookX: 0.8, lookY: 0 }, blink: 0.4 },
     { who: 'beast', x: 432, s: 0.68, look: 0.7, emo: { ...Emotions.stunned }, blink: 1.6 },
-    { who: 'squeex', x: 650, s: 0.68, look: 0.7, emo: { mouth: 'flat', lid: 0.3, brow: -0.15, lookX: 0.7, pupil: 9 }, blink: 2.3 },
-    { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...Emotions.unimpressed, lookX: 0.5 }, blink: 0.9 },
+    { who: 'squeex', x: 650, s: 0.68, look: 0.7, emo: { ...CONFUSED, browL: -0.2, browLiftL: -16, browR: 0.6, browLiftR: 8, lookX: 0.7, lookY: 0.05 }, blink: 2.3 },   // the other brow up, so the three don't match
+    { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...CONFUSED, lookX: 0.5, lookY: -0.05 }, blink: 0.9 },
   ];
   const STANDING = [
     { who: 'ludwig', x: 318, s: 0.62, emo: { ...Emotions.deflated, lookX: 0.7, crossArms: true }, blink: 1.1 },

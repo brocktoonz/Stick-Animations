@@ -29,7 +29,8 @@ Beats, as animated:
             ("some minamon rolls", 3.62-4.62)
 - 4.62-5.20 he rocks back, then lunges into the lens: "to men"
 - 5.20-6.85 the room: Nick, MrBeast, Squeex and Slime seated at the table,
-            Ludwig and Speed standing behind with arms folded; blank stares
+            Ludwig and Speed standing behind with arms folded; Nick, Squeex and
+            Slime confused (user's direction), MrBeast stunned, staring
             at him (just off frame right) while his voice goes on
             ("some minamon rolls")
 - 6.85-7.95 he springs up into frame, fists pumped out wide ("mini mum mom um")

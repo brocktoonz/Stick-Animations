@@ -81,7 +81,7 @@ const Cameos = (() => {
       if (!p.noEyes) eyes(ctx, fx, p.squint ? -22 : -6, o.eyeLop ? { eyeLop: o.eyeLop, ...p } : p, 1, !!o.lashes);   // noEyes: a front() hook draws its own   // rage eyes sit higher, clear of the teeth
       if (p.squint) {   // rage: the brow is the eye's top edge; add stress lines between the brows
         for (const dx of [-10, 0, 10]) stroke(ctx, [[fx + dx, -106], [fx + dx * 1.2, -80]], { w: 4, taper0: 0.3, taper1: 0.3 });
-      } else if (!p.noBrows) brows(ctx, fx, -62, p, 1, o.browW ?? 9, o.browHalo ?? true);   // browHalo false: no white edge (Speed)
+      } else if (!p.noBrows) brows(ctx, fx, -62, p, 1, o.browW ?? 9);   // no white edge round brows, on anyone (user decision)
       const mdy = (typeof o.mouthDy === 'function' ? o.mouthDy(p) : o.mouthDy ?? 0) * (1 - open);   // eases off as a yell opens, so a big mouth stays inside the chin
       if (p.noMouth) { /* a front() hook draws the mouth */ }
       else if (rage) mouth(ctx, fx + 4, 34 + mdy + jaw * 0.2, p, 0.95);   // fills the lower half of the face
@@ -206,7 +206,7 @@ const Cameos = (() => {
   // chest, buttons and a waist sash.
   const speed = build({
     skin: GREY, shirt: GREY,
-    head: head({ skin: GREY, hair: twists(), hat: strawHat, browHalo: false }),   // no white border round his brows (user decision)
+    head: head({ skin: GREY, hair: twists(), hat: strawHat }),
     detail: (ctx, n, h) => {
       for (const side of [-1, 1]) {   // vest panels, open down the middle
         const panel = [[side * 48, n], [side * 66, n + 64], [side * 68, h - 4], [side * 30, h - 4], [side * 22, n + 60], [side * 20, n + 4]];
