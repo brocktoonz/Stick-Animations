@@ -57,15 +57,6 @@ Skits.morningself = (() => {
   const DAY = { ceiling: '#f2f2f2', wall: '#dedede', floor: '#d0d0d0', skirting: '#f4f4f4', pane: W, curtain: '#a8a8a8', frame: '#f4f4f4',
                 head: '#8f8f8f', stand: '#9a9a9a', standTop: '#b4b4b4', mattress: '#dcdcdc', blanket: '#bdbdbd', pillow: '#d6d6d6', shade: '#cfcfcf' };
   const FLOOR_Y = 1430, CEIL_Y = 90;
-  // a wall clock left of the caption: just past 1 at night, 6 in the morning
-  function clock(ctx, c, day) {
-    const x = 108, y = 486, r = 62, face = Brush.ellipsePts(x, y, r, r, 20);
-    fill(ctx, face, c.frame, 0.4); outline(ctx, face, { w: 10 });
-    for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; stroke(ctx, [[x + Math.sin(a) * r * 0.74, y - Math.cos(a) * r * 0.74], [x + Math.sin(a) * r * 0.86, y - Math.cos(a) * r * 0.86]], { w: 4 }); }
-    const hand = (a, l, w) => stroke(ctx, [[x, y], [x + Math.sin(a) * l, y - Math.cos(a) * l]], { w, taper0: 0, taper1: 0.3 });
-    if (day) { hand(Math.PI, r * 0.5, 9); hand(0.02, r * 0.72, 6); }   // 6:00, when the alarms start else { hand(Math.PI / 6 + 0.1, r * 0.5, 9); hand(Math.PI * 0.4, r * 0.72, 6); }
-    blob(ctx, x, y, 6, 6, { fill: INK, w: 0, n: 6 });
-  }
   const WIN = [630, 650, 890, 990];                    // window, right of the bed
   const PIC = [110, 690, 330, 900];                    // framed picture, left wall
   const STAND = { x0: 750, x1: 1000, top: 1330, bot: 1478, back: 40 };   // a low nightstand beside the bed's head end, top about level with his shoulder
@@ -148,7 +139,6 @@ Skits.morningself = (() => {
     for (const [fx, dx] of [[60, -240], [330, -110], [610, 40], [880, 230], [1060, 330]]) stroke(ctx, [[fx, FLOOR_Y + 4], [fx + dx, 1940]], { w: 5 });   // floorboards
     fill(ctx, box(-100, -100, 1200, CEIL_Y, 4), c.ceiling, 0);               // ceiling
     panel(ctx, box(-60, CEIL_Y, 1140, CEIL_Y + 30, 6), c.skirting, 8);       // cornice
-    clock(ctx, c, day);
     picture(ctx, c);
     windowSet(ctx, c, day);
     nightstand(ctx, c);
