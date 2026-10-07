@@ -47,7 +47,9 @@ const Cameos = (() => {
     }
     const dy = S.neckY + 320;
     const shift = a => a && [a[0], a[1] + dy];
-    return (ctx, p) => figure(ctx, { mouth: 'smile', ...p, ...(dy ? { armL: shift(p.armL), armR: shift(p.armR) } : {}) }, S);
+    const draw = (ctx, p) => figure(ctx, { mouth: 'smile', ...p, ...(dy ? { armL: shift(p.armL), armR: shift(p.armR) } : {}) }, S);
+    draw.with = patch => build({ ...o, ...patch(o) });   // the same character with some options changed (e.g. dressed in a suit, see suited)
+    return draw;
   }
 
   // ---------- head ----------
@@ -1612,8 +1614,34 @@ const Cameos = (() => {
       head: head({ skin: SQ_SKIN, hair: sqHair(SQ_TUFT), beard: sqBeard(), front: sqStache, hat: headphones, browW: 9 }),
       detail: boxrTee }),
     overshirt: sqC(sqBeard({ full: 0.12, flecks: true }), sqStache),
-    beards: { trimmed: sqC(beardTrim, stacheTrim), full: (draw => (ctx, p) => draw(ctx, sqFace(p)))(sqC(beardFull2, stacheFull2, { mouthDy: p => FULL_MOUTH_DY + (p.smallMouth ? 16 : 0) })), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
+    beards: { trimmed: sqC(beardTrim, stacheTrim), full: (function wrap(draw) { const f = (ctx, p) => draw(ctx, sqFace(p)); f.with = patch => wrap(draw.with(patch)); return f; })(sqC(beardFull2, stacheFull2, { mouthDy: p => FULL_MOUTH_DY + (p.smallMouth ? 16 : 0) })), fullOld: sqC(beardFull, stacheFull), inked: sqC(beardInked, stacheInked) },
   };
 
-  return { squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, slimeRoach, originals, originals2, men, spikyShades, spikyBearded, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
+  // ---------- suits ----------
+  // Any cast member in a business suit: the same head, a jacket in `jacket`
+  // (sleeves too, always long), a white shirt V with lapels, a tie in `tie`
+  // and two buttons. Trousers are the default dark bottoms and ink legs.
+  //   const nickSuit = Cameos.suited(Cameos.nick, { jacket: '#2e2e2e', tie: '#5b7bb5' })
+  const suitFront = (tie, sd) => (ctx, n, h) => {
+    // every line has its own fixed seed, so nothing drawn before it (a mouth, another character) re-rolls it off the boil beat
+    const ring = (pts, w, seed) => stroke(ctx, [...pts, pts[0], pts[1]], { w, taper0: 0, taper1: 0, minW: 1, seed });
+    fill(ctx, [[-34, n - 2], [34, n - 2], [0, n + 104]], W, 0.3);   // shirt showing in the jacket's V
+    const t = [[-9, n + 24], [9, n + 24], [13, n + 84], [0, n + 100], [-13, n + 84]];
+    fill(ctx, t, tie, 0.3); ring(t, 6, sd + 1);
+    const knot = Brush.ellipsePts(0, n + 13, 13, 11, 10);
+    fill(ctx, knot, tie, 0.3); ring(knot, 6, sd + 2);
+    for (const side of [-1, 1]) {   // lapels: from the collar down to the V's point, with a notch
+      stroke(ctx, [[side * 38, n - 2], [side * 22, n + 34], [side * 34, n + 46], [0, n + 108]], { w: 7, taper0: 0.1, taper1: 0.2, seed: sd + 4 + side });
+      stroke(ctx, [[side * 24, n - 2], [side * 8, n + 16]], { w: 6, taper0: 0.2, taper1: 0.3, seed: sd + 8 + side });   // shirt collar points
+    }
+    stroke(ctx, [[0, n + 108], [2, h - 6]], { w: 6, taper0: 0.1, taper1: 0.1, seed: sd + 10 });   // the jacket's closing edge
+    [0.42, 0.72].forEach((k, i) => { const b = Brush.ellipsePts(14, n + 108 + (h - n - 108) * k, 6, 6, 8); fill(ctx, b, W, 0.2); ring(b, 4, sd + 12 + i); });
+  };
+  const suited = (draw, { jacket, tie, seed = 9300 }) => draw.with(o => {
+    const body = { ...(o.body ?? {}) };
+    delete body.legColor; delete body.bottoms;   // plain dark suit trousers, not the character's own
+    return { shirt: jacket, sleeve: jacket, sleeveHem: undefined, sleeveFill: undefined, body, detail: suitFront(tie, seed) };
+  });
+
+  return { suited, squeex, speed, ludwig, beast, nick: nickMidPart, nickOld: nickBack.same, slime, slimeRoach, originals, originals2, men, spikyShades, spikyBearded, spikyAccents, nickAlts, nickFlow, nickOutline, nickBack, nickMidPart, nickMidLayered, props: { cash, bigCheck }, parts: { build, head, hh, RX, RY } };
 })();

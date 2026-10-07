@@ -148,6 +148,11 @@ const Brush = (() => {
     if (o.w !== 0) outline(ctx, pts, { w: o.w ?? 8, jit: o.jit ?? 1.5, wob: o.wob ?? 1 });
   }
 
+  // Restart the per-frame stroke count at `base`, so a character drawn after it
+  // keeps the same randomness even when something drawn before it (another
+  // character's blink or mouth) uses a different number of strokes.
+  function reseed(base) { counter = base; }
+
   // A fresh random source tied to the current boil tick (for shakes, bursts).
   function random(seed = 0) { return mulberry(seed * 131 + boilSeed * 7919); }
 
@@ -156,5 +161,5 @@ const Brush = (() => {
   function setWeight(k) { weight = k; }
   const getWeight = () => weight;
 
-  return { INK, frame, setWeight, getWeight, setJitter, stroke, fill, outline, blob, ellipsePts, spline, random };
+  return { INK, frame, reseed, setWeight, getWeight, setJitter, stroke, fill, outline, blob, ellipsePts, spline, random };
 })();
