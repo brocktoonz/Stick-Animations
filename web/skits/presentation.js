@@ -187,7 +187,7 @@ Skits.presentation = (() => {
     const sp = talk(t, keys(t, [[0, 0.7], [1.2, 0.7], [2.0, 0.35]]));
     return {
       ...face(t), brow: keys(t, [[0, -0.1], [1.2, -0.25], [2.1, -0.55]]), pupil: keys(t, [[0, 12], [1.4, 12], [2.1, 9]]),
-      eyeScale: keys(t, [[0, 1], [1.4, 1], [2.1, 1.12]]), lookX: keys(t, [[0.26, 0.6], [0.38, 0.95], [0.5, 0.95], [0.62, 0.6]]), lookY: keys(t, [[0.26, 0], [0.38, 0.25], [0.5, 0.25], [0.62, 0]]),
+      eyeScale: keys(t, [[0, 1], [1.4, 1], [2.1, 1.12]]), lookX: keys(t, [[0.26, 0.6], [0.38, 0.95], [0.6, 0.95], [0.75, 0.75]]), lookY: keys(t, [[0.26, 0], [0.38, 0.25], [0.6, 0.25], [0.75, 0.1]]),   // looks at the slide as he points, then out toward the room
       lid: blink(t, 4, 2.2),
       tilt: keys(t, [[0, 0.04], [0.3, -0.06], [0.7, 0.02], [1.2, 0.07], [1.7, -0.04], [2.3, 0.05]]),
       lean: keys(t, [[0, 0.0], [0.35, -0.03], [0.8, 0.03], [1.5, 0.05], [2.3, 0.06]]),
@@ -195,7 +195,7 @@ Skits.presentation = (() => {
       mouth: 'smile',
       // the near arm reaches up onto the slide, at the tallest bar, and stays there through the first sentence:
       // a clear push toward the chart and back on each stressed word ("check", "made", "cinnamon", "rolls")
-      ...armKeys(1, t, [[0, [12, -222], 'down'], [0.1, [12, -222], 'down'], [0.3, [224, -400], 'down', 140], [0.38, [250, -416], 'down', 140], [0.5, [224, -400], 'down', 140], [0.86, [224, -400], 'down', 140], [0.94, [250, -416], 'down', 140], [1.06, [224, -400], 'down', 140], [1.22, [224, -400], 'down', 140], [1.3, [250, -416], 'down', 140], [1.42, [224, -400], 'down', 140], [1.82, [224, -400], 'down', 140], [1.9, [250, -416], 'down', 140], [2.04, [224, -400], 'down', 140], [2.38, [224, -400], 'down', 140]]),
+      ...armKeys(1, t, [[0, [12, -222], 'down'], [0.1, [12, -222], 'down'], [0.3, [206, -410], 'down', 110], [0.38, [230, -430], 'down', 110], [0.5, [206, -410], 'down', 110], [0.86, [206, -410], 'down', 110], [0.94, [230, -430], 'down', 110], [1.06, [206, -410], 'down', 110], [1.22, [206, -410], 'down', 110], [1.3, [230, -430], 'down', 110], [1.42, [206, -410], 'down', 110], [1.82, [206, -410], 'down', 110], [1.9, [230, -430], 'down', 110], [2.04, [206, -410], 'down', 110], [2.38, [206, -410], 'down', 110]]),
       ...armKeys(-1, t, [[0, [-8, -228], 'down'], [0.12, [-8, -228], 'down'], [0.42, 'r', 'rest'], [2.38, 'r', 'rest']]),
       ...(sp ?? {}),
     };
@@ -215,7 +215,7 @@ Skits.presentation = (() => {
       bob: keys(t, [[2.38, 0], [2.95, 0], [3.1, 6], [3.66, 6], [3.8, -4], [3.95, 0], [4.25, -5], [4.4, 0]]), weight: 0.6,
       // the stutter freezes him, arms limp; then the hands go up the outside and clutch the sides of his head
       // (behind it the whole time: no layer switch), come down, and the near arm points at the chart
-      ...armKeys(1, t, [[2.38, [224, -400], 'down', 140], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [186, -404], 'down'], [3.08, [174, -480], 'down'], [3.62, [170, -476], 'down'],
+      ...armKeys(1, t, [[2.38, [206, -410], 'down', 110], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [186, -404], 'down'], [3.08, [174, -480], 'down'], [3.62, [170, -476], 'down'],
         [3.8, [160, -392], 'down'], [4.02, [200, -384], 'down'], [4.62, [202, -380], 'down']]),
       ...armKeys(-1, t, [[2.38, 'r', 'rest'], [2.62, 'r', 'rest'], [2.86, 'r', 'rest'], [2.98, [-186, -404], 'down'], [3.08, [-174, -480], 'down'], [3.62, [-170, -476], 'down'],
         [3.9, 'r', 'rest'], [4.62, 'r', 'rest']]),   // the far arm comes down to a soft hang
@@ -336,7 +336,7 @@ Skits.presentation = (() => {
   const shots = [
     // 0.00-2.38: medium on him at the slide
     [0, 2.38, (ctx, t) => {
-      const z = lerp(2.2, 2.32, seg(t, 0, 2.38)), fx = 690, fy = 1330, sy = 1360;
+      const z = lerp(1.86, 1.94, seg(t, 0, 2.38)), fx = 640, fy = 1330, sy = 1390;   // back far enough that the hand on the chart reads clear of his head
       cam(ctx, fx, fy, z, sy); setA(ctx, false); hero(ctx, HX, FLOOR_A, 1, pose1(t));   // no slide title here: it would sit under the caption
       heads[heads.length - 1] = headScreen(FLOOR_A, 1, z, fy, sy);
     }],
