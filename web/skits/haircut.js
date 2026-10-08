@@ -736,7 +736,7 @@ Skits.haircut = (() => {
     for (const side of [-1, 1]) {
       const ex = fx + side * 40;
       fill(ctx, Brush.ellipsePts(ex, y, rx + 10, ry + 10, 24), W, 0);           // over the rig's eye
-      if (lid >= 0.72) {   // shut: one soft curve, the lashes' line
+      if (lid >= 0.985) {   // shut (the lids lift through a thin slit, never from this curve straight to half open: that popped): one soft curve, the lashes' line
         stroke(ctx, [[ex - rx - 2, y + 14], [ex - rx * 0.5, y + 24], [ex, y + 27], [ex + rx * 0.5, y + 24], [ex + rx + 2, y + 14]], { w: 13, taper0: 0.3, taper1: 0.3, jit: 0 });
         continue;
       }

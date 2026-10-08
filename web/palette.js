@@ -11,7 +11,7 @@ const Palette = (() => {
     hoodie: '#16a79c',                      // teal: the one saturated hue in the cast. Props never use it.
     beard: '#6b4a30', beardStroke: '#8a6a4c',   // the bearded version: same brown as the hair
     hairDark: '#4e3622',                        // darker strands inside his hair (the haircut video's cuts)
-    auburn: '#8a4a2c', auburnDark: '#4e2614',   // the glow-up swoop in the haircut mirror shot (a natural colour, that shot only)
+    auburn: '#7d4b30', auburnDark: '#4a2c1c',   // the glow-up swoop in the haircut mirror shot: his brown, a touch warmer (a natural colour, that shot only)
     iris: '#4a4a4a',                            // the narrowed glow-up eyes' iris
   };
   // Prop colours used so far: real-world colours, dulled so they sit below
@@ -40,7 +40,7 @@ const Palette = (() => {
     toggleOn: '#5fc86a',                            // an "on" switch on the alarm list (user decision: green, like the phone's own)
     rock: '#9c8a78', rockDark: '#6f5f50', pit: '#4a3d34',   // the volcano and the crater (dull earth browns)
     smoke: '#cdc3b8', flame: '#e3a04f',                     // the volcano's smoke, the meteor's trail
-    glass: '#dde8f0', skinShade: '#ebe0d4',          // window glass; the flat cel shading on a white face
+    glass: '#dde8f0', skinShade: '#e2e2e6',          // window glass; the flat cel shading on a white face
     water: '#b9d0e3',                               // tears, tear streams and sweat (a pale, dulled blue; always with the ink outline)
     phone: '#3a3a3a', phoneOff: '#5a5a5a', phoneDot: '#9a9a9a',   // a dark phone: body, dead screen, camera dot / list rules
   };
