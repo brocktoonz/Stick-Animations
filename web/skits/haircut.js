@@ -8,7 +8,7 @@ Skits.haircut = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { seg, lerp, easeOut, easeInOut, easeOutBack, clamp } = Stage;
   const { build, head, hh, RX, RY } = Cameos.parts;
-  const W = '#fff', RED = '#d9261c';
+  const W = '#fff', RED = Palette.captionRed, P = Palette.prop;
   // the edit: four shots, hard cuts only
   const CUT_2 = 3.0, CUT_3 = 4.5, CUT_4 = 7.0, END = 10.5;
 
@@ -63,7 +63,20 @@ Skits.haircut = (() => {
     for (let i = 0; i < 4; i++) { const [a, b] = [c[i], c[(i + 1) % 4]]; for (let k = 0; k < n; k++) pts.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]); }
     return pts;
   };
-  const panel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); outline(ctx, pts, { w }); };
+  // Set shapes boil like a character's: the outline is short straight segments with a fixed seed (from the shape's first
+  // point), and the colour fill follows exactly the same path, so the colour never bleeds out of the ink.
+  const even = (pts, step = 34) => {
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length], k = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+      for (let j = 0; j < k; j++) out.push([a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k]);
+    }
+    return out;
+  };
+  const setSeed = pts => 7000 + Math.round(Math.abs(pts[0][0]) * 3 + Math.abs(pts[0][1]) + pts.length * 17);
+  const setLine = (ctx, pts, w, seed) => { const e = even(pts); stroke(ctx, [...e, e[0], e[1]], { w, taper0: 0, taper1: 0, minW: 1, seed: seed ?? setSeed(pts) }); };
+  const flat = (ctx, pts, col) => { ctx.fillStyle = col; ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill(); };
+  const panel = (ctx, pts, col, w = 10) => { flat(ctx, even(pts), col); setLine(ctx, pts, w); };
   const zoom = (ctx, cx, cy, z) => { ctx.translate(cx, cy); ctx.scale(z, z); ctx.translate(-cx, -cy); };
 
   // ---------- hair: one silhouette from a cap plus pointed locks ----------
@@ -93,9 +106,9 @@ Skits.haircut = (() => {
   };
 
   // His usual hair grey (Hero.main: fill #8f8f8f, light inner strokes).
-  const GREY = '#8f8f8f', GREY_LINE = '#e0e0e0';
+  const GREY = Palette.hero.hair, GREY_LINE = Palette.hero.hairLine, HAIR_DARK = Palette.hero.hairDark;
   // Auburn: a natural hair colour, only in the "looks good" close-up.
-  const AUBURN = '#8a4a2c', AUBURN_DARK = '#4e2614';
+  const AUBURN = Palette.hero.auburn, AUBURN_DARK = Palette.hero.auburnDark;
 
   // BEFORE: an overgrown, shaggy mop. Locks hang over the ears and down to just
   // above the brows. The snips take them off one at a time, screen right and the
@@ -147,7 +160,7 @@ Skits.haircut = (() => {
     return pts;
   })();
   const NEAT_LINES = [[[-0.6, -1.02], [-0.64, -0.66]], [[-0.2, -1.12], [-0.22, -0.66]], [[0.22, -1.1], [0.24, -0.66]], [[0.62, -1.0], [0.66, -0.66]]];
-  const neatHair = ctx => hairShapes(ctx, [NEAT], GREY, NEAT_LINES, '#6a6a6a');
+  const neatHair = ctx => hairShapes(ctx, [NEAT], GREY, NEAT_LINES, HAIR_DARK);
   // The botched cut he drives home with: a lumpy, hacked-at top with short
   // spikes poking out, a fringe chopped at a slant in uneven lengths with a big
   // gouge where the forehead shows, one side cut right up above the ear, a
@@ -171,7 +184,7 @@ Skits.haircut = (() => {
   const BOTCHED_TUFTS = [lock([0.02, -1.06], [0.3, -1.36], 0.16, 0.14), lock([-0.5, -0.96], [-0.62, -1.14], 0.12, -0.04), lock([-0.78, -0.74], [-0.96, -0.86], 0.1, 0.03)];   // the cowlick, and a couple of hacked tufts on the left
   const BOTCHED_LINES = [[[-0.5, -0.86], [-0.46, -0.66]], [[-0.22, -0.86], [-0.2, -0.7]], [[0.6, -0.96], [0.62, -0.84]],
                          [[-0.9, -0.44], [-0.88, -0.24]]];
-  const botchedHair = ctx => hairShapes(ctx, [BOTCHED, ...BOTCHED_TUFTS], GREY, BOTCHED_LINES, '#5a5a5a');
+  const botchedHair = ctx => hairShapes(ctx, [BOTCHED, ...BOTCHED_TUFTS], GREY, BOTCHED_LINES, HAIR_DARK);
 
   // ----- PREVIEW ONLY: other bad haircuts to choose from (not used in the video;
   // shown by the haircut_hair_options skit). After the user's references.
@@ -259,11 +272,11 @@ Skits.haircut = (() => {
   const ALT_MUSHROOM_LINES = [[[-0.86, -0.92], [-0.5, -1.2], [-0.1, -1.3]], [[0.16, -1.3], [0.56, -1.18], [0.86, -0.92]], [[-0.4, -1.0], [-0.18, -1.08]], [[0.3, -1.0], [0.52, -0.92]]];
   const HAIR_OPTIONS = {
     current: botchedHair,
-    bowl: ctx => hairShapes(ctx, [ALT_BOWL], GREY, ALT_BOWL_LINES, '#5a5a5a'),
-    crop: ctx => hairShapes(ctx, [ALT_CROP], GREY, ALT_CROP_LINES, '#5a5a5a'),
-    crop_low: ctx => hairShapes(ctx, [ALT_CROP_LOW], GREY, ALT_CROP_LOW_LINES, '#5a5a5a'),
-    buzz: ctx => hairShapes(ctx, [ALT_BUZZ], '#a2a2a2', ALT_BUZZ_LINES, '#7a7a7a'),
-    mushroom: ctx => hairShapes(ctx, [ALT_MUSHROOM], GREY, ALT_MUSHROOM_LINES, '#5a5a5a'),
+    bowl: ctx => hairShapes(ctx, [ALT_BOWL], GREY, ALT_BOWL_LINES, HAIR_DARK),
+    crop: ctx => hairShapes(ctx, [ALT_CROP], GREY, ALT_CROP_LINES, HAIR_DARK),
+    crop_low: ctx => hairShapes(ctx, [ALT_CROP_LOW], GREY, ALT_CROP_LOW_LINES, HAIR_DARK),
+    buzz: ctx => hairShapes(ctx, [ALT_BUZZ], GREY, ALT_BUZZ_LINES, HAIR_DARK),
+    mushroom: ctx => hairShapes(ctx, [ALT_MUSHROOM], GREY, ALT_MUSHROOM_LINES, HAIR_DARK),
   };
   const DRIVE_HAIR = 'crop_low';   // the cut he drives home with (B2, the user's pick)
   let hairPick = null;   // preview only: the haircut_hair_options skit sets the others
@@ -276,14 +289,14 @@ Skits.haircut = (() => {
   const guy = (ctx, p) => guyRig(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
 
   // ---------- the barber: tall and lanky, bald with a grey horseshoe, handlebar moustache ----------
-  const SIDE_HAIR = '#bdbdbd', STACHE = '#5a5a5a';
+  const SIDE_HAIR = Palette.cast.barber.hair, STACHE = Palette.cast.barber.stache;
   const horseshoe = ctx => {
     for (const side of [-1, 1]) {
       const pts = hu([[side * 0.98, -0.1], [side * 1.06, -0.46], [side * 0.98, -0.78], [side * 0.82, -0.9],
                       [side * 0.78, -0.72], [side * 0.86, -0.46], [side * 0.88, -0.1]]);
       fill(ctx, pts, SIDE_HAIR, 0.8); outline(ctx, pts, { w: 9 });
     }
-    stroke(ctx, hu([[-0.4, -0.82], [-0.16, -0.9]]), { w: 6, color: '#bbb' });   // shine on the dome
+    stroke(ctx, hu([[-0.4, -0.82], [-0.16, -0.9]]), { w: 6, color: W });   // shine on the dome
   };
   const handlebar = (ctx, fx) => {
     for (const side of [-1, 1]) {
@@ -316,7 +329,7 @@ Skits.haircut = (() => {
 
   // ---------- props ----------
   // scissors: hand at the origin, blades pointing up (rot turns them); open 0..1
-  const scissors = (rot, open, sc = 1, col = '#d6d6d6') => (ctx, x, y) => {
+  const scissors = (rot, open, sc = 1, col = P.steel) => (ctx, x, y) => {
     ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(sc, sc);
     const a = 0.05 + 0.32 * open;
     for (const s of [-1, 1]) {
@@ -332,7 +345,7 @@ Skits.haircut = (() => {
   const comb = (ctx, x, y) => {
     ctx.save(); ctx.translate(x, y); ctx.rotate(-0.4);
     const c = [[-10, -6], [64, -6], [64, 8], [-10, 8]];
-    fill(ctx, c, '#3a3a3a', 0.3); outline(ctx, c, { w: 6 });
+    flat(ctx, even(c), P.charcoal); setLine(ctx, c, 6);
     for (let i = 0; i < 7; i++) stroke(ctx, [[i * 9, 8], [i * 9, 24]], { w: 4, taper0: 0, taper1: 0.4 });
     ctx.restore();
   };
@@ -341,15 +354,15 @@ Skits.haircut = (() => {
   const handMirror = (ctx, x, y) => {
     ctx.save(); ctx.translate(x, y); ctx.rotate(0.12);
     stroke(ctx, [[0, 10], [0, -70]], { w: 26, taper0: 0, taper1: 0, minW: 1 });
-    stroke(ctx, [[0, 10], [0, -70]], { w: 12, taper0: 0, taper1: 0, minW: 1, color: '#3a3a3a', jit: 0 });
+    stroke(ctx, [[0, 10], [0, -70]], { w: 12, taper0: 0, taper1: 0, minW: 1, color: P.charcoal, jit: 0 });
     const rim = Brush.ellipsePts(0, -150, 68, 86, 16);
-    fill(ctx, rim, '#3a3a3a', 0.4); outline(ctx, rim, { w: 9 });
-    fill(ctx, Brush.ellipsePts(0, -150, 52, 70, 16), '#eeeeee', 0.3);
+    flat(ctx, even(rim), P.charcoal); setLine(ctx, rim, 9);
+    fill(ctx, Brush.ellipsePts(0, -150, 52, 70, 16), P.glass, 0.3);
     ctx.save(); ctx.beginPath(); ctx.ellipse(0, -150, 50, 68, 0, 0, 7); ctx.clip();
     panel(ctx, box(-12, -110, 12, -70, 2), W, 5);                              // neck
     blob(ctx, 0, -134, 40, 38, { fill: W, w: 5, n: 12 });
     const bx = [[-41, -132], [-43, -170], [-32, -184], [32, -184], [43, -170], [41, -132], [0, -124]];   // hair all the way round the back
-    fill(ctx, bx, GREY, 0.2); outline(ctx, bx, { w: 5 });
+    flat(ctx, even(bx), GREY); setLine(ctx, bx, 5);
     stroke(ctx, [[-36, -210], [-18, -228]], { w: 5, color: W });   // glint
     ctx.restore();
     ctx.restore();
@@ -357,58 +370,25 @@ Skits.haircut = (() => {
 
   // ---------- the shop (one set for every shot) ----------
   const FLOOR_Y = 1650;
-  function lampHang(ctx, x, y) {
-    stroke(ctx, [[x, -600], [x + 2, y - 60]], { w: 6, taper0: 0, taper1: 0 });
-    const s = [[x - 26, y - 64], [x + 26, y - 64], [x + 84, y], [x - 84, y]];
-    panel(ctx, s, '#5a5a5a', 10);
-    blob(ctx, x, y + 14, 20, 16, { fill: W, w: 7, n: 10 });
-  }
-  function wall(ctx) {
-    ctx.fillStyle = '#e8e8e8'; ctx.fillRect(-600, -600, 2300, FLOOR_Y + 600);
-    fill(ctx, box(-600, 1330, 1700, FLOOR_Y, 4), '#cfcfcf', 0.3);              // lower wall
-    stroke(ctx, [[-600, 1330], [1700, 1326]], { w: 10 });                       // chair rail
-    stroke(ctx, [[-600, 1352], [1700, 1350]], { w: 5 });
-    // barber pole on the left: a glass tube with grey spiral stripes, caps top and bottom
+  // The shop is a few props on the bare paper (STYLE.md, Sets): the barber pole on the left says where we are. No wall,
+  // chair rail, shelf, hanging lamps or tiled floor. Ground lines only under feet: the barber's walk and the chair's base.
+  function pole(ctx) {
     const px = 120, y0 = 770, y1 = 1180;
     ctx.save(); ctx.beginPath(); ctx.rect(px - 44, y0, 88, y1 - y0); ctx.clip();
-    fill(ctx, box(px - 44, y0, px + 44, y1, 3), W, 0);
+    flat(ctx, box(px - 44, y0, px + 44, y1, 3), P.linen);
     for (let k = -2; k < 9; k++) {
       const yy = y0 + k * 62;
-      fill(ctx, [[px - 50, yy + 46], [px + 50, yy], [px + 50, yy + 26], [px - 50, yy + 72]], '#4a4a4a', 0.3);
+      flat(ctx, [[px - 50, yy + 46], [px + 50, yy], [px + 50, yy + 26], [px - 50, yy + 72]], k % 2 ? P.blanket : P.curtain);
     }
     ctx.restore();
-    outline(ctx, box(px - 44, y0, px + 44, y1, 3), { w: 10 });
-    panel(ctx, box(px - 58, y0 - 42, px + 58, y0, 3), '#9a9a9a', 10);
-    blob(ctx, px, y0 - 56, 30, 22, { fill: '#9a9a9a', w: 9, n: 10 });
-    panel(ctx, box(px - 58, y1, px + 58, y1 + 40, 3), '#9a9a9a', 10);
-    // a shelf on the right with a jar of combs and two bottles
-    const sx = 900, sy = 1240;
-    panel(ctx, box(sx - 120, sy, sx + 170, sy + 24, 4), '#9a9a9a', 9);
-    const jar = [[sx - 90, sy], [sx - 94, sy - 110], [sx - 20, sy - 110], [sx - 24, sy]];
-    fill(ctx, jar, '#d6d6d6', 0.3);
-    for (const dx of [-70, -56, -42]) stroke(ctx, [[sx + dx, sy - 100], [sx + dx + 4, sy - 170]], { w: 9 });
-    outline(ctx, jar, { w: 9 });
-    stroke(ctx, [[sx - 90, sy - 70], [sx - 24, sy - 70]], { w: 5 });
-    for (const [bx, bh, col] of [[sx + 30, 120, '#6a6a6a'], [sx + 100, 90, '#b4b4b4']]) {
-      const b = [[bx - 26, sy], [bx - 26, sy - bh + 30], [bx - 10, sy - bh + 10], [bx - 10, sy - bh - 10], [bx + 10, sy - bh - 10],
-                 [bx + 10, sy - bh + 10], [bx + 26, sy - bh + 30], [bx + 26, sy]];
-      panel(ctx, b, col, 9);
-    }
-    // lamps hanging from the ceiling
-    lampHang(ctx, 260, 250); lampHang(ctx, 820, 210);
+    setLine(ctx, box(px - 44, y0, px + 44, y1, 3), 10);
+    panel(ctx, box(px - 58, y0 - 42, px + 58, y0, 3), P.steelDark, 10);
+    panel(ctx, Brush.ellipsePts(px, y0 - 56, 30, 22, 20), P.steelDark, 9);
+    panel(ctx, box(px - 58, y1, px + 58, y1 + 40, 3), P.steelDark, 10);
   }
-  function floor(ctx) {
-    // square checker tiles in perspective, toward a vanishing point high above
-    fill(ctx, box(-600, FLOOR_Y, 1700, 2600, 4), '#f2f2f2', 0);
-    const VY = -2600, T = 120, rows = [];
-    for (let y = FLOOR_Y, h = 44; y < 2600; y += h, h *= 1.28) rows.push(y);
-    const xAt = (c, y) => 540 + c * T * (y - VY) / (FLOOR_Y - VY);
-    for (let r = 0; r < rows.length - 1; r++) for (let c = -14; c < 14; c++) {
-      if ((r + c + 100) % 2) continue;
-      const ya = rows[r], yb = rows[r + 1];
-      fill(ctx, [[xAt(c, ya), ya], [xAt(c + 1, ya), ya], [xAt(c + 1, yb), yb], [xAt(c, yb), yb]], '#3a3a3a', 0.4);
-    }
-    stroke(ctx, [[-600, FLOOR_Y], [1700, FLOOR_Y + 4]], { w: 11 });
+  function groundLines(ctx) {
+    stroke(ctx, [[420, FLOOR_Y], [700, FLOOR_Y + 3], [980, FLOOR_Y - 3]], { w: 9, taper0: 0, taper1: 0, seed: 7900 });   // where the barber walks
+    stroke(ctx, [[GX - 230, 1836], [GX, 1840], [GX + 230, 1834]], { w: 9, taper0: 0, taper1: 0, seed: 7901 });          // under the chair's base
   }
 
   // ---------- the chair and him in it ----------
@@ -417,15 +397,15 @@ Skits.haircut = (() => {
   const CAPE_BOT = 1540, SEAT = 1500, REST = 1700;
   function chairBack(ctx) {
     const b = [[GX - 210, 1500], [GX - 222, 1260], [GX - 170, 1210], [GX + 170, 1210], [GX + 222, 1260], [GX + 210, 1500]];
-    panel(ctx, b, '#3a3a3a', 11);
-    stroke(ctx, [[GX - 180, 1250], [GX + 180, 1252]], { w: 5, color: '#8a8a8a' });
+    panel(ctx, b, P.charcoal, 11);
+    stroke(ctx, [[GX - 180, 1250], [GX + 180, 1252]], { w: 5, color: P.steelDark });
   }
   function chairFront(ctx) {
-    panel(ctx, box(GX - 34, SEAT + 40, GX + 34, 1790, 4), '#cfcfcf', 10);                       // pedestal
-    blob(ctx, GX, 1800, 170, 34, { fill: '#9a9a9a', w: 11, n: 16 });                             // round base
-    for (const s of [-1, 1]) panel(ctx, box(GX + s * 250 - 40, SEAT - 40, GX + s * 250 + 40, SEAT + 6, 3), '#3a3a3a', 10);   // armrests
-    panel(ctx, box(GX - 220, SEAT, GX + 220, SEAT + 50, 4), '#3a3a3a', 10);                      // seat edge
-    panel(ctx, box(GX - 120, REST + 16, GX + 120, REST + 40, 4), '#cfcfcf', 9);                  // footrest
+    panel(ctx, box(GX - 34, SEAT + 40, GX + 34, 1790, 4), P.steel, 10);                       // pedestal
+    panel(ctx, Brush.ellipsePts(GX, 1800, 170, 34, 32), P.steelDark, 11);                             // round base
+    for (const s of [-1, 1]) panel(ctx, box(GX + s * 250 - 40, SEAT - 40, GX + s * 250 + 40, SEAT + 6, 3), P.charcoal, 10);   // armrests
+    panel(ctx, box(GX - 220, SEAT, GX + 220, SEAT + 50, 4), P.charcoal, 10);                      // seat edge
+    panel(ctx, box(GX - 120, REST + 16, GX + 120, REST + 40, 4), P.steel, 9);                  // footrest
     stroke(ctx, [[GX - 20, REST + 40], [GX - 20, 1770]], { w: 8 });
     for (const s of [-1, 1]) {   // his shins down out of the cape, feet on the rest
       stroke(ctx, [[GX + s * 52, CAPE_BOT - 30], [GX + s * 56, REST + 4]], { w: 24 * GS, taper0: 0, taper1: 0, minW: 1 });
@@ -437,7 +417,7 @@ Skits.haircut = (() => {
     const c = [[GX - 60, gNeck + 6], [GX + 60, gNeck + 6], [GX + 150, gNeck + 60], [GX + 250, gNeck + 150], [GX + 300, CAPE_BOT - 30],
                [GX + 210, CAPE_BOT + 4], [GX + 60, CAPE_BOT - 14], [GX - 80, CAPE_BOT + 6], [GX - 230, CAPE_BOT - 8], [GX - 300, CAPE_BOT - 34],
                [GX - 250, gNeck + 150], [GX - 150, gNeck + 60]];
-    fill(ctx, c, '#ececec', 0.6); outline(ctx, c, { w: 11 });
+    panel(ctx, c, P.blanket, 11);
     stroke(ctx, [[GX - 70, gNeck + 30], [GX, gNeck + 46], [GX + 70, gNeck + 30]], { w: 9 });   // neck band
     for (const [x0, x1] of [[-150, -190], [40, 60], [170, 220]]) stroke(ctx, [[GX + x0, gNeck + 120], [GX + x1, CAPE_BOT - 30]], { w: 6 });
     after?.(ctx);   // what's lying on it moves with it
@@ -516,7 +496,8 @@ Skits.haircut = (() => {
     const p = easeInOut(seg(t, PUSH1[0], PUSH1[1]));
     const S = lerp(c0.S, c1.S, p), A = Stage.mix(c0.A, c1.A, p);
     ctx.save(); ctx.translate(A[0], A[1]); ctx.scale(S, S); ctx.translate(-GX, -GY);
-    wall(ctx); floor(ctx);
+    ctx.fillStyle = Palette.paper; ctx.fillRect(-2000, -2000, 5000, 6000);   // bare paper, no wall or floor
+    pole(ctx); groundLines(ctx);
     cutCount = 0; hairNow = mopHair;   // nothing comes off in this shot
     let open = 1, since = 9;
     SNIPS1.forEach(sAt => {
@@ -557,7 +538,7 @@ Skits.haircut = (() => {
     const bendOut = Arms.arm(-1, [hl[0], hl[1] - BDY], 'out', false, 160).bendL;
     armL.bendL = lerp(bendOut, armL.bendL, relaxK);
     const armR = Arms.arm(1, [hr[0], hr[1] - BDY], 'out', false, 160);
-    const holdL = scissors(rot, open1, 1.5, W);   // big and white, so they read on his grey hair
+    const holdL = scissors(rot, open1, 1.5, P.steel);   // big and white, so they read on his grey hair
     // the barber, drawn first: behind the chair and him
     barberRig(ctx, { x: bx, y: fy, s: bs, lean, step, weight: walk > 0 && walk < 1 ? 0 : 0.5, ...fussy,
       lookX: lerp(-0.4, -0.3, walk), lookY: lerp(0.2, 0.6, walk), tilt: since < 0.22 ? 0.09 * Math.sin(Math.PI * since / 0.22) : 0,   // a nod into each snip, the work going on behind his head
@@ -582,7 +563,7 @@ Skits.haircut = (() => {
   // His head centre lands at CU_AT, CU_S times the size it is in the wide shots'
   // world. A flat backdrop, nothing of the shop. Lines are thinned by the zoom so
   // they come out the same weight as in the wide shots.
-  const CU_AT = [540, 1495], CU_S = 2.0, CU_BG = '#dcdcdc';
+  const CU_AT = [540, 1495], CU_S = 2.0, CU_BG = Palette.paper;
   const CU_WEIGHT = WIDE / CU_S;
   const CU_CAPE = 46;   // the cape sits a little lower in the close-ups, so it doesn't cut off his chin and jaw
   const cuHeadY = (yHead, z) => CU_AT[1] + yHead * GS * CU_S * z;   // a head-space y on screen
@@ -602,8 +583,8 @@ Skits.haircut = (() => {
   // flat cel shading under the cheekbones and down one side, the jaw corners
   // drawn on the outline, a heavy angled brow with a furrow, narrowed eyes
   // with lid creases, a long nose line, a small smirk. Hair: a big auburn swoop.
-  const SHADE = '#d4d4d4';
-  const P = pts => hu(pts);
+  const SHADE = P.skinShade;
+  const PH = pts => hu(pts);
   // the hair: separate pointed locks swept up and back off a side part, the
   // right flick splitting into several tips, a few locks falling over the forehead
   const GLOW_LOCKS = [
@@ -639,26 +620,26 @@ Skits.haircut = (() => {
     blob(ctx, 0, 0, RX, RY, { fill: W, w: 11, n: 18, jit: 1.8 });
     // cel shading, clipped to the face
     ctx.save(); ctx.beginPath(); ctx.ellipse(0, 0, RX - 5, RY - 5, 0, 0, 7); ctx.clip();
-    fill(ctx, P([[1.1, -0.5], [0.74, -0.36], [0.6, -0.02], [0.68, 0.3], [0.52, 0.62], [0.22, 0.86], [0.3, 1.2], [1.2, 1.2]]), SHADE, 0.4);   // down his right side
-    fill(ctx, P([[-0.72, 0.02], [-0.58, 0.12], [-0.44, 0.3], [-0.34, 0.5], [-0.4, 0.52], [-0.54, 0.32], [-0.7, 0.14]]), SHADE, 0.2);   // the cheekbone: from under the outer eye, in toward the mouth
-    fill(ctx, P([[0.12, -0.22], [0.2, 0.12], [0.22, 0.3], [0.1, 0.32], [0.08, 0.0]]), SHADE, 0.3);           // the nose's shadow side
-    fill(ctx, P([[-0.12, 0.74], [0.14, 0.74], [0.08, 0.8], [-0.08, 0.8]]), SHADE, 0.2);                       // a small shadow under the lower lip
+    fill(ctx, PH([[1.1, -0.5], [0.74, -0.36], [0.6, -0.02], [0.68, 0.3], [0.52, 0.62], [0.22, 0.86], [0.3, 1.2], [1.2, 1.2]]), SHADE, 0.4);   // down his right side
+    fill(ctx, PH([[-0.72, 0.02], [-0.58, 0.12], [-0.44, 0.3], [-0.34, 0.5], [-0.4, 0.52], [-0.54, 0.32], [-0.7, 0.14]]), SHADE, 0.2);   // the cheekbone: from under the outer eye, in toward the mouth
+    fill(ctx, PH([[0.12, -0.22], [0.2, 0.12], [0.22, 0.3], [0.1, 0.32], [0.08, 0.0]]), SHADE, 0.3);           // the nose's shadow side
+    fill(ctx, PH([[-0.12, 0.74], [0.14, 0.74], [0.08, 0.8], [-0.08, 0.8]]), SHADE, 0.2);                       // a small shadow under the lower lip
     {   // a thin band inside the lower outline, shadow side only: the jaw
       const band = [];
       for (let i = 0; i <= 10; i++) { const a = 0.15 + 1.45 * i / 10; band.push([Math.cos(a), Math.sin(a)]); }
       for (let i = 10; i >= 0; i--) { const a = 0.15 + 1.45 * i / 10; band.push([Math.cos(a) * 0.86, Math.sin(a) * 0.88]); }
-      fill(ctx, P(band), SHADE, 0.2);
+      fill(ctx, PH(band), SHADE, 0.2);
     }
         ctx.restore();
     // the jaw: two hard corners on the outline
-    for (const s of [-1, 1]) stroke(ctx, P([[s * 0.97, 0.22], [s * 0.66, 0.8], [s * 0.22, 0.99]]), { w: 11, taper0: 0.1, taper1: 0.4 });
+    for (const s of [-1, 1]) stroke(ctx, PH([[s * 0.97, 0.22], [s * 0.66, 0.8], [s * 0.22, 0.99]]), { w: 11, taper0: 0.1, taper1: 0.4 });
     // eyes: narrowed, upper lid heavy, a crease above, iris tucked under the lid
     for (const s of [-1, 1]) {
       const cx = s * 0.38 * RX + 8, cy = -0.12 * RY, w = 0.2 * RX, h = 0.085 * RY;
       const eye = almond(cx, cy, w, h, s * 3);
       fill(ctx, eye, W, 0.2);
       ctx.save(); ctx.beginPath(); ctx.moveTo(eye[0][0], eye[0][1]); for (const q of eye) ctx.lineTo(q[0], q[1]); ctx.clip();
-      blob(ctx, cx + 2, cy + 3, h * 1.25, h * 1.25, { fill: '#4a4a4a', w: 0, n: 10 });
+      blob(ctx, cx + 2, cy + 3, h * 1.25, h * 1.25, { fill: Palette.hero.iris, w: 0, n: 10 });
       blob(ctx, cx + 2, cy + 3, h * 0.6, h * 0.6, { fill: INK, w: 0, n: 8 });
       const lidY = cy + 3 - h * 0.63;   // the upper lid comes down over the top quarter of the iris
       ctx.fillStyle = W; ctx.fillRect(cx - w - 6, cy - h - 6, w * 2 + 12, lidY - (cy - h - 6));
@@ -668,21 +649,21 @@ Skits.haircut = (() => {
       stroke(ctx, [[cx - w * 0.7, cy - h - 12], [cx, cy - h - 16], [cx + w * 0.7, cy - h - 12]], { w: 4, taper0: 0.3, taper1: 0.3 });                           // crease
     }
     // brows: heavy and angled; the left one pulled down into a furrow, the right one up
-    stroke(ctx, P([[-0.74, -0.44], [-0.44, -0.42], [-0.14, -0.3]]), { w: 15, taper0: 0.5, taper1: 0.15 });
-    stroke(ctx, [...P([[0.14, -0.34]]), ...P([[0.42, -0.52], [0.76, -0.44]]).map(([x, y]) => [x, y - 10 * raise])], { w: 15, taper0: 0.15, taper1: 0.5 });
-    for (const [x0, x1] of [[-0.06, -0.04], [0.04, 0.06]]) stroke(ctx, P([[x0, -0.36], [x1, -0.22]]), { w: 4, taper0: 0.3, taper1: 0.3 });   // furrow
+    stroke(ctx, PH([[-0.74, -0.44], [-0.44, -0.42], [-0.14, -0.3]]), { w: 15, taper0: 0.5, taper1: 0.15 });
+    stroke(ctx, [...PH([[0.14, -0.34]]), ...PH([[0.42, -0.52], [0.76, -0.44]]).map(([x, y]) => [x, y - 10 * raise])], { w: 15, taper0: 0.15, taper1: 0.5 });
+    for (const [x0, x1] of [[-0.06, -0.04], [0.04, 0.06]]) stroke(ctx, PH([[x0, -0.36], [x1, -0.22]]), { w: 4, taper0: 0.3, taper1: 0.3 });   // furrow
     // a long straight nose line, the tip and a nostril
-    stroke(ctx, P([[0.04, -0.2], [0.1, 0.1], [0.16, 0.3]]), { w: 6, taper0: 0.4, taper1: 0.1 });
-    stroke(ctx, P([[0.16, 0.3], [0.06, 0.38], [-0.08, 0.36], [-0.14, 0.3]]), { w: 6, taper0: 0.2, taper1: 0.4 });
+    stroke(ctx, PH([[0.04, -0.2], [0.1, 0.1], [0.16, 0.3]]), { w: 6, taper0: 0.4, taper1: 0.1 });
+    stroke(ctx, PH([[0.16, 0.3], [0.06, 0.38], [-0.08, 0.36], [-0.14, 0.3]]), { w: 6, taper0: 0.2, taper1: 0.4 });
     // a small smirk: the lip line rising on one side, a short lower-lip shadow
-    stroke(ctx, P([[-0.26, 0.6], [-0.04, 0.62], [0.18, 0.58], [0.32, 0.48]]), { w: 7, taper0: 0.2, taper1: 0.3 });
-    stroke(ctx, P([[0.33, 0.44], [0.37, 0.52]]), { w: 4 });
-    stroke(ctx, P([[-0.1, 0.72], [0.12, 0.72]]), { w: 5, color: '#9a9a9a' });
+    stroke(ctx, PH([[-0.26, 0.6], [-0.04, 0.62], [0.18, 0.58], [0.32, 0.48]]), { w: 7, taper0: 0.2, taper1: 0.3 });
+    stroke(ctx, PH([[0.33, 0.44], [0.37, 0.52]]), { w: 4 });
+    stroke(ctx, hu([[-0.1, 0.72], [0.12, 0.72]]), { w: 5, color: SHADE });
     // the hair
     hairShapes(ctx, GLOW_HAIR, AUBURN, GLOW_LINES, AUBURN_DARK);
   }
   // under the cape: as in the eye close-up, only his head is drawn over it (torso and shoulders tucked up inside the head)
-  const glowRig = build({ shirt: '#ececec', sleeve: '#ececec', body: { torso: n => [[-20, n], [20, n], [20, n + 8], [-20, n + 8]], shY: -40 }, head: glowHead });
+  const glowRig = build({ shirt: P.blanket, sleeve: P.blanket, body: { torso: n => [[-20, n], [20, n], [20, n + 8], [-20, n + 8]], shY: -40 }, head: glowHead });
 
   function star(ctx, x, y, r) {
     const pts = [];
@@ -714,7 +695,7 @@ Skits.haircut = (() => {
     const loc = W2 => b1Local(W2, lean, bx, fy, B3.s);
     const hl = loc([430, 1040 + 6 * dip]), hr = loc([470, 1070]);   // both hands behind his head
     barberRig(ctx, { x: bx, y: fy, s: B3.s, lean, ...fussy, lookX: -0.5, lookY: 0.6, tilt: 0.12 * dip,
-      ...Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, 160), holdL: scissors(Math.PI, 0, 1.5, W),
+      ...Arms.arm(-1, [hl[0], hl[1] - BDY], 'down', false, 160), holdL: scissors(Math.PI, 0, 1.5, P.steel),
       ...Arms.arm(1, [hr[0], hr[1] - BDY], 'down', false, 160), holdR: comb });
   }
   function shot3(ctx, t) {
@@ -725,8 +706,8 @@ Skits.haircut = (() => {
       barberBehind3(ctx, t);
       // the chair's back behind his shoulders: the barber stands behind it, so it hides his legs
       const cb = [[GX - 330, 1560], [GX - 340, 1250], [GX - 280, 1185], [GX + 280, 1185], [GX + 340, 1250], [GX + 330, 1560]];
-      panel(ctx, cb, '#3a3a3a', 11);
-      stroke(ctx, [[GX - 300, 1236], [GX + 300, 1238]], { w: 5, color: '#8a8a8a' });
+      panel(ctx, cb, P.charcoal, 11);
+      stroke(ctx, [[GX - 300, 1236], [GX + 300, 1238]], { w: 5, color: P.steelDark });
       cape(ctx);   // the cape up at his neck, as in the wide shot, his head over its collar
       glowRig(ctx, { x: GX, y: gFeet, s: GS, raise, tilt: -0.04 + 0.006 * Math.sin(t * 1.2), armL: [-10, -350], armR: [10, -350], bendL: 0, bendR: 0 });
     }, AT3, Z3);
@@ -737,7 +718,7 @@ Skits.haircut = (() => {
     });
     ctx.restore();
     // the mirror: its frame down both edges, a hard white sheen in the corner
-    for (const x0 of [-20, 1040]) panel(ctx, box(x0, -40, x0 + 60, 1960, 6), '#5a5a5a', 12);
+    for (const x0 of [-20, 1040]) panel(ctx, box(x0, -40, x0 + 60, 1960, 6), P.charcoal, 12);
     stroke(ctx, [[930, 330], [1010, 210]], { w: 20, color: W, taper0: 0.3, taper1: 0.3 });   // up in the corner, clear of the barber
     stroke(ctx, [[960, 410], [1015, 330]], { w: 9, color: W, taper0: 0.3, taper1: 0.3 });
     // (the barber stands off to the right of the caption block, so only his hair and the sparkles count here)
@@ -797,7 +778,7 @@ Skits.haircut = (() => {
   };
   // In the close-up only his head is drawn over the cape: the rig's torso and
   // shoulders are tucked up inside the head, and his legs are far below the frame
-  const eyeRig = build({ shirt: '#ececec', sleeve: '#ececec', body: { torso: n => [[-20, n], [20, n], [20, n + 8], [-20, n + 8]], shY: -40 },
+  const eyeRig = build({ shirt: P.blanket, sleeve: P.blanket, body: { torso: n => [[-20, n], [20, n], [20, n + 8], [-20, n + 8]], shY: -40 },
     head: head({ hair: ctx => hairNow(ctx), front: eyesClean }) });
   function shot2(ctx, t) {
     const r = t - CUT_2;
@@ -822,7 +803,7 @@ Skits.haircut = (() => {
   // side window is on our left with the roadside streaming past, the door below
   // it, the pillar on our right. A small wheel in front that he just holds.
   const DRV_AT = [594, 1066], DRV_S = 1.72;   // his head centre (55% across, eyes at 55% down), the rig's scale
-  const V = { win: '#ffffff', scenery: '#8f8f8f', seat: '#606060', door: '#484848', fill: '#2e2e2e', pillar: '#121212', hoodie: '#8a8a8a', dash: '#565656', mirror: '#5c5c5c' };
+  const V = { win: P.glass, scenery: P.olive, seat: P.steelDark, belt: P.charcoal, hoodie: Palette.hero.hoodie, dash: P.charcoal, mirror: P.steelDark, wheel: P.charcoal };
   const DWIN = { x0: -50, x1: 440, y0: 480, y1: 1344 };           // left 40% (on out past the frame edge), 25% - 70% of the height
   const HORIZON = DWIN.y0 + 0.6 * (DWIN.y1 - DWIN.y0);
   const DSEAT = { x0: DRV_AT[0] - 352, x1: DRV_AT[0] + 352, y0: 672, r: 170 };   // 1.4x his head, 35% down to the bottom
@@ -859,22 +840,16 @@ Skits.haircut = (() => {
     const r = t - CUT_4;
     const w0 = Brush.getWeight();
     const bob = hh(Math.floor(t * 30 / 3) * 7 + 3) > 0.5 ? 1 : 0;   // the seat and him, 1 px on an uneven road
-    ctx.fillStyle = V.fill; ctx.fillRect(0, 0, 1080, 1920);
+    ctx.fillStyle = Palette.paper; ctx.fillRect(0, 0, 1080, 1920);   // the car is a few props on the bare paper: no door panel or pillar fills
     Brush.setWeight(w0 * 1.1);
-    // 2. the door below the window, one armrest line
-    fill(ctx, rrect(-50, DWIN.y1 - 40, DWIN.x1, 1980, 20), V.door, 0.4);
-    stroke(ctx, [[0, 1520], [DWIN.x1 - 10, 1520]], { w: 8 });
     // 1. the side window, the roadside streaming left to right through it
     const win = rrect(DWIN.x0, DWIN.y0, DWIN.x1, DWIN.y1, 60);
-    fill(ctx, win, V.win, 0.4);
+    flat(ctx, even(win), V.win);
     ctx.save(); ctx.beginPath(); ctx.moveTo(...win[0]); for (const q of win) ctx.lineTo(...q); ctx.closePath(); ctx.clip();
-    stroke(ctx, [[DWIN.x0 - 20, HORIZON], [DWIN.x1 + 20, HORIZON]], { w: 6, color: '#8a8a8a', jit: 0 });
+    stroke(ctx, [[DWIN.x0 - 20, HORIZON], [DWIN.x1 + 20, HORIZON]], { w: 6, color: P.oliveDark, jit: 0 });
     scenery(ctx, r);
     ctx.restore();
-    outline(ctx, win, { w: 10 });
-    stroke(ctx, [[DWIN.x1 + 4, DWIN.y1 + 2], [DWIN.x1 + 4, 1980]], { w: 10 });   // the door's front edge
-    // 4. the pillar on our right
-    panel(ctx, rrect(994, -40, 1100, 1960, 6), V.pillar, 10);
+    setLine(ctx, win, 10);
     // 3. his seat: one shape, the headrest its rounded top
     ctx.save(); ctx.translate(0, bob);
     panel(ctx, rrect(DSEAT.x0, DSEAT.y0, DSEAT.x1, 2300, DSEAT.r), V.seat, 10);   // runs straight off the bottom
@@ -887,7 +862,7 @@ Skits.haircut = (() => {
     // his body from the chest up, the barbershop build without the cape; his arms
     // come down to his hands on the wheel
     const torso = [[-48, -324], [-96, -306], [-128, -274], [-140, -220], [-128, 140], [128, 140], [140, -220], [128, -274], [96, -306], [48, -324]];
-    fill(ctx, torso, V.hoodie, 0.4); outline(ctx, torso, { w: 10 });
+    flat(ctx, even(torso), V.hoodie); setLine(ctx, torso, 10);
     const toRig = ([x, y]) => [(x - DRV_AT[0]) / DRV_S, (y - DRV_AT[1]) / DRV_S - 438];
     DHANDS.forEach((h, i) => {   // sleeves from the shoulders down to the hands
       const sd = i ? 1 : -1, arm = [[sd * 126, -246], [sd * 142, -150], toRig(h)];   // elbows out, forearms in to the wheel
@@ -901,14 +876,14 @@ Skits.haircut = (() => {
       const a = belt[Math.max(i - 1, 0)], b = belt[Math.min(i + 1, belt.length - 1)], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
       return [q[0] - (b[1] - a[1]) / d * 11 * k, q[1] + (b[0] - a[0]) / d * 11 * k];
     });
-    fill(ctx, [...side(-1), ...side(1).reverse()], V.door, 0);
+    fill(ctx, [...side(-1), ...side(1).reverse()], V.belt, 0);
     stroke(ctx, side(-1), { w: 6, taper0: 0, taper1: 0, minW: 1 }); stroke(ctx, side(1), { w: 6, taper0: 0, taper1: 0, minW: 1 });
     // his head over it (the rig, cut off above the neck)
     ctx.save(); ctx.beginPath(); ctx.rect(-600, -1200, 1200, 1200 - 330); ctx.ellipse(0, -438, RX + 3, RY + 3, 0, 0, 7); ctx.clip();
     guy(ctx, { x: 0, y: 0, s: 1, ...sad, lookY: 0.05, lookX: 0, lid, tilt: 0 });
     if (lid >= 1) for (const sd of [-1, 1]) {   // the rig's shut eye drops the tears; keep them on his cheeks through the blink
       const dx = sd * 62.5, dy = -438 - 6 + 38, drop = [[dx, dy - 10], [dx + 8, dy + 6], [dx, dy + 12], [dx - 8, dy + 6]];
-      fill(ctx, drop, '#d9d9d9', 0.3); outline(ctx, drop, { w: 4 });
+      fill(ctx, drop, P.water, 0.3); outline(ctx, drop, { w: 4 });
     }
     ctx.restore();
     ctx.restore();
@@ -919,20 +894,20 @@ Skits.haircut = (() => {
     const rim = []; for (let i = 0; i <= 48; i++) rim.push(wheelAt(Math.PI * 2 * i / 48));
     // (its spokes and hub sit below the dashboard's edge)
     stroke(ctx, rim, { w: 50, taper0: 0, taper1: 0, minW: 1, pressure: 0, jit: 0 });
-    stroke(ctx, rim, { w: 32, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: V.pillar, jit: 0 });
+    stroke(ctx, rim, { w: 32, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: V.wheel, jit: 0 });
     Brush.setWeight(w0);
     ctx.save(); ctx.translate(0, bob);
     for (const h of DHANDS) Chars.hand(ctx, h[0], h[1], null, DRV_S);
     ctx.restore();
     Brush.setWeight(w0 * 1.1);
     const c = DWHEEL.c[0], dash = [[-60, DASH_Y + 10], [c - 230, DASH_Y], [c - 120, DASH_Y - 26], [c, DASH_Y - 32], [c + 120, DASH_Y - 26], [c + 230, DASH_Y], [1140, DASH_Y + 10], [1140, 2100], [-60, 2100]];
-    fill(ctx, dash, V.dash, 0.5); outline(ctx, dash, { w: 10 });
+    flat(ctx, even(dash), V.dash); setLine(ctx, dash, 10);
     // the rear-view mirror at the top left, on a short stem with a ball joint
     stroke(ctx, [[170, -20], [170, 92]], { w: 18 });
-    blob(ctx, 170, 96, 16, 16, { fill: V.mirror, w: 8, n: 10 });
+    panel(ctx, Brush.ellipsePts(170, 96, 16, 16, 12), V.mirror, 8);
     const mir = [[-80, 112], [120, 104], [275, 114], [262, 196], [210, 236], [40, 244], [-80, 240]];
-    fill(ctx, mir, V.mirror, 0.6); outline(ctx, mir, { w: 10 });
-    stroke(ctx, [[268, 132], [258, 192], [214, 226]], { w: 6, color: '#cfcfcf', taper0: 0.2, taper1: 0.2 });   // the glass's edge catching the light
+    flat(ctx, even(mir), V.mirror); setLine(ctx, mir, 10);
+    stroke(ctx, [[268, 132], [258, 192], [214, 226]], { w: 6, color: W, taper0: 0.2, taper1: 0.2 });   // the glass's edge catching the light
     Brush.setWeight(w0);
     return { top: DRV_AT[1] - 1.42 * RY * DRV_S - 10 };
   }

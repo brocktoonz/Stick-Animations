@@ -10,6 +10,9 @@ const Palette = (() => {
     hair: '#6b4a30', hairLine: '#b89472',   // brown; the light strokes inside the spikes
     hoodie: '#16a79c',                      // teal: the one saturated hue in the cast. Props never use it.
     beard: '#6b4a30', beardStroke: '#8a6a4c',   // the bearded version: same brown as the hair
+    hairDark: '#4e3622',                        // darker strands inside his hair (the haircut video's cuts)
+    auburn: '#8a4a2c', auburnDark: '#4e2614',   // the glow-up swoop in the haircut mirror shot (a natural colour, that shot only)
+    iris: '#4a4a4a',                            // the narrowed glow-up eyes' iris
   };
   // Prop colours used so far: real-world colours, dulled so they sit below
   // the hoodie. Reuse these before inventing a new one.
@@ -37,6 +40,7 @@ const Palette = (() => {
     toggleOn: '#5fc86a',                            // an "on" switch on the alarm list (user decision: green, like the phone's own)
     rock: '#9c8a78', rockDark: '#6f5f50', pit: '#4a3d34',   // the volcano and the crater (dull earth browns)
     smoke: '#cdc3b8', flame: '#e3a04f',                     // the volcano's smoke, the meteor's trail
+    glass: '#dde8f0', skinShade: '#ebe0d4',          // window glass; the flat cel shading on a white face
     water: '#b9d0e3',                               // tears, tear streams and sweat (a pale, dulled blue; always with the ink outline)
     phone: '#3a3a3a', phoneOff: '#5a5a5a', phoneDot: '#9a9a9a',   // a dark phone: body, dead screen, camera dot / list rules
   };
@@ -54,6 +58,7 @@ const Palette = (() => {
     ludwig: { hair: '#d8b878', shirt: '#8fb0cf', pineapple: '#ecd79a', leaf: '#7c8a5c' },                 // blond, a pale blue shirt with butter pineapples
     beast:  { hair: '#46332a', hoodie: '#e3b94a' },                                                       // dark brown hair and beard, a yellow hoodie (he wears black or yellow: yellow carries the colour)
     nick:   { hair: '#a88a62', hairLine: '#d6bf96', shirt: '#3f434a' },                                   // light brown hair, a charcoal shirt (he usually wears black)
+    barber: { hair: '#c9c4bc', stache: '#6e655c' },                                                         // the haircut video's barber: grey horseshoe and handlebar moustache
     slime:  { roach: { suit: '#8a5f3e', pale: '#d9c3a0', dark: '#6b4630' },   // the roach onesie: cockroach brown suit, a pale ribbed belly, darker wing shells
               shirt: '#6f9a4f', stubble: '#3d3029', scalp: '#c9b8a6' },                                    // a moss-green shirt, dark stubble on a shaved head
     squeex: { skin: '#c4a08d', hair: '#3b2c24', hairLine: '#7a6050', beard: '#4a382d', tick: '#2e2420', overshirt: '#4a5568', tee: '#d6ccb8', khaki: '#b3a27c', button: '#efe6d9' },   // dark brown hair and beard, slate overshirt, oatmeal tee, khakis
