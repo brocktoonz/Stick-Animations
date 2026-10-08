@@ -1,6 +1,11 @@
 """Find pops and glitches in a rendered video, frame by frame.
 
     python3 scripts/glitch_check.py out/skit.mp4 [--grid 6x10] [--out DIR]
+        [--from SEC --to SEC [--margin 0.5]] [--origin SEC] [--json hits.json]
+
+--from/--to check only that range (plus the margin); on a partial render from
+export.cjs pass --origin so frame numbers are the real ones. --json writes the
+hit list for scripts/precheck.py to diff against the last accepted render.
 
 Every frame is compared with its neighbours, cell by cell on a grid (so a
 small arm pop isn't averaged away by a still frame). It reports:
@@ -16,25 +21,17 @@ hit it saves a strip of the frames around it (before, the hit, after) with
 the cell boxed, so you can look at every flagged spot. Every hit must be
 looked at and either fixed or explained before a render goes to the user.
 """
-import os, subprocess, sys, tempfile
+import argparse, json, os, sys, tempfile
 import numpy as np
 from PIL import Image, ImageDraw
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import vidrange
 
 def frames(path, w=270, h=480):
-    import imageio_ffmpeg
-    ff = imageio_ffmpeg.get_ffmpeg_exe()
-    raw = subprocess.run([ff, '-v', 'error', '-i', path, '-vf', f'scale={w}:{h}', '-f', 'rawvideo', '-pix_fmt', 'gray', '-'],
-                         capture_output=True, check=True).stdout
-    return np.frombuffer(raw, np.uint8).reshape(-1, h, w).astype(np.float32)
+    return vidrange.decode(path, w, h).astype(np.float32)
 
-def main():
-    args = sys.argv[1:]
-    path = args[0]
-    gx, gy = 6, 10
-    out = None
-    if '--grid' in args: gx, gy = map(int, args[args.index('--grid') + 1].split('x'))
-    if '--out' in args: out = args[args.index('--out') + 1]
-    F = frames(path)
+def find_hits(F, gx=6, gy=10):
+    """Hit list [(kind, a, b, x, y, change)] for a stack of gray frames (indices local to F)."""
     n, h, w = F.shape
     ch, cw = h // gy, w // gx
 
@@ -66,8 +63,27 @@ def main():
             y, x = np.unravel_index(np.argmax(np.where(m, cur, 0)), m.shape)
             hits.append(('SNAP', i, i, x, y, float(cur[y, x])))
     hits.sort(key=lambda t: t[1])
-    out = out or tempfile.mkdtemp(prefix='glitch_')
+    return hits
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('video')
+    ap.add_argument('--grid', default='6x10')
+    ap.add_argument('--out')
+    ap.add_argument('--json')
+    vidrange.add_range_args(ap)
+    a_ = ap.parse_args()
+    gx, gy = map(int, a_.grid.split('x'))
+    F = frames(a_.video)
+    lo, hi, off = vidrange.window(a_, len(F))
+    F = F[lo:hi]
+    base = lo + off                      # real frame number of F[0]
+    n, h, w = F.shape
+    ch, cw = h // gy, w // gx
+    hits = find_hits(F, gx, gy)
+    out = a_.out or tempfile.mkdtemp(prefix='glitch_')
     os.makedirs(out, exist_ok=True)
+    rec = []
     for kind, a, b, x, y, v in hits:
         idx = list(range(max(0, a - 2), min(n, b + 3)))
         strip = Image.new('L', (w * len(idx), h), 255)
@@ -76,10 +92,14 @@ def main():
             d = ImageDraw.Draw(im)
             d.rectangle([x * cw, y * ch, (x + 1) * cw - 1, (y + 1) * ch - 1], outline=0 if a <= f <= b else 128, width=2)
             strip.paste(im, (k * w, 0))
-        name = f'{kind.lower()}_{a:04d}-{b:04d}.png'
+        ra, rb = a + base, b + base      # real frame numbers
+        name = f'{kind.lower()}_{ra:04d}-{rb:04d}.png'
         strip.save(os.path.join(out, name))
-        print(f'{kind:4s} frames {a}-{b} ({a / 30:.2f}-{(b + 1) / 30:.2f} s) cell ({x},{y}) change {v:.2f}  -> {name}')
-    print(f'{len(hits)} hit(s) in {n} frames; strips in {out}')
+        rec.append({'kind': kind, 'a': ra, 'b': rb, 'x': int(x), 'y': int(y), 'change': round(v, 3)})
+        print(f'{kind:4s} frames {ra}-{rb} ({ra / 30:.2f}-{(rb + 1) / 30:.2f} s) cell ({x},{y}) change {v:.2f}  -> {name}')
+    if a_.json:
+        json.dump(rec, open(a_.json, 'w'), indent=1)
+    print(f'{len(hits)} hit(s) in {n} frames (real frames {base}-{base + n - 1}); strips in {out}')
 
 if __name__ == '__main__':
     main()

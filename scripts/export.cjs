@@ -5,6 +5,16 @@
 //   node scripts/export.cjs <skit> out/stills 0 45 90                  # PNG stills
 //   node scripts/export.cjs <skit> out/stills 0 45 --safe               # stills with safe zones shaded
 //   node scripts/export.cjs <skit> out/motion.mp4 --no-boil             # frozen line boil, for scripts/glitch_check.py
+//   node scripts/export.cjs <skit> out/part.mp4 --from 4.2 --to 6.5      # only that range (seconds), plus a margin
+//
+// --from/--to render only that time range, widened by --margin seconds (default
+// 0.5) each side so the cuts into and out of it are in the file. Frame numbers
+// are the same as in the full render (line boil is a function of the frame
+// number), so a partial render matches the full one frame for frame. The file
+// starts at second max(0, from - margin); pass that as --origin to
+// scripts/glitch_check.py and scripts/frame_sheets.py to label tiles with the
+// real frame numbers (the script prints it). With stills, --from/--to are
+// ignored (stills take explicit frame numbers).
 //
 // Skit names are the files in web/skits/ (thermostat, bored, lights, cast).
 // With --audio, the track is muxed in and the video runs as long as the skit.
@@ -21,6 +31,9 @@ const path = require('path');
   const audio = ai >= 0 ? args.splice(ai, 2)[1] : null;
   const nb = args.indexOf('--no-boil');   // freeze the line boil (motion check renders only)
   const noBoil = nb >= 0 && !!args.splice(nb, 1);
+  const opt = name => { const i = args.indexOf(name); return i >= 0 ? Number(args.splice(i, 2)[1]) : null; };
+  const from = opt('--from'), to = opt('--to'), marginOpt = opt('--margin');
+  const margin = marginOpt ?? 0.5;
   const si = args.indexOf('--safe');   // shade caption no-go areas (for checking stills)
   const safe = si >= 0 && !!args.splice(si, 1);
   const [skit, out, ...frameArgs] = args;
@@ -44,12 +57,16 @@ const path = require('path');
     for (const f of frameArgs.map(Number)) fs.writeFileSync(path.join(out, `${skit}_${f}.png`), await grab(f));
   } else {
     fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
+    const f0 = from == null ? 0 : Math.max(0, Math.floor((from - margin) * 30));
+    const f1 = to == null ? total : Math.min(total, Math.ceil((to + margin) * 30));
+    if (f0 > 0 || f1 < total) console.log(`range: frames ${f0}-${f1 - 1} (origin ${f0 / 30}s)`);
     const inputs = ['-f', 'image2pipe', '-framerate', '30', '-i', '-'];
-    const audioArgs = audio ? [...(start ? ['-ss', String(start)] : []), '-i', audio, '-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '160k', '-af', 'apad', '-t', String(total / 30)] : [];
+    const aStart = (start || 0) + f0 / 30;
+    const audioArgs = audio ? [...(aStart ? ['-ss', String(aStart)] : []), '-i', audio, '-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '160k', '-af', 'apad', '-t', String((f1 - f0) / 30)] : [];
     const ff = spawn(process.env.FFMPEG || 'ffmpeg', ['-y', '-loglevel', 'error', ...inputs, ...audioArgs,
       '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out],
       { stdio: ['pipe', 'inherit', 'inherit'] });
-    for (let f = 0; f < total; f++) {
+    for (let f = f0; f < f1; f++) {
       const buf = await grab(f);
       if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
     }
