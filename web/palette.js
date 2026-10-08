@@ -51,7 +51,7 @@ const Palette = (() => {
     speed:  { skin: '#a07561', straw: '#d9b86c', strawLine: '#a98a45', band: '#b8473d', vest: '#b8473d', button: '#e3c25a', sash: '#e3c25a', shorts: '#5a78a0' },   // One Piece straw hat, red vest, yellow sash, blue shorts; hair stays black
     ludwig: { hair: '#d8b878', shirt: '#8fb0cf', pineapple: '#ecd79a', leaf: '#7c8a5c' },                 // blond, a pale blue shirt with butter pineapples
     beast:  { hair: '#46332a', hoodie: '#e3b94a' },                                                       // dark brown hair and beard, a yellow hoodie (he wears black or yellow: yellow carries the colour)
-    nick:   { hair: '#a88a62', hairLine: '#d6bf96', shirt: '#7c5c82' },                                   // brown hair (the grey mop was brown), a dusty plum shirt
+    nick:   { hair: '#a88a62', hairLine: '#d6bf96', shirt: '#3f434a' },                                   // light brown hair, a charcoal shirt (he usually wears black)
     slime:  { shirt: '#6f9a4f', stubble: '#3d3029', scalp: '#c9b8a6' },                                    // a moss-green shirt, dark stubble on a shaved head
     squeex: { skin: '#c4a08d', hair: '#3b2c24', hairLine: '#7a6050', beard: '#4a382d', tick: '#2e2420', overshirt: '#4a5568', tee: '#d6ccb8', khaki: '#b3a27c', button: '#efe6d9' },   // dark brown hair and beard, slate overshirt, oatmeal tee, khakis
   };
