@@ -129,9 +129,15 @@ and alarm videos (cream paper, teal hero, coloured props; see
 - **Red** (`#e3261b` / `#d9261c`) belongs to title captions and to the one
   prop that is the joke (the eye doctor's balloon). Dialogue subtitles use
   speaker colours, see Captions.
-- **Cameos** stay grayscale with their existing clothing accents (suit ties)
-  until each is given a signature colour. Unnatural colours are for clothing
-  only; never on hair.
+- **Cameos have one signature clothing colour each** (`Palette.cast`, user
+  decision): Speed's red vest, yellow sash and blue shorts under the straw
+  hat; Ludwig's pale blue pineapple shirt; MrBeast's burnt-orange hoodie;
+  Nick's plum shirt; Slime's moss-green shirt; Squeex's slate overshirt over
+  an oatmeal tee, in khakis. Hair is natural colours only (Ludwig blond,
+  MrBeast, Nick and Squeex brown, Speed black), never an unnatural one. Ink
+  stays black, and nobody but the main character is teal. Suit ties keep
+  their colours (`Palette.tie`). **Skin is still as drawn** (white; Speed's
+  and Squeex's the existing grey) until the user decides on skin tones.
 - Not yet converted: skits other than the power nap and the alarm still draw
   their own grey sets. Convert a skit by swapping its backdrop and fills for
   `Palette` entries and dropping its walls and floors (see Sets below); the

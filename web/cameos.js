@@ -8,8 +8,9 @@ const Cameos = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { figure, eyes, brows, mouth, sweat } = Chars;
   const W = '#fff', GREY = '#a3a3a3';
-  const BLOND = '#d9d9d9';   // blond reads as a light grey in the ink style
-  const FACIAL_HAIR = '#5a5a5a', STRAW = '#e6e6e6';
+  const C = Palette.cast;
+  const BLOND = C.ludwig.hair;
+  const FACIAL_HAIR = C.beast.hair, STRAW = C.speed.straw;
   const RX = 146, RY = 136;   // head radii (the kid's is 138 x 128)
 
   // Fixed (non-boiling) pseudo-random numbers for tufts and patterns.
@@ -185,11 +186,11 @@ const Cameos = (() => {
                    [RX * 0.56, -RY * 1.62], [RX * 0.84, -RY * 1.3], [RX * 0.8, -RY * 0.92]];
     fill(ctx, crown, STRAW, 0.8);
     outline(ctx, crown, { w: 10 });
-    fill(ctx, [[-RX * 0.81, -RY * 1.0], [RX * 0.81, -RY * 1.0], [RX * 0.83, -RY * 1.24], [-RX * 0.83, -RY * 1.24]], '#3a3a3a', 0.6);
+    fill(ctx, [[-RX * 0.81, -RY * 1.0], [RX * 0.81, -RY * 1.0], [RX * 0.83, -RY * 1.24], [-RX * 0.83, -RY * 1.24]], C.speed.band, 0.6);
     for (let i = 0; i < 7; i++) {   // straw weave
       const x = -RX * 0.6 + i * RX * 0.2;
-      stroke(ctx, [[x, -RY * 1.3], [x * 0.7, -RY * 1.6]], { w: 4, color: '#9a9a9a' });
-      stroke(ctx, [[x * 2.2, -RY * 0.86], [x * 2.35, -RY * 0.96]], { w: 4, color: '#9a9a9a' });
+      stroke(ctx, [[x, -RY * 1.3], [x * 0.7, -RY * 1.6]], { w: 4, color: C.speed.strawLine });
+      stroke(ctx, [[x * 2.2, -RY * 0.86], [x * 2.35, -RY * 0.96]], { w: 4, color: C.speed.strawLine });
     }
     ctx.restore();
   };
@@ -209,23 +210,25 @@ const Cameos = (() => {
   // chest, buttons and a waist sash.
   const speed = build({
     skin: GREY, shirt: GREY,
+    body: { bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
+      fill(ctx, b, C.speed.shorts, 1.2); outline(ctx, b, { w: 9 }); } },   // blue shorts
     head: head({ skin: GREY, hair: twists(), hat: strawHat }),
     detail: (ctx, n, h) => {
       for (const side of [-1, 1]) {   // vest panels, open down the middle
         const panel = [[side * 48, n], [side * 66, n + 64], [side * 68, h - 4], [side * 30, h - 4], [side * 22, n + 60], [side * 20, n + 4]];
-        fill(ctx, panel, W, 0.6);
+        fill(ctx, panel, C.speed.vest, 0.6);
         outline(ctx, panel, { w: 8 });
-        for (let i = 0; i < 3; i++) blob(ctx, side * 34, n + 80 + i * 36, 7, 7, { fill: W, w: 4, n: 6 });
+        for (let i = 0; i < 3; i++) blob(ctx, side * 34, n + 80 + i * 36, 7, 7, { fill: C.speed.button, w: 4, n: 6 });
       }
       const sash = [[-70, h - 26], [70, h - 26], [72, h + 6], [-72, h + 6]];
-      fill(ctx, sash, '#dcdcdc', 0.8);
+      fill(ctx, sash, C.speed.sash, 0.8);
       outline(ctx, sash, { w: 7 });
     },
   });
 
   // Ludwig: light-grey blond swoop, short-sleeved pineapple shirt.
   const ludwig = build({
-    shirt: W, sleeveHem: 0.24,   // halfway down the upper arm, clear of the elbow
+    shirt: C.ludwig.shirt, sleeveHem: 0.24, sleeveFill: C.ludwig.shirt,   // halfway down the upper arm, clear of the elbow
     body: { hipY: -172, neckY: -352, legW: 21, footX: 18, hipX: 20, torso: (n, h) => [[-42, n], [42, n], [56, n + 60], [58, h - 4], [-58, h - 4], [-56, n + 60]] },
     headScale: [0.92, 1.06],
     head: head({ hair: swoop(), eyeLop: { side: -1, dy: 0.12, s: 1.07 } }),   // lopsided eyes: the screen-right eye (he faces left) a little lower and bigger
@@ -237,9 +240,9 @@ const Cameos = (() => {
         if (hands.some(([hx, hy]) => Math.hypot(hx - x, hy - (y - 6)) < 44)) continue;   // a hand rests here: leave this pineapple out, so none pokes out from behind a hand
         for (const a of [-0.9, -0.35, 0.2, 0.75]) {
           const r = a === -0.35 || a === 0.2 ? 20 : 14;
-          stroke(ctx, [[x, y - 14], [x + Math.sin(a) * r, y - 14 - Math.cos(a) * r]], { w: 5, taper0: 0.1, taper1: 0.9 });
+          stroke(ctx, [[x, y - 14], [x + Math.sin(a) * r, y - 14 - Math.cos(a) * r]], { w: 5, taper0: 0.1, taper1: 0.9, color: C.ludwig.leaf });
         }
-        blob(ctx, x, y, 11, 15, { fill: W, w: 5, n: 8 });
+        blob(ctx, x, y, 11, 15, { fill: C.ludwig.pineapple, w: 5, n: 8 });
         stroke(ctx, [[x - 8, y - 6], [x + 7, y + 9]], { w: 2.5 });
         stroke(ctx, [[x + 8, y - 6], [x - 7, y + 9]], { w: 2.5 });
       }
@@ -248,9 +251,9 @@ const Cameos = (() => {
 
   // MrBeast: side-swept hair, thick brows, goatee, black hoodie.
   const beast = build({
-    shirt: INK, sleeve: '#222',
+    shirt: C.beast.hoodie, sleeve: C.beast.hoodie,
     head: head({ hair: sidePart, beard: chinStrap, front: goateeFront, browW: 15 }),
-    detail: (ctx, n, h) => { hood(ctx, n, W); pocket(ctx, h, W); },
+    detail: (ctx, n, h) => { hood(ctx, n, INK); pocket(ctx, h, INK); },
   });
 
   const cash = (ctx, x, y) => {
@@ -683,7 +686,7 @@ const Cameos = (() => {
     for (let i = 0; i <= 6; i++) { const x = wide - 2 * wide * i / 6; bottom.push([x, len - (i % 2) * 0.12]); }
     const poly = [...wavyEdge([-wide - 0.02, len - 0.16], [-1.18, -0.36], waves, 0.07), ...MID_TOP,
       ...wavyEdge([1.18, -0.36], [wide + 0.02, len - 0.16], waves, 0.07), ...bottom];
-    fill(ctx, hu(poly), W, 1);
+    fill(ctx, hu(poly), C.nick.hair, 1);
     outline(ctx, hu(poly), { w: 11 });
     if (strands) for (const sx of [-1, 1])   // a wave down each longer back piece, below the front layer
       stroke(ctx, hu([[sx * 1.02, 0.34], [sx * 1.08, 0.52], [sx * 1.02, len - 0.18]]), { w: 6, taper0: 0.2, taper1: 0.4 });
@@ -695,7 +698,8 @@ const Cameos = (() => {
      [0.05, -0.96], [-0.05, -0.96], [-0.22, -0.8], [-0.5, -0.68], [-0.78, -0.46], ...wavyEdge([-0.88, -0.16], [-0.94, 0.3], 2, 0.05), [-0.88, 0.6]],
     [[[0.0, -0.98], [0.02, -1.14], [0.05, -1.28]],                        // the part
      [[0.1, -1.04], [0.52, -0.98], [0.9, -0.56]], [[-0.1, -1.04], [-0.52, -0.98], [-0.9, -0.56]],   // curtains falling away from it
-     [[1.0, -0.36], [1.1, -0.06], [1.02, 0.24], [1.12, 0.52]], [[-1.0, -0.36], [-1.1, -0.06], [-1.02, 0.24], [-1.12, 0.52]]]);   // waves down the sides
+     [[1.0, -0.36], [1.1, -0.06], [1.02, 0.24], [1.12, 0.52]], [[-1.0, -0.36], [-1.1, -0.06], [-1.02, 0.24], [-1.12, 0.52]]],   // waves down the sides
+    C.nick.hair, { lineColor: C.nick.hairLine });
   // Trial 2: same middle part, short at the front (face-framing pieces end at
   // the cheek) and longer towards the back (the layer behind hangs to the neck).
   const MID_SHORT_FRONT = outlineHair(
@@ -705,15 +709,15 @@ const Cameos = (() => {
      [0.05, -0.96], [-0.05, -0.96], [-0.22, -0.8], [-0.5, -0.68], [-0.78, -0.46], [-0.9, -0.16], [-0.88, 0.08]],
     [[[0.0, -0.98], [0.02, -1.14], [0.05, -1.28]],
      [[0.1, -1.04], [0.52, -0.98], [0.9, -0.56]], [[-0.1, -1.04], [-0.52, -0.98], [-0.9, -0.56]]],
-    W, { seamless: true, tips: 3 });
+    C.nick.hair, { seamless: true, tips: 3, lineColor: C.nick.hairLine });
   const nickMidLayered = build({
-    shirt: INK, sleeve: '#222', behind: midBack({ len: 0.86, wide: 1.1, waves: 3, strands: true }),
+    shirt: C.nick.shirt, sleeve: C.nick.shirt, behind: midBack({ len: 0.86, wide: 1.1, waves: 3, strands: true }),
     body: { hipY: -140, neckY: -300, legW: 27, footX: 42, hipX: 30, torso: (n, h) => [[-54, n], [54, n], [74, n + 60], [76, h - 4], [-76, h - 4], [-74, n + 60]] },
     headScale: [1.04, 0.98],
     head: head({ hair: MID_SHORT_FRONT, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
   const nickMidPart = build({
-    shirt: INK, sleeve: '#222', behind: midBack({ len: 0.8, wide: 1.1, waves: 3 }),   // back hair, the same length as the front
+    shirt: C.nick.shirt, sleeve: C.nick.shirt, behind: midBack({ len: 0.8, wide: 1.1, waves: 3 }),   // back hair, the same length as the front
     body: { hipY: -140, neckY: -300, legW: 27, footX: 42, hipX: 30, torso: (n, h) => [[-54, n], [54, n], [74, n + 60], [76, h - 4], [-76, h - 4], [-74, n + 60]] },
     headScale: [1.04, 0.98],
     head: head({ hair: MID_FRONT, front: roundGlasses }),
@@ -734,8 +738,8 @@ const Cameos = (() => {
   // Slime: shaved head (light stubble), short full beard + moustache, big grin.
   // clean shaven head: just a couple of shine marks
   const shaved = ctx => {
-    stroke(ctx, [[-RX * 0.42, -RY * 0.8], [-RX * 0.1, -RY * 0.92], [RX * 0.2, -RY * 0.9]], { w: 6, color: '#bbb' });
-    stroke(ctx, [[RX * 0.34, -RY * 0.84], [RX * 0.44, -RY * 0.78]], { w: 6, color: '#bbb' });
+    stroke(ctx, [[-RX * 0.42, -RY * 0.8], [-RX * 0.1, -RY * 0.92], [RX * 0.2, -RY * 0.9]], { w: 6, color: C.slime.scalp });
+    stroke(ctx, [[RX * 0.34, -RY * 0.84], [RX * 0.44, -RY * 0.78]], { w: 6, color: C.slime.scalp });
   };
   const shortBeard = ctx => {
     // outer: jaw line from ear to ear; inner (right to left): cheek line that
@@ -761,7 +765,7 @@ const Cameos = (() => {
       const x = gx + (hh(k) - 0.5) * 9 + ((gy / 10) % 2) * 5, y = gy + (hh(k + 5) - 0.5) * 7;
       const depth = Math.min(1, Math.max(0, (Math.hypot(x / RX, y / RY) - 0.62) / 0.34));   // 0 at the inner edge, 1 at the jaw
       if (hh(k + 13) > 0.25 + 0.75 * depth) continue;
-      blob(ctx, x, y, 1.5 + 0.5 * depth, 1.5 + 0.5 * depth, { fill: depth > 0.5 || hh(k + 9) > 0.5 ? '#4a4a4a' : '#7a7a7a', w: 0, n: 5 });
+      blob(ctx, x, y, 1.5 + 0.5 * depth, 1.5 + 0.5 * depth, { fill: depth > 0.5 || hh(k + 9) > 0.5 ? C.slime.stubble : C.slime.scalp, w: 0, n: 5 });
     }
     ctx.restore();
   };
@@ -775,11 +779,11 @@ const Cameos = (() => {
     ctx.clip();
     for (let y = 30; y < 56; y += 7) for (let x = fx - 62; x < fx + 64; x += 8) {
       const k = Math.round(x * 3 + y * 11);
-      blob(ctx, x + (hh(k) - 0.5) * 5, y - up + (hh(k + 2) - 0.5) * 4, 1.7, 1.7, { fill: '#4a4a4a', w: 0, n: 5 });
+      blob(ctx, x + (hh(k) - 0.5) * 5, y - up + (hh(k + 2) - 0.5) * 4, 1.7, 1.7, { fill: C.slime.stubble, w: 0, n: 5 });
     }
     ctx.restore();
   };
-  const slime = build({ shirt: INK, sleeve: '#222', head: head({ hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
+  const slime = build({ shirt: C.slime.shirt, sleeve: C.slime.shirt, head: head({ hair: shaved, beard: shortBeard, front: slimeStache, browW: 12 }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
   // Slime in a roach onesie (the "What am I? A roach?!" skit): a grey hood
@@ -1241,7 +1245,7 @@ const Cameos = (() => {
   // shade lighter than the hair) with a thin moustache lifted off the mouth,
   // and a big grin. Light-grey skin (the cameos stay grayscale). Each draft
   // leans on a different signature item from the photos.
-  const SQ_HAIR = '#2b2b2b', SQ_LINE = '#5e5e5e', SQ_BEARD = '#555555', SQ_TICK = '#3a3a3a', SQ_SKIN = '#d4d4d4';
+  const SQ_HAIR = C.squeex.hair, SQ_LINE = C.squeex.hairLine, SQ_BEARD = C.squeex.beard, SQ_TICK = C.squeex.tick, SQ_SKIN = '#d4d4d4';
   // Full short beard along the jaw. It starts below the ears, so skin shows
   // between it and the hair, and its jaw edge is tufted so it reads as hair.
   // The window around the mouth is wide, so the beard never outlines the lips.
@@ -1351,17 +1355,17 @@ const Cameos = (() => {
   };
   const overshirt = (ctx, n, h) => {   // C: open dark overshirt over a grey tee
     const tee = [[-28, n], [28, n], [32, h - 4], [-32, h - 4]];
-    fill(ctx, tee, '#8f8f8f', 0.4);
+    fill(ctx, tee, C.squeex.tee, 0.4);
     outline(ctx, tee, { w: 7 });
     stroke(ctx, [[-24, n + 2], [0, n + 22], [24, n + 2]], { w: 6 });
     for (const sd of [-1, 1]) {   // shirt tails hanging past the hem
       const tail = [[sd * 34, h - 6], [sd * 70, h - 6], [sd * 72, h + 26], [sd * 50, h + 34], [sd * 34, h + 22]];
-      fill(ctx, tail, '#3a3a3a', 0.4); outline(ctx, tail, { w: 7 });
+      fill(ctx, tail, C.squeex.overshirt, 0.4); outline(ctx, tail, { w: 7 });
     }
-    for (let i = 0; i < 3; i++) blob(ctx, -40, n + 70 + i * 44, 5, 5, { fill: '#9a9a9a', w: 3, n: 6 });   // buttons on the placket
+    for (let i = 0; i < 3; i++) blob(ctx, -40, n + 70 + i * 44, 5, 5, { fill: C.squeex.button, w: 3, n: 6 });   // buttons on the placket
     for (const sd of [-1, 1]) {
       const col = [[sd * 26, n - 2], [sd * 56, n - 4], [sd * 40, n + 52]];
-      fill(ctx, col, '#3a3a3a', 0.3); outline(ctx, col, { w: 6, color: '#9a9a9a' });
+      fill(ctx, col, C.squeex.overshirt, 0.3); outline(ctx, col, { w: 6 });
     }
   };
 
@@ -1492,7 +1496,7 @@ const Cameos = (() => {
   // moustache corners, the moustache on the upper lip, a rounded full chin.
   // Ink only at the edges (short strokes along the cheek line and the bottom),
   // a flat fill inside. It stretches with the jaw; the mouth cuts into it.
-  const FULLB = '#575757', STACHE = FULLB;   // the moustache is the beard's own grey (user decision); its shape still shows in the beard's top edge
+  const FULLB = C.squeex.beard, STACHE = FULLB;   // the moustache is the beard's own grey (user decision); its shape still shows in the beard's top edge
   // mouths the moustache goes under rather than over: his wide grin should show whole
   const STACHE_UNDER = new Set(['grinwide']);
   const drawStache = (ctx, P, { stacheTop, lip }) => {
@@ -1611,10 +1615,10 @@ const Cameos = (() => {
   };
 
   // C, with any beard and moustache: everything else is the chosen draft C
-  const sqC = (beard, stache, headOpts = {}) => build({ skin: SQ_SKIN, shirt: '#3a3a3a', sleeve: '#3a3a3a', headScale: [1.04, 0.98],
-    body: { legColor: '#8a8a8a',   // khakis, a mid grey so they don't read as bare legs, waist to ankle
+  const sqC = (beard, stache, headOpts = {}) => build({ skin: SQ_SKIN, shirt: C.squeex.overshirt, sleeve: C.squeex.overshirt, headScale: [1.04, 0.98],
+    body: { legColor: C.squeex.khaki,   // khakis, a mid grey so they don't read as bare legs, waist to ankle
       bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
-        fill(ctx, b, '#8a8a8a', 1.2); outline(ctx, b, { w: 9 }); } },
+        fill(ctx, b, C.squeex.khaki, 1.2); outline(ctx, b, { w: 9 }); } },
     head: head({ skin: SQ_SKIN, hair: sqHair(SQ_UP), beard, front: stache, browW: 9, ...headOpts }),
     detail: overshirt });
 
