@@ -22,7 +22,19 @@ const Palette = (() => {
     nightSky: '#3f4656',
     linen: '#efe6d9', linenNight: '#cdbfae',        // mattress, pillow
     shadow: '#dcc6ac',                              // flat shadow on the paper
+    // the alarm video's bedroom, night and day (the same objects, lit differently)
+    woodNight: '#6b4f3b',                           // headboard, night
+    standNight: '#73563f', standTopNight: '#86684f', // nightstand front / top, night
+    stand: '#b08a6c',                               // nightstand front, day (top is woodLight)
+    frameNight: '#a08f80', frame: '#f8eee2',        // window sill, night / day
+    pillowNight: '#d8cdbd', pillow: '#f5ede2',      // the bed pillow, night / day
+    sunPatch: '#fff8ee',                            // morning sun on the paper
+    moon: '#e8e8e8',                                // moon and stars
+    couchLeg: '#5e4330',                            // the couch's stubby wood legs (dark: they sit in shadow under the olive)
+    sleepBubble: '#e6edf2',                         // the sleep bubbles in the power nap close-up (a cool off-white)
+    phone: '#3a3a3a', phoneOff: '#5a5a5a', phoneDot: '#9a9a9a',   // a dark phone: body, dead screen, camera dot / list rules
   };
+  const captionRed = '#d9261c';   // title captions: the one red the channel uses on text (also the eye doctor's balloon)
   const tongue = '#b5555e';   // dusty rose, inside every open mouth (user decision: the grey tongue was the last grayscale leftover)
-  return { paper, paperNight, hero, prop, tongue };
+  return { paper, paperNight, hero, prop, tongue, captionRed };
 })();
