@@ -121,6 +121,12 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
   beard options are kept only for reference.
 - Cameos (`web/cameos.js`) are caricatures recognisable from hair silhouette
   plus one or two signature items.
+- **Ludwig's eyes are slightly lopsided** (user decision, as in the extinct
+  video): one eye sits a little lower and a little bigger than the other. It's
+  built into `Cameos.ludwig` (`eyeLop: { side: -1, dy: 0.12, s: 1.07 }`), so
+  always draw him with `Cameos.ludwig`; never draw his eyes level, never
+  override or drop `eyeLop`, and keep the same eye lopsided whichever way he
+  faces. A face drawn by a skit's own hook must copy the same offset.
 
 ## Camera and staging
 

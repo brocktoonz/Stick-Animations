@@ -7,7 +7,7 @@ emotion plus `sheet.png` with all of them on one page:
 |---|---|---|
 | `main/` | the main character (spiky hair) | `Hero.main` |
 | `speed/` | IShowSpeed | `Cameos.speed` |
-| `ludwig/` | Ludwig | `Cameos.ludwig` |
+| `ludwig/` | Ludwig (eyes slightly lopsided: one a little lower and bigger) | `Cameos.ludwig` |
 | `beast/` | MrBeast | `Cameos.beast` |
 | `nick/` | Nick | `Cameos.nick` |
 | `slime/` | Slime | `Cameos.slime` |
