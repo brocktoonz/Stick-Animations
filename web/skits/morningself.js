@@ -51,10 +51,13 @@ Skits.morningself = (() => {
   const setSeed = pts => 7000 + Math.round(Math.abs(pts[0][0]) * 3 + Math.abs(pts[0][1]) + pts.length * 17);
   const setLine = (ctx, pts, w, seed) => { const e = even(pts); stroke(ctx, [...e, e[0], e[1]], { w, taper0: 0, taper1: 0, minW: 1, seed: seed ?? setSeed(pts) }); };
   // `seed` pins a shape that moves (the phone, the blanket): setSeed follows pts[0], so a moving shape would re-roll its wobble every frame
-  const panel = (ctx, pts, col, w = 10, seed) => { fill(ctx, pts, col, 0.4); setLine(ctx, pts, w, seed); };
+  // A colour fill follows exactly the path the ink traces (the same short straight segments), never a smoothed curve
+  // of the corners: a spline through a few corner points bulges past the ink line and the colour bleeds out of it.
+  const flat = (ctx, pts, col) => { ctx.fillStyle = col; ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill(); };
+  const panel = (ctx, pts, col, w = 10, seed) => { flat(ctx, even(pts), col); setLine(ctx, pts, w, seed); };
   // a straight-sided polygon with points along every edge, so the brush's smoothing can't bulge it
   const poly = (corners, n = 6) => corners.flatMap((a, i) => { const b = corners[(i + 1) % corners.length]; return Array.from({ length: n }, (_, k) => [a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]); });
-  const shape = (ctx, pts, col, w = 10) => { const sm = Brush.spline(pts, true, 3); fill(ctx, sm, col, 0.5); setLine(ctx, sm.filter((_, i) => i % 12 === 0), w); };
+  const shape = (ctx, pts, col, w = 10) => { const q = Brush.spline(pts, true, 3).filter((_, i) => i % 12 === 0); flat(ctx, even(q), col); setLine(ctx, q, w); };
 
   function pillow(ctx, cx, cy, w, h, col) {
     // a soft rounded oblong in light grey, so its ends can't read as ears beside his face
@@ -164,7 +167,7 @@ Skits.morningself = (() => {
   function drawPhone(ctx, body, scr, k, lit, dot = 0, dotAt = [0, 0]) {
     fill(ctx, [body[3], body[2], [body[2][0], body[2][1] + PHONE_THICK * k], [body[3][0], body[3][1] + PHONE_THICK * k]], INK, 0.2);   // the edge, as it tips flat
     panel(ctx, body, P.phone, 6, 8200);
-    fill(ctx, scr, lit ? W : P.phoneOff, 0.2); setLine(ctx, scr, 4, 8201);
+    flat(ctx, even(scr), lit ? W : P.phoneOff); setLine(ctx, scr, 4, 8201);
     if (dot > 0.02) { ctx.save(); ctx.globalAlpha = dot; blob(ctx, dotAt[0], dotAt[1], 6, 6, { fill: P.phoneDot, w: 3, n: 6 }); ctx.restore(); }
     if (lit && k > 0.6) {   // the alarm on screen: a time and a big snooze button, fading in as the face turns up
       ctx.save(); ctx.globalAlpha = seg(k, 0.6, 1);
@@ -213,7 +216,7 @@ Skits.morningself = (() => {
     // outline a lightly smoothed copy: outline() starts at a random point and
     // overshoots, which crossed itself on the raw corners (a flickering loop)
     const sp = Brush.spline(pts, true, 2);   // fill and outline trace exactly the same path
-    ctx.fillStyle = c.blanket; ctx.beginPath(); sp.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill();
+    flat(ctx, even(sp), c.blanket);   // the same resampled path the ink follows
     // fixed seeds: the slap arm drawn before the blanket changes the brush's stroke count
     // on every slap, which re-rolled these lines each time (the lines must only boil on the beat)
     setLine(ctx, sp, 11, 8100);
