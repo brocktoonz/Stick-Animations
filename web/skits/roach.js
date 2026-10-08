@@ -7,8 +7,8 @@
 Skits.roach = (() => {
   const { stroke, fill, blob, INK } = Brush;
   const { seg, lerp, easeOut, easeInOut, easeOutBack, loud, blink, clamp } = Stage;
-  const E = Emotions, Ar = Arms, W = '#fff', BACKDROP = '#eeeeee';
-  const LUD = '#ffffff', SLIME = '#4fd34f';
+  const E = Emotions, Ar = Arms, W = '#fff', BACKDROP = Palette.paper;
+  const LUD = Palette.speaker.ludwig, SLIME = Palette.speaker.slime;
   const DUR = 6.05;
 
   // [start, end, colour, text]
@@ -77,8 +77,9 @@ Skits.roach = (() => {
     return { ['arm' + K]: at, ['bend' + K]: lerp(bendOf(a, ea), bendOf(b, eb), k) };
   };
   const REST = side => Arms.rest(side)[side < 0 ? 'armL' : 'armR'];   // the shared resting arm (soft hang), never a hand-coded rest
-  const shadow = (ctx, x, rx, y) => fill(ctx, Brush.ellipsePts(x, y + 6, rx, rx * 0.13, 14), '#bcbcbc', 0.5);
-  const ground = (ctx, y) => stroke(ctx, [[-700, y], [540, y + 3], [1800, y - 4]], { w: 6, taper0: 0, taper1: 0, seed: 6100 });
+  const shadow = (ctx, x, rx, y) => fill(ctx, Brush.ellipsePts(x, y + 6, rx, rx * 0.13, 14), Palette.prop.shadow, 0.5);
+  // a ground line only directly under his feet (half is its half-width), never a floor edge across the frame
+  const ground = (ctx, y, cx = 540, half = 260) => stroke(ctx, [[cx - half, y], [cx, y + 3], [cx + half, y - 4]], { w: 6, taper0: 0, taper1: 0, seed: 6100 });
   const backdrop = ctx => { ctx.fillStyle = BACKDROP; ctx.fillRect(-60, -60, 1200, 2040); };
 
   // Head-centre placement. Ludwig's head sits 40 units off his body line (toward his facing), Slime's is on it.
@@ -133,7 +134,7 @@ Skits.roach = (() => {
   // Slime's walk-in: a stride that follows the distance covered, damped to a stop as he arrives.
   const shots = [
     // 0.00-0.90: Ludwig, full body, slumped
-    [0, 0.9, (ctx, t) => { backdrop(ctx); ground(ctx, 1680); put(ctx, 'lud', 1.45, 480 + 40 * 1.45, 1680 - 470 * 1.45, ludPose(t)); }],
+    [0, 0.9, (ctx, t) => { backdrop(ctx); ground(ctx, 1680, 540, 230); put(ctx, 'lud', 1.45, 480 + 40 * 1.45, 1680 - 470 * 1.45, ludPose(t)); }],
     // 0.90-1.95: close-up, flat stare, "friends..."
     [0.9, 1.95, (ctx, t) => {
       const s = lerp(2.3, 2.42, seg(t, 0.9, 1.95));
@@ -149,7 +150,7 @@ Skits.roach = (() => {
       put(ctx, 'lud', 2.42, lerp(450, 90, slide), 1170, ludPose(t));
     }],
     // 2.50-3.85: Slime shouts at him (uncaptioned), then goes stone-faced
-    [2.5, 3.85, (ctx, t) => { backdrop(ctx); ground(ctx, 1636); put(ctx, 'slime', 2.0, 590, 760, slimePose(t), { top: 9999 }); }],
+    [2.5, 3.85, (ctx, t) => { backdrop(ctx); ground(ctx, 1636, 590, 300); put(ctx, 'slime', 2.0, 590, 760, slimePose(t), { top: 9999 }); }],
     // 3.85-4.8: close-up, "What am i?", hand on his chest
     [3.85, 4.8, (ctx, t) => {
       const s = lerp(2.7, 2.78, seg(t, 3.85, 4.8));
@@ -165,7 +166,7 @@ Skits.roach = (() => {
     [4.8, DUR, (ctx, t) => {
       const s = 1.35, droop = t < 5.0 ? lerp(0.5, 0, easeOut(seg(t, 4.8, 5.0))) : lerp(0, 0.75, easeInOut(seg(t, 5.55, 5.98)));
       const calm = easeInOut(seg(t, 5.45, 5.7)), m = t < 5.48 ? talk(t, 4.84, 5.48) : null;
-      backdrop(ctx); ground(ctx, 1680);
+      backdrop(ctx); ground(ctx, 1680, 540, 260);
       put(ctx, 'roach', s, 540, 1680 - 438 * s, {
         dir: 1, t, cleanTorso: true, ...E.neutral, mouth: 'flat', lookX: 0.0, pupil: 10, lid: blink(t, 3.7, 1.9) || lerp(0.2, 0.5, calm), flatLid: calm > 0.5, brow: lerp(0.55, 0.45, calm),
         tilt: keys(t, [[4.8, 0.0], [5.1, 0.06], [5.5, 0.06], [5.9, -0.02]]), bob: Math.sin(t * 2.1) * 3, weight: 0.7, droop,

@@ -52,10 +52,13 @@ const Palette = (() => {
     ludwig: { hair: '#d8b878', shirt: '#8fb0cf', pineapple: '#ecd79a', leaf: '#7c8a5c' },                 // blond, a pale blue shirt with butter pineapples
     beast:  { hair: '#46332a', hoodie: '#e3b94a' },                                                       // dark brown hair and beard, a yellow hoodie (he wears black or yellow: yellow carries the colour)
     nick:   { hair: '#a88a62', hairLine: '#d6bf96', shirt: '#3f434a' },                                   // light brown hair, a charcoal shirt (he usually wears black)
-    slime:  { shirt: '#6f9a4f', stubble: '#3d3029', scalp: '#c9b8a6' },                                    // a moss-green shirt, dark stubble on a shaved head
+    slime:  { roach: { suit: '#8a5f3e', pale: '#d9c3a0', dark: '#6b4630' },   // the roach onesie: cockroach brown suit, a pale ribbed belly, darker wing shells
+              shirt: '#6f9a4f', stubble: '#3d3029', scalp: '#c9b8a6' },                                    // a moss-green shirt, dark stubble on a shaved head
     squeex: { skin: '#c4a08d', hair: '#3b2c24', hairLine: '#7a6050', beard: '#4a382d', tick: '#2e2420', overshirt: '#4a5568', tee: '#d6ccb8', khaki: '#b3a27c', button: '#efe6d9' },   // dark brown hair and beard, slate overshirt, oatmeal tee, khakis
   };
+  // Dialogue caption colours, one per speaker (the original clips' burned-in colours).
+  const speaker = { nick: '#4f9be8', ludwig: '#ffffff', slime: '#4fd34f' };
   const captionRed = '#d9261c';   // title captions: the one red the channel uses on text (also the eye doctor's balloon)
   const tongue = '#b5555e';   // dusty rose, inside every open mouth (user decision: the grey tongue was the last grayscale leftover)
-  return { paper, paperNight, hero, prop, tongue, captionRed, tie, cast };
+  return { paper, paperNight, hero, prop, tongue, captionRed, tie, cast, speaker };
 })();

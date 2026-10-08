@@ -787,12 +787,12 @@ const Cameos = (() => {
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
 
   // Slime in a roach onesie (the "What am I? A roach?!" skit): a grey hood
-  // ringing his face with a segmented crown plate and two antennae, a grey
+  // ringing his face with a segmented crown plate and two antennae, a brown
   // suit with a pale ribbed belly, folded wing shells and spiky insect legs
   // behind. p.droop (0..1) lets the antennae sag. Everything is built on the
   // normal Slime head and body; only the costume pieces are new.
   const slimeRoach = (() => {
-    const SUIT = '#bdbdbd', PALE = '#e6e6e6', DARK = '#a6a6a6';
+    const SUIT = C.slime.roach.suit, PALE = C.slime.roach.pale, DARK = C.slime.roach.dark;
     let droop = 0;
     const evenPts = (pts, step = 34) => {   // short segments, so the brush join stays a short overlap
       const out = [];
