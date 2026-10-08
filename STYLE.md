@@ -131,7 +131,7 @@ and alarm videos (cream paper, teal hero, coloured props; see
   speaker colours, see Captions.
 - **Cameos have one signature clothing colour each** (`Palette.cast`, user
   decision): Speed's red vest, yellow sash and blue shorts under the straw
-  hat; Ludwig's pale blue pineapple shirt; MrBeast's burnt-orange hoodie;
+  hat; Ludwig's pale blue pineapple shirt; MrBeast's yellow hoodie;
   Nick's plum shirt; Slime's moss-green shirt; Squeex's slate overshirt over
   an oatmeal tee, in khakis. Hair is natural colours only (Ludwig blond,
   MrBeast, Nick and Squeex brown, Speed black), never an unnatural one. Ink
