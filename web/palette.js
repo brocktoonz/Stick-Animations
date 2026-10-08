@@ -30,11 +30,15 @@ const Palette = (() => {
     pillowNight: '#d8cdbd', pillow: '#f5ede2',      // the bed pillow, night / day
     sunPatch: '#fff8ee',                            // morning sun on the paper
     moon: '#e8e8e8',                                // moon and stars
+    // office props (presentation video): metals and dark plastics, dulled grey-blues
+    steel: '#a3a8ad', steelDark: '#6f7479', charcoal: '#4d5156',   // laptop lid / screen roller case / chair backs and the screen's weight bar
     couchLeg: '#5e4330',                            // the couch's stubby wood legs (dark: they sit in shadow under the olive)
     sleepBubble: '#e6edf2',                         // the sleep bubbles in the power nap close-up (a cool off-white)
     phone: '#3a3a3a', phoneOff: '#5a5a5a', phoneDot: '#9a9a9a',   // a dark phone: body, dead screen, camera dot / list rules
   };
+  // The cast's tie colours (cameos stay grayscale otherwise): the suited cast in the presentation video.
+  const tie = { hero: '#4f7fc9', nick: '#c9a43a', ludwig: '#3f8f5a', slime: '#7a56b0', speed: '#d0812f', beast: '#3fa0b0', squeex: '#a8506f' };
   const captionRed = '#d9261c';   // title captions: the one red the channel uses on text (also the eye doctor's balloon)
   const tongue = '#b5555e';   // dusty rose, inside every open mouth (user decision: the grey tongue was the last grayscale leftover)
-  return { paper, paperNight, hero, prop, tongue, captionRed };
+  return { paper, paperNight, hero, prop, tongue, captionRed, tie };
 })();

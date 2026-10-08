@@ -11,16 +11,17 @@ Skits.presentation = (() => {
   const { stroke, fill, INK } = Brush;
   const { seg, lerp, easeOut, easeInOut, easeOutBack, blink, clamp } = Stage;
   const W = '#fff', DUR = 10.0, HEAD = 438;
+  const P = Palette.prop;
 
   // ---------- the cast, suited (Cameos.suited) ----------
   const SUITS = {
-    hero: Cameos.suited(Hero.main, { jacket: '#5a5a5a', tie: '#4f7fc9', seed: 9300 }),
-    nick: Cameos.suited(Cameos.nick, { jacket: '#2e2e2e', tie: '#c9a43a', seed: 9330 }),
-    ludwig: Cameos.suited(Cameos.ludwig, { jacket: '#b4b4b4', tie: '#3f8f5a', seed: 9360 }),
-    slime: Cameos.suited(Cameos.slime, { jacket: '#3c3c3c', tie: '#7a56b0', seed: 9390 }),
-    speed: Cameos.suited(Cameos.speed, { jacket: '#262626', tie: '#d0812f', seed: 9420 }),
-    beast: Cameos.suited(Cameos.beast, { jacket: '#4a4a4a', tie: '#3fa0b0', seed: 9450 }),
-    squeex: Cameos.suited(Cameos.squeex.beards.full, { jacket: '#7c7c7c', tie: '#a8506f', seed: 9480 }),
+    hero: Cameos.suited(Hero.main, { jacket: '#5a5a5a', tie: Palette.tie.hero, seed: 9300 }),
+    nick: Cameos.suited(Cameos.nick, { jacket: '#2e2e2e', tie: Palette.tie.nick, seed: 9330 }),
+    ludwig: Cameos.suited(Cameos.ludwig, { jacket: '#b4b4b4', tie: Palette.tie.ludwig, seed: 9360 }),
+    slime: Cameos.suited(Cameos.slime, { jacket: '#3c3c3c', tie: Palette.tie.slime, seed: 9390 }),
+    speed: Cameos.suited(Cameos.speed, { jacket: '#262626', tie: Palette.tie.speed, seed: 9420 }),
+    beast: Cameos.suited(Cameos.beast, { jacket: '#4a4a4a', tie: Palette.tie.beast, seed: 9450 }),
+    squeex: Cameos.suited(Cameos.squeex.beards.full, { jacket: '#7c7c7c', tie: Palette.tie.squeex, seed: 9480 }),
   };
 
   // ---------- caption: the title, in the original's style ----------
@@ -108,64 +109,50 @@ Skits.presentation = (() => {
   const flat = (ctx, pts, col) => { ctx.fillStyle = col; ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); };
   const panel = (ctx, pts, col, w, seed) => { flat(ctx, pts, col); ring(ctx, pts, w, seed); };
   const rect = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
-  const shadow = (ctx, x, rx, y) => flat(ctx, Brush.ellipsePts(x, y + 4, rx, rx * 0.12, 20), '#b9b9b9');
+  const shadow = (ctx, x, rx, y) => flat(ctx, Brush.ellipsePts(x, y + 4, rx, rx * 0.12, 20), P.shadow);
   const heads = [];   // hair tops on screen this frame, checked against the caption
 
   // ---------- set A: the front of the meeting room ----------
-  const WALL = '#e3e3e3', FLOOR_COL = '#cdcdcd', FLOOR_A = 1720;
+  const FLOOR_A = 1720;   // no wall, floor or skirting is drawn: the paper is the room (STYLE.md, Sets)
   const SCREEN = { x0: 250, x1: 690, y0: 958, y1: 1400 };   // on his facing side, so he looks across the frame at the room
   // The title sits at the screen's right end, beside him, so it's whole in every shot that shows it;
   // the tight shots (the lunge, the close-up) leave it off rather than show a cropped word.
   function slide(ctx, title = true) {
     const { x0, x1, y0, y1 } = SCREEN;
     if (title) {
-      ctx.save(); ctx.fillStyle = '#3a3a3a'; ctx.font = '600 36px "TikTok Sans"'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.save(); ctx.fillStyle = INK; ctx.font = '600 36px "TikTok Sans"'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
       ctx.fillText('Q3 RESULTS', x1 - 26, y0 + 56); ctx.restore();
       line(ctx, [[x1 - 236, y0 + 86], [x1 - 26, y0 + 88]], 6, 9611);   // underline
     }
     const bx = x0 + 52, by = y1 - 50;
     line(ctx, [[bx, y0 + 140], [bx, by], [x1 - 36, by]], 8, 9612);   // axes
-    [[0, 64, '#bdbdbd'], [1, 112, '#a6a6a6'], [2, 160, '#8c8c8c'], [3, 214, '#6e6e6e']].forEach(([i, hgt, col]) => {
+    [[0, 64, P.blanket], [1, 112, P.butter], [2, 160, P.olive], [3, 214, P.curtain]].forEach(([i, hgt, col]) => {
       const x = bx + 30 + i * 84;
       panel(ctx, rect(x, by - hgt, x + 54, by), col, 7, 9620 + i);
     });
     line(ctx, [[bx + 34, by - 100], [bx + 120, by - 146], [bx + 190, by - 136], [bx + 270, by - 236]], 9, 9630);   // trend arrow, clear of his hair
     line(ctx, [[bx + 232, by - 238], [bx + 272, by - 240], [bx + 266, by - 200]], 9, 9631);
   }
-  function plant(ctx, x, y) {   // a potted office plant on the floor
-    panel(ctx, [[x - 70, y - 150], [x + 70, y - 150], [x + 54, y], [x - 54, y]], '#9a9a9a', 9, 9650);
-    line(ctx, [[x - 76, y - 150], [x + 76, y - 150]], 10, 9651);
-    const leaves = [[-1.15, 150], [-0.75, 200], [-0.35, 230], [0.05, 245], [0.45, 215], [0.85, 185], [1.2, 140]];
-    leaves.forEach(([a, l], i) => {
-      const tip = [x + Math.sin(a) * l, y - 150 - Math.cos(a) * l], mid = [x + Math.sin(a) * l * 0.5 - Math.cos(a) * 26, y - 150 - Math.cos(a) * l * 0.5 - Math.sin(a) * 26];
-      const mid2 = [x + Math.sin(a) * l * 0.5 + Math.cos(a) * 26, y - 150 - Math.cos(a) * l * 0.5 + Math.sin(a) * 26];
-      const leaf = Brush.spline([[x, y - 150], mid, tip, mid2], true, 4);
-      flat(ctx, leaf, '#7d7d7d'); ring(ctx, leaf.filter((_, j) => j % 6 === 0), 7, 9660 + i);
-      line(ctx, [[x, y - 150], [(x + tip[0]) / 2, (y - 150 + tip[1]) / 2]], 4, 9670 + i);
-    });
-  }
   function setA(ctx, title = true) {
-    ctx.fillStyle = WALL; ctx.fillRect(-1500, -500, 4500, 4000);
-    ctx.fillStyle = FLOOR_COL; ctx.fillRect(-1500, FLOOR_A, 4500, 2000);
-    line(ctx, [[-700, FLOOR_A - 46], [540, FLOOR_A - 44], [1800, FLOOR_A - 47]], 6, 9600, { taper0: 0, taper1: 0 });   // skirting
-    line(ctx, [[-700, FLOOR_A], [540, FLOOR_A + 2], [1800, FLOOR_A - 2]], 9, 9601, { taper0: 0, taper1: 0 });
+    ctx.fillStyle = Palette.paper; ctx.fillRect(-1500, -500, 4500, 4000);
+    line(ctx, [[HX - 150, FLOOR_A], [HX, FLOOR_A + 2], [HX + 150, FLOOR_A - 2]], 9, 9601, { taper0: 0, taper1: 0 });   // a ground line only under his feet
     // the pull-down projector screen: roller case, white sheet, weighted bottom bar
     const { x0, x1, y0, y1 } = SCREEN;
-    panel(ctx, rect(x0 - 26, y0 - 34, x1 + 26, y0), '#6a6a6a', 9, 9602);
+    panel(ctx, rect(x0 - 26, y0 - 34, x1 + 26, y0), P.steelDark, 9, 9602);
     panel(ctx, rect(x0, y0, x1, y1), W, 10, 9603);
-    panel(ctx, rect(x0 - 8, y1, x1 + 8, y1 + 18), '#4a4a4a', 8, 9604);
+    panel(ctx, rect(x0 - 8, y1, x1 + 8, y1 + 18), P.charcoal, 8, 9604);
     slide(ctx, title);
   }
   // The near edge of the meeting table, across the bottom of his full shot (drawn in screen space, over his feet):
   // the room he's presenting to is right there in front of him.
   function foreTable(ctx) {
     const y = 1716;
-    flat(ctx, [[-40, y], [1120, y - 10], [1120, 1960], [-40, 1960]], '#8a8a8a');
+    flat(ctx, [[-40, y], [1120, y - 10], [1120, 1960], [-40, 1960]], P.wood);
     line(ctx, [[-40, y], [540, y - 5], [1120, y - 10]], 11, 9800, { taper0: 0, taper1: 0 });
-    panel(ctx, [[70, y + 64], [300, y + 54], [292, y - 120], [84, y - 112]], '#bdbdbd', 9, 9801);   // an open laptop, seen from behind
+    panel(ctx, [[70, y + 64], [300, y + 54], [292, y - 120], [84, y - 112]], P.steel, 9, 9801);   // an open laptop, seen from behind
     line(ctx, [[150, y - 40], [172, y - 66], [196, y - 40]], 6, 9802);   // its logo
-    panel(ctx, [[420, y + 70], [600, y + 58], [610, y + 140], [428, y + 156]], W, 7, 9803);   // papers
-    panel(ctx, [[930, y - 70], [1000, y - 70], [994, y + 40], [936, y + 40]], W, 8, 9804);   // a coffee mug
+    panel(ctx, [[420, y + 70], [600, y + 58], [610, y + 140], [428, y + 156]], P.linen, 7, 9803);   // papers
+    panel(ctx, [[930, y - 70], [1000, y - 70], [994, y + 40], [936, y + 40]], P.linen, 8, 9804);   // a coffee mug
     line(ctx, [[1000, y - 50], [1030, y - 34], [1024, y + 4], [998, y + 14]], 8, 9805);
   }
   const HX = 760;   // where he stands, just right of the screen
@@ -300,19 +287,12 @@ Skits.presentation = (() => {
   const HEADGEO = { nick: 175, beast: 168, squeex: 180, slime: 150, ludwig: 245, speed: 230 };   // hair/hat top above the head centre, local units
   function chair(ctx, x, s, i) {   // a tall office chair back behind a seated person
     const top = TABLE_Y - 330 * s, w = 118 * s;
-    panel(ctx, [[x - w, TABLE_Y], [x - w, top + 40 * s], [x - w + 30 * s, top], [x + w - 30 * s, top], [x + w, top + 40 * s], [x + w, TABLE_Y]], '#5e5e5e', 9, 9700 + i);
+    panel(ctx, [[x - w, TABLE_Y], [x - w, top + 40 * s], [x - w + 30 * s, top], [x + w - 30 * s, top], [x + w, top + 40 * s], [x + w, TABLE_Y]], P.charcoal, 9, 9700 + i);
   }
   function setB(ctx, t) {
-    ctx.fillStyle = WALL; ctx.fillRect(-1500, -500, 4500, 4000);
-    // a long window with half-open blinds across the back wall
-    const wx0 = 40, wx1 = 1040, wy0 = 560, wy1 = 900;
-    panel(ctx, rect(wx0, wy0, wx1, wy1), '#f7f7f7', 10, 9710);
-    [0.0, 0.11, 0.21, 0.33, 0.42, 0.53].forEach((k, i) => line(ctx, [[wx0 + 8, wy0 + 26 + k * 300], [wx1 - 8, wy0 + 28 + k * 300]], 5, 9720 + i, { taper0: 0, taper1: 0 }));
-    line(ctx, [[540, wy0], [540, wy1]], 9, 9730, { taper0: 0, taper1: 0 });
-    panel(ctx, rect(wx0 - 20, wy1, wx1 + 20, wy1 + 22), '#d0d0d0', 8, 9731);   // sill
-    ctx.fillStyle = FLOOR_COL; ctx.fillRect(-1500, BACK_FLOOR, 4500, 2000);
-    line(ctx, [[-200, BACK_FLOOR - 40], [1300, BACK_FLOOR - 42]], 6, 9732, { taper0: 0, taper1: 0 });   // skirting
-    line(ctx, [[-200, BACK_FLOOR], [1300, BACK_FLOOR - 2]], 9, 9733, { taper0: 0, taper1: 0 });
+    ctx.fillStyle = Palette.paper; ctx.fillRect(-1500, -500, 4500, 4000);   // paper only: no wall, window, blinds, floor or skirting
+    // the two standing behind the table keep a short ground line under their feet
+    STANDING.forEach((c, i) => line(ctx, [[c.x - 110, BACK_FLOOR], [c.x, BACK_FLOOR + 2], [c.x + 110, BACK_FLOOR - 2]], 8, 9733 + i, { taper0: 0, taper1: 0 }));
   }
   function colleague(ctx, c, t, standing) {
     const feet = standing ? BACK_FLOOR : TABLE_Y + 210 * c.s;   // seated: the table edge crosses the waist
@@ -323,13 +303,13 @@ Skits.presentation = (() => {
     heads.push(hy - HEADGEO[c.who] * c.s);
   }
   function table(ctx) {
-    panel(ctx, [[-80, TABLE_Y], [1160, TABLE_Y], [1160, TABLE_Y + 110], [-80, TABLE_Y + 110]], '#8a8a8a', 11, 9740);   // the table top
-    panel(ctx, [[-80, TABLE_Y + 110], [1160, TABLE_Y + 110], [1160, 2100], [-80, 2100]], '#6e6e6e', 11, 9741);   // its front
+    panel(ctx, [[-80, TABLE_Y], [1160, TABLE_Y], [1160, TABLE_Y + 110], [-80, TABLE_Y + 110]], P.woodLight, 11, 9740);   // the table top
+    panel(ctx, [[-80, TABLE_Y + 110], [1160, TABLE_Y + 110], [1160, 2100], [-80, 2100]], P.wood, 11, 9741);   // its front
     // papers, a laptop and coffee cups on the table, in front of each seat
-    panel(ctx, [[60, TABLE_Y + 30], [190, TABLE_Y + 22], [200, TABLE_Y + 80], [70, TABLE_Y + 88]], W, 6, 9742);
-    panel(ctx, [[350, TABLE_Y + 60], [480, TABLE_Y + 60], [470, TABLE_Y + 8], [362, TABLE_Y + 8]], '#bdbdbd', 7, 9743);   // laptop lid, seen from behind
+    panel(ctx, [[60, TABLE_Y + 30], [190, TABLE_Y + 22], [200, TABLE_Y + 80], [70, TABLE_Y + 88]], P.linen, 6, 9742);
+    panel(ctx, [[350, TABLE_Y + 60], [480, TABLE_Y + 60], [470, TABLE_Y + 8], [362, TABLE_Y + 8]], P.steel, 7, 9743);   // laptop lid, seen from behind
     for (const [i, x] of [[0, 600], [1, 1010]]) {
-      panel(ctx, [[x - 22, TABLE_Y + 10], [x + 22, TABLE_Y + 10], [x + 18, TABLE_Y + 66], [x - 18, TABLE_Y + 66]], W, 6, 9744 + i);
+      panel(ctx, [[x - 22, TABLE_Y + 10], [x + 22, TABLE_Y + 10], [x + 18, TABLE_Y + 66], [x - 18, TABLE_Y + 66]], P.linen, 6, 9744 + i);
       line(ctx, [[x + 22, TABLE_Y + 22], [x + 38, TABLE_Y + 30], [x + 20, TABLE_Y + 52]], 6, 9746 + i);
     }
   }
