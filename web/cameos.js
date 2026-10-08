@@ -228,10 +228,10 @@ const Cameos = (() => {
 
   // Ludwig: light-grey blond swoop, short-sleeved pineapple shirt.
   const ludwig = build({
-    skin: C.ludwig.skin, shirt: C.ludwig.shirt, sleeveHem: 0.24, sleeveFill: C.ludwig.shirt,   // halfway down the upper arm, clear of the elbow
+    shirt: C.ludwig.shirt, sleeveHem: 0.24, sleeveFill: C.ludwig.shirt,   // halfway down the upper arm, clear of the elbow
     body: { hipY: -172, neckY: -352, legW: 21, footX: 18, hipX: 20, torso: (n, h) => [[-42, n], [42, n], [56, n + 60], [58, h - 4], [-58, h - 4], [-56, n + 60]] },
     headScale: [0.92, 1.06],
-    head: head({ skin: C.ludwig.skin, hair: swoop(), eyeLop: { side: -1, dy: 0.12, s: 1.07 } }),   // lopsided eyes: the screen-right eye (he faces left) a little lower and bigger
+    head: head({ hair: swoop(), eyeLop: { side: -1, dy: 0.12, s: 1.07 } }),   // lopsided eyes: the screen-right eye (he faces left) a little lower and bigger
     detail: (ctx, n, h, hands = []) => {
       outline(ctx, [[-40, n - 2], [0, n + 44], [-18, n + 60]], { w: 7 });
       outline(ctx, [[40, n - 2], [0, n + 44], [18, n + 60]], { w: 7 });
@@ -717,10 +717,10 @@ const Cameos = (() => {
     head: head({ hair: MID_SHORT_FRONT, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
   const nickMidPart = build({
-    skin: C.nick.skin, shirt: C.nick.shirt, sleeve: C.nick.shirt, behind: midBack({ len: 0.8, wide: 1.1, waves: 3 }),   // back hair, the same length as the front
+    shirt: C.nick.shirt, sleeve: C.nick.shirt, behind: midBack({ len: 0.8, wide: 1.1, waves: 3 }),   // back hair, the same length as the front
     body: { hipY: -140, neckY: -300, legW: 27, footX: 42, hipX: 30, torso: (n, h) => [[-54, n], [54, n], [74, n + 60], [76, h - 4], [-76, h - 4], [-74, n + 60]] },
     headScale: [1.04, 0.98],
-    head: head({ skin: C.nick.skin, hair: MID_FRONT, front: roundGlasses }),
+    head: head({ hair: MID_FRONT, front: roundGlasses }),
     detail: (ctx, n) => stroke(ctx, [[-32, n + 2], [0, n + 24], [32, n + 2]], { w: 7, color: W }) });
   const nickOutline = Object.fromEntries(Object.entries(NICK_OUTLINE).map(([k, h]) => [k, nickWith(h)]));
   const nickAlts = Object.fromEntries(Object.entries(nickHair).map(([k, h]) => [k, nickWith(h, NICK_BACK[k])]));

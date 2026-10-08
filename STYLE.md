@@ -137,17 +137,16 @@ and alarm videos (cream paper, teal hero, coloured props; see
   MrBeast, Nick and Squeex brown, Speed black), never an unnatural one. Ink
   stays black, and nobody but the main character is teal. Suit ties keep
   their colours (`Palette.tie`).
-- **Real people get real skin.** Skin is a per-character palette entry
-  (`Palette.cast.<name>.skin`), like hair. Only the original cast (the main
-  character, mom, dad, the kid) keeps white skin, because that is their design.
-  Every cameo of a real person gets a tone **sampled from a frame of that
-  person** (`scripts/sample_skin.py`: median of lit forehead/cheek patches,
-  dulled toward the paper so the hoodie stays the loudest thing), never guessed
-  from memory. The fill inside the face and hands changes; the ink outline,
-  the white halo and the white eyes stay. Check each new tone on the cream and
-  the night paper and against black hair and ink (the script prints the
-  contrasts) and render a test still before using it. Done: Nick and Ludwig.
-  Still grey, waiting for a reference frame: Speed, Squeex, Slime, MrBeast.
+- **Speed and Squeex get real skin tones** (user decision; their faces were
+  drawn grey). Skin is a per-character palette entry (`Palette.cast.<name>.skin`),
+  like hair, sampled from a frame of the person with `scripts/sample_skin.py`
+  (median of lit forehead/cheek patches, dulled toward the paper so the hoodie
+  stays the loudest thing), never guessed from memory. The fill inside the face
+  and hands changes; the ink outline, the white halo and the white eyes stay.
+  Check each tone on the cream and the night paper and against black hair and
+  ink (the script prints the contrasts) and render a test still. Everyone else
+  (the original cast, Nick, Ludwig, Slime, MrBeast) stays white. Speed and
+  Squeex are still grey, waiting for a reference frame.
 - Not yet converted: skits other than the power nap and the alarm still draw
   their own grey sets. Convert a skit by swapping its backdrop and fills for
   `Palette` entries and dropping its walls and floors (see Sets below); the
