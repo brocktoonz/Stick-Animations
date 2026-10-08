@@ -37,10 +37,23 @@ Skits.morningself = (() => {
     for (let i = 0; i < 4; i++) { const [a, b] = [c[i], c[(i + 1) % 4]]; for (let k = 0; k < n; k++) pts.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]); }
     return pts;
   };
-  const panel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); outline(ctx, pts, { w }); };
+  // Set outlines boil like a character's head: the path is resampled to short
+  // segments and each shape keeps one fixed seed, so it only wobbles on the beat
+  // instead of doubling a side or growing a nub (couchLine in powernap.js).
+  const even = (pts, step = 36) => {
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length], k = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+      for (let j = 0; j < k; j++) out.push([a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k]);
+    }
+    return out;
+  };
+  const setSeed = pts => 7000 + Math.round(Math.abs(pts[0][0]) * 3 + Math.abs(pts[0][1]) + pts.length * 17);
+  const setLine = (ctx, pts, w) => { const e = even(pts); stroke(ctx, [...e, e[0], e[1]], { w, taper0: 0, taper1: 0, minW: 1, seed: setSeed(pts) }); };
+  const panel = (ctx, pts, col, w = 10) => { fill(ctx, pts, col, 0.4); setLine(ctx, pts, w); };
   // a straight-sided polygon with points along every edge, so the brush's smoothing can't bulge it
   const poly = (corners, n = 6) => corners.flatMap((a, i) => { const b = corners[(i + 1) % corners.length]; return Array.from({ length: n }, (_, k) => [a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]); });
-  const shape = (ctx, pts, col, w = 10) => { fill(ctx, Brush.spline(pts, true, 3), col, 0.5); outline(ctx, pts, { w }); };
+  const shape = (ctx, pts, col, w = 10) => { const sm = Brush.spline(pts, true, 3); fill(ctx, sm, col, 0.5); setLine(ctx, sm.filter((_, i) => i % 12 === 0), w); };
 
   function pillow(ctx, cx, cy, w, h, col) {
     // a soft rounded oblong in light grey, so its ends can't read as ears beside his face
@@ -160,7 +173,7 @@ Skits.morningself = (() => {
   }
 
   // He lies on his back, head on the pillow, the blanket drawn up over him.
-  const S = 1.0, HX = 560, SLEEVE = '#8a8a8a';
+  const S = 1.0, HX = 560, SLEEVE = Palette.hero.hoodie;   // his hoodie, wherever an arm shows on its own
   const UP = 1170, DOWN = 1212;          // head centre: propped up, snuggled down
   const feet = hy => hy + 438 * S;
   // the blanket over the bed from `top` down and over the foot; his body a mound under it
@@ -190,13 +203,19 @@ Skits.morningself = (() => {
   const local = (hy, [X, Y]) => [(X - HX) / S, (Y - feet(hy)) / S];
   const screen = (hy, [x, y]) => [HX + x * S, feet(hy) + y * S];
   // the phone held up in his hand (pose space): a thin phone, back toward us
-  const heldPhone = (tilt, shift = 0) => (ctx, x, y) => {
+  // `face` 0..1: the lit screen is a sliver of its edge facing him, and widens into
+  // the whole face as the phone tips over flat, so the same drawing lands on the
+  // nightstand (no swap to another phone drawing: that popped). `lit` goes off
+  // once he lets go.
+  const heldPhone = (tilt, shift = 0, face = 0, lit = true) => (ctx, x, y) => {
     ctx.save(); ctx.translate(x, y); ctx.rotate(tilt); ctx.translate(0, -shift);
     panel(ctx, [[-26, -132], [26, -133], [27, 12], [-27, 13]], '#3a3a3a', 6);
-    fill(ctx, [[-25, -127], [-18, -128], [-18, 7], [-25, 8]], W, 0.2);   // the lit screen's edge, facing him
-    blob(ctx, 10, -114, 6, 6, { fill: '#9a9a9a', w: 3, n: 6 });            // camera
+    const sx = lerp(-18, 20, face);
+    fill(ctx, [[-25, -127], [sx, -128], [sx, 7], [-25, 8]], lit ? W : '#5a5a5a', 0.2);   // the screen
+    if (face < 0.5) blob(ctx, 10, -114, 6, 6, { fill: '#9a9a9a', w: 3, n: 6 });            // camera on the back, until the face shows
     ctx.restore();
   };
+  const LAND_TILT = 1.5;   // lying on the nightstand
 
   // thumb taps while he sets alarms (hand-timed, uneven); the loop-back gets its own
   const TAPS = [0.14, 0.27, 0.49, 0.58, 0.81, 0.9];
@@ -271,20 +290,27 @@ Skits.morningself = (() => {
                              : Stage.mix([0, -222], hemHand(hy, top, -1), easeInOut(seg(t, 2.12, 2.32)));
       // the face carries over from shot 1, then lids heavy, heavier, shut
       const early = t < 2.0;   // until the reach starts it's exactly shot 1's grip
-      const landed = reach > 0.82;   // set down: drawn as the flat phone, his hand still on it
       const lid = t < 2.28 ? smug.lid : t < 2.42 ? lerp(smug.lid, 0.72, seg(t, 2.28, 2.42)) : t < 2.5 ? 0.8 : 1;
       const face = t < 2.3 ? { ...smug } : { mouth: t < 2.6 ? 'smile' : 'flat', brow: 0, browLiftL: 18, browLiftR: 18, lookX: 0.55, lookY: 0.3, lowLid: 0.2, heavyLid: true };
       const settle = 0.03 * easeInOut(seg(t, 3.05, 3.4));   // a small nestle into the pillow, then still
-      const R = Arms.arm(1, rHand, t < 2.37 ? 'down' : 'out', !early && t < 2.56, lerp(R_UPPER, R_REACH, Math.sin(Math.PI * seg(t, 2.0, 2.4))));
-      const L = Arms.arm(-1, lHand, t < 2.16 ? 'down' : 'out', t < 2.56, 120);   // in front of him: hands on the covers under his chin
+      // the elbows go from hanging ('down', holding the phone up) to out at the sides
+      // ('out', hands on the hem) by blending the bend over a few frames, never by
+      // switching the solve mid-move (that flipped each elbow in one frame)
+      const bendBlend = (side, hand, k, front, upper) => {
+        const A = Arms.arm(side, hand, 'down', front, upper), B = Arms.arm(side, hand, 'out', front, upper), K = side < 0 ? 'L' : 'R';
+        return { ...A, ['bend' + K]: lerp(A['bend' + K], B['bend' + K], k) };
+      };
+      const R = bendBlend(1, rHand, easeInOut(seg(t, 2.3, 2.44)), !early && t < 2.56, lerp(R_UPPER, R_REACH, Math.sin(Math.PI * seg(t, 2.0, 2.4))));
+      const L = bendBlend(-1, lHand, easeInOut(seg(t, 2.12, 2.26)), t < 2.56, 120);   // in front of him: hands on the covers under his chin
       pose(c, hy, { ...face, lid, tilt: lerp(0.1, 0.16, sink) + settle, ...R, ...L,
         handSR: lerp(0.72, 1, seg(t, 2.28, 2.42)),
         // held: the phone under his mitten, which covers only its near end; it tips
         // clockwise (away from his face) until it lies flat on the nightstand
         // the phone slides up so his mitten grips its end over the rim, not inside it;
         // near the end of the move it's already the flat phone in its final spot, under his hand
-        ...(holding && !landed ? { holdR: heldPhone(lerp(-0.12, 1.5, easeInOut(reach)), GRIP) } : {}) }, top,
-        () => { if (!holding || landed) phoneFlat(ctx, PHONE[0], PHONE[1], t < 2.66); })(ctx);
+        ...(holding ? { holdR: heldPhone(lerp(-0.12, LAND_TILT, easeInOut(reach)), GRIP, seg(reach, 0.55, 1)) } : {}) }, top,
+        // once he lets go the same phone lies where his hand left it, drawn before him so his hand stays over it
+        () => { if (!holding) heldPhone(LAND_TILT, GRIP, 1, t < 2.66)(ctx, ON_STAND[0], ON_STAND[1]); })(ctx);
     }],
     // morning: the alarm goes and goes, and he slaps snooze again and again without waking
     [CUT3, END, (ctx, t) => {
