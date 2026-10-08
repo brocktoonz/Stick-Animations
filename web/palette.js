@@ -23,5 +23,6 @@ const Palette = (() => {
     linen: '#efe6d9', linenNight: '#cdbfae',        // mattress, pillow
     shadow: '#dcc6ac',                              // flat shadow on the paper
   };
-  return { paper, paperNight, hero, prop };
+  const tongue = '#b5555e';   // dusty rose, inside every open mouth (user decision: the grey tongue was the last grayscale leftover)
+  return { paper, paperNight, hero, prop, tongue };
 })();

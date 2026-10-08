@@ -999,7 +999,10 @@ const Cameos = (() => {
         const m = [[cx - w, cy - 2], [cx - w * 0.3, cy - 6], [cx + w * 0.5, cy - 2], [cx + w * 1.05, cy + 10], [cx + w * 0.7, cy + h * 0.85 + 8],
                    [cx, cy + h], [cx - w * 0.7, cy + h * 0.6]];
         fill(ctx, m, '#1c1c1c', 0.4);
-        fill(ctx, Brush.ellipsePts(cx + 4, cy + h * 0.78, w * 0.55, h * 0.22 + 3, 10), '#8a8a8a', 0.4);   // tongue
+        // tongue, clipped to the mouth pulled in past the outline's wobble so it never shows past the ink
+        ctx.save(); ctx.beginPath(); Brush.spline(Brush.inset(m, 5), true, 5).forEach(([qx, qy], i) => i ? ctx.lineTo(qx, qy) : ctx.moveTo(qx, qy)); ctx.clip();
+        fill(ctx, Brush.ellipsePts(cx + 4, cy + h * 0.78, w * 0.55, h * 0.22 + 3, 10), Palette.tongue, 0.4);
+        ctx.restore();
         outline(ctx, m, { w: 6 });
       }
       if (p.drool) {   // a glossy drip clinging to the low corner of the mouth, slowly stretching

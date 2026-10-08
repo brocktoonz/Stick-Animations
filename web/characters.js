@@ -211,7 +211,9 @@ const Chars = (() => {
     ctx.rotate(-side * (0.1 + 0.06 * (v.var ?? 0)));
     ctx.scale(side, 1);                            // draw with the big side on +x
     const clipTo = pts => { ctx.save(); ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (const q of Brush.spline(pts, true, 5)) ctx.lineTo(q[0], q[1]); ctx.clip(); };
-    const tongue = (cx, cy, rx, ry) => { ctx.fillStyle = '#8e8e8e'; ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 7); ctx.fill(); };
+    const tongue = (cx, cy, rx, ry) => { ctx.fillStyle = Palette.tongue; ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 7); ctx.fill(); };
+    // the tongue is clipped to the mouth pulled in by the outline's half width plus its wobble, so it never shows past the ink
+    const INSET = 4.5 * s;
     // lopsided D: flat-ish top lip, round bottom; left side (-x) smaller
     const dShape = (w, h) => [[-w * 0.8, -lift * 0.6], [-w * 0.35, -5 * s], [w * 0.45, -7 * s], [w, -3 * s - lift],
                               [w * 0.85, h * 0.62], [w * 0.2, h], [-w * 0.45, h * 0.8], [-w * 0.8, h * 0.3]];
@@ -235,7 +237,7 @@ const Chars = (() => {
         fill(ctx, pts, INK, 0.4);
         clipTo(pts);
         fill(ctx, [[-22 * s, -18 * s], [22 * s, -18 * s], [22 * s, -6 * s], [-22 * s, -8 * s]], W, 0.2);
-        tongue(3 * s, 30 * s, 13 * s, 8 * s);
+        clipTo(Brush.inset(pts, INSET)); tongue(3 * s, 30 * s, 13 * s, 8 * s); ctx.restore();
         ctx.restore();
         outline(ctx, pts, { w: 5.5 * s, jit: 0.4, color });
         break;
@@ -260,7 +262,7 @@ const Chars = (() => {
         fill(ctx, pts, INK, 0.4);
         clipTo(pts);
         fill(ctx, [[-30 * s, -12 * s], [30 * s, -12 * s], [30 * s, 3 * s - lift], [-30 * s, 1 * s]], W, 0.2);
-        tongue(3 * s, 12 * s, 11 * s, 10 * s);
+        clipTo(Brush.inset(pts, INSET)); tongue(3 * s, 12 * s, 11 * s, 10 * s); ctx.restore();
         ctx.restore();
         outline(ctx, pts, { w: 6 * s, jit: 0.5, color });
         break;
@@ -283,7 +285,7 @@ const Chars = (() => {
       case 'small': {
         const pts = Brush.ellipsePts(0, 6 * s, 12 * s, 16 * s, 10, 0.15);
         fill(ctx, pts, INK, 0.3);
-        clipTo(pts); tongue(2 * s, 20 * s, 9 * s, 6 * s); ctx.restore();
+        clipTo(Brush.inset(pts, INSET)); tongue(2 * s, 20 * s, 9 * s, 6 * s); ctx.restore();
         outline(ctx, pts, { w: 5 * s, jit: 0.4, color });
         break;
       }
@@ -295,7 +297,7 @@ const Chars = (() => {
         const tb = v.kind === 'half' ? 2 : 8;   // teeth strip depth: half-open shows more of the dark mouth
         const teeth = [[-w * s, -12 * s], [w * s * 1.1, -12 * s], [w * s * 1.1, tb * s - lift], [w * s * 0.2, (tb - 1) * s], [-w * s, (tb - 3) * s]];
         fill(ctx, teeth, W, 0.2);
-        if (v.kind !== 'half') tongue(w * s * 0.15, h * s * 0.98, w * s * 0.6, h * s * 0.3);
+        if (v.kind !== 'half') { clipTo(Brush.inset(pts, INSET)); tongue(w * s * 0.15, h * s * 0.98, w * s * 0.6, h * s * 0.3); ctx.restore(); }
         ctx.restore();
         outline(ctx, pts, { w: 6 * s, jit: 0.5, color });
       }

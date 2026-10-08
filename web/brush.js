@@ -131,6 +131,15 @@ const Brush = (() => {
     stroke(ctx, ring, { taper0: 0, taper1: 0, minW: 1, ...o });
   }
 
+  // The same closed shape pulled inward by `d` px (each point moved toward the
+  // centroid). Clip to this, not to the shape itself, for anything drawn
+  // inside an outlined shape: the brush outline wobbles, and a fill clipped to
+  // the outline's centre line pokes out wherever the stroke wanders outward.
+  function inset(pts, d) {
+    const cx = pts.reduce((a, p) => a + p[0], 0) / pts.length, cy = pts.reduce((a, p) => a + p[1], 0) / pts.length;
+    return pts.map(([x, y]) => { const dx = x - cx, dy = y - cy, L = Math.hypot(dx, dy) || 1, k = Math.max(0, L - d) / L; return [cx + dx * k, cy + dy * k]; });
+  }
+
   function ellipsePts(cx, cy, rx, ry, n = 16, rot = 0) {
     const pts = [];
     for (let i = 0; i < n; i++) {
@@ -161,5 +170,5 @@ const Brush = (() => {
   function setWeight(k) { weight = k; }
   const getWeight = () => weight;
 
-  return { INK, frame, reseed, setWeight, getWeight, setJitter, stroke, fill, outline, blob, ellipsePts, spline, random };
+  return { INK, frame, reseed, setWeight, getWeight, setJitter, stroke, fill, outline, blob, ellipsePts, spline, random , inset };
 })();

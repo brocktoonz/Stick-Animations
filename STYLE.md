@@ -113,6 +113,10 @@ and alarm videos (cream paper, teal hero, coloured props; see
   never a different tone per video: the feed is one paper.
 - **Skin stays white, ink stays black.** The halo and the character outlines
   are what make the drawing ours; colour goes around them, not into them.
+- **Tongues are dusty rose** (`Palette.tongue`), on everyone, never grey. A
+  tongue is clipped to the mouth pulled in past the outline's wobble
+  (`Brush.inset`), so no rose ever shows past the ink (user caught one
+  clipping).
 - **The main character carries the one saturated hue.** Brown hair
   (`Palette.hero.hair`), teal hoodie (`Palette.hero.hoodie`); his beard, when
   he has one, is the same brown as his hair. Nothing else in a frame is teal,

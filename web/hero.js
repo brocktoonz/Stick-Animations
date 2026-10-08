@@ -553,7 +553,7 @@ const Hero = (() => {
     // big open grin, two buck teeth hanging from the top lip
     const m = [[-70, 40], [0, 50], [70, 40], [52, 90], [0, 116], [-52, 90]];
     fill(ctx, m, INK, 1); outline(ctx, m, { w: 7 });
-    fill(ctx, [[18, 108], [-18, 108], [-24, 112], [24, 112]], '#9a9a9a', 0.4);   // tongue hint
+    fill(ctx, [[18, 108], [-18, 108], [-24, 112], [24, 112]], Palette.tongue, 0.4);   // tongue hint
     for (const x of [-15, 15]) { const t = [[x - 14, 46], [x + 14, 46], [x + 13, 76], [x - 13, 76]]; fill(ctx, t, W, 0.3); outline(ctx, t, { w: 5 }); }
   };
   const smiley = (ctx, n) => {
