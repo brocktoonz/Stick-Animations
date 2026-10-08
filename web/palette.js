@@ -39,13 +39,16 @@ const Palette = (() => {
   };
   // The cast's tie colours (cameos stay grayscale otherwise): the suited cast in the presentation video.
   const tie = { hero: '#4f7fc9', nick: '#c9a43a', ludwig: '#3f8f5a', slime: '#7a56b0', speed: '#d0812f', beast: '#3fa0b0', squeex: '#a8506f' };
-  // The rest of the cast (clothes and natural hair only; skin stays as drawn, ink stays black). Each has one
+  // The rest of the cast (clothes, natural hair and, for real people, a real skin tone; ink stays black).
+  // skin: sampled with scripts/sample_skin.py from a frame of the person (Nick: references/yard-extinct-animals/clip.mov at 1.5 s,
+  // forehead and cheek; Ludwig: the same clip at 4.3 s, cheek), then dulled toward the paper. Speed, Squeex, Slime and MrBeast
+  // have no reference frame in the repo yet, so they keep their old skin until one is supplied (never guess from memory). Each has one
   // signature clothing colour, dulled below the hero's hoodie, and none is teal. Cameos read them from here.
   const cast = {
     speed:  { straw: '#d9b86c', strawLine: '#a98a45', band: '#b8473d', vest: '#b8473d', button: '#e3c25a', sash: '#e3c25a', shorts: '#5a78a0' },   // One Piece straw hat, red vest, yellow sash, blue shorts; hair stays black
-    ludwig: { hair: '#d8b878', shirt: '#8fb0cf', pineapple: '#ecd79a', leaf: '#7c8a5c' },                 // blond, a pale blue shirt with butter pineapples
+    ludwig: { skin: '#cb8f74', hair: '#d8b878', shirt: '#8fb0cf', pineapple: '#ecd79a', leaf: '#7c8a5c' },                 // blond, a pale blue shirt with butter pineapples
     beast:  { hair: '#46332a', hoodie: '#e3b94a' },                                                       // dark brown hair and beard, a yellow hoodie (he wears black or yellow: yellow carries the colour)
-    nick:   { hair: '#7a5a43', hairLine: '#b08e70', shirt: '#7c5c82' },                                   // brown hair (the grey mop was brown), a dusty plum shirt
+    nick:   { skin: '#b48270', hair: '#7a5a43', hairLine: '#b08e70', shirt: '#7c5c82' },                                   // brown hair (the grey mop was brown), a dusty plum shirt
     slime:  { shirt: '#6f9a4f', stubble: '#3d3029', scalp: '#c9b8a6' },                                    // a moss-green shirt, dark stubble on a shaved head
     squeex: { hair: '#3b2c24', hairLine: '#7a6050', beard: '#4a382d', tick: '#2e2420', overshirt: '#4a5568', tee: '#d6ccb8', khaki: '#b3a27c', button: '#efe6d9' },   // dark brown hair and beard, slate overshirt, oatmeal tee, khakis
   };
