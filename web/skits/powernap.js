@@ -7,7 +7,7 @@
 Skits.powernap = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { seg, lerp, easeOut, easeInOut, easeOutBack, say, loud, blink, clamp } = Stage;
-  const W = '#fff', RED = '#d9261c', BACKDROP = '#eeeeee', HEAD = 438;
+  const W = '#fff', RED = '#d9261c', BACKDROP = Palette.paper, HEAD = 438;
   const hh = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
   const END = 10.4;   // the clip's audio ends at 9.21; the last ~1.2 s holds his groggy face in silence
@@ -120,7 +120,7 @@ Skits.powernap = (() => {
   function blanket(ctx, P, s, cover, down = 0) {
     const L = HEAD * s * cover, th = 115 * s;
     const pts = [P(-70 * s, -th), P(L * 0.5, -th * 1.08), P(L, -th), P(L + 14 * s, 0), P(L, th + down), P(L * 0.5, th * 1.05 + down), P(-80 * s, th + down)];
-    shape(ctx, pts, '#bdbdbd', 10);
+    shape(ctx, pts, Palette.prop.linen, 10);
     stroke(ctx, [P(L - 40 * s, -th * 0.9), P(L - 40 * s, th * 0.8 + down)], { w: 6 });   // folded hem
     stroke(ctx, [P(L * 0.4, -th * 0.6), P(L * 0.25, th * 0.3)], { w: 5 });             // a wrinkle
   }
@@ -145,18 +145,17 @@ Skits.powernap = (() => {
   const SEAT = 1310, FLOOR = 1520;
   function couchBack(ctx) {
     ctx.fillStyle = BACKDROP; ctx.fillRect(-2000, -2000, 5000, 6000);
-    ctx.fillStyle = '#e2e2e2'; ctx.fillRect(-2000, FLOOR, 5000, 3000);                       // floor
     stroke(ctx, [[-900, FLOOR], [540, FLOOR + 3], [2000, FLOOR - 3]], { w: 9, taper0: 0, taper1: 0 });
-    fill(ctx, Brush.ellipsePts(540, FLOOR + 8, 470, 20, 16), '#cfcfcf', 0.4);              // flat shadow
-    couchShape(ctx, [[150, 1040], [540, 1010], [930, 1040], [940, SEAT + 20], [140, SEAT + 20]], '#5c5c5c', 11);   // back cushions
+    fill(ctx, Brush.ellipsePts(540, FLOOR + 8, 470, 20, 16), Palette.prop.shadow, 0.4);              // flat shadow
+    couchShape(ctx, [[150, 1040], [540, 1010], [930, 1040], [940, SEAT + 20], [140, SEAT + 20]], Palette.prop.olive, 11);   // back cushions
     stroke(ctx, [[540, 1030], [540, SEAT]], { w: 6 });                                       // seam between the two back cushions
-    couchShape(ctx, [[70, 1150], [140, 1110], [220, 1140], [230, FLOOR - 40], [80, FLOOR - 40]], '#4e4e4e', 11);   // left arm (his head ends up on it)
+    couchShape(ctx, [[70, 1150], [140, 1110], [220, 1140], [230, FLOOR - 40], [80, FLOOR - 40]], Palette.prop.oliveDark, 11);   // left arm (his head ends up on it)
   }
   function couchFront(ctx) {
-    couchShape(ctx, [[860, 1150], [940, 1110], [1010, 1150], [1000, FLOOR - 40], [850, FLOOR - 40]], '#4e4e4e', 11);   // right arm
-    couchPanel(ctx, box(200, SEAT, 870, FLOOR - 40), '#6a6a6a', 11);                               // seat cushions, front face
+    couchShape(ctx, [[860, 1150], [940, 1110], [1010, 1150], [1000, FLOOR - 40], [850, FLOOR - 40]], Palette.prop.oliveDark, 11);   // right arm
+    couchPanel(ctx, box(200, SEAT, 870, FLOOR - 40), Palette.prop.oliveLight, 11);                               // seat cushions, front face
     stroke(ctx, [[535, SEAT + 6], [535, FLOOR - 48]], { w: 6, seed: 4999 });
-    for (const x of [130, 950]) couchPanel(ctx, box(x - 20, FLOOR - 40, x + 20, FLOOR + 4, 2), '#555', 8);   // stubby legs
+    for (const x of [130, 950]) couchPanel(ctx, box(x - 20, FLOOR - 40, x + 20, FLOOR + 4, 2), '#5e4330', 8);   // stubby legs (wood)
   }
 
   const CS = 1.1, HIP = 150 * CS;   // his hips sit on the seat; the legs hang behind the seat cushions
@@ -202,9 +201,9 @@ Skits.powernap = (() => {
         const foot = [lerp(sitF[0], lieF[0], swing), lerp(sitF[1], lieF[1], swing) - arc * 1.4];
         const leg = [hip, knee, foot];
         const edge = [[lerp(hip[0], knee[0], 0.45), lerp(hip[1], knee[1], 0.45)], knee, foot];   // the edge starts below the shorts, so the hip end never shows a grey ring
-        stroke(ctx, edge, { w: 36, taper0: 0, taper1: 0, color: '#6a6a6a' });   // a thin couch-grey edge round both legs (on the upper leg it also keeps the two legs apart)
+        stroke(ctx, edge, { w: 36, taper0: 0, taper1: 0, color: Palette.prop.oliveLight });   // a thin couch-coloured edge round both legs (on the upper leg it also keeps the two legs apart)
         stroke(ctx, leg, { w: 28, taper0: 0, taper1: 0 });                                   // black legs, as in his design (the same ink as his shorts)   // ...dark trousers inside, so the legs read apart
-        fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 42, 21, 10), '#6a6a6a', 0.8);
+        fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 42, 21, 10), Palette.prop.oliveLight, 0.8);
         fill(ctx, Brush.ellipsePts(foot[0] + 16 * swing, foot[1] + 4, 38, 17, 10), INK, 0.8);   // shoe, tucked onto the end of the shin
       }
       ctx.restore();
@@ -259,7 +258,7 @@ Skits.powernap = (() => {
         ctx.fillStyle = '#e6edf2'; ctx.fill(); ctx.lineWidth = 6 * Brush.getWeight(); ctx.strokeStyle = Brush.INK; ctx.stroke();
         stroke(ctx, [[bx - br * 0.5, by - br * 0.1], [bx - br * 0.3, by - br * 0.5]], { w: 5, color: W, taper0: 0.2, taper1: 0.2, seed: 4910 + i });
       }
-      couchShape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a8a8a8', 12);   // the couch cushion he pushes up from
+      couchShape(ctx, [[-60, 1850], [240, 1810], [540, 1832], [840, 1806], [1140, 1846], [1140, 2000], [-60, 2000]], '#a3b07f', 12);   // the couch cushion he pushes up from
       stroke(ctx, [[540, 1840], [540, 1940]], { w: 6, seed: 4998 });   // fixed seed: boils only on the beat
     }],
   ];

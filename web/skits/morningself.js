@@ -52,13 +52,16 @@ Skits.morningself = (() => {
 
   // ---------- the bedroom: one wide shot, one camera, night and morning ----------
   // Only the lighting changes between them: these palettes.
-  const NIGHT = { ceiling: '#7a7a7a', wall: '#8c8c8c', floor: '#777777', skirting: '#9c9c9c', pane: '#4c4c4c', curtain: '#5c5c5c', frame: '#a8a8a8',
-                  head: '#5a5a5a', stand: '#6c6c6c', standTop: '#808080', mattress: '#b4b4b4', blanket: '#a6a6a6', pillow: '#c2c2c2', shade: W };
-  const DAY = { ceiling: '#f2f2f2', wall: '#dedede', floor: '#d0d0d0', skirting: '#f4f4f4', pane: W, curtain: '#a8a8a8', frame: '#f4f4f4',
-                head: '#8f8f8f', stand: '#9a9a9a', standTop: '#b4b4b4', mattress: '#dcdcdc', blanket: '#bdbdbd', pillow: '#d6d6d6', shade: '#cfcfcf' };
-  const FLOOR_Y = 1430, CEIL_Y = 90;
+  // Colours: the paper darkens for night, the props keep real-world colours
+  // dulled below his hoodie (Palette). No wall, floor or ceiling is drawn: the
+  // bed, nightstand, lamp and window sit on the paper (user decision).
+  const P = Palette.prop;
+  const NIGHT = { paper: Palette.paperNight, pane: P.nightSky, curtain: P.curtainNight, frame: '#a08f80',
+                  head: '#6b4f3b', stand: '#73563f', standTop: '#86684f', mattress: P.linenNight, blanket: P.blanketNight, pillow: '#d8cdbd', shade: W };
+  const DAY = { paper: Palette.paper, pane: W, curtain: P.curtain, frame: '#f8eee2',
+                head: P.wood, stand: '#b08a6c', standTop: P.woodLight, mattress: P.linen, blanket: P.blanket, pillow: '#f5ede2', shade: P.butter };
+  const FLOOR_Y = 1430;   // where the floor used to be: the morning sun patch still ends there
   const WIN = [630, 650, 890, 990];                    // window, right of the bed
-  const PIC = [110, 690, 330, 900];                    // framed picture, left wall
   const STAND = { x0: 750, x1: 1000, top: 1330, bot: 1478, back: 40 };   // a low nightstand beside the bed's head end, top about level with his shoulder
   const LAMP_X = 970, PHONE = [842, 1316];   // well inside the nightstand top
   // the bed, seen from its foot: mattress top runs from the headboard (far) to the near edge
@@ -67,8 +70,8 @@ Skits.morningself = (() => {
 
   function windowSet(ctx, c, day) {
     const [x0, y0, x1, y1] = WIN, mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
-    if (day)   // morning sun through the window: a flat pale patch down the wall and across the floor
-      fill(ctx, [[x0 + 10, y1], [x1 - 10, y1], [x1 - 140, FLOOR_Y + 160], [x0 - 260, FLOOR_Y + 160]], '#f9f9f9', 0.3);
+    if (day)   // morning sun through the window: a flat pale patch down the paper
+      fill(ctx, [[x0 + 10, y1], [x1 - 10, y1], [x1 - 140, FLOOR_Y + 160], [x0 - 260, FLOOR_Y + 160]], '#fff8ee', 0.3);
     panel(ctx, box(x0, y0, x1, y1), c.pane, 11);
     ctx.save(); ctx.beginPath(); ctx.rect(x0 + 6, y0 + 6, x1 - x0 - 12, y1 - y0 - 12); ctx.clip();
     if (day) {
@@ -99,13 +102,6 @@ Skits.morningself = (() => {
     ctx.restore();
     stroke(ctx, [[x0 - 80, y0 - 36], [x1 + 74, y0 - 38]], { w: 10, taper0: 0, taper1: 0 });   // rod over the curtain tops
   }
-  function picture(ctx, c) {
-    const [x0, y0, x1, y1] = PIC;
-    panel(ctx, box(x0, y0, x1, y1, 4), c.frame, 10);
-    panel(ctx, box(x0 + 22, y0 + 22, x1 - 22, y1 - 22, 4), c.wall, 6);
-    stroke(ctx, [[x0 + 26, y1 - 40], [x0 + 80, y0 + 110], [x0 + 118, y1 - 70], [x0 + 160, y0 + 80], [x1 - 26, y1 - 40]], { w: 6 });   // hills
-    blob(ctx, x1 - 60, y0 + 62, 16, 16, { w: 5, n: 8 });
-  }
   function nightstand(ctx, c) {
     const { x0, x1, top, bot, back } = STAND, d = 30;   // the left side face shows: it's right of the camera
     panel(ctx, [[x0, top], [x0 - d, top - back], [x0 - d, bot - back], [x0, bot]], c.stand, 9);          // side
@@ -133,13 +129,7 @@ Skits.morningself = (() => {
   }
   function room(ctx, day) {
     const c = day ? DAY : NIGHT;
-    ctx.fillStyle = c.wall; ctx.fillRect(-100, -100, 1300, 2200);
-    fill(ctx, box(-100, FLOOR_Y, 1200, 2100, 4), c.floor, 0);
-    panel(ctx, box(-60, FLOOR_Y - 26, 1140, FLOOR_Y, 6), c.skirting, 8);
-    for (const [fx, dx] of [[60, -240], [330, -110], [610, 40], [880, 230], [1060, 330]]) stroke(ctx, [[fx, FLOOR_Y + 4], [fx + dx, 1940]], { w: 5 });   // floorboards
-    fill(ctx, box(-100, -100, 1200, CEIL_Y, 4), c.ceiling, 0);               // ceiling
-    panel(ctx, box(-60, CEIL_Y, 1140, CEIL_Y + 30, 6), c.skirting, 8);       // cornice
-    picture(ctx, c);
+    ctx.fillStyle = c.paper; ctx.fillRect(-100, -100, 1300, 2200);   // paper only: no wall, floor, skirting or picture
     windowSet(ctx, c, day);
     nightstand(ctx, c);
     lamp(ctx, c, !day);
@@ -320,9 +310,9 @@ Skits.morningself = (() => {
   // ---------- the phone close-up ----------
   const TIMES = ['6:00', '6:03', '6:06', '6:06', '6:07', '6:19', '6:15', '6:21', '6:28', '6:29', '6:30', '6:31', '6:33', '6:33', '6:41', '6:44', '6:52', '7:00'];
   function phoneScreen(ctx, t) {
-    ctx.fillStyle = '#a3a3a3'; ctx.fillRect(-100, -100, 1300, 2200);
+    ctx.fillStyle = Palette.paperNight; ctx.fillRect(-100, -100, 1300, 2200);
     // the blanket behind, a couple of folds
-    shape(ctx, [[-100, 1500], [400, 1420], [800, 1480], [1200, 1400], [1200, 2100], [-100, 2100]], '#bdbdbd', 11);
+    shape(ctx, [[-100, 1500], [400, 1420], [800, 1480], [1200, 1400], [1200, 2100], [-100, 2100]], Palette.prop.blanketNight, 11);
     stroke(ctx, [[880, 1560], [790, 1700]], { w: 6 });
     const z = lerp(1.04, 1.1, easeInOut(seg(t, CUT1, CUT2)));
     ctx.save(); ctx.translate(540, 900); ctx.scale(z, z); ctx.rotate(-0.025); ctx.translate(-540, -900);

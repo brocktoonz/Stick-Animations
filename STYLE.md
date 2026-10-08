@@ -62,14 +62,18 @@ disagree, the rule wins.
 - Outline style from the reference sheets: one continuous silhouette, waves
   and points in the outline, a few inner strokes, hair behind the head drawn
   as part of the same silhouette (never a stuck-on piece).
-- Natural hair colours only (greys in the house style, or real hair colours).
-  Never orange, blue, pink or other unnatural colours on hair.
+- Natural hair colours only (greys, or real hair colours; the main character
+  is brown, `Palette.hero.hair`). Never orange, blue, pink or other unnatural
+  colours on hair.
 
 ## Beards
 
 A full beard reads as one dense, short beard, never as stubble (hatching over
 skin) or as scraggly hair (long, uneven strokes). Squeex's beard
-(`beardFull2` in `web/cameos.js`, `?skit=squeex_beard2`) is the model.
+(`beardFull2` in `web/cameos.js`, `?skit=squeex_beard2`) is the model. The
+main character's long-nap beard (`Hero.mainBearded`) is the one exception to
+"never scraggly", and it is the same brown as his hair (user decision), not a
+darker shade.
 
 - Fill: one solid fill for the whole beard, sideburns and upper cheeks
   included, a grey that stays apart from both the hair and the clothes. No
@@ -98,9 +102,36 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
 
 ## Colour
 
-- Base is black, white and grey.
-- Red (`#e3261b` / `#d9261c`) belongs to title captions (dialogue subtitles use speaker colours, see Captions).
-- Unnatural colours are for clothing only. Cameos stay grayscale.
+Every colour lives in `web/palette.js` (`Palette`); read it from there, never
+type a hex into a skit. User decision after the palette tests on the power nap
+and alarm videos (cream paper, teal hero, coloured props; see
+`references/README.md` for how the tests were run).
+
+- **Paper.** Every shot sits on one flat cream (`Palette.paper`, `#f1e2d1`):
+  dialogue singles, cutaways, full scenes. A night scene darkens the same paper
+  (`Palette.paperNight`). Never white, never grey, never a saturated colour,
+  never a different tone per video: the feed is one paper.
+- **Skin stays white, ink stays black.** The halo and the character outlines
+  are what make the drawing ours; colour goes around them, not into them.
+- **The main character carries the one saturated hue.** Brown hair
+  (`Palette.hero.hair`), teal hoodie (`Palette.hero.hoodie`); his beard, when
+  he has one, is the same brown as his hair. Nothing else in a frame is teal,
+  and nothing else is as saturated as the hoodie.
+- **Props take real-world colours, dulled below the hoodie.** Wood is wood,
+  a blanket is blue, a lamp shade is butter: see `Palette.prop` and reuse those
+  before adding one. Only one large coloured shape per shot (a couch, a
+  blanket); small props can be whatever they are. No prop is ever teal, and a
+  prop keeps its colour between shots.
+- **Red** (`#e3261b` / `#d9261c`) belongs to title captions and to the one
+  prop that is the joke (the eye doctor's balloon). Dialogue subtitles use
+  speaker colours, see Captions.
+- **Cameos** stay grayscale with their existing clothing accents (suit ties)
+  until each is given a signature colour. Unnatural colours are for clothing
+  only; never on hair.
+- Not yet converted: skits other than the power nap and the alarm still draw
+  their own grey sets. Convert a skit by swapping its backdrop and fills for
+  `Palette` entries and dropping its walls and floors (see Sets below); the
+  main character is already in colour everywhere he appears.
 
 ## Cast
 
@@ -111,9 +142,10 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
 - Faces come from the shared emotion set (`web/emotions.js`, `...Emotions.angry`).
   Don't hand-tune a face in a skit when an emotion covers it; add or adjust the
   emotion instead and re-render `characters/` so the references stay true.
-- Main character: `Hero.main`, the spiky-haired guy with mid-grey hair and a
-  grey hoodie (`Cameos.spikyShades.brown`). The previous design is kept as
-  `Hero.mainOld`.
+- Main character: `Hero.main`, the spiky-haired guy with brown hair and a
+  teal hoodie (`Cameos.spikyMain`, colours in `Palette.hero`). The grey shade
+  sheet (`Cameos.spikyShades`) and the previous design (`Hero.mainOld`) are
+  kept for reference only.
 - Squeex: the approved design is draft C with the full dark beard,
   `Cameos.squeex.beards.full` (see `?skit=squeex_beard2` and
   `characters/squeex/beards/`). It has his own angry (squared clenched teeth)
@@ -132,11 +164,17 @@ skin) or as scraggly hair (long, uneven strokes). Squeex's beard
 
 - Don't sit in one medium two-shot. Cut to close-ups for reactions and punch
   lines, push in on the joke, pull back for group shots.
-- **Dialogue shots use a flat light-grey backdrop (`#eeeeee`), not scenery.**
+- **Dialogue shots use the flat cream paper (`Palette.paper`), not scenery.**
   One thin ink ground line and a flat ink shadow under each character keep
-  them grounded; the white halo around dark bodies stays visible on the grey.
+  them grounded; the white halo around dark bodies stays visible on the cream.
   Full sets (sky, hills, props, grass) are only for cutaways, and every
   cutaway in a video uses the same set kit so they match.
+- **Sets are props on the paper, never rooms** (user decision, from the alarm
+  and presentation tests). No wall, floor, ceiling, skirting or floorboards
+  drawn as surfaces: the bed, the nightstand, the window, the couch, the
+  meeting table sit on the bare paper, and a window floats where the wall
+  would be. A ground line appears only where a character is standing on it.
+  Night is the paper darkened plus a lit lamp, not a dark wall.
 - Frame the characters big: heads sit just under the captions, singles for
   most lines (medium or close-up), two-shots only when both need to be seen.
   Two-shots don't push in if it would clip a character at the edge.

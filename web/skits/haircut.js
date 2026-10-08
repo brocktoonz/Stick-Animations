@@ -270,8 +270,8 @@ Skits.haircut = (() => {
 
   let hairNow = mopHair;
   const hoodieFront = (ctx, n) => stroke(ctx, [[-50, n + 2], [-30, n + 30], [0, n + 38], [30, n + 30], [50, n + 2]], { w: 9 });
-  // Hero.main's build (Cameos.spikyShades.brown) with a swappable haircut
-  const guyRig = build({ shirt: '#8a8a8a', sleeve: '#8a8a8a', detail: hoodieFront,
+  // Hero.main's build (Cameos.spikyMain) with a swappable haircut
+  const guyRig = build({ shirt: Palette.hero.hoodie, sleeve: Palette.hero.hoodie, detail: hoodieFront,
     head: head({ hair: ctx => hairNow(ctx) }) });
   const guy = (ctx, p) => guyRig(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
 

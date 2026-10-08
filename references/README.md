@@ -17,3 +17,17 @@ want, or upload just the audio.
 
 Suggested layout: one folder per idea, e.g. `references/power-nap/` with the
 clip plus a `notes.md` saying who says which line.
+
+## Palette tests (October 2026)
+
+The channel's colours (STYLE.md, Colour; `web/palette.js`) were chosen by
+rendering real skit frames, not swatches: the power nap wide and close-up and
+the alarm video's night and morning shots, each re-coloured in a scratch copy
+of `web/` and laid side by side. Tested and rejected: full colour with peach
+skin (no hierarchy, reads as vector explainer art); a grey character on a
+coloured set (the set wins the eye); white paper (white skin loses its edge);
+pale blue and mint paper (too close to the teal); grey walls and floors next
+to coloured props (stickers on a set). The references the user supplied were
+Nutshell Animations, Ice Cream Sandwich, gebutaw and pochita__arc: one paper
+tone per feed, at most one hue on the character, muted colour on a few props,
+no rooms drawn as surfaces.

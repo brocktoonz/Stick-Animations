@@ -659,9 +659,9 @@ const Hero = (() => {
   const mainHair = Object.fromEntries(Object.entries(MAIN_HAIR).map(([k, h]) => [k, mainWith(h)]));
   const mainBody = build({ shirt: '#5a5a5a', sleeve: '#5a5a5a', head: mainHead, detail: overshirt });
   const mainOld = (ctx, p) => mainBody(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
-  // The main character: the spiky-haired guy, mid-grey hair, grey hoodie.
+  // The main character: the spiky-haired guy, brown hair, teal hoodie (Palette.hero).
   const mainDefaults = draw => { const f = (ctx, p) => draw(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p }); f.with = patch => mainDefaults(draw.with(patch)); return f; };
-  const main = mainDefaults(Cameos.spikyShades.brown);
+  const main = mainDefaults(Cameos.spikyMain);
   // the main character after a very long nap: full scraggly beard and moustache
   const mainBearded = (ctx, p) => Cameos.spikyBearded(ctx, { mouth: 'smile', lid: 0, brow: 0, ...p });
 
