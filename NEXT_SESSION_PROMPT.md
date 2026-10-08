@@ -1,6 +1,12 @@
 Convert the remaining videos to the channel's new colour style. Read CLAUDE.md, STYLE.md (the Colour and Sets sections and the reference pair in references/style/sets/) and web/palette.js first. The power nap (web/skits/powernap.js) and the alarm video (web/skits/morningself.js) are already converted and are the models for everything below: cream paper, props in real-world colours dulled below the hoodie, no walls or floors drawn as surfaces, the main character in brown hair and a teal hoodie, rose tongues. Do not change those two skits.
 
-Convert these five skits, one at a time, in this order, committing and pushing after each one passes review:
+Before any conversion, make the cheap review loop the default (user decision, to cut token cost), and commit it:
+- Add --from <sec> --to <sec> to scripts/export.cjs, scripts/glitch_check.py and scripts/frame_sheets.py so a change inside part of a video renders, pop-checks and sheets only that range (plus a one-shot margin).
+- Add scripts/change_map.py: given two frozen-boil renders (before and after a change), compare line edges frame by frame and print the time ranges that differ. Those ranges, padded by one shot each side, are the default scope for the pop check, the sheets and the reviewer.
+- Move the mechanical checks into scripts/precheck.py and run it before every review: caption text against the transcript, hex colours typed into a skit instead of read from Palette, set-piece boil measured as frame-to-frame edge change on the 3-frame beat, and the glitch_check hit list diffed against the previous accepted render. Its report goes to the reviewer with the file path.
+- In CLAUDE.md, make the scoped review the default for any revision of a video that has already passed: scope from change_map.py, full review only when shared code touches most shots or the user asks. The art-reviewer agent now runs on Sonnet (set in .claude/agents/art-reviewer.md); keep it there unless the user says otherwise.
+
+Then convert these five skits, one at a time, in this order, committing and pushing after each one passes review:
 
 1. presentation (web/skits/presentation.js, references/presentation/, audio references/presentation/clip.mov)
 2. eyedoctor (web/skits/eyedoctor.js, references/eye-doctor/, audio references/eye-doctor/clip.mov)
