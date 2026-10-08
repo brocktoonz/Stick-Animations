@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 CROP = (90, 280, 990, 1580)   # the figure and its label, out of the 1080x1920 frame
+PAPER = (0xf1, 0xe2, 0xd1)   # Palette.paper
 CAST = ['main', 'speed', 'ludwig', 'beast', 'nick', 'slime', 'squeex']
 
 
@@ -36,7 +37,8 @@ def render(name, keys):
             tiles.append(im)
     cols, tw, th = 4, 360, 520
     rows = -(-len(tiles) // cols)
-    sheet = Image.new('RGB', (cols * tw, rows * th + 90), 'white')
+    sheet = Image.new('RGB', (cols * tw, rows * th + 90), 'white')   # the header row stays white
+    ImageDraw.Draw(sheet).rectangle([0, 90, cols * tw, rows * th + 90], fill=PAPER)   # the tiles (and any empty cell) sit on the real paper
     font = ImageFont.truetype(os.path.join(ROOT, 'web', 'fonts', 'LuckiestGuy.ttf'), 60)
     ImageDraw.Draw(sheet).text((24, 16), name.upper(), font=font, fill=(227, 38, 27))
     for i, im in enumerate(tiles):

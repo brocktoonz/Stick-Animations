@@ -18,7 +18,7 @@
       title: '', subtitle: '', duration: KEYS.length,
       draw(ctx, t) {
         const key = KEYS[Math.min(KEYS.length - 1, Math.floor(t))];
-        Stage.livingRoom(ctx, { floor: false, picture: false, lamp: false });
+        ctx.fillStyle = Palette.paper; ctx.fillRect(0, 0, 1080, 1920);   // every sheet is shown on the real paper
         draw(ctx, { x: 540, y: 1660, s: 1.75, ...Emotions[key] });
         Stage.text(ctx, key.toUpperCase(), 540, 360, 80, 'Luckiest Guy', Brush.INK, 16);
       },

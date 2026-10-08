@@ -1557,10 +1557,10 @@ const Cameos = (() => {
   // one tear: a thin streak from the outer corner of the screen-left eye, ending in a drop on the bare cheek
   const tearStreak = (ctx, fx) => {
     const x = fx - 40 - 30;   // the eye's outer edge (eyes sit 40 either side of the face line, 30 wide)
-    stroke(ctx, [[x + 4, 8], [x, 22], [x - 2, 32]], { w: 7, color: '#6a6a6a', taper0: 0.2, taper1: 0.2 });
+    stroke(ctx, [[x + 4, 8], [x, 22], [x - 2, 32]], { w: 7, color: Palette.prop.water, taper0: 0.2, taper1: 0.2 });
     const d = [[x - 2, 30], [x + 6, 43], [x - 2, 52], [x - 10, 43]];   // the drop stays on bare cheek, above the beard
-    fill(ctx, d, W, 0.3); outline(ctx, d, { w: 4 });
-    stroke(ctx, [[x - 6, 42], [x - 4, 38]], { w: 3, color: '#9a9a9a' });   // a glint, so it reads as water
+    fill(ctx, d, Palette.prop.water, 0.3); outline(ctx, d, { w: 4 });
+    stroke(ctx, [[x - 6, 42], [x - 4, 38]], { w: 3, color: W });   // a glint, so it reads as water
   };
   // lowered upper lids in his skin tone (the shared lid fill is white, which shows as a
   // white cap on grey skin). Angry lids tilt down toward the nose; unimpressed stays flat.

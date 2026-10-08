@@ -35,7 +35,7 @@ const Chars = (() => {
     const o = side * s;
     const pts = [[x - 8 * o, y], [x + 8 * o, y], [x + 30 * o, y + 60 * s], [x + 44 * o, y + 120 * s],
                  [x + 20 * o, y + 124 * s], [x + 10 * o, y + 62 * s]];
-    fill(ctx, pts, '#dcdcdc', 0.5); outline(ctx, pts, { w: 4 * s });
+    fill(ctx, pts, Palette.prop.water, 0.5); outline(ctx, pts, { w: 4 * s });
     stroke(ctx, [[x + 4 * o, y + 16 * s], [x + 22 * o, y + 90 * s]], { w: 3.5 * s, color: W });
   }
   // Extra eye looks (see web/emotions.js): eyeScale, sparkle, flatLid, lowLid,
@@ -119,12 +119,12 @@ const Chars = (() => {
         const ty = y + ry * 0.3, wave = [];
         for (let i = 0; i <= 6; i++) wave.push([ex - rx + i * rx / 3, ty + (i % 2 ? -5 : 4) * size]);
         clipEye();
-        fill(ctx, [...wave, [ex + rx + 4, y + ry + 4], [ex - rx - 4, y + ry + 4]], '#d9d9d9', 0.3);
+        fill(ctx, [...wave, [ex + rx + 4, y + ry + 4], [ex - rx - 4, y + ry + 4]], Palette.prop.water, 0.3);
         ctx.restore();
         stroke(ctx, wave, { w: 4 * size, taper0: 0.2, taper1: 0.2 });
         const dx = ex + side * rx * 0.75, dy = y + ry * 0.95;   // a drop at the outer corner
         const drop = [[dx, dy - 10 * size], [dx + 8 * size, dy + 6 * size], [dx, dy + 12 * size], [dx - 8 * size, dy + 6 * size]];
-        fill(ctx, drop, '#d9d9d9', 0.3); outline(ctx, drop, { w: 4 * size });
+        fill(ctx, drop, Palette.prop.water, 0.3); outline(ctx, drop, { w: 4 * size });
       }
       if (heavy) {
         ctx.restore();
@@ -188,9 +188,14 @@ const Chars = (() => {
     ctx.clip();
     ctx.fillStyle = W; ctx.fillRect(x - w2, y - 10 * s, w2 * 2, Math.min(30 * s, h * 0.45));
     for (let i = -3; i <= 3; i++) stroke(ctx, [[x + i * w2 / 4, y - 8 * s], [x + i * w2 / 4, y + Math.min(20 * s, h * 0.35)]], { w: 4 * s, taper0: 0, taper1: 0 });
-    if (tongue) {
-      ctx.fillStyle = '#9a9a9a';
+    if (tongue) {   // dusty rose, clipped to the mouth pulled in past the outline's wobble so it never shows past the ink
+      ctx.save();
+      ctx.beginPath(); const ins = Brush.spline(Brush.inset(pts, 6 * s), true, 6); ctx.moveTo(ins[0][0], ins[0][1]);
+      for (const q of ins) ctx.lineTo(q[0], q[1]);
+      ctx.clip();
+      ctx.fillStyle = Palette.tongue;
       ctx.beginPath(); ctx.ellipse(x + 10 * s, y + h * 0.95, w2 * 0.55, h * 0.3, 0, 0, 7); ctx.fill();
+      ctx.restore();
     }
     ctx.restore();
     outline(ctx, pts, { w: 7 * s, jit: 1 });
@@ -342,8 +347,8 @@ const Chars = (() => {
       const cy = y + h * 0.18;   // centred high so even a big gape stays above the chin
       const pts = Brush.ellipsePts(x, cy, w2, h * 0.52, 14);
       fill(ctx, pts, INK, 0.6);
-      ctx.save(); ctx.beginPath(); ctx.ellipse(x, cy, w2, h * 0.52, 0, 0, 7); ctx.clip();
-      ctx.fillStyle = '#9a9a9a'; ctx.beginPath(); ctx.ellipse(x, cy + h * 0.45, w2 * 0.7, h * 0.28, 0, 0, 7); ctx.fill();
+      ctx.save(); ctx.beginPath(); ctx.ellipse(x, cy, Math.max(1, w2 - 6 * s), Math.max(1, h * 0.52 - 6 * s), 0, 0, 7); ctx.clip();   // pulled in past the outline's wobble
+      ctx.fillStyle = Palette.tongue; ctx.beginPath(); ctx.ellipse(x, cy + h * 0.45, w2 * 0.7, h * 0.28, 0, 0, 7); ctx.fill();
       ctx.restore();
       outline(ctx, pts, { w: 6 * s });
     } else if (k === 'grimace') {   // hurt / sobbing: wavy open mouth
@@ -360,7 +365,7 @@ const Chars = (() => {
       const w2 = (78 + 22 * open) * s, h = (70 + 70 * open) * s;
       const pts = [[x - w2, y], [x, y - 8 * s], [x + w2, y], [x + w2 * 0.86, y + h * 0.55],
                    [x + w2 * 0.45, y + h * 0.95], [x, y + h], [x - w2 * 0.45, y + h * 0.95], [x - w2 * 0.86, y + h * 0.55]];
-      fill(ctx, pts, '#d4d4d4', 1);
+      fill(ctx, pts, Palette.tongue, 1);   // the shark-tooth yell: the mouth's inside is the tongue's dusty rose, never grey
       ctx.save();
       ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
       for (const q of Brush.spline(pts, true, 6)) ctx.lineTo(q[0], q[1]);
@@ -387,7 +392,7 @@ const Chars = (() => {
 
   function sweat(ctx, x, y, s = 1) {
     const pts = [[x, y - 26 * s], [x + 13 * s, y + 4 * s], [x, y + 16 * s], [x - 13 * s, y + 4 * s]];
-    fill(ctx, pts, '#dff1ff', 0.5);
+    fill(ctx, pts, Palette.prop.water, 0.5);
     outline(ctx, pts, { w: 5 * s, jit: 0.6 });
   }
 
