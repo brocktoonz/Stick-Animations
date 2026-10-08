@@ -34,6 +34,7 @@ const Palette = (() => {
     steel: '#a3a8ad', steelDark: '#6f7479', charcoal: '#4d5156',   // laptop lid / screen roller case / chair backs and the screen's weight bar
     couchLeg: '#5e4330',                            // the couch's stubby wood legs (dark: they sit in shadow under the olive)
     sleepBubble: '#e6edf2',                         // the sleep bubbles in the power nap close-up (a cool off-white)
+    toggleOn: '#5fc86a',                            // an "on" switch on the alarm list (user decision: green, like the phone's own)
     phone: '#3a3a3a', phoneOff: '#5a5a5a', phoneDot: '#9a9a9a',   // a dark phone: body, dead screen, camera dot / list rules
   };
   // The cast's tie colours (cameos stay grayscale otherwise): the suited cast in the presentation video.

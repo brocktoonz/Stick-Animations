@@ -378,7 +378,7 @@ Skits.morningself = (() => {
       // toggle, on: dark track, knob to the right
       const tx = sx1 - 150, ty = y + rowH / 2;
       const track = [[tx, ty - 30], [tx + 92, ty - 30], [tx + 112, ty - 16], [tx + 114, ty + 14], [tx + 92, ty + 30], [tx, ty + 30], [tx - 20, ty + 14], [tx - 20, ty - 16]];
-      fill(ctx, track, P.phone, 0.4); outline(ctx, track, { w: 5 });
+      fill(ctx, track, P.toggleOn, 0.4); outline(ctx, track, { w: 5 });
       blob(ctx, tx + 88, ty, 25, 25, { fill: W, w: 5, n: 10 });
       stroke(ctx, [[sx0 + 30, y + rowH], [sx1 - 10, y + rowH + 2]], { w: 3, color: P.phoneDot });
     });
