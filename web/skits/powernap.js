@@ -111,9 +111,9 @@ Skits.powernap = (() => {
   function pillow(ctx, [cx, cy], w, h, rot) {
     ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
     const p = [[-w, -h * 0.7], [-w * 0.5, -h], [w * 0.5, -h], [w, -h * 0.7], [w * 1.04, 0], [w, h * 0.7], [w * 0.5, h], [-w * 0.5, h], [-w, h * 0.7], [-w * 1.04, 0]];
-    shape(ctx, p, Palette.prop.linen, 11);
-    stroke(ctx, [[-w * 0.82, -h * 0.5], [-w * 0.62, -h * 0.25]], { w: 5 });   // corner crease
-    stroke(ctx, [[w * 0.3, h * 0.55], [w * 0.62, h * 0.4]], { w: 5 });
+    couchShape(ctx, p, Palette.prop.linen, 11);   // seeded like the couch, so it only boils on the beat
+    stroke(ctx, [[-w * 0.82, -h * 0.5], [-w * 0.62, -h * 0.25]], { w: 5, seed: 4995 });   // corner crease
+    stroke(ctx, [[w * 0.3, h * 0.55], [w * 0.62, h * 0.4]], { w: 5, seed: 4994 });
     ctx.restore();
   }
   // blanket over the body from past the feet up to `cover` of the way to the head
@@ -145,10 +145,10 @@ Skits.powernap = (() => {
   const SEAT = 1310, FLOOR = 1520;
   function couchBack(ctx) {
     ctx.fillStyle = BACKDROP; ctx.fillRect(-2000, -2000, 5000, 6000);
-    stroke(ctx, [[70, FLOOR], [540, FLOOR + 3], [1010, FLOOR - 3]], { w: 9, taper0: 0, taper1: 0 });   // only under the couch (its flat shadow's width), not the full frame
+    stroke(ctx, [[70, FLOOR], [540, FLOOR + 3], [1010, FLOOR - 3]], { w: 9, taper0: 0, taper1: 0, seed: 4997 });   // only under the couch (its flat shadow's width), not the full frame
     fill(ctx, Brush.ellipsePts(540, FLOOR + 8, 470, 20, 16), Palette.prop.shadow, 0.4);              // flat shadow
     couchShape(ctx, [[150, 1040], [540, 1010], [930, 1040], [940, SEAT + 20], [140, SEAT + 20]], Palette.prop.olive, 11);   // back cushions
-    stroke(ctx, [[540, 1030], [540, SEAT]], { w: 6 });                                       // seam between the two back cushions
+    stroke(ctx, [[540, 1030], [540, SEAT]], { w: 6, seed: 4996 });                                       // seam between the two back cushions
     couchShape(ctx, [[70, 1150], [140, 1110], [220, 1140], [230, FLOOR - 40], [80, FLOOR - 40]], Palette.prop.oliveDark, 11);   // left arm (his head ends up on it)
   }
   function couchFront(ctx) {
