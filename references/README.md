@@ -31,3 +31,7 @@ to coloured props (stickers on a set). The references the user supplied were
 Nutshell Animations, Ice Cream Sandwich, gebutaw and pochita__arc: one paper
 tone per feed, at most one hue on the character, muted colour on a few props,
 no rooms drawn as surfaces.
+
+`references/style/sets/` holds the two-frame comparison behind the Sets
+section of STYLE.md: our alarm video (props on cream paper) next to another
+account's fully painted bedroom around a bare stick figure. Ours is the first.

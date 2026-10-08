@@ -170,11 +170,7 @@ and alarm videos (cream paper, teal hero, coloured props; see
   Full sets (sky, hills, props, grass) are only for cutaways, and every
   cutaway in a video uses the same set kit so they match.
 - **Sets are props on the paper, never rooms** (user decision, from the alarm
-  and presentation tests). No wall, floor, ceiling, skirting or floorboards
-  drawn as surfaces: the bed, the nightstand, the window, the couch, the
-  meeting table sit on the bare paper, and a window floats where the wall
-  would be. A ground line appears only where a character is standing on it.
-  Night is the paper darkened plus a lit lamp, not a dark wall.
+  and presentation tests). See the Sets section below.
 - Frame the characters big: heads sit just under the captions, singles for
   most lines (medium or close-up), two-shots only when both need to be seen.
   Two-shots don't push in if it would clip a character at the edge.
@@ -214,6 +210,46 @@ and alarm videos (cream paper, teal hero, coloured props; see
   brush, never polygons.
 - Anything drawn behind a head (back hair, hoods) squashes and stretches
   with it, so no fill shows past the outline.
+
+## Sets: props on the paper, never rooms
+
+The reference pair in `references/style/sets/` is the whole rule in two
+frames. `ours_props-on-paper.png` is our alarm video: a bed, a nightstand, a
+lamp and a window on bare cream paper. `not-ours_detailed-room_simple-character.png`
+is another account's version of the same joke: a fully painted room (walls,
+corner, framed picture, curtain rod, lit lamp, light rays across the floor)
+around a bare stick figure. We make the first one, on purpose. The character
+is the detailed thing; the set is a few props.
+
+- **Nothing is drawn as a surface.** No wall, floor, ceiling, corner,
+  skirting, floorboards, cornice, carpet. The paper (`Palette.paper`) is the
+  room. A set with a floor fill and a wall fill is wrong even if both are
+  cream.
+- **Only the props the scene needs**, and few of them: the ones a character
+  touches or looks at, plus at most one or two that place the scene (a
+  window, a lamp). A framed picture, a rug, a second lamp, a plant in the
+  corner, a bookshelf: cut them unless the joke uses them.
+- **Props float where they would be.** A window hangs in the air where the
+  wall would be; a lamp stands on the nightstand; a couch sits on nothing.
+  Nobody misses the wall. The eye reads the paper as the room.
+- **A ground line only under feet.** A thin ink line appears where a
+  character stands (the dialogue backdrop), never as a floor edge across a
+  set. A flat ink shadow under feet or furniture is fine.
+- **No lighting.** No light rays, no sun patches on the floor, no gradients,
+  no cast shadows from windows. Night is the paper darkened
+  (`Palette.paperNight`) plus a lit lamp and a dark window pane; morning is
+  the paper back to cream plus a sun in the pane. The one allowed touch is a
+  small flat pale patch under a window (the alarm video), never a ray.
+- **Prop colour follows the Colour section**: real-world colours dulled
+  below the hoodie, one large coloured shape per shot.
+- **Why**: the viewer looks at the face and the caption. A painted room
+  pulls the eye off both, costs hours per skit in hand-coded JS, and makes
+  our videos look like everyone's AI-generated room. Props on paper is the
+  look of the accounts we are modelled on (gebutaw, pochita__arc, Nutshell).
+
+Check: cover the character with your thumb. If what's left looks like a
+room, there's too much set. It should look like three or four objects on a
+sheet of paper.
 
 ## Animals
 

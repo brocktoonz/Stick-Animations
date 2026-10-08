@@ -46,7 +46,7 @@ Staging and camera
 Backgrounds
 - Dialogue shots use the flat cream paper (`Palette.paper`), a single ink ground line, and flat ink shadows. No scenery.
 - Colour (STYLE.md, Colour; `web/palette.js`): the paper is the one cream in every shot of a converted video (night: the same paper darkened). Skin is white, ink is black. The main character has brown hair, a teal hoodie, and a beard the same brown as his hair. Flag: any other teal in frame; any prop more saturated than the hoodie; more than one large coloured shape per shot; a prop that changes colour between shots; coloured skin; a white, grey or saturated backdrop in a converted video (power nap, alarm); any hex colour typed into a skit instead of read from `Palette`.
-- Sets are props on the paper, never rooms: flag any wall, floor, ceiling, skirting or floorboard drawn as a surface, and any ground line under nothing. Furniture, a window and a lamp sit on the bare paper.
+- Sets are props on the paper, never rooms (STYLE.md, Sets; reference pair in `references/style/sets/`): flag any wall, floor, ceiling, corner, skirting, floorboard, rug or cornice drawn as a surface; any light ray, sun patch larger than a small flat pale shape, gradient or cast shadow; any ground line under nothing; and any prop the scene doesn't use (a framed picture, a second lamp, a plant for decoration). Cover the character: what's left should be three or four objects on paper, not a room.
 - Cutaways have full backgrounds, drawn with the same brush weight as the characters.
 - The halo never shows as a visible white disc or blob against the paper.
 Characters
