@@ -209,10 +209,10 @@ const Cameos = (() => {
   // Speed: twists under a straw hat, Luffy's open sleeveless vest over a bare
   // chest, buttons and a waist sash.
   const speed = build({
-    skin: GREY, shirt: GREY,
+    skin: C.speed.skin, shirt: C.speed.skin,
     body: { bottoms: (ctx, hipY) => { const b = [[-64, hipY - 12], [64, hipY - 12], [70, hipY + 50], [8, hipY + 56], [0, hipY + 30], [-8, hipY + 56], [-70, hipY + 50]];
       fill(ctx, b, C.speed.shorts, 1.2); outline(ctx, b, { w: 9 }); } },   // blue shorts
-    head: head({ skin: GREY, hair: twists(), hat: strawHat }),
+    head: head({ skin: C.speed.skin, hair: twists(), hat: strawHat }),
     detail: (ctx, n, h) => {
       for (const side of [-1, 1]) {   // vest panels, open down the middle
         const panel = [[side * 48, n], [side * 66, n + 64], [side * 68, h - 4], [side * 30, h - 4], [side * 22, n + 60], [side * 20, n + 4]];
@@ -1245,7 +1245,7 @@ const Cameos = (() => {
   // shade lighter than the hair) with a thin moustache lifted off the mouth,
   // and a big grin. Light-grey skin (the cameos stay grayscale). Each draft
   // leans on a different signature item from the photos.
-  const SQ_HAIR = C.squeex.hair, SQ_LINE = C.squeex.hairLine, SQ_BEARD = C.squeex.beard, SQ_TICK = C.squeex.tick, SQ_SKIN = '#d4d4d4';
+  const SQ_HAIR = C.squeex.hair, SQ_LINE = C.squeex.hairLine, SQ_BEARD = C.squeex.beard, SQ_TICK = C.squeex.tick, SQ_SKIN = C.squeex.skin;
   // Full short beard along the jaw. It starts below the ears, so skin shows
   // between it and the hair, and its jaw edge is tufted so it reads as hair.
   // The window around the mouth is wide, so the beard never outlines the lips.

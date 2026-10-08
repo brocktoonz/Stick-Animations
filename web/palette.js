@@ -39,17 +39,20 @@ const Palette = (() => {
   };
   // The cast's tie colours (cameos stay grayscale otherwise): the suited cast in the presentation video.
   const tie = { hero: '#4f7fc9', nick: '#c9a43a', ludwig: '#3f8f5a', slime: '#7a56b0', speed: '#d0812f', beast: '#3fa0b0', squeex: '#a8506f' };
-  // The rest of the cast (clothes and natural hair; ink stays black). Skin: Nick, Ludwig, Slime and MrBeast stay white
-  // (user decision: only Speed and Squeex, whose faces were drawn grey, get a skin tone). Speed's and Squeex's tones are
-  // sampled with scripts/sample_skin.py from a frame of the person, then dulled toward the paper; they wait for a reference
-  // frame (none in the repo), so they keep their old grey until one is supplied. Never guess from memory.
+  // The rest of the cast (clothes and natural hair; ink stays black). Skin: only Speed and Squeex, whose faces were drawn
+  // grey, get a skin tone (user decision); everyone else stays white. Their tones are sampled with scripts/sample_skin.py
+  // from the reference screenshots the user supplied, then dulled toward the paper:
+  //   Speed  '#a07561' from the studio portrait (IMDb) forehead and both cheeks, raw #894226; the pale outdoor Wikipedia
+  //          frame samples much lighter (raw #d2a08d, flash-lit) and was not used.
+  //   Squeex '#c4a08d' from the airplane selfie (even light, neutral white balance) forehead and cheeks, raw #bb8166; the
+  //          headphone frame is warm-lit (raw #b6604d) and was not used.
   const cast = {
-    speed:  { straw: '#d9b86c', strawLine: '#a98a45', band: '#b8473d', vest: '#b8473d', button: '#e3c25a', sash: '#e3c25a', shorts: '#5a78a0' },   // One Piece straw hat, red vest, yellow sash, blue shorts; hair stays black
+    speed:  { skin: '#a07561', straw: '#d9b86c', strawLine: '#a98a45', band: '#b8473d', vest: '#b8473d', button: '#e3c25a', sash: '#e3c25a', shorts: '#5a78a0' },   // One Piece straw hat, red vest, yellow sash, blue shorts; hair stays black
     ludwig: { hair: '#d8b878', shirt: '#8fb0cf', pineapple: '#ecd79a', leaf: '#7c8a5c' },                 // blond, a pale blue shirt with butter pineapples
     beast:  { hair: '#46332a', hoodie: '#e3b94a' },                                                       // dark brown hair and beard, a yellow hoodie (he wears black or yellow: yellow carries the colour)
     nick:   { hair: '#7a5a43', hairLine: '#b08e70', shirt: '#7c5c82' },                                   // brown hair (the grey mop was brown), a dusty plum shirt
     slime:  { shirt: '#6f9a4f', stubble: '#3d3029', scalp: '#c9b8a6' },                                    // a moss-green shirt, dark stubble on a shaved head
-    squeex: { hair: '#3b2c24', hairLine: '#7a6050', beard: '#4a382d', tick: '#2e2420', overshirt: '#4a5568', tee: '#d6ccb8', khaki: '#b3a27c', button: '#efe6d9' },   // dark brown hair and beard, slate overshirt, oatmeal tee, khakis
+    squeex: { skin: '#c4a08d', hair: '#3b2c24', hairLine: '#7a6050', beard: '#4a382d', tick: '#2e2420', overshirt: '#4a5568', tee: '#d6ccb8', khaki: '#b3a27c', button: '#efe6d9' },   // dark brown hair and beard, slate overshirt, oatmeal tee, khakis
   };
   const captionRed = '#d9261c';   // title captions: the one red the channel uses on text (also the eye doctor's balloon)
   const tongue = '#b5555e';   // dusty rose, inside every open mouth (user decision: the grey tongue was the last grayscale leftover)

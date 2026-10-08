@@ -144,9 +144,12 @@ and alarm videos (cream paper, teal hero, coloured props; see
   stays the loudest thing), never guessed from memory. The fill inside the face
   and hands changes; the ink outline, the white halo and the white eyes stay.
   Check each tone on the cream and the night paper and against black hair and
-  ink (the script prints the contrasts) and render a test still. Everyone else
-  (the original cast, Nick, Ludwig, Slime, MrBeast) stays white. Speed and
-  Squeex are still grey, waiting for a reference frame.
+  ink (the script prints the contrasts) and render a test still
+  (`?skit=skin_test`: the hero, Speed and Squeex on the cream and the night
+  paper). Done: Speed `#a07561` and Squeex `#c4a08d`, sampled from the
+  reference screenshots the user supplied (the sources are noted in
+  `web/palette.js`). Everyone else (the original cast, Nick, Ludwig, Slime,
+  MrBeast) stays white.
 - Not yet converted: skits other than the power nap and the alarm still draw
   their own grey sets. Convert a skit by swapping its backdrop and fills for
   `Palette` entries and dropping its walls and floors (see Sets below); the
