@@ -10,6 +10,7 @@
 const Animals2 = (() => {
   const { stroke, fill, blob, INK } = Brush;
   const W = '#fff';
+  const C = Palette.animal;
 
   // A silhouette is a list of parts, each an ellipse or a tube. They're drawn
   // twice: first every part enlarged by the outline width in ink, then every
@@ -131,7 +132,7 @@ const Animals2 = (() => {
       T([[118, ay], [156, ay + 6]], 18),                                  // stub
       T([[152, ay - 2], [178, ay - 12]], 12, 1), T([[152, ay + 8], [176, ay + 22]], 12, 1),   // two claw points
     ];
-    silhouette(ctx, leg(-45, -120, 60, ph + Math.PI, wk, { off: -30, knee: 14, foot: 42 }), '#7c7c7c', lw, 10);   // far leg
+    silhouette(ctx, leg(-45, -120, 60, ph + Math.PI, wk, { off: -30, knee: 14, foot: 42 }), C.trex.far, lw, 10);   // far leg
     // snarling: the mouth is cut out of the silhouette, so the background
     // shows between the teeth (no black or grey fill in there)
     const mUp = [[120, -272], [236, -290]], mLo = [[214, -222], [118, -254]];
@@ -154,7 +155,7 @@ const Animals2 = (() => {
         T([[75, -262], [205, -264]], 58),                                 // boxy jaw
       ]),
       ...arm,
-    ], '#8a8a8a', lw, 11);
+    ], C.trex.body, lw, 11);
     if (p.snarl) {
       ctx.restore();
       for (const lip of [mUp, [mLo[1], mLo[0]]]) stroke(ctx, lip, { w: lw * 0.9, taper0: 0.5, taper1: 0, minW: 1, jit: 0.3, wob: 0.3 });   // ink along each jaw only; nothing closes the mouth
@@ -166,7 +167,7 @@ const Animals2 = (() => {
       line(ctx, p.eyes === 'happy' ? [[228, -262], [170, -268], [130, -268], [112, -282], [110, -296]] : [[228, -262], [170, -264], [116, -258]], lw);   // happy: the corner curls up into the cheek   // snout tip to below the eye; turns up when happy
       fangs(ctx, 140, -263, 222, -262, 5, 16, lw);
     }
-    marks(ctx, -45, -275, 3, 36, lw);
+    marks(ctx, -45, -275, 3, 36, lw, C.trex.mark);
     eye(ctx, 120, -336, 29, p, lw);
   });
 
@@ -176,7 +177,7 @@ const Animals2 = (() => {
     // enlarged sickle claw: a hooked blade raised off the front of the visible foot
     const claw = ([x, y], col, seed) => silhouette(ctx, [T([[x + 14, y - 4], [x + 18, y - 14], [x + 27, y - 19], [x + 33, y - 12]], 11, 1)], col, lw * 0.6, seed);   // small hooked toe claw (user-approved size)
     const far = leg(-15, -118, 28, ph + Math.PI, wk, { off: -44, knee: 22, foot: 28 });
-    silhouette(ctx, far, '#989898', lw, 20);   // far leg, set well back
+    silhouette(ctx, far, C.raptor.far, lw, 20);   // far leg, set well back
     const near = leg(18, -118, 30, ph, wk, { off: 14, knee: 20, foot: 30 }), [fx, fy] = near[1].e;
     // snarling: the mouth is cut out of the silhouette like the T-rex's, so the
     // background shows between the teeth, with ink only along the two jaws
@@ -201,7 +202,7 @@ const Animals2 = (() => {
         T([[122, -228], [170, -225], [208, -222]], 34, 0.12),             // long snout, level, ending in a blunt rounded tip
       ]),
       T([[62, -140], [88, -122], [98, -132]], 14),                        // little arm
-    ], '#a8a8a8', lw, 21);
+    ], C.raptor.body, lw, 21);
     if (p.snarl) {
       ctx.restore();
       for (const lip of [mUp, [mLo[1], mLo[0]]]) stroke(ctx, lip, { w: lw * 0.9, taper0: 0.5, taper1: 0, minW: 1, jit: 0.3, wob: 0.3 });
@@ -213,8 +214,8 @@ const Animals2 = (() => {
       fangs(ctx, 136, -213, 208, -212, 5, 12, lw);
     }
     // enlarged sickle claw: a hooked toe claw raised on the visible foot
-    claw([fx, fy], '#5a5a5a', 29);
-    marks(ctx, -20, -185, 2, 26, lw);
+    claw([fx, fy], C.raptor.claw, 29);
+    marks(ctx, -20, -185, 2, 26, lw, C.raptor.mark);
     eye(ctx, p.snarl ? 96 : p.eyes === 'happy' ? 104 : 102, p.snarl ? -246 : p.eyes === 'happy' ? -234 : -238, 22, p, lw, 0.75, 0.95);
   });
 
@@ -222,7 +223,7 @@ const Animals2 = (() => {
     const ph = t * 8, wk = !!p.walk, sw = Math.sin(t * 2.5) * 6;
     const fur = [-150, -115, -40, 0, 35].map((x, i) => T([[x, -128], [x - 12, -78 + (i % 2) * 12]], 30, 1));   // belly fringe, clear of the leg gap
     const shag = [[-176, -250], [-186, -200], [-176, -150]].map(([x, y]) => T([[x + 20, y], [x - 16, y + 22]], 30, 1));   // shaggy rump
-    silhouette(ctx, [...leg(-68, -120, 54, ph + Math.PI, wk, { off: -6 }), ...leg(58, -190, 54, ph, wk, { off: 8 })], '#4a4a4a', lw, 30);   // far legs
+    silhouette(ctx, [...leg(-68, -120, 54, ph + Math.PI, wk, { off: -6 }), ...leg(58, -190, 54, ph, wk, { off: 8 })], C.mammoth.far, lw, 30);   // far legs
     silhouette(ctx, [
       ...shag,
       T([[-160, -215], [-196, -190]], 26, 1),                             // tail tuft
@@ -233,41 +234,41 @@ const Animals2 = (() => {
       E(150, -262, 78, 82),                                               // head
       T([[118, -322], [104, -354]], 34, 1), T([[140, -330], [138, -366]], 38, 1), T([[160, -326], [174, -354]], 32, 1),   // one shaggy crown
       T([[205, -238], [228, -170], [238, -100], [252 + sw, -58], [280 + sw, -52], [288 + sw, -76]], 36, 1),   // trunk hanging below the tusk, curled at the tip
-    ], '#6e6e6e', lw, 31);
-    patch(ctx, 92, -252, 30, 46, 0.2, '#5c5c5c', lw * 0.7);             // ear flap over the head/shoulder edge
+    ], C.mammoth.body, lw, 31);
+    patch(ctx, 92, -252, 30, 46, 0.2, C.mammoth.ear, lw * 0.7);             // ear flap over the head/shoulder edge
     // big sweeping tusk: down, forward past the trunk, then up and out
     const tusk = [[178, -208], [222, -140], [296, -128], [346, -196]];
     stroke(ctx, tusk, { w: 36 + lw * 2, taper0: 0, taper1: 0.85, minW: 0.4 });
-    stroke(ctx, tusk, { w: 36, taper0: 0, taper1: 0.85, color: W });
+    stroke(ctx, tusk, { w: 36, taper0: 0, taper1: 0.85, color: C.mammoth.tusk });
     eye(ctx, 176, -286, 24, p, lw);
   });
 
   const dodo = (ctx, p) => place(ctx, p, (lw, t) => {
     const ph = t * 14, wk = !!p.walk;
-    silhouette(ctx, leg(-16, -52, 16, ph + Math.PI, wk, { off: -10, foot: 22 }), '#adadad', lw, 40);   // far leg
+    silhouette(ctx, leg(-16, -52, 16, ph + Math.PI, wk, { off: -10, foot: 22 }), C.dodo.far, lw, 40);   // far leg
     // big hooked beak: its own light shape, tucked behind the head outline
     const beak = [[50, -198], [118, -194], [142, -170], [132, -148], [116, -162], [54, -160]];
     Brush.outline(ctx, beak, { w: lw * 2, jit: 0.3, wob: 0.3 });
-    fill(ctx, beak, '#e8e8e8', 0.3);
+    fill(ctx, beak, C.dodo.beak, 0.3);
     silhouette(ctx, [
       E(-78, -140, 32, 13, 0.5), E(-84, -116, 30, 12, 0.1), E(-66, -162, 26, 11, 0.95),   // three rounded tail plumes fanned up and back
       ...leg(14, -52, 16, ph, wk, { off: 12, knee: -6, foot: 22 }),
       E(0, -105, 66, 62),                                                 // round body
       E(38, -178, 42, 40),                                                // head
-    ], '#bdbdbd', lw, 41);
-    patch(ctx, -6, -120, 34, 20, -0.3, '#a8a8a8', lw * 0.7);                  // wing stub
+    ], C.dodo.body, lw, 41);
+    patch(ctx, -6, -120, 34, 20, -0.3, C.dodo.wing, lw * 0.7);                  // wing stub
     eye(ctx, 44, -188, 18, p, lw);
   });
 
   const fishLegs = (ctx, p) => place(ctx, p, (lw, t) => {
     const ph = t * 13, wk = !!p.walk;
-    silhouette(ctx, leg(-18, -110, 20, ph + Math.PI, wk, { off: -14, foot: 26 }), '#a0a0a0', lw, 50);   // far leg
+    silhouette(ctx, leg(-18, -110, 20, ph + Math.PI, wk, { off: -14, foot: 26 }), C.fishLegs.far, lw, 50);   // far leg
     silhouette(ctx, [
       T([[-90, -150], [-150, -190]], 40, 1), T([[-90, -150], [-150, -110]], 40, 1),   // tail fin
       ...leg(18, -110, 20, ph, wk, { off: 10, foot: 26 }),
       E(-20, -196, 52, 20, 0.08),                                         // low rounded back fin
       E(0, -150, 105, 58),                                                // body
-    ], '#b0b0b0', lw, 51);
+    ], C.fishLegs.body, lw, 51);
     mouth(ctx, 86, -126, 16, lw);
     eye(ctx, 55, -168, 20, p, lw);
   });
@@ -275,13 +276,13 @@ const Animals2 = (() => {
   const wingPig = (ctx, p) => place(ctx, p, (lw, t) => {
     const flap = Math.sin(t * 22), hover = Math.sin(t * 6) * 12;
     ctx.translate(0, -60 + hover);
-    silhouette(ctx, [...leg(-30, -60, 26, 0, false, { off: -14 }), ...leg(58, -60, 26, 0, false, { off: 4 })], '#b8b8b8', lw, 70);   // far legs
+    silhouette(ctx, [...leg(-30, -60, 26, 0, false, { off: -14 }), ...leg(58, -60, 26, 0, false, { off: 4 })], C.wingPig.far, lw, 70);   // far legs
     silhouette(ctx, [
       ...leg(-55, -60, 26, 0, false, { off: 4, knee: -6 }), ...leg(34, -60, 26, 0, false, { off: 14 }),
       E(0, -100, 100, 62),                                                // body
       E(100, -104, 24, 26),                                               // snout
       E(58, -156, 18, 28, 0.7),                                           // floppy ear
-    ], '#d6d6d6', lw, 71);
+    ], C.wingPig.body, lw, 71);
     for (const [x, y] of [[110, -103], [120, -100]]) blob(ctx, x, y, 3, 4.5, { fill: INK, w: 0, n: 6 });   // nostrils side by side, tipped slightly
     // corkscrew tail: about 1.5 turns out of the rump, a skinny line so the curl reads
     // grows out of the rump in one smooth curve: up and back, round in a loop,
@@ -295,7 +296,7 @@ const Animals2 = (() => {
     silhouette(ctx, [
       E(-52, 0, 58, 22),
       E(-30, 24, 14, 20, 0.2), E(-58, 28, 15, 21, 0.35), E(-86, 24, 15, 20, 0.55), E(-110, 12, 14, 18, 0.8),
-    ], '#a8a8a8', lw, 61);
+    ], C.wingPig.wing, lw, 61);
     ctx.restore();
     eye(ctx, p.eyes === 'happy' ? 58 : 64, p.eyes === 'happy' ? -116 : -126, 20, p, lw, 0.95, 0.9);   // happy arc sits lower, clear of the ear
   });
@@ -309,10 +310,10 @@ const Animals2 = (() => {
       T([[50, -100], [60 + sway * 0.4, -260], [70 + sway, -380]], 42),    // the long neck
       E(hx, hy, 78, 60),                                                  // head
       T([[hx - 46, hy - 26], [hx - 40, hy - 76]], 38, 1), T([[hx + 46, hy - 26], [hx + 40, hy - 76]], 38, 1),   // ears
-    ], '#7a7a7a', lw, 81);
+    ], C.longCat.body, lw, 81);
     for (const sd of [-1, 1]) eye(ctx, hx + sd * 34, hy - 8, 26, p, lw, 0.8, 0.8);   // the shared big eye, both facing the viewer
     mouth(ctx, hx + 4, hy + 38, 12, lw);
-    marks(ctx, -30, -112, 3, 20, lw, '#5a5a5a');
+    marks(ctx, -30, -112, 3, 20, lw, C.longCat.mark);
   });
 
   // the meteor is a prop, not an animal: it still comes from animals.js

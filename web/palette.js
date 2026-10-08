@@ -35,6 +35,8 @@ const Palette = (() => {
     couchLeg: '#5e4330',                            // the couch's stubby wood legs (dark: they sit in shadow under the olive)
     sleepBubble: '#e6edf2',                         // the sleep bubbles in the power nap close-up (a cool off-white)
     toggleOn: '#5fc86a',                            // an "on" switch on the alarm list (user decision: green, like the phone's own)
+    rock: '#9c8a78', rockDark: '#6f5f50', pit: '#4a3d34',   // the volcano and the crater (dull earth browns)
+    smoke: '#cdc3b8', flame: '#e3a04f',                     // the volcano's smoke, the meteor's trail
     water: '#b9d0e3',                               // tears, tear streams and sweat (a pale, dulled blue; always with the ink outline)
     phone: '#3a3a3a', phoneOff: '#5a5a5a', phoneDot: '#9a9a9a',   // a dark phone: body, dead screen, camera dot / list rules
   };
@@ -58,7 +60,18 @@ const Palette = (() => {
   };
   // Dialogue caption colours, one per speaker (the original clips' burned-in colours).
   const speaker = { nick: '#4f9be8', ludwig: '#ffffff', slime: '#4fd34f' };
+  // The animals (flat house style, web/animals2.js): natural colours, dulled like the props. Each animal's body, the
+  // darker far-side legs and one or two accents. Predators are green and rust, the rest earth tones, none teal.
+  const animal = {
+    trex:    { body: '#7f8f5a', far: '#66744a', mark: '#5f6b45' },
+    raptor:  { body: '#b0794f', far: '#8d6040', claw: '#5a4a3a', mark: '#8a5a38' },
+    mammoth: { body: '#8a6a4e', far: '#6b4f3a', ear: '#765840', tusk: '#efe6d9' },
+    dodo:    { body: '#a89c88', far: '#8f836f', wing: '#8f836f', beak: '#ecd79a' },
+    fishLegs:{ body: '#8aa6bd', far: '#6f8aa0' },
+    wingPig: { body: '#e3b3ab', far: '#c99f98', wing: '#cfa8a2' },
+    longCat: { body: '#c98f5a', mark: '#8a5a36' },
+  };
   const captionRed = '#d9261c';   // title captions: the one red the channel uses on text (also the eye doctor's balloon)
   const tongue = '#b5555e';   // dusty rose, inside every open mouth (user decision: the grey tongue was the last grayscale leftover)
-  return { paper, paperNight, hero, prop, tongue, captionRed, tie, cast, speaker };
+  return { paper, paperNight, hero, prop, tongue, captionRed, tie, cast, speaker, animal };
 })();

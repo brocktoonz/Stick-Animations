@@ -222,13 +222,13 @@ const Animals = (() => {
     for (let i = 0; i < 7; i++) {
       const off = (i - 3) * r * 0.24, len = r * (2.6 + (i % 3) * 0.8) * (1 + 0.1 * Math.sin(t * 30 + i));
       stroke(ctx, [[-r * 0.3, off - r * 0.2], [-len * 0.7, off - len * 0.55], [-len, off - len * 0.8]],
-        { w: r * (i % 2 ? 0.2 : 0.3), taper0: 0.1, taper1: 1, color: i % 2 ? '#bdbdbd' : INK });
+        { w: r * (i % 2 ? 0.2 : 0.3), taper0: 0.1, taper1: 1, color: i % 2 ? Palette.prop.flame : INK });
     }
     const rock = [];
     for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, k = 0.86 + 0.14 * Math.sin(i * 2.7); rock.push([Math.cos(a) * r * k, Math.sin(a) * r * k]); }
-    shape(ctx, rock, '#5a5a5a', 10);
+    shape(ctx, rock, Palette.prop.rockDark, 10);
     for (const [cx, cy, cr] of [[-0.3, -0.2, 0.22], [0.3, 0.25, 0.16], [0.2, -0.35, 0.12]])
-      shape(ctx, Brush.ellipsePts(cx * r, cy * r, cr * r, cr * r, 8), '#3e3e3e', 4);
+      shape(ctx, Brush.ellipsePts(cx * r, cy * r, cr * r, cr * r, 8), Palette.prop.pit, 4);
     ctx.restore();
   }
 

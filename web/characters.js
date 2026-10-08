@@ -591,7 +591,7 @@ const Chars = (() => {
       ctx.fillStyle = S.torsoFill ?? W; ctx.fill();
       ctx.lineWidth = 10 * lw; ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.stroke();
     } else {
-      fill(ctx, torso, S.torsoFill ?? W, 0.5);
+      fill(ctx, Brush.inset(torso, 2), S.torsoFill ?? W, 0.5);   // pulled in a hair so the colour never peeks past the ink hem
       outline(ctx, torso, { w: 10 });
     }
     {   // where the hands will rest, so a shirt print can stay clear of them

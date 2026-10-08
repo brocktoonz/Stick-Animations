@@ -5,9 +5,9 @@
 Skits.extinct = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { seg, lerp, easeOut, easeInOut, easeOutBack, say, loud, blink, shake, burst, clamp } = Stage;
-  const A = Animals2, E = Emotions, W = '#fff';
+  const A = Animals2, E = Emotions, W = '#fff', P = Palette.prop;
   const FLOOR = 1680, S = 1.45;
-  const NICK = '#4f9be8', LUD = '#ffffff', SLIME = '#4fd34f';
+  const NICK = Palette.speaker.nick, LUD = Palette.speaker.ludwig, SLIME = Palette.speaker.slime;
 
   // [start, end, speaker colour, text]: words exactly as captioned in the
   // original, timed to the speech itself (word timestamps from
@@ -147,20 +147,31 @@ Skits.extinct = (() => {
   function cam(ctx, fx, fy, z, sy = 1150) { ctx.translate(540, sy); ctx.scale(z, z); ctx.translate(-fx, -fy); }
 
   // ---------- sets (drawn wide so any framing stays inside them) ----------
-  function sky(ctx) {
-    ctx.fillStyle = W; ctx.fillRect(-700, -900, 2500, 3600);
-    for (const [x, y, k] of [[140, 230, 0.9], [900, 230, 1.0], [-260, 380, 1], [1320, 330, 0.9]]) cloud(ctx, x, y, k);   // kept clear of the caption block
-  }
-  // Cloud: a union of round puffs on a flat-ish base. Every puff is outlined
-  // first, then all are filled white on top, so only the outer edge shows.
-  function cloud(ctx, x, y, k) {
-    const puffs = [[-78, 6, 44, 38], [-28, -20, 60, 54], [36, -14, 56, 50], [88, 8, 40, 34], [0, 20, 118, 30]];
-    for (const [dx, dy, rx, ry] of puffs) blob(ctx, x + dx * k, y + dy * k, rx * k, ry * k, { fill: null, w: 9, n: 18, jit: 0.8 });
-    for (const [dx, dy, rx, ry] of puffs) fill(ctx, Brush.ellipsePts(x + dx * k, y + dy * k, rx * k - 5, ry * k - 5, 18), W, 0.3);
-  }
+  // Set pieces boil like a character's: every outline is short straight segments with its own fixed seed (see
+  // setLine in morningself.js), and the colour fill follows exactly the path the ink traces, so nothing bleeds.
+  const even = (pts, step = 34) => {
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length], k = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+      for (let j = 0; j < k; j++) out.push([a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k]);
+    }
+    return out;
+  };
+  // Catmull-Rom with a FIXED number of points per segment (a moving shape must keep the same point count every frame, or its resampled ink pops)
+  const smooth = (pts, n = 8) => pts.flatMap((p1, i) => {
+    const p0 = pts[(i + pts.length - 1) % pts.length], p2 = pts[(i + 1) % pts.length], p3 = pts[(i + 2) % pts.length];
+    return Array.from({ length: n }, (_, j) => { const t = j / n, t2 = t * t, t3 = t2 * t; return [0, 1].map(d => 0.5 * (2 * p1[d] + (-p0[d] + p2[d]) * t + (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * t2 + (-p0[d] + 3 * p1[d] - 3 * p2[d] + p3[d]) * t3)); });
+  });
+  const ring = (ctx, pts, w, seed) => { const e = pts.exact ? pts : even(pts); stroke(ctx, [...e, e[0], e[1]], { w, taper0: 0, taper1: 0, minW: 1, seed }); };
+  const solid = (ctx, pts, col, w, seed) => {
+    const e = pts.exact ? pts : even(pts); ctx.fillStyle = col; ctx.beginPath(); e.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill();
+    ring(ctx, pts, w, seed);
+  };
+  // The cutaways sit on bare paper too: no sky, clouds, hills or ground fill (STYLE.md, Sets).
+  function sky(ctx) { ctx.fillStyle = Palette.paper; ctx.fillRect(-700, -900, 2500, 3600); }
   // Dialogue shots: a flat light-grey backdrop (the white halo around dark
   // bodies stays visible on it), one thin ink ground line, flat shadows.
-  const BACKDROP = '#eeeeee';
+  const BACKDROP = Palette.paper;
   function stage(ctx, floor = FLOOR) {
     ctx.fillStyle = BACKDROP; ctx.fillRect(-700, -900, 2500, 3600);
     stroke(ctx, [[-700, floor], [540, floor + 3], [1800, floor - 4]], { w: 6, taper0: 0, taper1: 0 });
@@ -169,49 +180,40 @@ Skits.extinct = (() => {
   // (sky, clouds, hills, grass) with made-up plants, so it reads as a world.
   function newWorld(ctx, t) {
     sky(ctx);
-    const hills = [[-700, 1360], [-100, 1200], [420, 1300], [1000, 1170], [1800, 1320], [1800, 1700], [-700, 1700]];
-    fill(ctx, hills, '#e8e8e8', 0.4); outline(ctx, hills, { w: 9 });
-    for (const [x, h, r] of [[80, 520, 110], [990, 600, 130]]) {   // lollipop trees with spiral canopies
-      stroke(ctx, [[x, FLOOR], [x + 10, FLOOR - h * 0.5], [x, FLOOR - h]], { w: 40, taper0: 0, taper1: 0.3 });
-      stroke(ctx, [[x, FLOOR], [x + 10, FLOOR - h * 0.5], [x, FLOOR - h]], { w: 24, taper0: 0, taper1: 0.3, color: '#9a9a9a' });
-      blob(ctx, x, FLOOR - h - r * 0.7, r, r, { fill: '#d2d2d2', w: 11, n: 16 });
+    for (const [k, [x, h, r]] of [[80, 520, 110], [990, 600, 130]].entries()) {   // lollipop trees with spiral canopies
+      stroke(ctx, [[x, FLOOR], [x + 10, FLOOR - h * 0.5], [x, FLOOR - h]], { w: 40, taper0: 0, taper1: 0.3, seed: 9200 + k });
+      stroke(ctx, [[x, FLOOR], [x + 10, FLOOR - h * 0.5], [x, FLOOR - h]], { w: 24, taper0: 0, taper1: 0.3, color: P.wood, seed: 9210 + k });
+      solid(ctx, Brush.ellipsePts(x, FLOOR - h - r * 0.7, r, r, 28), P.oliveLight, 11, 9220 + k);
       const sp = [];
       for (let i = 0; i <= 30; i++) { const u = i / 30, a = u * Math.PI * 4.5; sp.push([x + Math.cos(a) * r * 0.75 * u, FLOOR - h - r * 0.7 + Math.sin(a) * r * 0.75 * u]); }
-      stroke(ctx, sp, { w: 6, taper0: 0.2, taper1: 0.2 });
+      stroke(ctx, sp, { w: 6, taper0: 0.2, taper1: 0.2, seed: 9230 + k });
     }
-    for (const [x, k] of [[400, 0.8], [980, 0.85]]) {   // giant mushrooms, in the gaps between the animals
-      stroke(ctx, [[x, FLOOR], [x, FLOOR - 120 * k]], { w: 44 * k, taper0: 0, taper1: 0 });
-      stroke(ctx, [[x, FLOOR], [x, FLOOR - 120 * k]], { w: 30 * k, taper0: 0, taper1: 0, color: W });
-      const cap = [[x - 90 * k, FLOOR - 110 * k], [x - 60 * k, FLOOR - 190 * k], [x, FLOOR - 215 * k], [x + 60 * k, FLOOR - 190 * k], [x + 90 * k, FLOOR - 110 * k]];
-      fill(ctx, cap, '#bdbdbd', 0.4); outline(ctx, cap, { w: 10 });
-      for (const d of [-40, 10, 45]) blob(ctx, x + d * k, FLOOR - 160 * k + (d % 20), 12 * k, 10 * k, { fill: W, w: 5, n: 8 });
+    for (const [k, [x, kk]] of [[400, 0.8], [980, 0.85]].entries()) {   // giant mushrooms, in the gaps between the animals
+      stroke(ctx, [[x, FLOOR], [x, FLOOR - 120 * kk]], { w: 44 * kk, taper0: 0, taper1: 0, seed: 9240 + k });
+      stroke(ctx, [[x, FLOOR], [x, FLOOR - 120 * kk]], { w: 30 * kk, taper0: 0, taper1: 0, color: P.linen, seed: 9250 + k });
+      const cap = [[x - 90 * kk, FLOOR - 110 * kk], [x - 60 * kk, FLOOR - 190 * kk], [x, FLOOR - 215 * kk], [x + 60 * kk, FLOOR - 190 * kk], [x + 90 * kk, FLOOR - 110 * kk]];
+      solid(ctx, cap, P.curtain, 10, 9260 + k);
+      for (const d of [-40, 10, 45]) blob(ctx, x + d * kk, FLOOR - 160 * kk + (d % 20), 12 * kk, 10 * kk, { fill: W, w: 5, n: 8 });
     }
-    ground(ctx, '#d9d9d9');
+    ground(ctx);
   }
-  function ground(ctx, col) {
-    fill(ctx, [[-700, FLOOR], [1800, FLOOR - 6], [1800, 2700], [-700, 2700]], col, 0.4);
-    stroke(ctx, [[-700, FLOOR], [540, FLOOR + 4], [1800, FLOOR - 6]], { w: 11 });
-    for (let i = 0; i < 34; i++) {   // grass: irregular spacing, size and lean
-      const x = -500 + i * 70 + (hh(i) - 0.5) * 60, y = FLOOR + 22 + hh(i + 40) * 170, k = 0.6 + hh(i + 80) * 0.9;
-      if (hh(i + 120) < 0.25) continue;
-      for (const d of [-1, 0, 1]) stroke(ctx, [[x + d * 9 * k, y], [x + d * 17 * k + (hh(i + 7) - 0.5) * 10, y - 26 * k * (d ? 0.8 : 1.1)]], { w: 6, taper0: 0, taper1: 0.9 });
-    }
+  // A ground line only under the animals' feet (no ground fill, no grass).
+  function ground(ctx) {
+    stroke(ctx, [[60, FLOOR], [540, FLOOR + 4], [1020, FLOOR - 6]], { w: 9, taper0: 0, taper1: 0, seed: 9300 });
   }
   // flat ink shadow under a character or animal (no blur)
-  const shadow = (ctx, x, rx, y = FLOOR + 6) => fill(ctx, Brush.ellipsePts(x, y, rx, rx * 0.13, 14), '#bcbcbc', 0.5);
+  const shadow = (ctx, x, rx, y = FLOOR + 6) => fill(ctx, Brush.ellipsePts(x, y, rx, rx * 0.13, 14), P.shadow, 0.5);
   function prehistoric(ctx, t) {
     sky(ctx);
-    const hills = [[-700, 1320], [-200, 1180], [300, 1270], [980, 1150], [1800, 1300], [1800, 1700], [-700, 1700]];
-    fill(ctx, hills, '#e8e8e8', 0.4); outline(ctx, hills, { w: 9 });
     const corners = [[440, FLOOR], [690, 880], [790, 870], [1040, FLOOR]], volcano = [];
     for (let i = 0; i < 4; i++) {   // points along each edge keep the brush's spline from bulging past the corners
       const [a, b] = [corners[i], corners[(i + 1) % 4]];
       for (let k = 0; k < 8; k++) volcano.push([a[0] + (b[0] - a[0]) * k / 8, a[1] + (b[1] - a[1]) * k / 8]);
     }
     smoke(ctx, t);   // drawn first so its base tucks behind the crater rim
-    fill(ctx, volcano, '#cfcfcf', 0.4); outline(ctx, volcano, { w: 12 });
+    solid(ctx, volcano, P.rock, 12, 9101);
     palm(ctx, 130, FLOOR, 1.15, t);
-    ground(ctx, '#d9d9d9');
+    ground(ctx);
     for (const x of [360, 1010]) fern(ctx, x, FLOOR + 14);
   }
   // one continuous column of smoke out of the crater: overlapping puffs merged
@@ -227,13 +229,13 @@ Skits.extinct = (() => {
       puffs.push([x, y, r * (1.05 + hh(i) * 0.2), r * 0.9]);
     }
     puffs.push([752, 880, 32, 28]);   // the column's root in the crater
-    for (const [col, g] of [[INK, 11], ['#b9b9b9', 0]])
+    for (const [col, g] of [[INK, 11], [P.smoke, 0]])
       for (const [x, y, rx, ry] of puffs) fill(ctx, Brush.ellipsePts(x, y, rx + g, ry + g, 18), col, g ? 0.8 : 0.4);
   }
   function palm(ctx, x, y, s, t) {
     const trunk = [[x, y], [x + 30 * s, y - 250 * s], [x + 20 * s, y - 470 * s]];
     stroke(ctx, trunk, { w: 62 * s, taper0: 0, taper1: 0.3 });
-    stroke(ctx, trunk, { w: 44 * s, taper0: 0, taper1: 0.3, color: '#9a9a9a' });
+    stroke(ctx, trunk, { w: 44 * s, taper0: 0, taper1: 0.3, color: P.wood });
     for (let i = 1; i < 6; i++) stroke(ctx, [[x + 4 * i * s - 18 * s, y - i * 78 * s], [x + 4 * i * s + 18 * s, y - i * 78 * s - 8 * s]], { w: 6 });
     const top = [x + 20 * s, y - 470 * s];
     for (const a of [-2.7, -2.1, -1.2, -0.5, 0.1]) {
@@ -241,7 +243,8 @@ Skits.extinct = (() => {
       const tip = [top[0] + Math.cos(a + sway) * 200 * s, top[1] + Math.sin(a + sway) * 110 * s + 60 * s];
       const mid = [(top[0] + tip[0]) / 2, Math.min(top[1], tip[1]) - 30 * s];
       const leaf = [top, mid, tip, [mid[0], mid[1] + 34 * s]];
-      fill(ctx, leaf, '#8a8a8a', 0.4); outline(ctx, leaf, { w: 11 });
+      const lp = smooth(leaf, 8); lp.exact = true;   // fixed point count: the swaying leaf can't pop
+      solid(ctx, lp, P.olive, 11, 9110 + Math.round(a * 10));
     }
   }
   function fern(ctx, x, y) {
@@ -249,7 +252,7 @@ Skits.extinct = (() => {
       const tip = [x + Math.cos(a) * 100, y + Math.sin(a) * 100];
       const pts = [[x, y], [(x + tip[0]) / 2, (y + tip[1]) / 2 - 10], tip];
       stroke(ctx, pts, { w: 26, taper0: 0, taper1: 0.9 });
-      stroke(ctx, pts, { w: 14, taper0: 0, taper1: 0.9, color: '#8a8a8a' });
+      stroke(ctx, pts, { w: 14, taper0: 0, taper1: 0.9, color: P.oliveLight });
     }
   }
   function sparkle(ctx, x, y, r, rot = 0) {
@@ -263,7 +266,7 @@ Skits.extinct = (() => {
     if (k <= 0 || k >= 1) return;
     for (let i = 0; i < 7; i++) {
       const a = -Math.PI * (0.15 + 0.7 * i / 6), d = 40 + 160 * k;
-      blob(ctx, x + Math.cos(a) * d, gy - 10 + Math.sin(a) * d * 0.9 + k * k * 120, 16 * (1 - k * 0.5), 14 * (1 - k * 0.5), { fill: '#8a8a8a', w: 7, n: 7 });
+      blob(ctx, x + Math.cos(a) * d, gy - 10 + Math.sin(a) * d * 0.9 + k * k * 120, 16 * (1 - k * 0.5), 14 * (1 - k * 0.5), { fill: P.wood, w: 7, n: 7 });
     }
   }
   function rise(ctx, x, k, draw) {
@@ -549,17 +552,17 @@ Skits.extinct = (() => {
       ctx.save(); shake(ctx, 18 * (1 - seg(t, 23.02, 23.4)), Math.floor(t * 30));
       prehistoric(ctx, t);
       // crater: dark pit with a raised, jagged rim of broken rock, debris still settling
-      const pit = Brush.ellipsePts(560, FLOOR + 40, 300, 70, 20);
-      fill(ctx, pit, '#3a3a3a', 0.4); outline(ctx, pit, { w: 12 });
+      const pit = Brush.ellipsePts(560, FLOOR + 40, 300, 70, 28);
+      solid(ctx, pit, P.pit, 12, 9121);
       const rim = [];
       for (let i = 0; i <= 16; i++) { const a = Math.PI * (1 + i / 16); rim.push([560 + Math.cos(a) * 330, FLOOR + 40 + Math.sin(a) * (110 + (i % 2) * 45)]); }
       rim.push([890, FLOOR + 40], [230, FLOOR + 40]);
-      fill(ctx, rim, '#9a9a9a', 0.4); outline(ctx, rim, { w: 12 });
-      fill(ctx, Brush.ellipsePts(560, FLOOR + 40, 250, 40, 16), '#3a3a3a', 0.3);
+      solid(ctx, rim, P.rock, 12, 9122);
+      fill(ctx, Brush.ellipsePts(560, FLOOR + 40, 250, 40, 16), P.pit, 0.3);
       for (let i = 0; i < 7; i++) {   // rocks thrown out, landing in the first half second
         const land = seg(t, 23.02 + i * 0.04, 23.35 + i * 0.05), x = 560 + (i - 3) * 110 + (i % 2 ? 20 : -20);
         const y = FLOOR + 30 + (i % 3) * 18 - (1 - land) * (180 + 60 * (i % 3)) * 4 * land;
-        blob(ctx, x, y, 22 + (i % 3) * 6, 16 + (i % 2) * 5, { fill: '#6a6a6a', w: 8, n: 8 });
+        blob(ctx, x, y, 22 + (i % 3) * 6, 16 + (i % 2) * 5, { fill: P.rockDark, w: 8, n: 8 });
       }
       ctx.restore();
     }],
