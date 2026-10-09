@@ -276,7 +276,7 @@ Skits.presentation = (() => {
   // (User: the blank faces read as if nothing was happening.)
   const { armR, bendR, armRFront, ...CONFUSED } = Emotions.confused;
   const SEATED = [
-    { who: 'nick', x: 215, s: 0.68, look: 0.7, emo: { ...Emotions.unimpressed, lid: 0.64, lookX: 0.85, lookY: 0, browL: 0.55, browLiftL: 10, browR: -0.4, browLiftR: -17 }, lean: 0.14, blink: 0.4 },   // Ludwig's deadpan 'unimpressed' look, flat half-closed lids and side-eye (user request)
+    { who: 'nick', x: 215, s: 0.68, look: 0.7, emo: { ...Emotions.unimpressed, lid: 0.64, lookX: 0.85, lookY: 0, browL: 0.55, browLiftL: 10, browR: -0.4, browLiftR: -9 }, lean: 0.14, blink: 0.4 },   // Ludwig's deadpan 'unimpressed' look, flat half-closed lids and side-eye (user request)
     { who: 'beast', x: 432, s: 0.68, look: 0.7, emo: { ...Emotions.stunned }, blink: 1.6 },
     { who: 'squeex', x: 650, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'o', open: 0.3, mouthScale: 1.35, browL: -0.5, browLiftL: -12, browR: 0, browLiftR: 0, lookX: 0.6, lookY: -0.5 }, lean: -0.13, blink: 2.3 },   // the other brow raised high, the other level (not slanted, which read as a scowl); an 'o' big enough to show through the beard
     { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'wobbly', browL: 0, browLiftL: 0, browR: -0.5, browLiftR: -12, lookX: 0.55, lookY: -0.4 }, lean: 0.12, blink: 0.9 },   // one brow high, one level: puzzled, not cross
