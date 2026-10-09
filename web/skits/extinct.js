@@ -220,9 +220,16 @@ Skits.extinct = (() => {
   }
   function palm(ctx, x, y, s, t) {
     const trunk = [[x, y - 31 * s], [x + 30 * s, y - 250 * s], [x + 20 * s, y - 470 * s]];
-    const tp = even(smooth(trunk, 10)); tp.exact = true;   // short segments and a fixed seed, so the trunk boils a little like the character lines
-    stroke(ctx, tp, { w: 62 * s, taper0: 0, taper1: 0.3, seed: 9120 });
-    stroke(ctx, tp, { w: 44 * s, taper0: 0, taper1: 0.3, color: P.wood, seed: 9120 });
+    // the original tapered trunk (skinny at the top), now with a fixed seed and a small wobble so its borders boil gently
+    // one closed trunk shape, wide at the foot and skinny at the top, outlined like the other set pieces (short segments, fixed seed)
+    const path = Brush.spline(trunk, false, 12), L = [0];
+    path.forEach((q, i) => i && L.push(L[i - 1] + Math.hypot(q[0] - path[i - 1][0], q[1] - path[i - 1][1])));
+    const half = i => (28 - 18 * clamp((L[i] / L[L.length - 1] - 0.55) / 0.45)) * s, left = [], right = [];
+    path.forEach((q, i) => {
+      const n = path[Math.min(i + 1, path.length - 1)], m = path[Math.max(i - 1, 0)], dx = n[0] - m[0], dy = n[1] - m[1], d = Math.hypot(dx, dy) || 1;
+      left.push([q[0] - dy / d * half(i), q[1] + dx / d * half(i)]); right.push([q[0] + dy / d * half(i), q[1] - dx / d * half(i)]);
+    });
+    solid(ctx, [...left, ...right.reverse()], P.wood, 12, 9120);
     for (let i = 1; i < 6; i++) stroke(ctx, [[x + 4 * i * s - 18 * s, y - i * 78 * s], [x + 4 * i * s + 18 * s, y - i * 78 * s - 8 * s]], { w: 6 });
     const top = [x + 20 * s, y - 470 * s];
     for (const a of [-2.7, -2.1, -1.2, -0.5, 0.1]) {
