@@ -373,7 +373,7 @@ Skits.haircut = (() => {
   // The shop is a few props on the bare paper (STYLE.md, Sets): the barber pole on the left says where we are. No wall,
   // chair rail, shelf, hanging lamps or tiled floor. Ground lines only under feet: the barber's walk and the chair's base.
   function pole(ctx) {
-    const px = 48, y0 = 770, y1 = 1180;   // far left, clear of the scissors
+    const px = 48, y0 = 960, y1 = 1370;   // far left and low, clear of the scissors raised by his head
     ctx.save(); ctx.beginPath(); ctx.rect(px - 44, y0, 88, y1 - y0); ctx.clip();
     flat(ctx, box(px - 44, y0, px + 44, y1, 3), P.linen);
     for (let k = -2; k < 9; k++) {
