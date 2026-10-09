@@ -148,11 +148,11 @@ Skits.presentation = (() => {
   function foreTable(ctx) {
     const y = 1716;
     // a short slab with both ends showing, not an edge-to-edge band
-    panel(ctx, [[70, y], [1010, y - 10], [1030, y + 52], [50, y + 62]], P.woodLight, 11, 9800);
-    panel(ctx, [[50, y + 62], [1030, y + 52], [1010, 1980], [70, 1980]], P.wood, 11, 9806);
+    panel(ctx, [[70, y], [1010, y - 10], [1030, y + 52], [50, y + 62]], P.wood, 11, 9800);   // the top
+    panel(ctx, [[50, y + 62], [1030, y + 52], [1030, y + 98], [50, y + 108]], P.woodDark, 11, 9806);   // its thin front edge; paper below
     panel(ctx, [[70, y + 64], [300, y + 54], [292, y - 120], [84, y - 112]], P.steel, 9, 9801);   // an open laptop, seen from behind
     line(ctx, [[150, y - 40], [172, y - 66], [196, y - 40]], 6, 9802);   // its logo
-    panel(ctx, [[420, y + 70], [600, y + 58], [610, y + 140], [428, y + 156]], P.linen, 7, 9803);   // papers
+    panel(ctx, [[420, y + 8], [600, y - 2], [610, y + 42], [428, y + 50]], P.linen, 7, 9803);   // papers, now lying on the top surface (they hung over the old front face)
     panel(ctx, [[930, y - 70], [1000, y - 70], [994, y + 40], [936, y + 40]], P.linen, 8, 9804);   // a coffee mug
     line(ctx, [[1000, y - 50], [1030, y - 34], [1024, y + 4], [998, y + 14]], 8, 9805);
   }
@@ -298,8 +298,10 @@ Skits.presentation = (() => {
   }
   function table(ctx) {
     // a short slab with both ends showing (it stops just past the first and last seat), not an edge-to-edge band
-    panel(ctx, [[130, TABLE_Y], [950, TABLE_Y], [972, TABLE_Y + 110], [108, TABLE_Y + 110]], P.woodLight, 11, 9740);   // the table top
-    panel(ctx, [[108, TABLE_Y + 110], [972, TABLE_Y + 110], [940, 2100], [140, 2100]], P.wood, 11, 9741);   // its front
+    // a thin slab, not a box: the top, a front edge about 45 px tall, paper below, and a thin leg at each end (setLine/panel: seeded, boils on the beat)
+    for (const [i, [x0, x1]] of [[0, [142, 172]], [1, [908, 938]]]) panel(ctx, [[x0, TABLE_Y + 150], [x1, TABLE_Y + 150], [x1 - 2, TABLE_Y + 470], [x0 + 2, TABLE_Y + 470]], P.woodDark, 9, 9750 + i);
+    panel(ctx, [[130, TABLE_Y], [950, TABLE_Y], [972, TABLE_Y + 110], [108, TABLE_Y + 110]], P.wood, 11, 9740);   // the table top
+    panel(ctx, [[108, TABLE_Y + 110], [972, TABLE_Y + 110], [972, TABLE_Y + 155], [108, TABLE_Y + 155]], P.woodDark, 11, 9741);   // its thin front edge
     // papers, a laptop and coffee cups on the table, in front of each seat
     panel(ctx, [[150, TABLE_Y + 30], [260, TABLE_Y + 22], [270, TABLE_Y + 80], [160, TABLE_Y + 88]], P.linen, 6, 9742);
     panel(ctx, [[350, TABLE_Y + 60], [480, TABLE_Y + 60], [470, TABLE_Y + 8], [362, TABLE_Y + 8]], P.steel, 7, 9743);   // laptop lid, seen from behind
