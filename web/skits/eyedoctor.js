@@ -7,7 +7,7 @@
 Skits.eyedoctor = (() => {
   const { stroke, fill, outline, blob, INK } = Brush;
   const { seg, lerp, easeInOut, easeOut, easeOutBack, blink, shake, burst } = Stage;
-  const W = '#fff', RED = '#d9261c';
+  const W = '#fff', RED = Palette.captionRed, P = Palette.prop;   // the balloon and the glove keep their red: it's the joke
   const HEAD = 438;                    // feet-to-head-centre of the main character (unscaled)
   const X = 540, S = 2.0, EYE_Y = 1102;   // eyes end half behind the machine's top edge
   const Y = EYE_Y + (HEAD + 6) * S;   // his feet, so the eyes land at EYE_Y
@@ -22,44 +22,57 @@ Skits.eyedoctor = (() => {
     }
     return pts;
   }
-  const panel = (ctx, pts, color, w = 10) => { fill(ctx, pts, color, 0.4); outline(ctx, pts, { w, jit: 0.8 }); };
+  // Set shapes boil like a character's: short straight segments, a fixed seed from the shape's first point, and the
+  // colour fill traces exactly the same path, so it never bleeds out of the ink.
+  const even = (pts, step = 34) => {
+    const out = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length], k = Math.max(1, Math.round(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+      for (let j = 0; j < k; j++) out.push([a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k]);
+    }
+    return out;
+  };
+  const panel = (ctx, pts, color, w = 10) => {
+    const e = even(pts);
+    ctx.fillStyle = color; ctx.beginPath(); e.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill();
+    stroke(ctx, [...e, e[0], e[1]], { w, taper0: 0, taper1: 0, minW: 1, seed: 7000 + Math.round(Math.abs(pts[0][0]) * 3 + Math.abs(pts[0][1]) + pts.length * 17) });
+  };
+  const paperWash = a => `rgba(241,226,209,${a})`;   // fades go to the paper, never to white
 
   // ---------- set ----------
   function room(ctx) {
-    ctx.fillStyle = W; ctx.fillRect(-60, -60, 1200, 2040);
-    panel(ctx, box(850, 440, 1060, 800), W, 8);   // eye chart, kept clear of the caption
+    ctx.fillStyle = Palette.paper; ctx.fillRect(-60, -60, 1200, 2040);
+    panel(ctx, box(850, 440, 1060, 800), P.linen, 8);   // eye chart, kept clear of the caption
     [['E', 90, 490], ['F P', 54, 580], ['T O Z', 38, 650], ['L P E D', 26, 710], ['P E C F D', 18, 752]]
       .forEach(([s, size, y]) => Stage.text(ctx, s, 955, y + 20, size * 0.9, 'Luckiest Guy', INK));
   }
 
   // Exam chair seen from the front: backrest with a headrest pad, above the machine.
   function chairBack(ctx) {
-    panel(ctx, box(X - 190, 860, X + 190, 1200), '#6a6a6a', 12);             // backrest
-    panel(ctx, box(X - 120, 760, X + 120, 860), '#8a8a8a', 10);              // headrest
-    stroke(ctx, [[X - 150, 1030], [X + 150, 1030]], { w: 6, color: '#999' }); // seam
+    panel(ctx, box(X - 190, 860, X + 190, 1200), P.charcoal, 12);             // backrest
+    panel(ctx, box(X - 120, 760, X + 120, 860), P.steelDark, 10);              // headrest
+    stroke(ctx, [[X - 150, 1030], [X + 150, 1030]], { w: 6, color: P.steelDark }); // seam
   }
 
   // The machine from behind: head unit with vents and a knob, on a table.
   function machineBack(ctx) {
-    panel(ctx, box(-40, 1560, 1120, 1960), '#d6d6d6', 12);                  // table
-    panel(ctx, box(190, MTOP, 890, 1560), '#ececec', 12);                   // head unit
-    panel(ctx, box(250, MTOP - 60, 830, MTOP + 20), '#dcdcdc', 10);         // top hood
-    for (let i = 0; i < 7; i++) stroke(ctx, [[300, 1290 + i * 34], [520, 1290 + i * 34]], { w: 7, color: '#8a8a8a' });   // vents
-    blob(ctx, 720, 1320, 44, 44, { fill: '#bdbdbd', w: 8, n: 12 });          // knob
-    blob(ctx, 720, 1440, 22, 22, { fill: '#7fd17f', w: 6, n: 8 });           // power light
+    panel(ctx, box(20, 1560, 1060, 1960), P.woodLight, 12);                  // table
+    panel(ctx, box(190, MTOP, 890, 1560), P.steel, 12);                   // head unit
+    panel(ctx, box(250, MTOP - 60, 830, MTOP + 20), P.steelDark, 10);         // top hood
+    for (let i = 0; i < 7; i++) stroke(ctx, [[300, 1290 + i * 34], [520, 1290 + i * 34]], { w: 7, color: P.charcoal });   // vents
+    blob(ctx, 720, 1320, 44, 44, { fill: P.charcoal, w: 8, n: 12 });          // knob
+    blob(ctx, 720, 1440, 22, 22, { fill: P.toggleOn, w: 6, n: 8 });           // power light
   }
 
   // ---------- the view through the eyepiece ----------
   const POV = [540, 1150], POVR = 470;
   function balloonScene(ctx, k) {
     const [cx, cy] = POV;
-    const g = ctx.createLinearGradient(0, cy - POVR, 0, cy + POVR);
-    g.addColorStop(0, '#f4f4f4'); g.addColorStop(0.55, '#e2e2e2'); g.addColorStop(0.56, '#cfcfcf'); g.addColorStop(1, '#bdbdbd');
-    ctx.fillStyle = g; ctx.fillRect(cx - POVR, cy - POVR, POVR * 2, POVR * 2);
+    ctx.fillStyle = Palette.paper; ctx.fillRect(cx - POVR, cy - POVR, POVR * 2, POVR * 2);   // flat sky, no gradient
     const hy = cy + 0.12 * POVR;                                             // horizon
     stroke(ctx, [[cx - POVR, hy], [cx + POVR, hy]], { w: 6 });
-    fill(ctx, [[cx - 14, hy], [cx + 14, hy], [cx + 300, cy + POVR], [cx - 300, cy + POVR]], '#8a8a8a', 0.3);   // the road
-    stroke(ctx, [[cx, hy + 20], [cx, cy + POVR]], { w: 8, color: W, taper0: 0.9, taper1: 0 });
+    fill(ctx, [[cx - 14, hy], [cx + 14, hy], [cx + 300, cy + POVR], [cx - 300, cy + POVR]], P.steel, 0.3);   // the road
+    stroke(ctx, [[cx, hy + 20], [cx, cy + POVR]], { w: 8, color: P.linen, taper0: 0.9, taper1: 0 });
     for (const s of [-1, 1]) stroke(ctx, [[cx + s * 14, hy], [cx + s * 300, cy + POVR]], { w: 7 });
     // the hot air balloon at the end of the road, bobbing a little
     const bx = cx, by = hy - 150 + Math.sin(k * 6) * 6;
@@ -68,17 +81,17 @@ Skits.eyedoctor = (() => {
     for (const x of [-40, 0, 40]) stroke(ctx, [[bx + x * 0.3, by - 88], [bx + x, by], [bx + x * 0.3, by + 86]], { w: 5 });
     stroke(ctx, [[bx - 30, by + 82], [bx - 16, by + 128]], { w: 4 });
     stroke(ctx, [[bx + 30, by + 82], [bx + 16, by + 128]], { w: 4 });
-    panel(ctx, box(bx - 20, by + 126, bx + 20, by + 156), '#b58a5a', 5);
+    panel(ctx, box(bx - 20, by + 126, bx + 20, by + 156), P.wood, 5);
   }
 
   function glove(ctx, x, y, s, rot = 0) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
-    panel(ctx, box(-60, 90, 60, 170), W, 8);                                     // cuff
+    panel(ctx, box(-60, 90, 60, 170), P.linen, 8);                                     // cuff
     const g = [[-110, -40], [-80, -130], [20, -150], [110, -90], [120, 20], [80, 100], [-70, 100], [-120, 40]];
     fill(ctx, g, RED, 1); outline(ctx, g, { w: 11 });
     const thumb = Brush.ellipsePts(-110, 10, 44, 60, 12, -0.4);
     fill(ctx, thumb, RED, 0.6); outline(ctx, thumb, { w: 9 });
-    stroke(ctx, [[-40, -110], [40, -120], [90, -70]], { w: 7, color: '#ff8a80' });   // shine
+    stroke(ctx, [[-40, -110], [40, -120], [90, -70]], { w: 7, color: W });   // shine
     ctx.restore();
   }
 
@@ -96,7 +109,7 @@ Skits.eyedoctor = (() => {
     fill(ctx, head, W, 0.5); outline(ctx, head, { w: 11 });
     for (const sd of [-1, 1]) fill(ctx, [[sd * 150, -10], [sd * 158, -70], [sd * 120, -60], [sd * 128, 20]], INK, 0.6);   // side hair
     stroke(ctx, [[-140, -80], [0, -120], [140, -80]], { w: 10 });                // head-mirror band
-    blob(ctx, 0, -110, 38, 38, { fill: '#e6e6e6', w: 8, n: 12 });
+    blob(ctx, 0, -110, 38, 38, { fill: P.steel, w: 8, n: 12 });
     Chars.eyes(ctx, 0, -10, { lid: 0.2, pupil: 9 }, 0.85);
     Chars.brows(ctx, 0, -64 - jaw * 0.3, { brow: 0.8 }, 0.9, 10);
     Chars.mouth(ctx, 6, 56 + jaw * 0.4, scream > 0 ? { mouth: 'yell', open: scream * 0.8 } : { mouth: 'grin', open: 0.4 }, 0.9);
@@ -105,13 +118,13 @@ Skits.eyedoctor = (() => {
   }
 
   function povFrame(ctx, draw) {
-    ctx.fillStyle = '#111'; ctx.fillRect(-60, -60, 1200, 2040);
+    ctx.fillStyle = INK; ctx.fillRect(-60, -60, 1200, 2040);   // the eyepiece's black mask
     const [cx, cy] = POV;
     ctx.save();
     ctx.beginPath(); ctx.arc(cx, cy, POVR, 0, Math.PI * 2); ctx.clip();
     draw();
     ctx.restore();
-    outline(ctx, Brush.ellipsePts(cx, cy, POVR, POVR, 28), { w: 18, color: '#333' });
+    outline(ctx, Brush.ellipsePts(cx, cy, POVR, POVR, 28), { w: 18, color: P.charcoal });
   }
 
   // ---------- shots ----------
@@ -129,7 +142,7 @@ Skits.eyedoctor = (() => {
     ctx.restore();
     whiteout(ctx, seg(t, 1.2, 1.5));
   }
-  const whiteout = (ctx, a) => { if (a > 0) { ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.fillRect(-60, -60, 1200, 2040); } };
+  const whiteout = (ctx, a) => { if (a > 0) { ctx.fillStyle = paperWash(a); ctx.fillRect(-60, -60, 1200, 2040); } };
 
   // 2: his view: the balloon drifts in and out of focus.
   function shotBalloon(ctx, t) {
@@ -158,7 +171,7 @@ Skits.eyedoctor = (() => {
       const s = lerp(1.2, 9, easeOut(Math.min(1, hit * 1.6)));
       glove(ctx, 540, 1100, s, lerp(-0.5, -0.1, hit));
       if (hit > 0.55) {
-        ctx.fillStyle = `rgba(255,255,255,${(1 - hit) * 1.6})`; ctx.fillRect(-60, -60, 1200, 2040);
+        ctx.fillStyle = paperWash(Math.min(1, (1 - hit) * 1.6)); ctx.fillRect(-60, -60, 1200, 2040);
         burst(ctx, 540, 1100, 36, 250, 900);
       }
     }
@@ -200,7 +213,7 @@ Skits.eyedoctor = (() => {
 
   return {
     title: 'That one machine\nat the eye doctor:', subtitle: '', duration: 5.67,
-    fade: true,   // keeps the bottom fade this video was made with (it became opt-in later)
+    // (no bottom fade: STYLE.md allows no soft fades or gradients, and the paper stays flat)
     titleBottom: 385,   // last line just above the eye chart (its top is ~397 at the end of the push-in)
     draw(ctx, t) {
       if (t < 1.5) shotSetup(ctx, t);          // "Alright, go ahead and put your chin up there for me, please."
