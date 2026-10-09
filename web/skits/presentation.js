@@ -309,8 +309,8 @@ Skits.presentation = (() => {
   // ---------- the oval conference table (the 5.20-6.85 s shot) ----------
   // Seen from slightly above: the top is an ellipse, its far edge curving away behind the four, its near edge curving
   // toward the camera and running off the bottom of the frame. Wood top, a thin darker rim, no front face, no legs.
-  const OV = { cx: 540, cy: 1666, rx: 430, ry: 260 };
-  const OSEAT = [255, 445, 635, 825];   // the four sit along the far curve, closer together than before
+  const OV = { cx: 540, cy: 1626, rx: 500, ry: 220 };
+  const OSEAT = [218, 433, 647, 862];   // the four sit along the far curve, closer together than before
   const farEdge = x => OV.cy - OV.ry * Math.sqrt(Math.max(0, 1 - ((x - OV.cx) / OV.rx) ** 2));
   const ovalPts = (rx, ry) => Brush.ellipsePts(OV.cx, OV.cy, rx, ry, 72);
   function ovalTable(ctx) {
@@ -360,7 +360,7 @@ Skits.presentation = (() => {
     }],
     // 5.20-6.85: the room: six blank stares
     [5.2, 6.85, (ctx, t) => {
-      const z = lerp(1.14, 1.16, seg(t, 5.2, 6.85));   // pushed in: the four heads fill the width with a margin
+      const z = lerp(1.03, 1.05, seg(t, 5.2, 6.85));   // pushed in: the four heads fill the width with a margin
       cam(ctx, 540, 1250, z, 880); ovalRoom(ctx, t);
       for (let i = 0; i < heads.length; i++) heads[i] = 880 + (heads[i] - 1250) * z;
     }],
