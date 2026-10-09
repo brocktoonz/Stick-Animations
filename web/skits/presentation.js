@@ -311,8 +311,8 @@ Skits.presentation = (() => {
   // near edge runs off the bottom, so the top fills only the bottom third of the frame. Drawn in screen units (no zoom).
   // Six seated, three along each side, receding with the table. Each is placed by head centre and head width; the table's
   // side edge crosses the body at the waist, the head and shoulders stay clear of it, and one forearm lies on the top.
-  const FAR_Y = 1250;
-  const edgeL = y => 489 - 0.70 * (y - FAR_Y), edgeR = y => 602 + 0.78 * (y - FAR_Y);
+  const FAR_Y = 905;   // a higher camera: the table runs much further up the frame
+  const edgeL = y => 293 - 0.35 * (y - 1560), edgeR = y => 782 + 0.35 * (y - 1480);   // tangent to the heads' inner sides, so no head sits under the table
   const tableOutline = (inset = 0) => {
     const pts = [], y0 = FAR_Y + 34;
     for (let k = 0; k <= 16; k++) { const a = Math.PI + Math.PI * k / 16; pts.push([(edgeL(y0) + edgeR(y0)) / 2 + Math.cos(a) * ((edgeR(y0) - edgeL(y0)) / 2 - inset), y0 + Math.sin(a) * (34 - inset * 0.7)]); }
@@ -323,8 +323,8 @@ Skits.presentation = (() => {
   const HEAD_W = 285;   // a head's width in local units at s = 1
   // near to far on each side; the two sides do not mirror (the near-right sits further back, the gaps are uneven)
   const SIX = [
-    { i: 0, x: 175, y: 1500, w: 230, side: 1 }, { i: 1, x: 300, y: 1330, w: 185, side: 1 }, { who: 'ludwig', x: 410, y: 1215, w: 150, side: 1, blink: 1.1, emo: { ...Emotions.deflated, pupil: 11 } },
-    { i: 3, x: 905, y: 1440, w: 230, side: -1 }, { i: 2, x: 790, y: 1300, w: 185, side: -1 }, { who: 'speed', x: 680, y: 1200, w: 150, side: -1, blink: 2.0, emo: { mouth: 'o', open: 0.2, brow: -0.3, pupil: 9 } },
+    { i: 0, x: 170, y: 1560, w: 230, side: 1 }, { i: 1, x: 290, y: 1290, w: 190, side: 1 }, { who: 'ludwig', x: 385, y: 1040, w: 160, side: 1, blink: 1.1, emo: { ...Emotions.deflated, pupil: 11 } },
+    { i: 3, x: 905, y: 1480, w: 230, side: -1 }, { i: 2, x: 790, y: 1220, w: 190, side: -1 }, { who: 'speed', x: 690, y: 960, w: 160, side: -1, blink: 2.0, emo: { mouth: 'o', open: 0.2, brow: -0.3, pupil: 9 } },
   ].map(c => { const base = c.i !== undefined ? SEATED[c.i] : {}; return { ...base, ...c, s: c.w / HEAD_W, emo: { ...(c.emo ?? base.emo), lookX: 0, lookY: 0 } }; });   // everyone looks at the lens
   function seatedAt(ctx, c, t) {
     const waist = c.y + 228 * c.s, feet = c.y + HEAD * c.s;
@@ -341,12 +341,12 @@ Skits.presentation = (() => {
   }
   function tableProps(ctx) {   // a laptop, mugs and papers between people, smaller as they recede
     const at = (cx, cy, k, pts) => pts.map(([x, y]) => [cx + x * k, cy + y * k]);
-    panel(ctx, at(600, 1740, 1, [[-70, 30], [70, 30], [60, -26], [-60, -26]]), P.steel, 7, 9743);   // laptop lid, seen from behind
-    panel(ctx, at(440, 1600, 0.8, [[-60, -26], [50, -34], [58, 26], [-50, 36]]), P.linen, 6, 9742);
-    panel(ctx, at(720, 1500, 0.65, [[-22, 0], [22, 0], [18, 56], [-18, 56]]), P.linen, 6, 9744);
-    line(ctx, at(720, 1500, 0.65, [[22, 12], [38, 20], [20, 42]]), 6, 9746);
-    panel(ctx, at(560, 1400, 0.5, [[-22, 0], [22, 0], [18, 56], [-18, 56]]), P.linen, 6, 9745);
-    panel(ctx, at(650, 1340, 0.45, [[-60, -26], [50, -34], [58, 26], [-50, 36]]), P.linen, 6, 9747);
+    panel(ctx, at(560, 1740, 1, [[-70, 30], [70, 30], [60, -26], [-60, -26]]), P.steel, 7, 9743);   // laptop lid, seen from behind
+    panel(ctx, at(450, 1520, 0.8, [[-60, -26], [50, -34], [58, 26], [-50, 36]]), P.linen, 6, 9742);
+    panel(ctx, at(690, 1400, 0.65, [[-22, 0], [22, 0], [18, 56], [-18, 56]]), P.linen, 6, 9744);
+    line(ctx, at(690, 1400, 0.65, [[22, 12], [38, 20], [20, 42]]), 6, 9746);
+    panel(ctx, at(520, 1250, 0.5, [[-22, 0], [22, 0], [18, 56], [-18, 56]]), P.linen, 6, 9745);
+    panel(ctx, at(590, 1090, 0.42, [[-60, -26], [50, -34], [58, 26], [-50, 36]]), P.linen, 6, 9747);
   }
   function ovalRoom(ctx, t) {
     setB(ctx, t);
@@ -356,14 +356,6 @@ Skits.presentation = (() => {
     Brush.reseed(40000);
     ovalTable(ctx);   // the table's edge crosses each body at the waist
     tableProps(ctx);
-    const JACKET = { nick: '#2e2e2e', ludwig: '#b4b4b4', slime: '#3c3c3c', speed: '#262626', beast: '#4a4a4a', squeex: '#7c7c7c' };
-    order.forEach(k => {   // one forearm lies on the top, toward the table's middle: a jacket sleeve and a hand
-      const c = SIX[k], d = c.side, waist = c.y + 228 * c.s, s = c.s;
-      const el = [c.x + d * 8 * s, waist - 4 * s], hd = [c.x + d * 150 * s, waist + 70 * s], sw = 42 * s;   // comes out from under the table edge at the waist
-      stroke(ctx, [el, [(el[0] + hd[0]) / 2, (el[1] + hd[1]) / 2 + 6 * s], hd], { w: sw + 10, taper0: 0, taper1: 0, minW: 1, seed: 9760 + k });
-      stroke(ctx, [el, [(el[0] + hd[0]) / 2, (el[1] + hd[1]) / 2 + 6 * s], hd], { w: sw, taper0: 0, taper1: 0, minW: 1, seed: 9760 + k, color: JACKET[c.who] });
-      Brush.blob(ctx, hd[0] + d * 14 * s, hd[1] + 4 * s, 26 * s, 24 * s, { fill: W, w: 7, n: 10 });
-    });
   }
 
   // ---------- shots ----------
