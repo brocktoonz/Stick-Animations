@@ -71,7 +71,8 @@ Skits.eyedoctor = (() => {
     ctx.fillStyle = Palette.paper; ctx.fillRect(cx - POVR, cy - POVR, POVR * 2, POVR * 2);   // flat sky, no gradient
     const hy = cy + 0.12 * POVR;                                             // horizon
     stroke(ctx, [[cx - POVR, hy], [cx + POVR, hy]], { w: 6 });
-    fill(ctx, [[cx - 14, hy], [cx + 14, hy], [cx + 300, cy + POVR], [cx - 300, cy + POVR]], P.steel, 0.3);   // the road
+    { const road = [[cx - 14, hy], [cx + 14, hy], [cx + 300, cy + POVR], [cx - 300, cy + POVR]];   // the road: a flat fill on exactly the lines the ink follows (a smoothed fill bulged past them)
+      ctx.fillStyle = P.steel; ctx.beginPath(); road.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill(); }
     stroke(ctx, [[cx, hy + 20], [cx, cy + POVR]], { w: 8, color: P.linen, taper0: 0.9, taper1: 0 });
     for (const s of [-1, 1]) stroke(ctx, [[cx + s * 14, hy], [cx + s * 300, cy + POVR]], { w: 7 });
     // the hot air balloon at the end of the road, bobbing a little
@@ -171,7 +172,7 @@ Skits.eyedoctor = (() => {
       const s = lerp(1.2, 9, easeOut(Math.min(1, hit * 1.6)));
       glove(ctx, 540, 1100, s, lerp(-0.5, -0.1, hit));
       if (hit > 0.55) {
-        ctx.fillStyle = paperWash(Math.min(1, (1 - hit) * 1.6)); ctx.fillRect(-60, -60, 1200, 2040);
+        ctx.fillStyle = paperWash(1); ctx.fillRect(-60, -60, 1200, 2040);   // straight from the red glove to the paper: a fade between them goes pink
         burst(ctx, 540, 1100, 36, 250, 900);
       }
     }

@@ -150,10 +150,12 @@ and alarm videos (cream paper, teal hero, coloured props; see
   reference screenshots the user supplied (the sources are noted in
   `web/palette.js`). Everyone else (the original cast, Nick, Ludwig, Slime,
   MrBeast) stays white.
-- Not yet converted: skits other than the power nap and the alarm still draw
-  their own grey sets. Convert a skit by swapping its backdrop and fills for
-  `Palette` entries and dropping its walls and floors (see Sets below); the
-  main character is already in colour everywhere he appears.
+- Converted: every video (power nap, alarm, presentation, eye doctor, roach,
+  extinct, haircut) is on the paper with palette props. Older preview and
+  test skits (`web/skits/*_sheet.js`, drafts and trials) still draw their own
+  greys; convert one the same way before it goes into a video: swap its
+  backdrop and fills for `Palette` entries and drop walls and floors (see
+  Sets below).
 
 ## Cast
 
