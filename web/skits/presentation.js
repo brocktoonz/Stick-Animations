@@ -342,9 +342,9 @@ Skits.presentation = (() => {
     }],
     // 5.20-6.85: the room: six blank stares
     [5.2, 6.85, (ctx, t) => {
-      const z = lerp(1.18, 1.2, seg(t, 5.2, 6.85));   // wide enough that all four fit and the short table's ends show
-      cam(ctx, 540, 1250, z, 830); room(ctx, t);   // nobody standing behind now, so the four at the table sit higher in the frame
-      for (let i = 0; i < heads.length; i++) heads[i] = 830 + (heads[i] - 1250) * z;
+      const z = lerp(1.07, 1.09, seg(t, 5.2, 6.85));   // wide enough that all four fit with a margin and the short table's ends show
+      cam(ctx, 540, 1250, z, 880); room(ctx, t);   // nobody standing behind now, so the four at the table sit higher in the frame
+      for (let i = 0; i < heads.length; i++) heads[i] = 880 + (heads[i] - 1250) * z;
     }],
     // 6.85-7.95: he springs up into frame, arms up
     [6.85, 7.95, (ctx, t) => {
@@ -365,11 +365,11 @@ Skits.presentation = (() => {
       cam(ctx, fx, fy, z, sy); setA(ctx); hero(ctx, HX, FLOOR_A, 1, pose7(t));
       heads[heads.length - 1] = headScreen(FLOOR_A, 1, z, fy, sy);
     }],
-    // 9.15-10.0: pushed in on Squeex and Slime at the table, still staring
+    // 9.15-10.0: a slow push-in on the four at the table, still staring
     [9.15, DUR, (ctx, t) => {
-      const z = lerp(1.76, 1.8, seg(t, 9.15, DUR));
-      cam(ctx, 760, 1250, z, 900); room(ctx, t);
-      for (let i = 0; i < heads.length; i++) heads[i] = 900 + (heads[i] - 1250) * z;
+      const z = lerp(1.06, 1.12, seg(t, 9.15, DUR));   // a slow push-in on all four: with everyone seated shoulder to shoulder there is no clean crop through the row
+      cam(ctx, 540, 1250, z, 880); room(ctx, t);
+      for (let i = 0; i < heads.length; i++) heads[i] = 880 + (heads[i] - 1250) * z;
     }],
   ];
 
