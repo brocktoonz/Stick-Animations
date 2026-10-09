@@ -422,11 +422,20 @@ const Chars = (() => {
     const c = [2 * e[0] - mx, 2 * e[1] - my], t = at, u = 1 - t;      // the hem's position and direction on the arm
     const p = [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]];
     const tx = 2 * u * (c[0] - a[0]) + 2 * t * (b[0] - c[0]), ty = 2 * u * (c[1] - a[1]) + 2 * t * (b[1] - c[1]), tl = Math.hypot(tx, ty) || 1;
-    const ux = tx / tl, uy = ty / tl, nx = -uy, ny = ux, R = 400;
+    // clip to a band along the arm from the shoulder to the hem only (a half-plane at the hem also caught a bent arm's
+    // forearm folding back past it, and coloured the forearm)
+    const half = w * 0.7, side1 = [], side2 = [], N = 12;
+    for (let i = 0; i <= N; i++) {
+      const k = t * i / N, v = 1 - k;
+      const q = [v * v * a[0] + 2 * v * k * c[0] + k * k * b[0], v * v * a[1] + 2 * v * k * c[1] + k * k * b[1]];
+      const gx = 2 * v * (c[0] - a[0]) + 2 * k * (b[0] - c[0]), gy = 2 * v * (c[1] - a[1]) + 2 * k * (b[1] - c[1]), gl = Math.hypot(gx, gy) || 1;
+      side1.push([q[0] - gy / gl * half, q[1] + gx / gl * half]); side2.push([q[0] + gy / gl * half, q[1] - gx / gl * half]);
+    }
+    const ux = tx / tl, uy = ty / tl;   // the hem's cut is square to the arm
+    void ux; void uy;
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(p[0] + nx * R, p[1] + ny * R); ctx.lineTo(p[0] - nx * R, p[1] - ny * R);
-    ctx.lineTo(p[0] - nx * R - ux * R, p[1] - ny * R - uy * R); ctx.lineTo(p[0] + nx * R - ux * R, p[1] + ny * R - uy * R);
+    [...side1, ...side2.reverse()].forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
     ctx.closePath(); ctx.clip();
     stroke(ctx, [a, e, b], { w: w * 0.45, taper0: 0, taper1: 0, minW: 1, seed, pressure: 0, color: col });
     ctx.restore();
