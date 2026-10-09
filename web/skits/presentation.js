@@ -126,7 +126,7 @@ Skits.presentation = (() => {
     }
     const bx = x0 + 52, by = y1 - 50;
     line(ctx, [[bx, y0 + 140], [bx, by], [x1 - 36, by]], 8, 9612);   // axes
-    [[0, 64, P.blanket], [1, 112, P.butter], [2, 160, P.olive], [3, 214, P.curtain]].forEach(([i, hgt, col]) => {
+    [[0, 64, P.steel], [1, 112, P.butter], [2, 160, P.olive], [3, 214, P.wood]].forEach(([i, hgt, col]) => {
       const x = bx + 30 + i * 84;
       panel(ctx, rect(x, by - hgt, x + 54, by), col, 7, 9620 + i);
     });
@@ -147,8 +147,9 @@ Skits.presentation = (() => {
   // the room he's presenting to is right there in front of him.
   function foreTable(ctx) {
     const y = 1716;
-    flat(ctx, [[-40, y], [1120, y - 10], [1120, 1960], [-40, 1960]], P.wood);
-    line(ctx, [[-40, y], [540, y - 5], [1120, y - 10]], 11, 9800, { taper0: 0, taper1: 0 });
+    // a short slab with both ends showing, not an edge-to-edge band
+    panel(ctx, [[70, y], [1010, y - 10], [1030, y + 52], [50, y + 62]], P.woodLight, 11, 9800);
+    panel(ctx, [[50, y + 62], [1030, y + 52], [1010, 1980], [70, 1980]], P.wood, 11, 9806);
     panel(ctx, [[70, y + 64], [300, y + 54], [292, y - 120], [84, y - 112]], P.steel, 9, 9801);   // an open laptop, seen from behind
     line(ctx, [[150, y - 40], [172, y - 66], [196, y - 40]], 6, 9802);   // its logo
     panel(ctx, [[420, y + 70], [600, y + 58], [610, y + 140], [428, y + 156]], P.linen, 7, 9803);   // papers
@@ -269,7 +270,7 @@ Skits.presentation = (() => {
   // ---------- set B: the meeting table, from where he stands ----------
   // Four seated at the table (front row), two standing behind against the wall.
   // Everyone looks screen-right, at him just off frame.
-  const TABLE_Y = 1406, BACK_FLOOR = 1112;   // the standing two are raised clear of the seated heads, folded arms in view
+  const TABLE_Y = 1406;   // only the four at the table are in the meeting shots (user decision: nobody standing behind)
   // The shared confused face (one brow up, one down, small 'o' mouth) without its head-scratching arm:
   // they're seated at the table, eyes rolled up toward him, heads tilted (each its own way, held in `lean`).
   // (User: the blank faces read as if nothing was happening.)
@@ -280,35 +281,29 @@ Skits.presentation = (() => {
     { who: 'squeex', x: 650, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'o', open: 0.3, mouthScale: 1.35, browL: -0.5, browLiftL: -12, browR: 0, browLiftR: 0, lookX: 0.6, lookY: -0.5 }, lean: -0.13, blink: 2.3 },   // the other brow raised high, the other level (not slanted, which read as a scowl); an 'o' big enough to show through the beard
     { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'wobbly', browL: 0, browLiftL: 0, browR: -0.5, browLiftR: -12, lookX: 0.55, lookY: -0.4 }, lean: 0.12, blink: 0.9 },   // one brow high, one level: puzzled, not cross
   ];
-  const STANDING = [
-    { who: 'ludwig', x: 318, s: 0.62, emo: { ...Emotions.deflated, lookX: 0.7, crossArms: true }, blink: 1.1 },
-    { who: 'speed', x: 768, s: 0.62, emo: { mouth: 'o', open: 0.2, brow: -0.3, lookX: 0.6, pupil: 9, crossArms: true }, blink: 2.0 },
-  ];
-  const HEADGEO = { nick: 175, beast: 168, squeex: 180, slime: 150, ludwig: 245, speed: 230 };   // hair/hat top above the head centre, local units
+  const HEADGEO = { nick: 175, beast: 168, squeex: 180, slime: 150 };   // hair/hat top above the head centre, local units
   function chair(ctx, x, s, i) {   // a tall office chair back behind a seated person
     const top = TABLE_Y - 330 * s, w = 118 * s;
     panel(ctx, [[x - w, TABLE_Y], [x - w, top + 40 * s], [x - w + 30 * s, top], [x + w - 30 * s, top], [x + w, top + 40 * s], [x + w, TABLE_Y]], P.charcoal, 9, 9700 + i);
   }
   function setB(ctx, t) {
-    ctx.fillStyle = Palette.paper; ctx.fillRect(-1500, -500, 4500, 4000);   // paper only: no wall, window, blinds, floor or skirting
-    // the two standing behind the table keep a short ground line under their feet
-    STANDING.forEach((c, i) => line(ctx, [[c.x - 110, BACK_FLOOR], [c.x, BACK_FLOOR + 2], [c.x + 110, BACK_FLOOR - 2]], 8, 9733 + i, { taper0: 0, taper1: 0 }));
+    ctx.fillStyle = Palette.paper; ctx.fillRect(-1500, -500, 4500, 4000);   // paper only: no wall, window, blinds, floor, skirting or anyone standing: only the people at the table
   }
-  function colleague(ctx, c, t, standing) {
-    const feet = standing ? BACK_FLOOR : TABLE_Y + 210 * c.s;   // seated: the table edge crosses the waist
+  function colleague(ctx, c, t) {
+    const feet = TABLE_Y + 210 * c.s;   // seated: the table edge crosses the waist
     const hy = feet - HEAD * c.s;
     const tilt = (c.lean ?? 0) + Math.sin(c.x * 0.013) * 0.05 + keys(t, [[5.2, 0], [6.0, 0], [6.4, 0.04 * Math.sign(c.x - 540)], [10, 0.04 * Math.sign(c.x - 540)]]);
-      + (c.who === 'speed' ? keys(t, [[9.2, 0], [9.42, -0.07], [9.64, 0.05], [9.84, -0.05], [10, -0.01]]) : 0);   // the last shot: a slow head shake
-    SUITS[c.who](ctx, { x: c.x, y: feet, s: c.s, dir: 1, t, ...c.emo, tilt, lid: blink(t, 3.3, c.blink) || (c.emo.lid ?? 0), weight: 0.4, legs: !standing ? false : undefined });
+    SUITS[c.who](ctx, { x: c.x, y: feet, s: c.s, dir: 1, t, ...c.emo, tilt, lid: blink(t, 3.3, c.blink) || (c.emo.lid ?? 0), weight: 0.4, legs: false });
     heads.push(hy - HEADGEO[c.who] * c.s);
   }
   function table(ctx) {
-    panel(ctx, [[-80, TABLE_Y], [1160, TABLE_Y], [1160, TABLE_Y + 110], [-80, TABLE_Y + 110]], P.woodLight, 11, 9740);   // the table top
-    panel(ctx, [[-80, TABLE_Y + 110], [1160, TABLE_Y + 110], [1160, 2100], [-80, 2100]], P.wood, 11, 9741);   // its front
+    // a short slab with both ends showing (it stops just past the first and last seat), not an edge-to-edge band
+    panel(ctx, [[130, TABLE_Y], [950, TABLE_Y], [972, TABLE_Y + 110], [108, TABLE_Y + 110]], P.woodLight, 11, 9740);   // the table top
+    panel(ctx, [[108, TABLE_Y + 110], [972, TABLE_Y + 110], [940, 2100], [140, 2100]], P.wood, 11, 9741);   // its front
     // papers, a laptop and coffee cups on the table, in front of each seat
-    panel(ctx, [[60, TABLE_Y + 30], [190, TABLE_Y + 22], [200, TABLE_Y + 80], [70, TABLE_Y + 88]], P.linen, 6, 9742);
+    panel(ctx, [[150, TABLE_Y + 30], [260, TABLE_Y + 22], [270, TABLE_Y + 80], [160, TABLE_Y + 88]], P.linen, 6, 9742);
     panel(ctx, [[350, TABLE_Y + 60], [480, TABLE_Y + 60], [470, TABLE_Y + 8], [362, TABLE_Y + 8]], P.steel, 7, 9743);   // laptop lid, seen from behind
-    for (const [i, x] of [[0, 600], [1, 1010]]) {
+    for (const [i, x] of [[0, 600], [1, 900]]) {
       panel(ctx, [[x - 22, TABLE_Y + 10], [x + 22, TABLE_Y + 10], [x + 18, TABLE_Y + 66], [x - 18, TABLE_Y + 66]], P.linen, 6, 9744 + i);
       line(ctx, [[x + 22, TABLE_Y + 22], [x + 38, TABLE_Y + 30], [x + 20, TABLE_Y + 52]], 6, 9746 + i);
     }
@@ -316,9 +311,8 @@ Skits.presentation = (() => {
   function room(ctx, t) {
     setB(ctx, t);
     // each person starts from a fixed stroke count, so one blinking doesn't re-roll the lines of everyone drawn after them
-    STANDING.forEach((c, i) => { Brush.reseed(20000 + i * 2000); colleague(ctx, c, t, true); });
     SEATED.forEach((c, i) => chair(ctx, c.x, c.s, i));
-    SEATED.forEach((c, i) => { Brush.reseed(30000 + i * 2000); colleague(ctx, c, t, false); });
+    SEATED.forEach((c, i) => { Brush.reseed(30000 + i * 2000); colleague(ctx, c, t); });
     Brush.reseed(40000);
     table(ctx);
   }
@@ -348,9 +342,9 @@ Skits.presentation = (() => {
     }],
     // 5.20-6.85: the room: six blank stares
     [5.2, 6.85, (ctx, t) => {
-      const z = lerp(1.2, 1.23, seg(t, 5.2, 6.85));
-      cam(ctx, 540, 1250, z, 1480); room(ctx, t);
-      for (let i = 0; i < heads.length; i++) heads[i] = 1480 + (heads[i] - 1250) * z;
+      const z = lerp(1.27, 1.3, seg(t, 5.2, 6.85));
+      cam(ctx, 540, 1250, z, 1180); room(ctx, t);   // nobody standing behind now, so the four at the table sit higher in the frame
+      for (let i = 0; i < heads.length; i++) heads[i] = 1180 + (heads[i] - 1250) * z;
     }],
     // 6.85-7.95: he springs up into frame, arms up
     [6.85, 7.95, (ctx, t) => {
@@ -371,11 +365,11 @@ Skits.presentation = (() => {
       cam(ctx, fx, fy, z, sy); setA(ctx); hero(ctx, HX, FLOOR_A, 1, pose7(t));
       heads[heads.length - 1] = headScreen(FLOOR_A, 1, z, fy, sy);
     }],
-    // 9.15-10.0: pushed in on Squeex, Speed and Slime, still staring
+    // 9.15-10.0: pushed in on Squeex and Slime at the table, still staring
     [9.15, DUR, (ctx, t) => {
       const z = lerp(1.76, 1.8, seg(t, 9.15, DUR));
-      cam(ctx, 840, 1150, z, 1530); room(ctx, t);
-      for (let i = 0; i < heads.length; i++) heads[i] = 1530 + (heads[i] - 1150) * z;
+      cam(ctx, 760, 1250, z, 1190); room(ctx, t);
+      for (let i = 0; i < heads.length; i++) heads[i] = 1190 + (heads[i] - 1250) * z;
     }],
   ];
 

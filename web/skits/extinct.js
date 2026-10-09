@@ -180,21 +180,7 @@ Skits.extinct = (() => {
   // (sky, clouds, hills, grass) with made-up plants, so it reads as a world.
   function newWorld(ctx, t) {
     sky(ctx);
-    for (const [k, [x, h, r]] of [[80, 520, 110], [990, 600, 130]].entries()) {   // lollipop trees with spiral canopies
-      stroke(ctx, [[x, FLOOR], [x + 10, FLOOR - h * 0.5], [x, FLOOR - h]], { w: 40, taper0: 0, taper1: 0.3, seed: 9200 + k });
-      stroke(ctx, [[x, FLOOR], [x + 10, FLOOR - h * 0.5], [x, FLOOR - h]], { w: 24, taper0: 0, taper1: 0.3, color: P.wood, seed: 9210 + k });
-      solid(ctx, Brush.ellipsePts(x, FLOOR - h - r * 0.7, r, r, 28), P.oliveLight, 11, 9220 + k);
-      const sp = [];
-      for (let i = 0; i <= 30; i++) { const u = i / 30, a = u * Math.PI * 4.5; sp.push([x + Math.cos(a) * r * 0.75 * u, FLOOR - h - r * 0.7 + Math.sin(a) * r * 0.75 * u]); }
-      stroke(ctx, sp, { w: 6, taper0: 0.2, taper1: 0.2, seed: 9230 + k });
-    }
-    for (const [k, [x, kk]] of [[400, 0.8], [980, 0.85]].entries()) {   // giant mushrooms, in the gaps between the animals
-      stroke(ctx, [[x, FLOOR], [x, FLOOR - 120 * kk]], { w: 44 * kk, taper0: 0, taper1: 0, seed: 9240 + k });
-      stroke(ctx, [[x, FLOOR], [x, FLOOR - 120 * kk]], { w: 30 * kk, taper0: 0, taper1: 0, color: P.linen, seed: 9250 + k });
-      const cap = [[x - 90 * kk, FLOOR - 110 * kk], [x - 60 * kk, FLOOR - 190 * kk], [x, FLOOR - 215 * kk], [x + 60 * kk, FLOOR - 190 * kk], [x + 90 * kk, FLOOR - 110 * kk]];
-      solid(ctx, cap, P.curtain, 10, 9260 + k);
-      for (const d of [-40, 10, 45]) blob(ctx, x + d * kk, FLOOR - 160 * kk + (d % 20), 12 * kk, 10 * kk, { fill: W, w: 5, n: 8 });
-    }
+    // (the lollipop trees and giant mushrooms are cut: the new animals stand on bare paper, nothing the gag doesn't use)
     ground(ctx);
   }
   // A ground line only under the animals' feet (no ground fill, no grass).
@@ -533,7 +519,16 @@ Skits.extinct = (() => {
     // raptors frolicking... "thats why he sent the meteor"
     [21.55, 23.02, (ctx, t) => {
       const hit = 22.95;
-      if (t >= hit) { ctx.fillStyle = W; ctx.fillRect(-60, -60, 1200, 2040); return; }   // hard flash, then cut
+      if (t >= hit) {   // a fast black-and-white impact frame (user decision): inverted burst, then a white one, then the cut
+        const inv = t < hit + 0.035, bg = inv ? INK : W, fg = inv ? W : INK;
+        ctx.fillStyle = bg; ctx.fillRect(-60, -60, 1200, 2040);
+        for (let i = 0; i < 18; i++) {   // fixed rays out of the impact point (nothing random: a still frame)
+          const a = i / 18 * Math.PI * 2 + 0.1, r0 = 70, r1 = 420 + 360 * hh(i + 3);
+          stroke(ctx, [[540 + Math.cos(a) * r0, FLOOR + 20 + Math.sin(a) * r0 * 0.6], [540 + Math.cos(a) * r1, FLOOR + 20 + Math.sin(a) * r1 * 0.9]], { w: 26 - 12 * hh(i + 40), taper0: 0.05, taper1: 1, color: fg, seed: 9400 + i });
+        }
+        blob(ctx, 540, FLOOR + 20, 150, 110, { fill: fg, w: 0, n: 18 });
+        return;
+      }
       ctx.save();
       prehistoric(ctx, t);
       const look = t > 22.35;

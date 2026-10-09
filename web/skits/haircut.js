@@ -373,7 +373,7 @@ Skits.haircut = (() => {
   // The shop is a few props on the bare paper (STYLE.md, Sets): the barber pole on the left says where we are. No wall,
   // chair rail, shelf, hanging lamps or tiled floor. Ground lines only under feet: the barber's walk and the chair's base.
   function pole(ctx) {
-    const px = 120, y0 = 770, y1 = 1180;
+    const px = 66, y0 = 770, y1 = 1180;   // far left, clear of the scissors
     ctx.save(); ctx.beginPath(); ctx.rect(px - 44, y0, 88, y1 - y0); ctx.clip();
     flat(ctx, box(px - 44, y0, px + 44, y1, 3), P.linen);
     for (let k = -2; k < 9; k++) {
@@ -386,8 +386,8 @@ Skits.haircut = (() => {
     panel(ctx, Brush.ellipsePts(px, y0 - 56, 30, 22, 20), P.steelDark, 9);
     panel(ctx, box(px - 58, y1, px + 58, y1 + 40, 3), P.steelDark, 10);
   }
-  function groundLines(ctx) {
-    stroke(ctx, [[420, FLOOR_Y], [700, FLOOR_Y + 3], [980, FLOOR_Y - 3]], { w: 9, taper0: 0, taper1: 0, seed: 7900 });   // where the barber walks
+  function groundLines(ctx, bx = 860) {
+    stroke(ctx, [[bx - 150, FLOOR_Y], [bx, FLOOR_Y + 3], [bx + 150, FLOOR_Y - 3]], { w: 9, taper0: 0, taper1: 0, seed: 7900 });   // under the barber's feet, wherever he walks
     stroke(ctx, [[GX - 230, 1836], [GX, 1840], [GX + 230, 1834]], { w: 9, taper0: 0, taper1: 0, seed: 7901 });          // under the chair's base
   }
 
@@ -497,7 +497,7 @@ Skits.haircut = (() => {
     const S = lerp(c0.S, c1.S, p), A = Stage.mix(c0.A, c1.A, p);
     ctx.save(); ctx.translate(A[0], A[1]); ctx.scale(S, S); ctx.translate(-GX, -GY);
     ctx.fillStyle = Palette.paper; ctx.fillRect(-2000, -2000, 5000, 6000);   // bare paper, no wall or floor
-    pole(ctx); groundLines(ctx);
+    pole(ctx);
     cutCount = 0; hairNow = mopHair;   // nothing comes off in this shot
     let open = 1, since = 9;
     SNIPS1.forEach(sAt => {
@@ -508,6 +508,7 @@ Skits.haircut = (() => {
     const n = SNIPS1.filter(sAt => t >= sAt).length;
     const wk = seg(t, WALK[0], WALK[1]), walk = 0.25 * easeInOut(wk) + 0.75 * wk;   // a steady pace, easing only a little at each end
     const bx = lerp(B1.x0, B1.x1, walk), fy = lerp(B1.f0, B1.f1, walk), bs = lerp(B1.s0, B1.s1, walk);   // round behind the chair, a step back
+    groundLines(ctx, bx);   // only under his feet, following him
     const step = t > WALK[0] && t < WALK[1] ? 0.7 * Math.sin(Math.PI * 2 * (t - WALK[0]) / 0.35) * (1 - Math.abs(2 * walk - 1) ** 3) : 0;
     const lean = lerp(-0.03, 0.03, walk) - 0.008 * Math.sin(t * 0.9) + (since < 0.22 ? -0.035 * Math.sin(Math.PI * since / 0.22) : 0);   // he dips into each snip
     // the scissor hand (pose space): at his side, lifted up by his head, carried
@@ -771,8 +772,8 @@ Skits.haircut = (() => {
         const n = 72, under = shape.slice(0, n + 1), xo = under[0][0] - ex;
         stroke(ctx, under, { w: 12, taper0: 0.12, taper1: 0.12, minW: 1, jit: 0, pressure: 0.2 });
         const bow = 0.3 * Math.abs(xo), lidPts = [];
-        for (let i = 0; i <= 24; i++) { const k = i / 24, x = ex - Math.abs(xo) * 1.12 + 2 * Math.abs(xo) * 1.12 * k; lidPts.push([x, ly + 3 - bow * Math.sin(Math.PI * (0.06 + 0.88 * k)) ]); }
-        stroke(ctx, lidPts, { w: 15, taper0: 0.25, taper1: 0.25, minW: 1, jit: 0, pressure: 0.3 });
+        for (let i = 0; i <= 24; i++) { const k = i / 24, x = ex - Math.abs(xo) * 1.0 + 2 * Math.abs(xo) * 1.0 * k; lidPts.push([x, ly + 3 - bow * Math.sin(Math.PI * (0.06 + 0.88 * k)) ]); }
+        stroke(ctx, lidPts, { w: 13, taper0: 0.25, taper1: 0.25, minW: 1, jit: 0, pressure: 0.3 });
       }
     }
   };

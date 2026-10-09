@@ -45,7 +45,7 @@ const Palette = (() => {
     phone: '#3a3a3a', phoneOff: '#5a5a5a', phoneDot: '#9a9a9a',   // a dark phone: body, dead screen, camera dot / list rules
   };
   // The cast's tie colours (cameos stay grayscale otherwise): the suited cast in the presentation video.
-  const tie = { hero: '#4f7fc9', nick: '#c9a43a', ludwig: '#3f8f5a', slime: '#7a56b0', speed: '#d0812f', beast: '#3fa0b0', squeex: '#a8506f' };
+  const tie = { hero: '#4f7fc9', nick: '#c9a43a', ludwig: '#3f8f5a', slime: '#7a56b0', speed: '#d0812f', beast: '#9c4a32', squeex: '#a8506f' };
   // The rest of the cast (clothes and natural hair; ink stays black). Skin: only Speed and Squeex, whose faces were drawn
   // grey, get a skin tone (user decision); everyone else stays white. Their tones are sampled with scripts/sample_skin.py
   // from the reference screenshots the user supplied, then dulled toward the paper:
