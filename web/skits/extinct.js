@@ -184,23 +184,23 @@ Skits.extinct = (() => {
     ground(ctx);
   }
   // A ground line only under the animals' feet (no ground fill, no grass).
-  function ground(ctx) {
-    stroke(ctx, [[60, FLOOR], [540, FLOOR + 4], [1020, FLOOR - 6]], { w: 9, taper0: 0, taper1: 0, seed: 9300 });
+  function ground(ctx, y = FLOOR) {
+    stroke(ctx, [[60, y], [540, y + 4], [1020, y - 6]], { w: 9, taper0: 0, taper1: 0, seed: 9300 });
   }
   // flat ink shadow under a character or animal (no blur)
   const shadow = (ctx, x, rx, y = FLOOR + 6) => fill(ctx, Brush.ellipsePts(x, y, rx, rx * 0.13, 14), P.shadow, 0.5);
   function prehistoric(ctx, t) {
     sky(ctx);
-    const corners = [[440, FLOOR], [690, 880], [790, 870], [1040, FLOOR]], volcano = [];
+    const GL = FLOOR - 75, corners = [[440, GL], [690, 880], [790, 870], [1040, GL]], volcano = [];   // the base meets the ground line at the big animals' feet
     for (let i = 0; i < 4; i++) {   // points along each edge keep the brush's spline from bulging past the corners
       const [a, b] = [corners[i], corners[(i + 1) % 4]];
       for (let k = 0; k < 8; k++) volcano.push([a[0] + (b[0] - a[0]) * k / 8, a[1] + (b[1] - a[1]) * k / 8]);
     }
     smoke(ctx, t);   // drawn first so its base tucks behind the crater rim
     solid(ctx, volcano, P.rock, 12, 9101);
-    palm(ctx, 130, FLOOR, 1.15, t);
-    ground(ctx);
-    for (const x of [360, 1010]) fern(ctx, x, FLOOR + 14);
+    palm(ctx, 130, GL, 1.15, t);
+    ground(ctx, GL);
+    for (const x of [360, 1010]) fern(ctx, x, GL + 14);
   }
   // one continuous column of smoke out of the crater: overlapping puffs merged
   // into a single silhouette (ink grown, then fill), widening as it rises and

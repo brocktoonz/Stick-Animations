@@ -584,6 +584,10 @@ const Chars = (() => {
       const hip = [side * S.hipX + wt * 14, hipY + S.legTop];
       let foot = [fx, -12 - lift];
       let leg = [hip, [(hip[0] + fx) / 2 + 8 + 30 * free + side * 6 * free, (hip[1] + foot[1]) / 2 - 6 * free], foot];
+      if (free) {   // a bent free leg gets points along its curve, so the boil can't kink the knee into a Z
+        const m = leg[1], c = [2 * m[0] - (hip[0] + foot[0]) / 2, 2 * m[1] - (hip[1] + foot[1]) / 2];
+        leg = Array.from({ length: 9 }, (_, i) => { const k = i / 8, v = 1 - k; return [v * v * hip[0] + 2 * v * k * c[0] + k * k * foot[0], v * v * hip[1] + 2 * v * k * c[1] + k * k * foot[1]]; });
+      }
       const kick = side === 1 ? (p.kick ?? 0) : 0;
       if (kick) {   // the front leg swings straight from the hip (negative = drawn back for the wind-up)
         const L = -12 - hip[1], a = kick * 1.15;
