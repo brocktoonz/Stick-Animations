@@ -322,9 +322,9 @@ Skits.presentation = (() => {
     for (let k = 29; k >= 1; k--) { const y = y0 + (NEAR_Y - y0) * k / 30; pts.push([540 - halfW(y) + inset, y]); }
     return even(pts, 34);
   };
-  // the four, left to right: the nearer pair larger and lower, the farther pair smaller and higher. Each sits so the table's
-  // diagonal edge just clears the head and crosses the lap (the table is nearer the camera than the lap, so it hides it).
-  const OSEATS = [[-1, 1560, 0.84], [-1, 1290, 0.58], [1, 1290, 0.58], [1, 1560, 0.84]].map(([side, ty, s]) => ({ x: 540 + side * (halfW(ty - 90 * s) + 90 * s - 28), ty, s }));
+  // the four, left to right: the nearer pair larger and lower, the farther pair smaller and higher. Each sits just outside
+  // the table's diagonal edge, clear of it.
+  const OSEATS = [[-1, 1560, 0.84], [-1, 1290, 0.58], [1, 1290, 0.58], [1, 1560, 0.84]].map(([side, ty, s]) => ({ x: 540 + side * (halfW(ty - 90 * s) + 90 * s + 16), ty, s }));
   function ovalTable(ctx) {
     const outer = tableOutline(0), inner = tableOutline(15);
     flat(ctx, outer, P.woodDark);   // the thin rim: the darker band between the outer and inner outline
@@ -342,11 +342,11 @@ Skits.presentation = (() => {
   }
   function ovalRoom(ctx, t) {
     setB(ctx, t);
-    const order = [1, 2, 0, 3];   // the far pair first, then the near pair, then the table over their laps
+    Brush.reseed(40000);
+    ovalTable(ctx);   // the table first: the four sit beside it, in front of it, never under its edge
+    const order = [1, 2, 0, 3];   // the far pair first, then the near pair
     order.forEach(i => chair(ctx, OSEATS[i].x, OSEATS[i].s, i, OSEATS[i].ty));
     order.forEach(i => { Brush.reseed(30000 + i * 2000); colleague(ctx, { ...SEATED[i], x: OSEATS[i].x, s: OSEATS[i].s }, t, OSEATS[i].ty); });
-    Brush.reseed(40000);
-    ovalTable(ctx);
   }
 
   // ---------- shots ----------
