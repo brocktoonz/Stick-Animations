@@ -425,11 +425,12 @@ const Chars = (() => {
     // clip to a band along the arm from the shoulder to the hem only (a half-plane at the hem also caught a bent arm's
     // forearm folding back past it, and coloured the forearm)
     const half = w * 0.7, side1 = [], side2 = [], N = 12;
-    for (let i = 0; i <= N; i++) {
-      const k = t * i / N, v = 1 - k;
+    for (let i = -1; i <= N; i++) {   // i = -1 starts the band behind the shoulder point, so the fill stroke's round cap there is inside the clip
+      const k = Math.max(0, t * i / N), v = 1 - k, back = i < 0 ? half : 0;
       const q = [v * v * a[0] + 2 * v * k * c[0] + k * k * b[0], v * v * a[1] + 2 * v * k * c[1] + k * k * b[1]];
       const gx = 2 * v * (c[0] - a[0]) + 2 * k * (b[0] - c[0]), gy = 2 * v * (c[1] - a[1]) + 2 * k * (b[1] - c[1]), gl = Math.hypot(gx, gy) || 1;
-      side1.push([q[0] - gy / gl * half, q[1] + gx / gl * half]); side2.push([q[0] + gy / gl * half, q[1] - gx / gl * half]);
+      const bx = -gx / gl * back, by = -gy / gl * back;
+      side1.push([q[0] - gy / gl * half + bx, q[1] + gx / gl * half + by]); side2.push([q[0] + gy / gl * half + bx, q[1] - gx / gl * half + by]);
     }
     const ux = tx / tl, uy = ty / tl;   // the hem's cut is square to the arm
     void ux; void uy;
