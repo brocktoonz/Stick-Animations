@@ -276,11 +276,11 @@ Skits.presentation = (() => {
   function setB(ctx, t) {
     ctx.fillStyle = Palette.paper; ctx.fillRect(-1500, -500, 4500, 4000);   // paper only: no wall, window, blinds, floor, skirting or anyone standing: only the people at the table
   }
-  function colleague(ctx, c, t, ty = TABLE_Y) {
-    const feet = ty + 210 * c.s;   // seated: the table edge crosses the waist
+  function colleague(ctx, c, t, ty = TABLE_Y, standing = false) {
+    const feet = standing ? BACK_FLOOR : ty + 210 * c.s;   // seated: the table edge crosses the waist
     const hy = feet - HEAD * c.s;
     const tilt = (c.lean ?? 0) + Math.sin(c.x * 0.013) * 0.05 + keys(t, [[5.2, 0], [6.0, 0], [6.4, 0.04 * Math.sign(c.x - 540)], [10, 0.04 * Math.sign(c.x - 540)]]);
-    SUITS[c.who](ctx, { x: c.x, y: feet, s: c.s, dir: 1, t, ...c.emo, tilt, lid: blink(t, 3.3, c.blink) || (c.emo.lid ?? 0), weight: 0.4, legs: false });
+    SUITS[c.who](ctx, { x: c.x, y: feet, s: c.s, dir: 1, t, ...c.emo, tilt, lid: blink(t, 3.3, c.blink) || (c.emo.lid ?? 0), weight: 0.4, legs: standing ? undefined : false });
     heads.push(hy - HEADGEO[c.who] * c.s);
   }
   function table(ctx) {
@@ -306,56 +306,21 @@ Skits.presentation = (() => {
     table(ctx);
   }
 
-  // ---------- the long conference table (the 5.20-6.85 s shot) ----------
-  // The camera sits at the head of a long table that recedes to a far edge near y=1250; the side edges converge and the
-  // near edge runs off the bottom, so the top fills only the bottom third of the frame. Drawn in screen units (no zoom).
-  // Six seated, three along each side, receding with the table. Each is placed by head centre and head width; the table's
-  // side edge crosses the body at the waist, the head and shoulders stay clear of it, and one forearm lies on the top.
-  const FAR_Y = 905;   // a higher camera: the table runs much further up the frame
-  const edgeL = y => 293 - 0.35 * (y - 1560), edgeR = y => 782 + 0.35 * (y - 1480);   // tangent to the heads' inner sides, so no head sits under the table
-  const tableOutline = (inset = 0) => {
-    const pts = [], y0 = FAR_Y + 34;
-    for (let k = 0; k <= 16; k++) { const a = Math.PI + Math.PI * k / 16; pts.push([(edgeL(y0) + edgeR(y0)) / 2 + Math.cos(a) * ((edgeR(y0) - edgeL(y0)) / 2 - inset), y0 + Math.sin(a) * (34 - inset * 0.7)]); }
-    for (let k = 1; k <= 24; k++) { const y = y0 + (2150 - y0) * k / 24; pts.push([edgeR(y) - inset, y]); }
-    for (let k = 23; k >= 1; k--) { const y = y0 + (2150 - y0) * k / 24; pts.push([edgeL(y) + inset, y]); }
-    return even(pts, 34);
-  };
-  const HEAD_W = 285;   // a head's width in local units at s = 1
-  // near to far on each side; the two sides do not mirror (the near-right sits further back, the gaps are uneven)
-  const SIX = [
-    { i: 0, x: 170, y: 1560, w: 230, side: 1 }, { i: 1, x: 290, y: 1290, w: 190, side: 1 }, { who: 'ludwig', x: 385, y: 1040, w: 160, side: 1, blink: 1.1, emo: { ...Emotions.deflated, pupil: 11 } },
-    { i: 3, x: 905, y: 1480, w: 230, side: -1 }, { i: 2, x: 790, y: 1220, w: 190, side: -1 }, { who: 'speed', x: 690, y: 960, w: 160, side: -1, blink: 2.0, emo: { mouth: 'o', open: 0.2, brow: -0.3, pupil: 9 } },
-  ].map(c => { const base = c.i !== undefined ? SEATED[c.i] : {}; return { ...base, ...c, s: c.w / HEAD_W, emo: { ...(c.emo ?? base.emo), lookX: 0, lookY: 0 } }; });   // everyone looks at the lens
-  function seatedAt(ctx, c, t) {
-    const waist = c.y + 228 * c.s, feet = c.y + HEAD * c.s;
-    const tilt = (c.lean ?? 0) * 0.5 + Math.sin(c.x * 0.013) * 0.03;
-    SUITS[c.who](ctx, { x: c.x, y: feet, s: c.s, dir: 1, t, ...c.emo, tilt, lid: blink(t, 3.3, c.blink) || (c.emo.lid ?? 0), weight: 0.4, legs: false });
-    heads.push(c.y - HEADGEO[c.who] * c.s);
-    return waist;
-  }
-  function ovalTable(ctx) {
-    const outer = tableOutline(0), inner = tableOutline(13);
-    flat(ctx, outer, P.woodDark);   // the thin rim: the darker band between the outer and inner outline
-    flat(ctx, inner, P.wood);       // the top
-    stroke(ctx, [...outer, outer[0], outer[1]], { w: 11, taper0: 0, taper1: 0, minW: 1, seed: 9740 });
-  }
-  function tableProps(ctx) {   // a laptop, mugs and papers between people, smaller as they recede
-    const at = (cx, cy, k, pts) => pts.map(([x, y]) => [cx + x * k, cy + y * k]);
-    panel(ctx, at(560, 1740, 1, [[-70, 30], [70, 30], [60, -26], [-60, -26]]), P.steel, 7, 9743);   // laptop lid, seen from behind
-    panel(ctx, at(450, 1520, 0.8, [[-60, -26], [50, -34], [58, 26], [-50, 36]]), P.linen, 6, 9742);
-    panel(ctx, at(690, 1400, 0.65, [[-22, 0], [22, 0], [18, 56], [-18, 56]]), P.linen, 6, 9744);
-    line(ctx, at(690, 1400, 0.65, [[22, 12], [38, 20], [20, 42]]), 6, 9746);
-    panel(ctx, at(520, 1250, 0.5, [[-22, 0], [22, 0], [18, 56], [-18, 56]]), P.linen, 6, 9745);
-    panel(ctx, at(590, 1090, 0.42, [[-60, -26], [50, -34], [58, 26], [-50, 36]]), P.linen, 6, 9747);
-  }
-  function ovalRoom(ctx, t) {
+  // ---------- the 5.20-6.85 s shot: the four seated at the table, the two standing behind them ----------
+  const BACK_FLOOR = 1112;   // the standing two are raised clear of the seated heads, folded arms in view
+  const STANDING = [
+    { who: 'ludwig', x: 318, s: 0.62, emo: { ...Emotions.deflated, lookX: 0.7, crossArms: true }, blink: 1.1 },
+    { who: 'speed', x: 768, s: 0.62, emo: { mouth: 'o', open: 0.2, brow: -0.3, lookX: 0.6, pupil: 9, crossArms: true }, blink: 2.0 },
+  ];
+  function roomStanding(ctx, t) {
     setB(ctx, t);
-    const order = SIX.map((c, k) => k).sort((a, b) => SIX[a].y - SIX[b].y);   // far first
-    order.forEach(k => chair(ctx, SIX[k].x, SIX[k].s, k, SIX[k].y + 228 * SIX[k].s));
-    order.forEach(k => { Brush.reseed(30000 + k * 2000); seatedAt(ctx, SIX[k], t); });
+    // the two standing behind the table keep a short ground line under their feet
+    STANDING.forEach((c, i) => line(ctx, [[c.x - 110, BACK_FLOOR], [c.x, BACK_FLOOR + 2], [c.x + 110, BACK_FLOOR - 2]], 8, 9733 + i, { taper0: 0, taper1: 0 }));
+    STANDING.forEach((c, i) => { Brush.reseed(20000 + i * 2000); colleague(ctx, c, t, TABLE_Y, true); });
+    SEATED.forEach((c, i) => chair(ctx, c.x, c.s, i));
+    SEATED.forEach((c, i) => { Brush.reseed(30000 + i * 2000); colleague(ctx, c, t); });
     Brush.reseed(40000);
-    ovalTable(ctx);   // the table's edge crosses each body at the waist
-    tableProps(ctx);
+    table(ctx);
   }
 
   // ---------- shots ----------
@@ -382,7 +347,9 @@ Skits.presentation = (() => {
     }],
     // 5.20-6.85: the room: six blank stares
     [5.2, 6.85, (ctx, t) => {
-      ovalRoom(ctx, t);   // laid out in screen units: no camera move
+      const z = lerp(1.2, 1.23, seg(t, 5.2, 6.85));
+      cam(ctx, 540, 1250, z, 1480); roomStanding(ctx, t);
+      for (let i = 0; i < heads.length; i++) heads[i] = 1480 + (heads[i] - 1250) * z;
     }],
     // 6.85-7.95: he springs up into frame, arms up
     [6.85, 7.95, (ctx, t) => {
