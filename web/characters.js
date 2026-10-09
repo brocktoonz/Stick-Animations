@@ -411,14 +411,25 @@ const Chars = (() => {
   }
 
   // Short sleeve in a different colour from the skin (opt-in, S.sleeveFill):
-  // repaints the arm's fill from the shoulder to the hem, along the same curve.
+  // re-strokes the arm's own fill strip, with the very same path, seed and width tube() used, in the sleeve colour,
+  // clipped to the shoulder side of the hem. Same path means the colour sits exactly inside the ink on both sides
+  // (a separately-built curve drifted over the ink border and left white slivers beside it).
   function sleeveFill(ctx, a, b, bend, w, at, col) {
     const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
     const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
     const e = [mx - dy / d * bend * d, my + dx / d * bend * d];
-    const c = [2 * e[0] - mx, 2 * e[1] - my];
-    const q = t => { const u = 1 - t; return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]; };
-    stroke(ctx, [a, q(at / 2), q(at)], { w: w * 0.45, taper0: 0, taper1: 0, minW: 1, pressure: 0, color: col });
+    const seed = 1000 + Math.round(a[0] * 7 + a[1] * 13);
+    const c = [2 * e[0] - mx, 2 * e[1] - my], t = at, u = 1 - t;      // the hem's position and direction on the arm
+    const p = [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]];
+    const tx = 2 * u * (c[0] - a[0]) + 2 * t * (b[0] - c[0]), ty = 2 * u * (c[1] - a[1]) + 2 * t * (b[1] - c[1]), tl = Math.hypot(tx, ty) || 1;
+    const ux = tx / tl, uy = ty / tl, nx = -uy, ny = ux, R = 400;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(p[0] + nx * R, p[1] + ny * R); ctx.lineTo(p[0] - nx * R, p[1] - ny * R);
+    ctx.lineTo(p[0] - nx * R - ux * R, p[1] - ny * R - uy * R); ctx.lineTo(p[0] + nx * R - ux * R, p[1] + ny * R - uy * R);
+    ctx.closePath(); ctx.clip();
+    stroke(ctx, [a, e, b], { w: w * 0.45, taper0: 0, taper1: 0, minW: 1, seed, pressure: 0, color: col });
+    ctx.restore();
   }
 
   // Short-sleeve hem: a line across the arm, a fraction `at` of the way from
