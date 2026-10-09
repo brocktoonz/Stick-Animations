@@ -325,10 +325,15 @@ Skits.presentation = (() => {
     // the two standing behind the table keep a short ground line under their feet
     STANDING.forEach((c, i) => line(ctx, [[c.x - 110, BACK_FLOOR], [c.x, BACK_FLOOR + 2], [c.x + 110, BACK_FLOOR - 2]], 8, 9733 + i, { taper0: 0, taper1: 0 }));
     STANDING.forEach((c, i) => { Brush.reseed(20000 + i * 2000); colleague(ctx, c, t, TABLE_Y, true); });
+    // the table and the four seated are raised so their heads sit about where the standing pair's legs are (user request)
+    const RAISE = -190, n0 = heads.length;
+    ctx.save(); ctx.translate(0, RAISE);
     SEATED.forEach((c, i) => chair(ctx, c.x, c.s, i));
     SEATED.forEach((c, i) => { Brush.reseed(30000 + i * 2000); colleague(ctx, c, t); });
     Brush.reseed(40000);
     table(ctx);
+    ctx.restore();
+    for (let i = n0; i < heads.length; i++) heads[i] += RAISE;
   }
 
   // ---------- shots ----------
