@@ -143,19 +143,6 @@ Skits.presentation = (() => {
     panel(ctx, rect(x0 - 8, y1, x1 + 8, y1 + 18), P.charcoal, 8, 9604);
     slide(ctx, title);
   }
-  // The near edge of the meeting table, across the bottom of his full shot (drawn in screen space, over his feet):
-  // the room he's presenting to is right there in front of him.
-  function foreTable(ctx) {
-    const y = 1716;
-    // a short slab with both ends showing, not an edge-to-edge band
-    panel(ctx, [[70, y], [1010, y - 10], [1030, y + 52], [50, y + 62]], P.wood, 11, 9800);   // the top
-    panel(ctx, [[50, y + 62], [1030, y + 52], [1030, y + 98], [50, y + 108]], P.woodDark, 11, 9806);   // its thin front edge; paper below
-    panel(ctx, [[70, y + 64], [300, y + 54], [292, y - 120], [84, y - 112]], P.steel, 9, 9801);   // an open laptop, seen from behind
-    line(ctx, [[150, y - 40], [172, y - 66], [196, y - 40]], 6, 9802);   // its logo
-    panel(ctx, [[420, y + 8], [600, y - 2], [610, y + 42], [428, y + 50]], P.linen, 7, 9803);   // papers, now lying on the top surface (they hung over the old front face)
-    panel(ctx, [[930, y - 70], [1000, y - 70], [994, y + 40], [936, y + 40]], P.linen, 8, 9804);   // a coffee mug
-    line(ctx, [[1000, y - 50], [1030, y - 34], [1024, y + 4], [998, y + 14]], 8, 9805);
-  }
   const HX = 760;   // where he stands, just right of the screen
 
   // ---------- Hero ----------
@@ -282,15 +269,15 @@ Skits.presentation = (() => {
     { who: 'slime', x: 866, s: 0.68, look: 0.7, emo: { ...CONFUSED, mouth: 'wobbly', browL: 0, browLiftL: 0, browR: -0.5, browLiftR: -12, lookX: 0.55, lookY: -0.4 }, lean: 0.12, blink: 0.9 },   // one brow high, one level: puzzled, not cross
   ];
   const HEADGEO = { nick: 175, beast: 168, squeex: 180, slime: 150 };   // hair/hat top above the head centre, local units
-  function chair(ctx, x, s, i) {   // a tall office chair back behind a seated person
-    const top = TABLE_Y - 330 * s, w = 118 * s;
-    panel(ctx, [[x - w, TABLE_Y], [x - w, top + 40 * s], [x - w + 30 * s, top], [x + w - 30 * s, top], [x + w, top + 40 * s], [x + w, TABLE_Y]], P.charcoal, 9, 9700 + i);
+  function chair(ctx, x, s, i, ty = TABLE_Y) {   // a tall office chair back behind a seated person
+    const top = ty - 330 * s, w = 118 * s;
+    panel(ctx, [[x - w, ty], [x - w, top + 40 * s], [x - w + 30 * s, top], [x + w - 30 * s, top], [x + w, top + 40 * s], [x + w, ty]], P.charcoal, 9, 9700 + i);
   }
   function setB(ctx, t) {
     ctx.fillStyle = Palette.paper; ctx.fillRect(-1500, -500, 4500, 4000);   // paper only: no wall, window, blinds, floor, skirting or anyone standing: only the people at the table
   }
-  function colleague(ctx, c, t) {
-    const feet = TABLE_Y + 210 * c.s;   // seated: the table edge crosses the waist
+  function colleague(ctx, c, t, ty = TABLE_Y) {
+    const feet = ty + 210 * c.s;   // seated: the table edge crosses the waist
     const hy = feet - HEAD * c.s;
     const tilt = (c.lean ?? 0) + Math.sin(c.x * 0.013) * 0.05 + keys(t, [[5.2, 0], [6.0, 0], [6.4, 0.04 * Math.sign(c.x - 540)], [10, 0.04 * Math.sign(c.x - 540)]]);
     SUITS[c.who](ctx, { x: c.x, y: feet, s: c.s, dir: 1, t, ...c.emo, tilt, lid: blink(t, 3.3, c.blink) || (c.emo.lid ?? 0), weight: 0.4, legs: false });
@@ -319,6 +306,36 @@ Skits.presentation = (() => {
     table(ctx);
   }
 
+  // ---------- the oval conference table (the 5.20-6.85 s shot) ----------
+  // Seen from slightly above: the top is an ellipse, its far edge curving away behind the four, its near edge curving
+  // toward the camera and running off the bottom of the frame. Wood top, a thin darker rim, no front face, no legs.
+  const OV = { cx: 540, cy: 1666, rx: 430, ry: 260 };
+  const OSEAT = [255, 445, 635, 825];   // the four sit along the far curve, closer together than before
+  const farEdge = x => OV.cy - OV.ry * Math.sqrt(Math.max(0, 1 - ((x - OV.cx) / OV.rx) ** 2));
+  const ovalPts = (rx, ry) => Brush.ellipsePts(OV.cx, OV.cy, rx, ry, 72);
+  function ovalTable(ctx) {
+    const outer = even(ovalPts(OV.rx, OV.ry), 34), inner = even(ovalPts(OV.rx - 16, OV.ry - 13), 34);
+    flat(ctx, outer, P.woodDark);   // the thin rim: the darker band between the outer and inner ellipse
+    flat(ctx, inner, P.wood);       // the top
+    stroke(ctx, [...outer, outer[0], outer[1]], { w: 11, taper0: 0, taper1: 0, minW: 1, seed: 9740 });
+    // papers, a laptop and two coffee cups along the curve, each in front of a seat
+    const e = i => farEdge(OSEAT[i]);
+    panel(ctx, [[OSEAT[0] - 70, e(0) + 52], [OSEAT[0] + 40, e(0) + 40], [OSEAT[0] + 50, e(0) + 98], [OSEAT[0] - 60, e(0) + 110]], P.linen, 6, 9742);
+    panel(ctx, [[OSEAT[1] - 62, e(1) + 98], [OSEAT[1] + 62, e(1) + 98], [OSEAT[1] + 54, e(1) + 46], [OSEAT[1] - 54, e(1) + 46]], P.steel, 7, 9743);   // laptop lid, seen from behind
+    for (const [i, k] of [[0, 2], [1, 3]]) {
+      const x = OSEAT[k] - 6, y = e(k) + 40;
+      panel(ctx, [[x - 22, y], [x + 22, y], [x + 18, y + 56], [x - 18, y + 56]], P.linen, 6, 9744 + i);
+      line(ctx, [[x + 22, y + 12], [x + 38, y + 20], [x + 20, y + 42]], 6, 9746 + i);
+    }
+  }
+  function ovalRoom(ctx, t) {
+    setB(ctx, t);
+    SEATED.forEach((c, i) => chair(ctx, OSEAT[i], c.s, i, farEdge(OSEAT[i])));
+    SEATED.forEach((c, i) => { Brush.reseed(30000 + i * 2000); colleague(ctx, { ...c, x: OSEAT[i] }, t, farEdge(OSEAT[i])); });
+    Brush.reseed(40000);
+    ovalTable(ctx);
+  }
+
   // ---------- shots ----------
   const headScreen = (y, s, z, fy, sy) => sy + (y - hairTop * s - fy) * z;
   const shots = [
@@ -333,7 +350,6 @@ Skits.presentation = (() => {
       const z = 1.55, fx = 618, fy = 1390, sy = 1250;
       cam(ctx, fx, fy, z, sy); setA(ctx); hero(ctx, HX, FLOOR_A, 1, pose2(t));
       heads[heads.length - 1] = headScreen(FLOOR_A, 1, z, fy, sy);
-      ctx.setTransform(1, 0, 0, 1, 0, 0); foreTable(ctx);
     }],
     // 4.62-5.20: the lunge: the camera rushes in on his face
     [4.62, 5.2, (ctx, t) => {
@@ -344,8 +360,8 @@ Skits.presentation = (() => {
     }],
     // 5.20-6.85: the room: six blank stares
     [5.2, 6.85, (ctx, t) => {
-      const z = lerp(1.07, 1.09, seg(t, 5.2, 6.85));   // wide enough that all four fit with a margin and the short table's ends show
-      cam(ctx, 540, 1250, z, 880); room(ctx, t);   // nobody standing behind now, so the four at the table sit higher in the frame
+      const z = lerp(1.14, 1.16, seg(t, 5.2, 6.85));   // pushed in: the four heads fill the width with a margin
+      cam(ctx, 540, 1250, z, 880); ovalRoom(ctx, t);
       for (let i = 0; i < heads.length; i++) heads[i] = 880 + (heads[i] - 1250) * z;
     }],
     // 6.85-7.95: he springs up into frame, arms up
