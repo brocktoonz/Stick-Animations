@@ -306,32 +306,45 @@ Skits.presentation = (() => {
     table(ctx);
   }
 
-  // ---------- the oval conference table (the 5.20-6.85 s shot) ----------
-  // Seen from slightly above: the top is an ellipse, its far edge curving away behind the four, its near edge curving
-  // toward the camera and running off the bottom of the frame. Wood top, a thin darker rim, no front face, no legs.
-  const OV = { cx: 540, cy: 1786, rx: 780, ry: 380 };
-  const OSEAT = [150, 410, 670, 930];   // the four sit along the far curve, closer together than before
-  const farEdge = x => OV.cy - OV.ry * Math.sqrt(Math.max(0, 1 - ((x - OV.cx) / OV.rx) ** 2));
-  const ovalPts = (rx, ry) => Brush.ellipsePts(OV.cx, OV.cy, rx, ry, 72);
+  // ---------- the long conference table (the 5.20-6.85 s shot) ----------
+  // Seen from one end, from just above (references: a long conference table receding away, people along both sides):
+  // an oval top that is wide and runs off the bottom of the frame near the camera and narrows to a rounded far end.
+  // Two colleagues sit along each long side, the nearer pair larger. Wood top, a thin darker rim, no front face, no legs.
+  const FAR_Y = 1230, CAP_H = 90, NEAR_Y = 2500;
+  const halfW = y => 250 + 0.47 * (y - 1368);   // the long sides widen steadily toward the camera
+  const tableOutline = (inset = 0) => {
+    const pts = [], y0 = FAR_Y + CAP_H, rx = halfW(y0) - inset;
+    for (let k = 0; k <= 24; k++) {   // the rounded far end
+      const a = Math.PI + Math.PI * k / 24;
+      pts.push([540 + Math.cos(a) * rx, y0 + Math.sin(a) * (CAP_H - inset * 0.7)]);
+    }
+    for (let k = 1; k <= 30; k++) { const y = y0 + (NEAR_Y - y0) * k / 30; pts.push([540 + halfW(y) - inset, y]); }
+    for (let k = 29; k >= 1; k--) { const y = y0 + (NEAR_Y - y0) * k / 30; pts.push([540 - halfW(y) + inset, y]); }
+    return even(pts, 34);
+  };
+  // the four, left to right: the nearer pair larger and lower, the farther pair smaller and higher. Each sits so the table's
+  // diagonal edge just clears the head and crosses the lap (the table is nearer the camera than the lap, so it hides it).
+  const OSEATS = [[-1, 1560, 0.84], [-1, 1290, 0.58], [1, 1290, 0.58], [1, 1560, 0.84]].map(([side, ty, s]) => ({ x: 540 + side * (halfW(ty - 90 * s) + 90 * s - 28), ty, s }));
   function ovalTable(ctx) {
-    const outer = even(ovalPts(OV.rx, OV.ry), 34), inner = even(ovalPts(OV.rx - 16, OV.ry - 13), 34);
-    flat(ctx, outer, P.woodDark);   // the thin rim: the darker band between the outer and inner ellipse
+    const outer = tableOutline(0), inner = tableOutline(15);
+    flat(ctx, outer, P.woodDark);   // the thin rim: the darker band between the outer and inner outline
     flat(ctx, inner, P.wood);       // the top
     stroke(ctx, [...outer, outer[0], outer[1]], { w: 11, taper0: 0, taper1: 0, minW: 1, seed: 9740 });
-    // papers, a laptop and two coffee cups along the curve, each in front of a seat
-    const e = i => farEdge(OSEAT[i]);
-    panel(ctx, [[OSEAT[0] - 70, e(0) + 52], [OSEAT[0] + 40, e(0) + 40], [OSEAT[0] + 50, e(0) + 98], [OSEAT[0] - 60, e(0) + 110]], P.linen, 6, 9742);
-    panel(ctx, [[OSEAT[1] - 62, e(1) + 98], [OSEAT[1] + 62, e(1) + 98], [OSEAT[1] + 54, e(1) + 46], [OSEAT[1] - 54, e(1) + 46]], P.steel, 7, 9743);   // laptop lid, seen from behind
-    for (const [i, k] of [[0, 2], [1, 3]]) {
-      const x = OSEAT[k] - 6, y = e(k) + 40;
-      panel(ctx, [[x - 22, y], [x + 22, y], [x + 18, y + 56], [x - 18, y + 56]], P.linen, 6, 9744 + i);
-      line(ctx, [[x + 22, y + 12], [x + 38, y + 20], [x + 20, y + 42]], 6, 9746 + i);
+    // papers, a laptop and two coffee cups on the top, each beside a seat, smaller with distance
+    const at = (cx, cy, k, pts) => pts.map(([x, y]) => [cx + x * k, cy + y * k]);
+    panel(ctx, at(300, 1640, 1, [[-60, -26], [50, -34], [58, 26], [-50, 36]]), P.linen, 6, 9742);   // papers, near left
+    panel(ctx, at(780, 1640, 1, [[-62, 30], [62, 30], [54, -22], [-54, -22]]), P.steel, 7, 9743);   // laptop lid, seen from behind, near right
+    for (const [i, x] of [[0, 440], [1, 650]]) {   // a mug on the far part of each side
+      const y = 1400, k = 0.7;
+      panel(ctx, at(x, y, k, [[-22, 0], [22, 0], [18, 56], [-18, 56]]), P.linen, 6, 9744 + i);
+      line(ctx, at(x, y, k, [[22, 12], [38, 20], [20, 42]]), 6, 9746 + i);
     }
   }
   function ovalRoom(ctx, t) {
     setB(ctx, t);
-    SEATED.forEach((c, i) => chair(ctx, OSEAT[i], c.s, i, farEdge(OSEAT[i])));
-    SEATED.forEach((c, i) => { Brush.reseed(30000 + i * 2000); colleague(ctx, { ...c, x: OSEAT[i] }, t, farEdge(OSEAT[i])); });
+    const order = [1, 2, 0, 3];   // the far pair first, then the near pair, then the table over their laps
+    order.forEach(i => chair(ctx, OSEATS[i].x, OSEATS[i].s, i, OSEATS[i].ty));
+    order.forEach(i => { Brush.reseed(30000 + i * 2000); colleague(ctx, { ...SEATED[i], x: OSEATS[i].x, s: OSEATS[i].s }, t, OSEATS[i].ty); });
     Brush.reseed(40000);
     ovalTable(ctx);
   }
