@@ -385,9 +385,9 @@ Skits.presentation = (() => {
     }],
     // 9.15-10.0: a slow push-in on the four at the table, still staring
     [9.15, DUR, (ctx, t) => {
-      const z = lerp(1.06, 1.12, seg(t, 9.15, DUR));   // a slow push-in on all four: with everyone seated shoulder to shoulder there is no clean crop through the row
-      cam(ctx, 540, 1250, z, 880); room(ctx, t);
-      for (let i = 0; i < heads.length; i++) heads[i] = 880 + (heads[i] - 1250) * z;
+      const z = lerp(1.2, 1.27, seg(t, 9.15, DUR));   // all six are back in the room: the same framing as the 5.2 s shot, pushed in a little
+      cam(ctx, 540, 1250, z, 1480); roomStanding(ctx, t);
+      for (let i = 0; i < heads.length; i++) heads[i] = 1480 + (heads[i] - 1250) * z;
     }],
   ];
 
