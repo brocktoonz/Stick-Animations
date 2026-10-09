@@ -108,7 +108,11 @@ Skits.eyedoctor = (() => {
     ctx.save(); ctx.rotate(-0.1 * scream);                                        // head tips back
     const head = Brush.ellipsePts(0, jaw * 0.5, 150 - jaw * 0.2, 140 + jaw * 0.5, 18);
     fill(ctx, head, W, 0.5); outline(ctx, head, { w: 11 });
-    for (const sd of [-1, 1]) fill(ctx, [[sd * 150, -10], [sd * 158, -70], [sd * 120, -60], [sd * 128, 20]], INK, 0.6);   // side hair
+    for (const sd of [-1, 1]) {   // he's bald: a grey band of hair hugging the skull on each side (not a black blob that reads as an ear)
+      const arc = (rx, ry, a0, a1, n = 8) => Array.from({ length: n + 1 }, (_, i) => { const a = a0 + (a1 - a0) * i / n; return [sd * Math.cos(a) * rx, jaw * 0.5 + Math.sin(a) * ry]; });
+      const pts = [...arc(150 - jaw * 0.2 + 24, 140 + jaw * 0.5 + 24, -0.75, 0.3), ...arc(150 - jaw * 0.2 - 4, 140 + jaw * 0.5 - 4, 0.3, -0.75)];
+      panel(ctx, pts, Palette.cast.barber.hair, 8);
+    }
     stroke(ctx, [[-140, -80], [0, -120], [140, -80]], { w: 10 });                // head-mirror band
     blob(ctx, 0, -110, 38, 38, { fill: P.steel, w: 8, n: 12 });
     Chars.eyes(ctx, 0, -10, { lid: 0.2, pupil: 9 }, 0.85);
@@ -214,7 +218,7 @@ Skits.eyedoctor = (() => {
 
   return {
     title: 'That one machine\nat the eye doctor:', subtitle: '', duration: 5.67,
-    // (no bottom fade: STYLE.md allows no soft fades or gradients, and the paper stays flat)
+    fade: true,   // the bottom fade this video was made with: the user chose to keep it (it is opt-in; no other video uses it)
     titleBottom: 385,   // last line just above the eye chart (its top is ~397 at the end of the push-in)
     draw(ctx, t) {
       if (t < 1.5) shotSetup(ctx, t);          // "Alright, go ahead and put your chin up there for me, please."
