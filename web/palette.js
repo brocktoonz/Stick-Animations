@@ -40,6 +40,7 @@ const Palette = (() => {
     toggleOn: '#5fc86a',                            // an "on" switch on the alarm list (user decision: green, like the phone's own)
     rock: '#9c8a78', rockDark: '#6f5f50', pit: '#4a3d34',   // the volcano and the crater (dull earth browns)
     smoke: '#cdc3b8', flame: '#e3a04f',                     // the volcano's smoke, the meteor's trail
+    wall: '#e4d5c2', floor: '#cbb89f',              // the meeting room's back wall and floor (user: put the wall back): a shade off the paper so the room reads
     glass: '#dde8f0', skinShade: '#e2e2e6',          // window glass; the flat cel shading on a white face
     water: '#b9d0e3',                               // tears, tear streams and sweat (a pale, dulled blue; always with the ink outline)
     phone: '#3a3a3a', phoneOff: '#5a5a5a', phoneDot: '#9a9a9a',   // a dark phone: body, dead screen, camera dot / list rules

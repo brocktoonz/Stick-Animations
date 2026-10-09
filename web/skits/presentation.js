@@ -312,8 +312,22 @@ Skits.presentation = (() => {
     { who: 'ludwig', x: 318, s: 0.62, emo: { ...Emotions.deflated, lookX: 0.7, crossArms: true }, blink: 1.1 },
     { who: 'speed', x: 768, s: 0.62, emo: { mouth: 'o', open: 0.2, brow: -0.3, lookX: 0.6, pupil: 9, crossArms: true }, blink: 2.0 },
   ];
+  // the back wall of the meeting room (user: "put an actual wall back"): wall, a long window with half-open blinds, a sill,
+  // the floor from the standing pair's feet down, and a skirting line; set lines are seeded and short-segmented
+  function wallB(ctx) {
+    ctx.fillStyle = P.wall; ctx.fillRect(-1500, -500, 4500, 4000);
+    const wx0 = 40, wx1 = 1040, wy0 = 700, wy1 = 1000;
+    panel(ctx, rect(wx0, wy0, wx1, wy1), P.glass, 10, 9710);
+    [0.0, 0.11, 0.21, 0.33, 0.42, 0.53].forEach((k, i) => line(ctx, [[wx0 + 8, wy0 + 26 + k * 300], [wx1 - 8, wy0 + 28 + k * 300]], 5, 9720 + i, { taper0: 0, taper1: 0 }));
+    line(ctx, [[540, wy0], [540, wy1]], 9, 9730, { taper0: 0, taper1: 0 });
+    panel(ctx, rect(wx0 - 20, wy1, wx1 + 20, wy1 + 22), P.frame, 8, 9731);   // sill
+    ctx.fillStyle = P.floor; ctx.fillRect(-1500, BACK_FLOOR, 4500, 2000);
+    line(ctx, [[-200, BACK_FLOOR - 40], [1300, BACK_FLOOR - 42]], 6, 9732, { taper0: 0, taper1: 0 });   // skirting
+    line(ctx, [[-200, BACK_FLOOR], [1300, BACK_FLOOR - 2]], 9, 9735, { taper0: 0, taper1: 0 });
+  }
   function roomStanding(ctx, t) {
     setB(ctx, t);
+    wallB(ctx);
     // the two standing behind the table keep a short ground line under their feet
     STANDING.forEach((c, i) => line(ctx, [[c.x - 110, BACK_FLOOR], [c.x, BACK_FLOOR + 2], [c.x + 110, BACK_FLOOR - 2]], 8, 9733 + i, { taper0: 0, taper1: 0 }));
     STANDING.forEach((c, i) => { Brush.reseed(20000 + i * 2000); colleague(ctx, c, t, TABLE_Y, true); });
