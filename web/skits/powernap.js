@@ -179,7 +179,7 @@ Skits.powernap = (() => {
       const said = talk(t, ...SAID.alrighty) ?? talk(t, ...SAID.nap) ?? talk(t, ...SAID.huh);
       const out = easeInOut(seg(t, 3.34, 3.5));   // after "huh" the lower lids, brows, tilt and mouth settle over 5 frames, not in one
       const pose = t >= 3.34 ? { lid: 1, lowLid: lerp(0.2, 0, out), brow: lerp(0, -0.15, out), mouth: 'o', open: lerp(0.5, 0.12, out), tilt: lerp(0, -0.1, out) }   // out (after "huh")
-        : { lid: Math.max(heavy, blink(t, 2.7, 0.3), easeInOut(seg(t, 3.22, 3.34))), lowLid: 0.2,   // lids slide shut over the last few frames brow: -0.25, pupil: 9, lookX: 0.3, lookY: -0.2, tilt: -0.08,
+        : { lid: Math.max(heavy, blink(t, 2.7, 0.3), easeInOut(seg(t, 3.22, 3.34))), lowLid: 0.2, brow: -0.25, pupil: 9, lookX: 0.3, lookY: -0.2, tilt: -0.08,   // lids slide shut over the last few frames; tired eyes, looking up and aside, not into the lens
             ...(said ?? (t < 0.44 ? { mouth: 'smile' } : { mouth: 'flat' })) };            // content smile before he speaks
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
       Hero.main(ctx, { x: 0, y: HIP, s: CS, shadow: false, legs: false,
