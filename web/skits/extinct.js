@@ -219,7 +219,7 @@ Skits.extinct = (() => {
       for (const [x, y, rx, ry] of puffs) fill(ctx, Brush.ellipsePts(x, y, rx + g, ry + g, 18), col, g ? 0.8 : 0.4);
   }
   function palm(ctx, x, y, s, t) {
-    const trunk = [[x, y], [x + 30 * s, y - 250 * s], [x + 20 * s, y - 470 * s]];
+    const trunk = [[x, y - 31 * s], [x + 30 * s, y - 250 * s], [x + 20 * s, y - 470 * s]];
     stroke(ctx, trunk, { w: 62 * s, taper0: 0, taper1: 0.3 });
     stroke(ctx, trunk, { w: 44 * s, taper0: 0, taper1: 0.3, color: P.wood });
     for (let i = 1; i < 6; i++) stroke(ctx, [[x + 4 * i * s - 18 * s, y - i * 78 * s], [x + 4 * i * s + 18 * s, y - i * 78 * s - 8 * s]], { w: 6 });
