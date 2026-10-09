@@ -651,6 +651,7 @@ const Chars = (() => {
           hand(ctx, hd[0], hd[1], null, S.handS * 0.9, S.skin ?? W);
         }
         tube(ctx, sh, el, side * -0.08, S.armW, S.armFill ?? W, false);
+        if (S.sleeveHem && S.sleeveFill) sleeveFill(ctx, sh, el, side * -0.08, S.armW, Math.min(0.8, S.sleeveHem * 2), S.sleeveFill);
         if (S.sleeveHem) sleeveHem(ctx, sh, el, side * -0.08, S.armW, Math.min(0.8, S.sleeveHem * 2));   // this segment is the upper arm only
         if (side > 0) {
           tube(ctx, el, hd, -0.08, S.armW, S.armFill ?? W, false);

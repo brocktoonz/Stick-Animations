@@ -233,6 +233,7 @@ const Cameos = (() => {
     headScale: [0.92, 1.06],
     head: head({ hair: swoop(), eyeLop: { side: -1, dy: 0.12, s: 1.07 } }),   // lopsided eyes: the screen-right eye (he faces left) a little lower and bigger
     detail: (ctx, n, h, hands = []) => {
+      fill(ctx, [[-40, n - 2], [-20, n + 22], [0, n + 44], [20, n + 22], [40, n - 2]], W, 0.5);   // bare white neck between the collar points, not shirt colour
       outline(ctx, [[-40, n - 2], [0, n + 44], [-18, n + 60]], { w: 7 });
       outline(ctx, [[40, n - 2], [0, n + 44], [18, n + 60]], { w: 7 });
       for (let i = 0; i < 4; i++) {   // pineapples: crosshatched body, crown of leaves
