@@ -283,12 +283,12 @@ Skits.presentation = (() => {
     SUITS[c.who](ctx, { x: c.x, y: feet, s: c.s, dir: 1, t, ...c.emo, tilt, lid: blink(t, 3.3, c.blink) || (c.emo.lid ?? 0), weight: 0.4, legs: standing ? undefined : false });
     heads.push(hy - HEADGEO[c.who] * c.s);
   }
-  function table(ctx) {
+  function table(ctx, deep = 0) {   // deep: extra depth of the top and edge, so the legs below are shorter
     // a short slab with both ends showing (it stops just past the first and last seat), not an edge-to-edge band
     // a thin slab, not a box: the top, a front edge about 45 px tall, paper below, and a thin leg at each end (setLine/panel: seeded, boils on the beat)
-    for (const [i, [x0, x1]] of [[0, [142, 172]], [1, [908, 938]]]) panel(ctx, [[x0, TABLE_Y + 150], [x1, TABLE_Y + 150], [x1 - 2, TABLE_Y + 470], [x0 + 2, TABLE_Y + 470]], P.woodDark, 9, 9750 + i);
-    panel(ctx, [[130, TABLE_Y], [950, TABLE_Y], [972, TABLE_Y + 110], [108, TABLE_Y + 110]], P.wood, 11, 9740);   // the table top
-    panel(ctx, [[108, TABLE_Y + 110], [972, TABLE_Y + 110], [972, TABLE_Y + 155], [108, TABLE_Y + 155]], P.woodDark, 11, 9741);   // its thin front edge
+    for (const [i, [x0, x1]] of [[0, [142, 172]], [1, [908, 938]]]) panel(ctx, [[x0, TABLE_Y + 150 + deep], [x1, TABLE_Y + 150 + deep], [x1 - 2, TABLE_Y + 470], [x0 + 2, TABLE_Y + 470]], P.woodDark, 9, 9750 + i);
+    panel(ctx, [[130, TABLE_Y], [950, TABLE_Y], [972, TABLE_Y + 110 + deep], [108, TABLE_Y + 110 + deep]], P.wood, 11, 9740);   // the table top
+    panel(ctx, [[108, TABLE_Y + 110 + deep], [972, TABLE_Y + 110 + deep], [972, TABLE_Y + 155 + deep], [108, TABLE_Y + 155 + deep]], P.woodDark, 11, 9741);   // its thin front edge
     // papers, a laptop and coffee cups on the table, in front of each seat
     panel(ctx, [[150, TABLE_Y + 30], [260, TABLE_Y + 22], [270, TABLE_Y + 80], [160, TABLE_Y + 88]], P.linen, 6, 9742);
     panel(ctx, [[350, TABLE_Y + 60], [480, TABLE_Y + 60], [470, TABLE_Y + 8], [362, TABLE_Y + 8]], P.steel, 7, 9743);   // laptop lid, seen from behind
@@ -331,7 +331,7 @@ Skits.presentation = (() => {
     SEATED.forEach((c, i) => chair(ctx, c.x, c.s, i));
     SEATED.forEach((c, i) => { Brush.reseed(30000 + i * 2000); colleague(ctx, c, t); });
     Brush.reseed(40000);
-    table(ctx);
+    table(ctx, 110);   // a deeper top, so the legs under it are shorter (user request)
     ctx.restore();
     for (let i = n0; i < heads.length; i++) heads[i] += RAISE;
   }
