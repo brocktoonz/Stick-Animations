@@ -385,9 +385,9 @@ Skits.presentation = (() => {
     }],
     // 9.15-10.0: a slow push-in on the four at the table, still staring
     [9.15, DUR, (ctx, t) => {
-      const z = lerp(1.2, 1.27, seg(t, 9.15, DUR));   // all six are back in the room: the same framing as the 5.2 s shot, pushed in a little
-      cam(ctx, 540, 1250, z, 1480); roomStanding(ctx, t);
-      for (let i = 0; i < heads.length; i++) heads[i] = 1480 + (heads[i] - 1250) * z;
+      const z = lerp(2.08, 2.1, seg(t, 9.15, DUR));   // the original ending: pushed in on Speed standing behind Squeex and Slime, still staring
+      cam(ctx, 787, 1000, z, 1330); roomStanding(ctx, t);   // (focus raised with the table, so Speed's hat clears the caption)
+      for (let i = 0; i < heads.length; i++) heads[i] = 1330 + (heads[i] - 1000) * z;
     }],
   ];
 
