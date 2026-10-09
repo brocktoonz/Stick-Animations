@@ -310,7 +310,7 @@ Skits.presentation = (() => {
   const BACK_FLOOR = 1112;   // the standing two are raised clear of the seated heads, folded arms in view
   const STANDING = [
     { who: 'ludwig', x: 318, s: 0.62, emo: { ...Emotions.deflated, lookX: 0.7, crossArms: true }, blink: 1.1 },
-    { who: 'speed', x: 768, s: 0.62, emo: { mouth: 'o', open: 0.2, brow: -0.3, lookX: 0.6, pupil: 9, crossArms: true }, blink: 2.0 },
+    { who: 'speed', x: 768, s: 0.62, emo: { mouth: 'o', open: 0.2, brow: -0.3, lookX: 0.6, pupil: 9, ...Arms.both([124, -440], 'out', true) }, blink: 2.0 },   // surprised: both hands up at the sides of his head (user request, from a reference photo)
   ];
   // the back wall of the meeting room (user: "put an actual wall back", then "simpler"): a plain wall, the floor from the
   // standing pair's feet down, and one wall/floor line. No window, blinds or skirting.
