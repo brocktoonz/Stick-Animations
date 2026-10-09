@@ -220,8 +220,9 @@ Skits.extinct = (() => {
   }
   function palm(ctx, x, y, s, t) {
     const trunk = [[x, y - 31 * s], [x + 30 * s, y - 250 * s], [x + 20 * s, y - 470 * s]];
-    stroke(ctx, trunk, { w: 62 * s, taper0: 0, taper1: 0.3 });
-    stroke(ctx, trunk, { w: 44 * s, taper0: 0, taper1: 0.3, color: P.wood });
+    const tp = even(smooth(trunk, 10)); tp.exact = true;   // short segments and a fixed seed, so the trunk boils a little like the character lines
+    stroke(ctx, tp, { w: 62 * s, taper0: 0, taper1: 0.3, seed: 9120 });
+    stroke(ctx, tp, { w: 44 * s, taper0: 0, taper1: 0.3, color: P.wood, seed: 9120 });
     for (let i = 1; i < 6; i++) stroke(ctx, [[x + 4 * i * s - 18 * s, y - i * 78 * s], [x + 4 * i * s + 18 * s, y - i * 78 * s - 8 * s]], { w: 6 });
     const top = [x + 20 * s, y - 470 * s];
     for (const a of [-2.7, -2.1, -1.2, -0.5, 0.1]) {
