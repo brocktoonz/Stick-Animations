@@ -205,7 +205,10 @@ Skits.morningself = (() => {
   }
 
   // He lies on his back, head on the pillow, the blanket drawn up over him.
-  const S = 1.0, HX = 560, SLEEVE = Palette.hero.hoodie;   // his hoodie, wherever an arm shows on its own
+  const S = 1.0, HX = 560, TEE = Palette.hero.hoodie;   // he sleeps in a t-shirt (user decision), in his usual teal
+  // Hero.main with a short-sleeved crew-neck tee instead of the hoodie: bare forearms, a sleeve hem halfway down the upper arm
+  const pyjamas = Hero.main.with(() => ({ shirt: TEE, sleeve: W, sleeveHem: 0.26, sleeveFill: TEE,
+    detail: (ctx, n) => stroke(ctx, [[-34, n + 2], [0, n + 22], [34, n + 2]], { w: 8, seed: 8300 }) }));
   const UP = 1170, DOWN = 1212;          // head centre: propped up, snuggled down
   const feet = hy => hy + 438 * S;
   // the blanket over the bed from `top` down and over the foot; his body a mound under it
@@ -228,7 +231,7 @@ Skits.morningself = (() => {
   const pose = (c, hy, p, top, before, after, hump, under) => (ctx) => {
     pillow(ctx, HX - 15, hy + 62, 178, 76, c.pillow);   // behind his head, inside the bed's width
     before?.();
-    Hero.main(ctx, { x: HX, y: feet(hy), s: S, shadow: false, ...p });
+    pyjamas(ctx, { x: HX, y: feet(hy), s: S, shadow: false, ...p });
     under?.();   // drawn over him but under the blanket (an arm coming out from under it)
     blanket(ctx, c, top, hump);
     after?.();
@@ -285,7 +288,7 @@ Skits.morningself = (() => {
   // blanket's own hem covers where it comes out: one clean edge, no patch.
   function armFromCovers(ctx, top, hand) {
     const out = [HX + 66, top + 40];
-    Chars.tube(ctx, out, hand, -0.05, 24 * S, SLEEVE, false);
+    Chars.tube(ctx, out, hand, -0.05, 24 * S, W, false);   // a bare arm: the tee's short sleeve is under the blanket
     Chars.hand(ctx, hand[0], hand[1], null, S, W, true);
   }
 
@@ -399,7 +402,8 @@ Skits.morningself = (() => {
       const hx = 540 + side * 425, hy = 1720 - (side > 0 ? 50 * flick : 0);   // over the bezel, wrapping the sides
       const sl = [[540 + side * 640, 2260], [hx + side * 30, hy + 50]];
       stroke(ctx, sl, { w: 96, taper0: 0, taper1: 0, minW: 1 });                    // hoodie sleeve, as wide as the hand
-      stroke(ctx, sl, { w: 74, taper0: 0, taper1: 0, minW: 1, color: SLEEVE, jit: 0 });
+      stroke(ctx, sl, { w: 74, taper0: 0, taper1: 0, minW: 1, color: W, jit: 0 });   // bare forearm
+      stroke(ctx, [sl[0], [lerp(sl[0][0], sl[1][0], 0.38), lerp(sl[0][1], sl[1][1], 0.38)]], { w: 74, taper0: 0, taper1: 0, minW: 1, color: TEE, jit: 0 });   // the tee's short sleeve at the bottom of the frame
       ctx.save(); ctx.translate(hx, hy); ctx.scale(side, 1);   // the thumb hook points in, onto the screen
       Chars.hand(ctx, 0, 0, null, HS, W, true);   // plain mitten, no thumb hook
       ctx.restore();
