@@ -373,7 +373,7 @@ Skits.haircut = (() => {
   // The shop is a few props on the bare paper (STYLE.md, Sets): the barber pole on the left says where we are. No wall,
   // chair rail, shelf, hanging lamps or tiled floor. Ground lines only under feet: the barber's walk and the chair's base.
   function pole(ctx) {
-    const px = 66, y0 = 770, y1 = 1180;   // far left, clear of the scissors
+    const px = 48, y0 = 770, y1 = 1180;   // far left, clear of the scissors
     ctx.save(); ctx.beginPath(); ctx.rect(px - 44, y0, 88, y1 - y0); ctx.clip();
     flat(ctx, box(px - 44, y0, px + 44, y1, 3), P.linen);
     for (let k = -2; k < 9; k++) {
@@ -387,7 +387,7 @@ Skits.haircut = (() => {
     panel(ctx, box(px - 58, y1, px + 58, y1 + 40, 3), P.steelDark, 10);
   }
   function groundLines(ctx, bx = 860) {
-    stroke(ctx, [[bx - 150, FLOOR_Y], [bx, FLOOR_Y + 3], [bx + 150, FLOOR_Y - 3]], { w: 9, taper0: 0, taper1: 0, seed: 7900 });   // under the barber's feet, wherever he walks
+    stroke(ctx, [[bx - 110, FLOOR_Y], [bx, FLOOR_Y + 3], [bx + 110, FLOOR_Y - 3]], { w: 9, taper0: 0, taper1: 0, seed: 7900 });   // under the barber's feet, wherever he walks
     stroke(ctx, [[GX - 230, 1836], [GX, 1840], [GX + 230, 1834]], { w: 9, taper0: 0, taper1: 0, seed: 7901 });          // under the chair's base
   }
 
@@ -773,7 +773,7 @@ Skits.haircut = (() => {
         stroke(ctx, under, { w: 12, taper0: 0.12, taper1: 0.12, minW: 1, jit: 0, pressure: 0.2 });
         const bow = 0.3 * Math.abs(xo), lidPts = [];
         for (let i = 0; i <= 24; i++) { const k = i / 24, x = ex - Math.abs(xo) * 1.0 + 2 * Math.abs(xo) * 1.0 * k; lidPts.push([x, ly + 3 - bow * Math.sin(Math.PI * (0.06 + 0.88 * k)) ]); }
-        stroke(ctx, lidPts, { w: 13, taper0: 0.25, taper1: 0.25, minW: 1, jit: 0, pressure: 0.3 });
+        stroke(ctx, lidPts, { w: 13, taper0: 0.45, taper1: 0.45, minW: 0.2, jit: 0, pressure: 0.3 });   // the ends thin to nothing: no round caps poking past the ring
       }
     }
   };
